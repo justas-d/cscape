@@ -2,52 +2,97 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.Linq.Expressions;
 using System.Threading;
+using System.Threading.Tasks;
 using cscape;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using SQLite;
 
 namespace cscape_dev
 {
-    public class JsonGameServerConfig : IGameServerConfig
+    class ServerDatabase : IDatabase
     {
-        public string Version { get; }
-        public int Revision { get; }
-        public string PrivateLoginKeyDir { get; }
-        public int MaxPlayers { get; }
-        [JsonConverter(typeof(JsonEndpointConverter))]
-        public EndPoint ListenEndPoint { get; }
-        public int Backlog { get; }
+        public IPacketLengthLookup Packet { get; }
+        public IPlayerDatabase Player { get; }
 
-        public JsonGameServerConfig(string version, int revision, string privateLoginKeyDir, int maxPlayers, EndPoint listenEndPoint, int backlog)
+        private SQLiteAsyncConnection _db;
+
+        public ServerDatabase(string sqliteDbDir, string packetJsonDir)
         {
-            Version = version;
-            Revision = revision;
-            PrivateLoginKeyDir = privateLoginKeyDir;
-            MaxPlayers = maxPlayers;
-            ListenEndPoint = listenEndPoint;
-            Backlog = backlog;
+            _db = new SQLiteAsyncConnection(sqliteDbDir);
+            Packet = JsonConvert.DeserializeObject<PacketLookup>(File.ReadAllText(packetJsonDir));
+
+            Player = new PlayerDb(_db);
         }
     }
 
-    public class JsonEndpointConverter : JsonConverter
+    class PlayerDb : IPlayerDatabase
     {
-        private const char Delimiter = ':';
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        private class SaveData : IPlayerSaveData
         {
-            var val = (IPEndPoint) value;
-            JToken.FromObject($"{val.Address}{Delimiter}{val.Port}").WriteTo(writer);
+            [PrimaryKey, AutoIncrement]
+            public int Id { get; }
+            public string PasswordHash { get; }
+            [MaxLength(Player.MaxUsernameChars), Indexed]
+            public string Username { get; }
+
+            public SaveData()
+            {
+                
+            }
+
+            public SaveData(Player player)
+            {
+                if (player == null) throw new ArgumentNullException(nameof(player));
+                if (string.IsNullOrEmpty(player.Username)) throw new ArgumentNullException(nameof(player.Username));
+                if (string.IsNullOrEmpty(player.PasswordHash)) throw new ArgumentNullException(nameof(player.PasswordHash));
+
+                Id = player.Id;
+                PasswordHash = player.PasswordHash;
+                Username = player.Username;
+            }
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        private readonly SQLiteAsyncConnection _db;
+
+        private async Task<SaveData> GetUser(string username)
         {
-            var raw = JToken.Load(reader).ToString().Split(Delimiter);
-            return new IPEndPoint(IPAddress.Parse(raw[0]), Convert.ToInt32(raw[1]));
+            return await _db.Table<SaveData>()
+                    .Where(u => string.Equals(username, u.Username, StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefaultAsync();
         }
 
-        public override bool CanConvert(Type objectType) => objectType == typeof(IPEndPoint);
+        public PlayerDb(SQLiteAsyncConnection db)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+            _db = db;
+            _db.CreateTableAsync<SaveData>();
+        }
+
+        public async Task<PlayerLookupResult> Load(string username, string passwordHash)
+        {
+            var user = await GetUser(username);
+            if (user == null)
+                return PlayerLookupResult.NoUserFound;
+
+            if (!string.Equals(passwordHash, user.PasswordHash))
+                return PlayerLookupResult.BadPassword;
+
+            return new PlayerLookupResult(PlayerLookupResult.StatusType.Success, user);
+        }
+
+        public async Task Save(Player player)
+        {
+            //@TODO: test db saving
+            var data = new SaveData(player);
+            if ((await GetUser(player.Username)) == null)
+                await _db.InsertAsync(data);
+            else 
+                await _db.UpdateAsync(data);
+        }
+
+        public async Task<bool> UserExists(string username) => await GetUser(username) != null;
     }
 
     static class Program
@@ -59,7 +104,7 @@ namespace cscape_dev
         {
             // config
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(File.ReadAllText("config.json"));
-            _server = new GameServer(cfg);
+            _server = new GameServer(cfg, new ServerDatabase("data.db", "packet-lengths.json"));
 
             _server.Log.LogReceived += (s, l) => LogQueue.Add(l);
 

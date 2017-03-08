@@ -35,11 +35,11 @@ namespace cscape
         public void Add([NotNull] T ent)
         {
             var id = NextId();
-            ent.UniqueId = NextId();
+            ent.InstanceId = NextId();
             _pool[id] = ent;
         }
 
-        public void Remove([NotNull]T ent) => Remove(ent.UniqueId);
+        public void Remove([NotNull]T ent) => Remove(ent.InstanceId);
 
         public void Remove(int index)
         {

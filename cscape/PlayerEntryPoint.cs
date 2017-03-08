@@ -205,6 +205,9 @@ namespace cscape
                     return;
                 }
 
+                // todo: load player data
+              //  var data = Server.Database.Player.Load(username, );
+
                 Server.Log.Debug(this, "Done socket init.");
             }
             //@TODO: exception handle socket acception

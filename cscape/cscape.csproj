@@ -49,9 +49,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blob.cs" />
+    <Compile Include="Entity.cs" />
+    <Compile Include="EntityPool.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GameServer.cs" />
+    <Compile Include="IGameServerConfig.cs" />
     <Compile Include="IsaacRandomGen.cs" />
+    <Compile Include="LogEventArgs.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="LogSeverity.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayerEntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +67,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="packet-lengths.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

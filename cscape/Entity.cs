@@ -9,17 +9,17 @@ namespace cscape
         /// </summary>
         public bool IsOwned { get; private set; }
 
-        private int _uniqueId;
+        private int _instanceId;
 
-        public int UniqueId
+        public int InstanceId
         {
-            get { return _uniqueId; }
+            get { return _instanceId; }
             set
             {
                 if(IsOwned)
                     throw new InvalidOperationException("Tried to set entity id when it's already owned.");
 
-                _uniqueId = value;
+                _instanceId = value;
                 IsOwned = true;
             }
         }

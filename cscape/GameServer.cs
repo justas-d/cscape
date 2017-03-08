@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace cscape
 {
@@ -14,11 +15,15 @@ namespace cscape
         /// </summary>
         public EntityPool<Player> Players { get; }
         public IGameServerConfig Config { get; }
+        public IDatabase Database { get; }
 
         public DateTime StartTime { get; private set; }
 
-        public GameServer(IGameServerConfig config)
+        public GameServer([NotNull] IGameServerConfig config, [NotNull] IDatabase database)
         {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (database == null) throw new ArgumentNullException(nameof(database));
+
             // verify config
             if (config.Version == null) throw new ArgumentNullException(nameof(config.Version));
             if (config.PrivateLoginKeyDir== null) throw new ArgumentNullException(nameof(config.PrivateLoginKeyDir));
@@ -30,6 +35,7 @@ namespace cscape
                 throw new FileNotFoundException($"Could not find private login key in directory: {config.PrivateLoginKeyDir}");
 
             Config = config;
+            Database = database;
 
             Log = new Logger(this);
             _entry = new PlayerEntryPoint(this);
