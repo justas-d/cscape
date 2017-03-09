@@ -3,6 +3,14 @@ using JetBrains.Annotations;
 
 namespace cscape
 {
+    public interface IPlayerSaveData
+    {
+        int Id { get; }
+        string PasswordHash { get; }
+        string Username { get; }
+        byte TitleIcon { get; }
+    }
+
     public sealed class Player : Entity
     {
         public const int MaxUsernameChars = 12;
@@ -14,6 +22,8 @@ namespace cscape
         //@TODO: change password feature
         public string PasswordHash { get; private set; }
 
+        public byte TitleIcon { get; set; }
+
         public Player([NotNull] IPlayerSaveData save)
         {
             if (save == null) throw new ArgumentNullException(nameof(save));
@@ -23,6 +33,7 @@ namespace cscape
             Id = save.Id;
             Username = save.Username;
             PasswordHash = save.PasswordHash;
+            TitleIcon = save.TitleIcon;
         }
     }
 }

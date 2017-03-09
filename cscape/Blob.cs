@@ -5,8 +5,12 @@ namespace cscape
     public class Blob
     {
         public byte[] Buffer { get; private set; }
-        public int ReadHead { get; set; } = -1;
-        public int WriteHead { get; set; } = -1;
+
+        private int _readHead = -1;
+        private int _writeHead = -1;
+
+        public int BytesRead => _readHead + 1;
+        public int BytesWritten => _writeHead + 1;
 
         /// <summary>
         /// Wrapper constructor. Wraps a given buffer.
@@ -26,21 +30,24 @@ namespace cscape
 
         public void WriteBlock(byte[] src, int offset, int count)
         {
-            System.Buffer.BlockCopy(src, offset, Buffer, WriteHead+1, count);
-            WriteHead += count;
+            System.Buffer.BlockCopy(src, offset, Buffer, _writeHead+1, count);
+            _writeHead += count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ResetWrite() => WriteHead = -1;
+        public void ResetWrite() => _writeHead = -1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ResetRead() => ReadHead = -1;
+        public void ResetRead() => _readHead = -1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte()
         {
-            return Buffer[++ReadHead];
+            return Buffer[++_readHead];
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReadSkipByte() => ++_readHead;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadInt16()
@@ -62,7 +69,7 @@ namespace cscape
 
         public void Write(byte val)
         {
-            Buffer[++WriteHead] = val;
+            Buffer[++_writeHead] = val;
         }
 
         public void Write16(short val)

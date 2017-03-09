@@ -24,43 +24,11 @@ namespace cscape
         IPlayerDatabase Player { get; }
     }
 
-    public sealed class PlayerLookupResult
-    {
-        public enum StatusType
-        {
-            Success,
-            BadPassword,
-            NoUserFound
-        }
-
-        public StatusType Status { get; }
-        [CanBeNull]
-        public IPlayerSaveData Data { get; }
-
-        public PlayerLookupResult(StatusType status, [CanBeNull] IPlayerSaveData data)
-        {
-            if (!Enum.IsDefined(typeof(StatusType), status))
-                throw new InvalidEnumArgumentException(nameof(status), (int) status, typeof(StatusType));
-
-            Status = status;
-            Data = data;
-        }
-
-        public static PlayerLookupResult BadPassword { get; } = new PlayerLookupResult(StatusType.BadPassword, null);
-        public static PlayerLookupResult NoUserFound { get; } = new PlayerLookupResult(StatusType.NoUserFound, null);
-    }
-
     public interface IPlayerDatabase
     {
         Task<bool> UserExists(string username);
-        Task<PlayerLookupResult> Load(string username, string passwordHash);
+        Task<IPlayerSaveData> Load(string username, string password);
         Task Save(Player player);
-    }
-
-    public interface IPlayerSaveData
-    {
-        int Id { get; }
-        string PasswordHash { get; }
-        string Username { get; }
+        Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd);
     }
 }

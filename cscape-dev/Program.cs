@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using cscape;
 using Newtonsoft.Json;
+using Sodium;
 using SQLite;
 
 namespace cscape_dev
@@ -36,12 +37,28 @@ namespace cscape_dev
             public string PasswordHash { get; }
             [MaxLength(Player.MaxUsernameChars), Indexed]
             public string Username { get; }
+            public byte TitleIcon { get; }
 
+            /// <summary>
+            /// SQLite constructor
+            /// </summary>
             public SaveData()
             {
                 
             }
 
+            /// <summary>
+            /// New player constructor
+            /// </summary>
+            public SaveData(string username, string pwdHash)
+            {
+                Username = username;
+                PasswordHash = pwdHash;
+            }
+
+            /// <summary>
+            /// Save existing player constructor
+            /// </summary>
             public SaveData(Player player)
             {
                 if (player == null) throw new ArgumentNullException(nameof(player));
@@ -51,7 +68,9 @@ namespace cscape_dev
                 Id = player.Id;
                 PasswordHash = player.PasswordHash;
                 Username = player.Username;
+                TitleIcon = player.TitleIcon;
             }
+
         }
 
         private readonly SQLiteAsyncConnection _db;
@@ -70,29 +89,48 @@ namespace cscape_dev
             _db.CreateTableAsync<SaveData>();
         }
 
-        public async Task<PlayerLookupResult> Load(string username, string passwordHash)
+        public async Task<IPlayerSaveData> Load(string username, string password)
         {
             var user = await GetUser(username);
             if (user == null)
-                return PlayerLookupResult.NoUserFound;
+                return null;
 
-            if (!string.Equals(passwordHash, user.PasswordHash))
-                return PlayerLookupResult.BadPassword;
+            if (!await Task.Run(() => PasswordHash.ScryptHashStringVerify(user.PasswordHash, password)))
+                return null;
 
-            return new PlayerLookupResult(PlayerLookupResult.StatusType.Success, user);
+            return user;
         }
 
-        public async Task Save(Player player)
+        public Task Save(Player player)
+        {
+            var data = new SaveData(player);
+            return Save(data);
+        }
+
+        private async Task Save(SaveData save)
         {
             //@TODO: test db saving
-            var data = new SaveData(player);
-            if ((await GetUser(player.Username)) == null)
-                await _db.InsertAsync(data);
-            else 
-                await _db.UpdateAsync(data);
+            if ((await GetUser(save.Username)) == null)
+                await _db.InsertAsync(save);
+            else
+                await _db.UpdateAsync(save);
         }
 
         public async Task<bool> UserExists(string username) => await GetUser(username) != null;
+
+        public async Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd)
+        {
+            if (await UserExists(username))
+                return await Load(username, pwd);
+
+            // @todo: default stats
+            var data = new SaveData(
+                username, 
+                await Task.Run(() => PasswordHash.ScryptHashString(pwd, PasswordHash.Strength.Medium)));
+
+            await Save(data);
+            return data;
+        }
     }
 
     static class Program

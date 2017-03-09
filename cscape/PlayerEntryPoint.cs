@@ -11,36 +11,36 @@ using Org.BouncyCastle.OpenSsl;
 
 namespace cscape
 {
+    public enum InitResponseCode : byte
+    {
+        ContinueToCredentials = 0,
+        LoginDone = 2,
+        ReconnectDone = 15,
+
+        Wait = 1,
+        InvalidCredentials = 3,
+        DisabledAccount = 4,
+        AccountAlreadyLoggedIn = 5,
+        MustUpdate = 6,
+        WorldIsFull = 7,
+        LoginServerOffline = 8,
+        LoginRatelimitByAddress = 9,
+        BadSessionId = 10,
+        LoginServerRejected = 11,
+        IsNotAMember = 12,
+        GeneralFailure = 13,
+        UpdateInProgress = 14,
+        LoginRatelimitBySocket = 16,
+        InMembersArea = 17,
+        InvalidLoginServer = 20,
+        TransferringAccount = 21, // send extra byte for countdown on the client's end
+    }
+
     /// <summary>
     /// Handles incoming connections and sets them up for the game loop.
     /// </summary>
     public class PlayerEntryPoint : IDisposable
     {
-        public enum InitResponseCode : byte
-        {
-            ContinueToCredentials = 0,
-            LoginDone = 2,
-            ReconnectDone = 15,
-
-            Wait = 1,
-            InvalidCredentials = 3,
-            DisabledAccount = 4,
-            AccountAlreadyLoggedIn = 5,
-            MustUpdate = 6,
-            WorldIsFull = 7,
-            LoginServerOffline = 8,
-            LoginRatelimitByAddress = 9,
-            BadSessionId = 10,
-            LoginServerRejected = 11,
-            IsNotAMember = 12,
-            GeneralFailure = 13,
-            UpdateInProgress = 14,
-            LoginRatelimitBySocket= 16,
-            InMembersArea = 17,
-            InvalidLoginServer = 20,
-            TransferringAccount = 21, // send extra byte for countdown on the client's end
-        }
-
         public GameServer Server { get; }
         public EndPoint Endpoint { get; }
         public int Backlog { get; }
@@ -114,7 +114,7 @@ namespace cscape
                 }
 
                 // another byte contains a bit of the username but we dont care about that
-                blob.ReadHead++;
+                blob.ReadSkipByte();
 
                 for (var i = 0; i < initMagicZeroCount; i++)
                     blob.Write(0);
@@ -129,7 +129,7 @@ namespace cscape
                 blob.WriteBlock(serverKey, 0, randomKeySize);
 
                 // send the packet
-                await SocketSend(socket, blob, blob.WriteHead + 1);
+                await SocketSend(socket, blob);
                 blob.ResetWrite();
 
                 // receive login block
@@ -141,8 +141,7 @@ namespace cscape
                 magic = blob.ReadByte();
                 if (magic != normalConnectMagic && magic != reconnectMagic)
                 {
-                    Server.Log.Warning(this, $"Invalid login block magic: {magic}");
-                    KillSocket(socket);
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, $"Invalid login block magic: {magic}");
                     return;
                 }
 
@@ -152,14 +151,13 @@ namespace cscape
                 //1 - length
                 //2  - 255
                 // skip 'em
-                blob.ReadHead += 2;
+                blob.ReadSkipByte();
 
                 // verify revision
                 var revision = blob.ReadInt16();
                 if (revision != Server.Config.Revision)
                 {
-                    Server.Log.Warning(this, $"Invalid revision: {revision}");
-                    KillSocket(socket);
+                    await KillBadConnection(socket, blob, InitResponseCode.MustUpdate);
                     return;
                 }
 
@@ -175,8 +173,7 @@ namespace cscape
                 magic = blob.ReadByte();
                 if (magic != loginMagic)
                 {
-                    Server.Log.Warning(this, $"Invalid login magic: {magic}");
-                    KillSocket(socket);
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, $"Invalid login magic: {magic}");
                     return;
                 }
 
@@ -193,20 +190,33 @@ namespace cscape
                 string password;
                 if (!blob.TryReadString(Player.MaxUsernameChars, out username))
                 {
-                    Server.Log.Warning(this, $"Overflow detected when reading username.");
-                    KillSocket(socket);
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, "Overflow detected when reading username.");
                     return;
                 }
 
                 if (!blob.TryReadString(Player.MaxPasswordChars, out password))
                 {
-                    Server.Log.Warning(this, $"Overflow detected when reading password.");
-                    KillSocket(socket);
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, "Overflow detected when reading password.");
                     return;
                 }
 
+                // check if user is logged in
+                foreach (var p in Server.Players)
+                {
+                    if (p.Username.Equals(username, StringComparison.InvariantCulture))
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.AccountAlreadyLoggedIn);
+                        return;
+                    }
+                }
+
                 // todo: load player data
-              //  var data = Server.Database.Player.Load(username, );
+                var data = await Server.Database.Player.LoadOrCreateNew(username, password);
+                if (data == null)
+                {
+                    await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
+                    return;
+                }
 
                 Server.Log.Debug(this, "Done socket init.");
             }
@@ -217,11 +227,20 @@ namespace cscape
             }
         }
 
+        private async Task KillBadConnection(Socket socket, Blob blob, InitResponseCode response, string log = null)
+        {
+            blob.Write((byte) InitResponseCode.AccountAlreadyLoggedIn);
+            await SocketSend(socket, blob);
+            KillSocket(socket);
+            if (log != null)
+                Server.Log.Warning(this, null);
+        }
+
         private static void KillSocket(Socket socket)
             => socket?.Dispose();
 
-        private async Task<int> SocketSend(Socket socket, Blob blob, int len)
-            => await Task.Factory.FromAsync((c, o) => socket.BeginSend(blob.Buffer, 0, len, SocketFlags.None, c, o),
+        private async Task<int> SocketSend(Socket socket, Blob blob)
+            => await Task.Factory.FromAsync((c, o) => socket.BeginSend(blob.Buffer, 0, blob.BytesWritten, SocketFlags.None, c, o),
                 socket.EndSend, null);
 
         private static async Task<int> SocketReceive(Socket socket, Blob blob, int len)
