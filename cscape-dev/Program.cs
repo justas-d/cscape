@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using cscape;
@@ -152,7 +151,7 @@ namespace cscape_dev
                     WriteLog(log);
             });
 
-            _server.Start();
+            Task.Run(_server.Start());
 
             while (true)
                 Console.ReadLine();
