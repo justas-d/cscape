@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -49,6 +50,8 @@ namespace cscape
         private readonly Socket _socket;
 
         private readonly IAsymmetricBlockCipher _crypto;
+
+        public ConcurrentQueue<Player> PlayerQueue { get; } = new ConcurrentQueue<Player>();
 
         public PlayerEntryPoint(GameServer server)
         {
@@ -210,13 +213,18 @@ namespace cscape
                     }
                 }
 
-                // todo: load player data
                 var data = await Server.Database.Player.LoadOrCreateNew(username, password);
                 if (data == null)
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
                     return;
                 }
+
+                blob.Write(0); // is flagged
+                blob.Write(data.TitleIcon);
+
+                await SocketSend(socket, blob);
+                PlayerQueue.Enqueue(new Player(data));
 
                 Server.Log.Debug(this, "Done socket init.");
             }

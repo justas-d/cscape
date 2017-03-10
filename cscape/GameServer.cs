@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -42,7 +43,7 @@ namespace cscape
             Players = new EntityPool<Player>(config.MaxPlayers);
         }
 
-        public void Start()
+        public async Task Start()
         {
             StartTime = DateTime.Now;
 
@@ -57,6 +58,32 @@ namespace cscape
             });
 
             Log.Normal(this, "Server live.");
+
+            //TODO: bool to terminate mainloop
+            var watch = new Stopwatch();
+            const int tickMs = 600;
+            while (true)
+            {
+                watch.Start();
+                // todo : packet handling, player io, game ticks
+                Player newPlayer;
+                while (!_entry.PlayerQueue.TryDequeue(out newPlayer))
+                {
+                    Players.Add(newPlayer);
+                }
+
+
+                watch.Stop();
+
+                var delta = (int)(tickMs - watch.ElapsedMilliseconds);
+                if (delta <= 0)
+                {
+                    Log.Warning(this, $"Tick process time too slow! need to wait for {delta}ms. Tick target ms: {tickMs}ms, watch time: {watch.ElapsedMilliseconds}ms");
+                    continue;
+                }
+
+                await Task.Delay(delta);
+            }
         }
     }
 }
