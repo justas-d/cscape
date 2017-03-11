@@ -43,7 +43,7 @@ namespace cscape_dev
             /// </summary>
             public SaveData()
             {
-                
+
             }
 
             /// <summary>
@@ -108,7 +108,7 @@ namespace cscape_dev
 
         private async Task Save(SaveData save)
         {
-            //@TODO: test db saving
+            //todo: test db saving
             if ((await GetUser(save.Username)) == null)
                 await _db.InsertAsync(save);
             else
@@ -122,9 +122,9 @@ namespace cscape_dev
             if (await UserExists(username))
                 return await Load(username, pwd);
 
-            // @todo: default stats
+            // todo: default stats
             var data = new SaveData(
-                username, 
+                username,
                 await Task.Run(() => PasswordHash.ScryptHashString(pwd, PasswordHash.Strength.Medium)));
 
             await Save(data);
@@ -151,7 +151,7 @@ namespace cscape_dev
                     WriteLog(log);
             });
 
-            Task.Run(_server.Start());
+            Task.Run(_server.Start);
 
             while (true)
                 Console.ReadLine();

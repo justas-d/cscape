@@ -59,14 +59,16 @@ namespace cscape
             Endpoint = server.Config.ListenEndPoint;
             Backlog = server.Config.Backlog;
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            _socket.SendTimeout = 5000;
+            _socket.ReceiveTimeout = 5000;
             _rng = new Random();
 
             AsymmetricCipherKeyPair keys;
             using (var file = File.Open(Server.Config.PrivateLoginKeyDir, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var stream = new StreamReader(file))
-                keys = (AsymmetricCipherKeyPair) new PemReader(stream).ReadObject();
+                keys = (AsymmetricCipherKeyPair)new PemReader(stream).ReadObject();
 
-            //@TODO: maybe switch to SHA256?
+            //todo: maybe switch to SHA256?
             _crypto = new OaepEncoding(new RsaEngine(), new Sha1Digest());
             _crypto.Init(false, keys.Private);
         }
@@ -81,7 +83,7 @@ namespace cscape
             while (true)
             {
                 var socket = await Task.Factory.FromAsync(_socket.BeginAccept, _socket.EndAccept, null);
-                if (socket == null || !socket.Connected) 
+                if (socket == null || !socket.Connected)
                     continue;
 
                 await InitConnection(socket);
@@ -123,7 +125,7 @@ namespace cscape
                     blob.Write(0);
 
                 // initMagicZeroCount can be any InitResponseCode
-                // @TODO some sort of function that inspects the state of the server and returns an appropriate InitResponseCode
+                // todo some sort of function that inspects the state of the server and returns an appropriate InitResponseCode
                 blob.Write((byte)InitResponseCode.ContinueToCredentials);
 
                 // write server isaac key
@@ -148,13 +150,13 @@ namespace cscape
                     return;
                 }
 
-                //@TODO reconnect logic
-                var isReconnecting = magic == reconnectMagic;
+                //todo reconnect logic
+                //var isReconnecting = magic == reconnectMagic;
 
                 //1 - length
                 //2  - 255
                 // skip 'em
-                blob.ReadSkipByte();
+                blob.ReadSkipByte(2);
 
                 // verify revision
                 var revision = blob.ReadInt16();
@@ -164,7 +166,8 @@ namespace cscape
                     return;
                 }
 
-                var isLowMem = blob.ReadByte() == 1;
+                blob.ReadByte(); // low mem
+                //var isLowMem = blob.ReadByte() == 1;
 
                 // read crcs
                 var crcs = new int[crcCount];
@@ -185,8 +188,9 @@ namespace cscape
                 for (var i = 0; i < keyCount; i++)
                     keys[i] = blob.ReadInt32();
 
-                //@TODO reconnect logic
-                var signlinkUid = blob.ReadInt32();
+                //TODO reconnect logic
+                blob.ReadInt32(); // signid
+                //var signlinkUid = blob.ReadInt32();
 
                 // try read user/pass
                 string username;
@@ -228,7 +232,7 @@ namespace cscape
 
                 Server.Log.Debug(this, "Done socket init.");
             }
-            //@TODO: exception handle socket acception
+            //todo: exception handle socket acception
             catch
             {
                 throw;
@@ -237,7 +241,7 @@ namespace cscape
 
         private async Task KillBadConnection(Socket socket, Blob blob, InitResponseCode response, string log = null)
         {
-            blob.Write((byte) InitResponseCode.AccountAlreadyLoggedIn);
+            blob.Write((byte)InitResponseCode.AccountAlreadyLoggedIn);
             await SocketSend(socket, blob);
             KillSocket(socket);
             if (log != null)

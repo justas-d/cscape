@@ -30,7 +30,7 @@ namespace cscape
 
         public void WriteBlock(byte[] src, int offset, int count)
         {
-            System.Buffer.BlockCopy(src, offset, Buffer, _writeHead+1, count);
+            System.Buffer.BlockCopy(src, offset, Buffer, _writeHead + 1, count);
             _writeHead += count;
         }
 
@@ -47,12 +47,12 @@ namespace cscape
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ReadSkipByte() => ++_readHead;
+        public void ReadSkipByte(int numberOfBytesToSkip = 1) => _readHead = _readHead + numberOfBytesToSkip;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadInt16()
         {
-            return (short) ((ReadByte() << 8) + ReadByte());
+            return (short)((ReadByte() << 8) + ReadByte());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -90,7 +90,7 @@ namespace cscape
             Write((byte)(val >> 48));
             Write((byte)(val >> 40));
             Write((byte)(val >> 32));
-            Write32((int) val);
+            Write32((int)val);
         }
 
         public void Overwrite(byte[] newbuffer)

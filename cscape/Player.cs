@@ -17,9 +17,9 @@ namespace cscape
         public const int MaxPasswordChars = 128;
 
         public int Id { get; }
-        //@TODO: change username feature
+        //todo: change username feature
         public string Username { get; private set; }
-        //@TODO: change password feature
+        //todo: change password feature
         public string PasswordHash { get; private set; }
 
         public byte TitleIcon { get; set; }

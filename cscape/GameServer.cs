@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -27,12 +27,12 @@ namespace cscape
 
             // verify config
             if (config.Version == null) throw new ArgumentNullException(nameof(config.Version));
-            if (config.PrivateLoginKeyDir== null) throw new ArgumentNullException(nameof(config.PrivateLoginKeyDir));
-            if (config.ListenEndPoint== null) throw new ArgumentNullException(nameof(config.ListenEndPoint));
-            if (config.MaxPlayers<= 0) throw new ArgumentOutOfRangeException(nameof(config.MaxPlayers));
-            if (config.Backlog<= 0) throw new ArgumentOutOfRangeException(nameof(config.Backlog));
+            if (config.PrivateLoginKeyDir == null) throw new ArgumentNullException(nameof(config.PrivateLoginKeyDir));
+            if (config.ListenEndPoint == null) throw new ArgumentNullException(nameof(config.ListenEndPoint));
+            if (config.MaxPlayers <= 0) throw new ArgumentOutOfRangeException(nameof(config.MaxPlayers));
+            if (config.Backlog <= 0) throw new ArgumentOutOfRangeException(nameof(config.Backlog));
 
-            if(!File.Exists(config.PrivateLoginKeyDir))
+            if (!File.Exists(config.PrivateLoginKeyDir))
                 throw new FileNotFoundException($"Could not find private login key in directory: {config.PrivateLoginKeyDir}");
 
             Config = config;
@@ -49,7 +49,7 @@ namespace cscape
 
             Log.Normal(this, "Starting server...");
 
-            //@TODO run the entry point task with a cancellation token
+            //todo run the entry point task with a cancellation token
             Task.Run(_entry.StartListening).ContinueWith(t =>
             {
                 Log.Debug(this, $"EntryPoint listen task terminated in status: Completed: {t.IsCompleted} Faulted: {t.IsFaulted} Cancelled: {t.IsCanceled}");
@@ -67,7 +67,7 @@ namespace cscape
                 watch.Start();
                 // todo : packet handling, player io, game ticks
                 Player newPlayer;
-                while (!_entry.PlayerQueue.TryDequeue(out newPlayer))
+                while (_entry.PlayerQueue.TryDequeue(out newPlayer))
                 {
                     Players.Add(newPlayer);
                 }

@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace cscape
 {
-    public class EntityPool<T> : IEnumerable<T> where T : Entity 
+    public class EntityPool<T> : IEnumerable<T> where T : Entity
     {
         public int Size { get; }
 
@@ -22,7 +22,7 @@ namespace cscape
             _idPool = new Stack<int>(Size);
             _pool = new T[Size];
 
-            for (var i = 0; i < Size; i++)
+            for (var i = Size - 1; i >= 0; i--)
                 _idPool.Push(i);
         }
 
@@ -62,6 +62,14 @@ namespace cscape
             return GetEnumerator();
         }
 
-        public IEnumerator<T> GetEnumerator() => _pool.Where(e => e != null).GetEnumerator();
+        public IEnumerator<T> GetEnumerator()
+        {
+            //todo: internal list that contains all available not null players. return enumerator of that list in the pool enumerator method.
+            foreach (var p in _pool)
+            {
+                if (p != null)
+                    yield return p;
+            }
+        }
     }
 }
