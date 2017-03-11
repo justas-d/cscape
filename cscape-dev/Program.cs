@@ -29,14 +29,14 @@ namespace cscape_dev
 
     class PlayerDb : IPlayerDatabase
     {
-        private class SaveData : IPlayerSaveData
+        class SaveData : IPlayerSaveData
         {
             [PrimaryKey, AutoIncrement]
-            public int Id { get; }
-            public string PasswordHash { get; }
+            public int Id { get; set; }
+            public string PasswordHash { get; set; }
             [MaxLength(Player.MaxUsernameChars), Indexed]
-            public string Username { get; }
-            public byte TitleIcon { get; }
+            public string Username { get; set; }
+            public byte TitleIcon { get; set; }
 
             /// <summary>
             /// SQLite constructor
@@ -77,8 +77,8 @@ namespace cscape_dev
         private async Task<SaveData> GetUser(string username)
         {
             return await _db.Table<SaveData>()
-                    .Where(u => string.Equals(username, u.Username, StringComparison.OrdinalIgnoreCase))
-                    .FirstOrDefaultAsync();
+                            .Where(u => u.Username == username)
+                            .FirstOrDefaultAsync();
         }
 
         public PlayerDb(SQLiteAsyncConnection db)
