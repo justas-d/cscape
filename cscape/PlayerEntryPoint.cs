@@ -213,7 +213,7 @@ namespace cscape
 
                 // check if user is logged in
                 var loggedInPlayer = Server.Players.FirstOrDefault(
-                        p => p.Username.Equals(username, StringComparison.InvariantCulture));
+                    p => p.Username.Equals(username, StringComparison.InvariantCulture));
 
                 IPlayerSaveData data = null;
                 if (!isReconnecting) //login
@@ -235,7 +235,8 @@ namespace cscape
                 {
                     if (loggedInPlayer == null)
                     {
-                        await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, "Tried to reconnect to player that is not present in ent pool.");
+                        await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                            "Tried to reconnect to player that is not present in ent pool.");
                         return;
                     }
 
@@ -248,13 +249,13 @@ namespace cscape
 
                 if (isReconnecting)
                 {
-                    blob.Write((byte)InitResponseCode.ReconnectDone);
+                    blob.Write((byte) InitResponseCode.ReconnectDone);
                     LoginQueue.Enqueue(new ReconnectPlayerLogin(username, socket, signlinkUid));
                 }
-                    
+
                 else
                 {
-                    blob.Write((byte)InitResponseCode.LoginDone);
+                    blob.Write((byte) InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
                     blob.Write(data.TitleIcon);
                     LoginQueue.Enqueue(new NormalPlayerLogin(Server, data, socket, signlinkUid));
@@ -264,11 +265,20 @@ namespace cscape
 
                 Server.Log.Debug(this, "Done socket init.");
             }
-            //todo: exception handle socket acception
-            catch
+            catch (SocketException)
             {
-                throw;
+                Server.Log.Debug(this, "SocketException in Entry.");
             }
+            catch (ObjectDisposedException)
+            {
+                Server.Log.Debug(this, "ObjectDisposedException in Entry.");
+            }
+#if RELEASE
+            catch (Exception ex)
+            {
+                Server.Log.Exception(this, "Unhandled exception in EntryPoint.", ex);
+            }
+#endif
         }
 
         private async Task KillBadConnection(Socket socket, Blob blob, InitResponseCode response, string log = null)
