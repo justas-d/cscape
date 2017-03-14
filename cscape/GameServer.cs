@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -50,7 +51,9 @@ namespace cscape
             Log.Normal(this, "Starting server...");
 
             //todo run the entry point task with a cancellation token
+#pragma warning disable 4014
             Task.Run(_entry.StartListening).ContinueWith(t =>
+#pragma warning restore 4014
             {
                 Log.Debug(this, $"EntryPoint listen task terminated in status: Completed: {t.IsCompleted} Faulted: {t.IsFaulted} Cancelled: {t.IsCanceled}");
                 if (t.Exception != null)
@@ -59,30 +62,49 @@ namespace cscape
 
             Log.Normal(this, "Server live.");
 
-            //TODO: bool to terminate mainloop
-            var watch = new Stopwatch();
+            //TODO: bool to terminate main loop
+
             const int tickMs = 600;
+            var watch = new Stopwatch();
+            var waitTime = 0;
+            var playerRemoveQueue = new Queue<int>();
             while (true)
             {
+                // ====== PROLOGUE ====== 
+
                 watch.Start();
-                // todo : packet handling, player io, game ticks
-                Player newPlayer;
-                while (_entry.PlayerQueue.TryDequeue(out newPlayer))
+
+                // ====== BODY ====== 
+
+                IPlayerLogin login;
+                while (_entry.LoginQueue.TryDequeue(out login))
+                    login.Transfer(Players);
+               
+                foreach (var player in Players)
                 {
-                    Players.Add(newPlayer);
+                    if (player.Connection.ManageHardDisconnect(waitTime + watch.ElapsedMilliseconds))
+                        playerRemoveQueue.Enqueue(player.InstanceId);
+
+                    // todo : packet handling, player io
                 }
 
+                // ====== EPILOGUE ====== 
+                if (playerRemoveQueue.Count > 0)
+                {
+                    Log.Debug(this, $"Reaping {playerRemoveQueue.Count} players.");
+                    while (playerRemoveQueue.Count > 0)
+                        Players.Remove(playerRemoveQueue.Dequeue());
+                }
 
                 watch.Stop();
-
-                var delta = (int)(tickMs - watch.ElapsedMilliseconds);
-                if (delta <= 0)
+                waitTime = (int)(tickMs - watch.ElapsedMilliseconds);
+                watch.Reset();
+                if (waitTime <= 0)
                 {
-                    Log.Warning(this, $"Tick process time too slow! need to wait for {delta}ms. Tick target ms: {tickMs}ms, watch time: {watch.ElapsedMilliseconds}ms");
+                    Log.Warning(this, $"Tick process time too slow! need to wait for {waitTime}ms. Tick target ms: {tickMs}ms.");
                     continue;
                 }
-
-                await Task.Delay(delta);
+                await Task.Delay(waitTime);
             }
         }
     }

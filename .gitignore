@@ -287,3 +287,4 @@ __pycache__/
 *.xsd.cs
 
 crypto* 
+sqlite3.dll

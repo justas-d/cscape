@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -51,7 +52,7 @@ namespace cscape
 
         private readonly IAsymmetricBlockCipher _crypto;
 
-        public ConcurrentQueue<Player> PlayerQueue { get; } = new ConcurrentQueue<Player>();
+        public ConcurrentQueue<IPlayerLogin> LoginQueue { get; } = new ConcurrentQueue<IPlayerLogin>();
 
         public PlayerEntryPoint(GameServer server)
         {
@@ -114,7 +115,7 @@ namespace cscape
                 if (magic != initHandshakeMagic)
                 {
                     Server.Log.Debug(this, $"Killing socket due to back handshake magic ({magic})");
-                    KillSocket(socket);
+                    socket.Dispose();
                     return;
                 }
 
@@ -126,7 +127,7 @@ namespace cscape
 
                 // initMagicZeroCount can be any InitResponseCode
                 // todo some sort of function that inspects the state of the server and returns an appropriate InitResponseCode
-                blob.Write((byte)InitResponseCode.ContinueToCredentials);
+                blob.Write((byte) InitResponseCode.ContinueToCredentials);
 
                 // write server isaac key
                 var serverKey = new byte[randomKeySize];
@@ -146,12 +147,13 @@ namespace cscape
                 magic = blob.ReadByte();
                 if (magic != normalConnectMagic && magic != reconnectMagic)
                 {
-                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, $"Invalid login block magic: {magic}");
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                        $"Invalid login block magic: {magic}");
                     return;
                 }
 
                 //todo reconnect logic
-                //var isReconnecting = magic == reconnectMagic;
+                var isReconnecting = magic == reconnectMagic;
 
                 //1 - length
                 //2  - 255
@@ -179,7 +181,8 @@ namespace cscape
                 magic = blob.ReadByte();
                 if (magic != loginMagic)
                 {
-                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, $"Invalid login magic: {magic}");
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                        $"Invalid login magic: {magic}");
                     return;
                 }
 
@@ -188,47 +191,76 @@ namespace cscape
                 for (var i = 0; i < keyCount; i++)
                     keys[i] = blob.ReadInt32();
 
-                //TODO reconnect logic
-                blob.ReadInt32(); // signid
-                //var signlinkUid = blob.ReadInt32();
+                var signlinkUid = blob.ReadInt32();
 
                 // try read user/pass
                 string username;
                 string password;
                 if (!blob.TryReadString(Player.MaxUsernameChars, out username))
                 {
-                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, "Overflow detected when reading username.");
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                        "Overflow detected when reading username.");
                     return;
                 }
 
                 if (!blob.TryReadString(Player.MaxPasswordChars, out password))
                 {
-                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, "Overflow detected when reading password.");
+                    await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                        "Overflow detected when reading password.");
                     return;
                 }
+                username = username.ToLowerInvariant();
 
                 // check if user is logged in
-                foreach (var p in Server.Players)
+                var loggedInPlayer = Server.Players.FirstOrDefault(
+                        p => p.Username.Equals(username, StringComparison.InvariantCulture));
+
+                IPlayerSaveData data = null;
+                if (!isReconnecting) //login
                 {
-                    if (p.Username.Equals(username, StringComparison.InvariantCulture))
+                    if (loggedInPlayer != null)
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.AccountAlreadyLoggedIn);
                         return;
                     }
-                }
 
-                var data = await Server.Database.Player.LoadOrCreateNew(username, password);
-                if (data == null)
+                    data = await Server.Database.Player.LoadOrCreateNew(username, password);
+                    if (data == null)
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
+                        return;
+                    }
+                }
+                else //reconnect
                 {
-                    await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
-                    return;
+                    if (loggedInPlayer == null)
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure, "Tried to reconnect to player that is not present in ent pool.");
+                        return;
+                    }
+
+                    if (!await Server.Database.Player.IsValidPassword(loggedInPlayer.PasswordHash, password))
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
+                        return;
+                    }
                 }
 
-                blob.Write(0); // is flagged
-                blob.Write(data.TitleIcon);
+                if (isReconnecting)
+                {
+                    blob.Write((byte)InitResponseCode.ReconnectDone);
+                    LoginQueue.Enqueue(new ReconnectPlayerLogin(username, socket, signlinkUid));
+                }
+                    
+                else
+                {
+                    blob.Write((byte)InitResponseCode.LoginDone);
+                    blob.Write(0); // is flagged
+                    blob.Write(data.TitleIcon);
+                    LoginQueue.Enqueue(new NormalPlayerLogin(Server, data, socket, signlinkUid));
+                }
 
                 await SocketSend(socket, blob);
-                PlayerQueue.Enqueue(new Player(data));
 
                 Server.Log.Debug(this, "Done socket init.");
             }
@@ -243,13 +275,10 @@ namespace cscape
         {
             blob.Write((byte)InitResponseCode.AccountAlreadyLoggedIn);
             await SocketSend(socket, blob);
-            KillSocket(socket);
+            socket?.Dispose();
             if (log != null)
                 Server.Log.Warning(this, null);
         }
-
-        private static void KillSocket(Socket socket)
-            => socket?.Dispose();
 
         private async Task<int> SocketSend(Socket socket, Blob blob)
             => await Task.Factory.FromAsync((c, o) => socket.BeginSend(blob.Buffer, 0, blob.BytesWritten, SocketFlags.None, c, o),

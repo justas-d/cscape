@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using cscape;
@@ -130,12 +131,23 @@ namespace cscape_dev
             await Save(data);
             return data;
         }
+
+        public Task<bool> IsValidPassword(string pwdHash, string pwd)
+        {
+            return Task.Run(() => PasswordHash.ScryptHashStringVerify(pwdHash, pwd));
+        }
     }
 
     static class Program
     {
         private static readonly BlockingCollection<LogEventArgs> LogQueue = new BlockingCollection<LogEventArgs>();
         private static GameServer _server;
+
+        private static void HandleAggregateException(AggregateException aggEx)
+        {
+            foreach (var ex in aggEx.InnerExceptions)
+                ExceptionDispatchInfo.Capture(ex).Throw();
+        }
 
         static void Main()
         {
@@ -145,13 +157,25 @@ namespace cscape_dev
 
             _server.Log.LogReceived += (s, l) => LogQueue.Add(l);
 
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                if (e.Observed)
+                    return;
+                HandleAggregateException(e.Exception);
+                e.SetObserved();
+            };
+
             ThreadPool.QueueUserWorkItem(o =>
             {
                 foreach (var log in LogQueue.GetConsumingEnumerable())
                     WriteLog(log);
             });
 
-            Task.Run(_server.Start);
+            Task.Run(_server.Start).ContinueWith(t =>
+            {
+                if (t.IsFaulted && t.Exception != null)
+                    HandleAggregateException(t.Exception);
+            });
 
             while (true)
                 Console.ReadLine();

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace cscape
@@ -35,7 +34,7 @@ namespace cscape
         public void Add([NotNull] T ent)
         {
             var id = NextId();
-            ent.InstanceId = NextId();
+            ent.InstanceId = id;
             _pool[id] = ent;
         }
 
@@ -43,7 +42,7 @@ namespace cscape
 
         public void Remove(int index)
         {
-            if (index <= 0 || Size >= index) throw new ArgumentOutOfRangeException(nameof(index));
+            if(0 > index || index >= Size) throw new ArgumentOutOfRangeException(nameof(index));
 
             _idPool.Push(index);
             _pool[index] = null;
@@ -53,7 +52,7 @@ namespace cscape
         {
             var pop = _idPool.Pop();
             Debug.Assert(Size > pop || pop >= 0);
-            Debug.Assert(_pool[pop] != null);
+            Debug.Assert(_pool[pop] == null);
             return pop;
         }
 
