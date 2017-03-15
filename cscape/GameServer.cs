@@ -85,6 +85,13 @@ namespace cscape
                     if (player.Connection.ManageHardDisconnect(waitTime + watch.ElapsedMilliseconds))
                         playerRemoveQueue.Enqueue(player.InstanceId);
 
+                    if (player.Connection.IsConnected())
+                    {
+                        // todo : exception handle synchronization
+                        foreach (var sync in player.SyncMachines)
+                            await sync.Synchronize(player.Connection.Socket);
+                    }
+
                     // todo : packet handling, player io
                 }
 

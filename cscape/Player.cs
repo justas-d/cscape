@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace cscape
@@ -75,6 +77,9 @@ namespace cscape
         [NotNull]
         public GameServer Server { get; }
 
+        [NotNull]
+        public List<ISyncMachine> SyncMachines = new List<ISyncMachine>();
+
         public Player([NotNull] NormalPlayerLogin login)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
@@ -86,6 +91,80 @@ namespace cscape
             PasswordHash = login.Data.PasswordHash;
             TitleIcon = login.Data.TitleIcon;
             Server = login.Server;
+
+            SyncMachines.Add(new RegionSyncMachine(Position));
+        }
+    }
+
+    public interface ISyncMachine
+    {
+        Task Synchronize(Socket socket);
+    }
+
+    public class RegionSyncMachine : ISyncMachine
+    {
+        private readonly PositionController _pos;
+        private Region _oldRegion;
+
+        public const int RegionInitOpcode = 73;
+
+        public RegionSyncMachine(PositionController pos)
+        {
+            _pos = pos;
+        }
+
+        public Task Synchronize(Socket socket)
+        {
+            // send region init if regions changed
+            if (!_oldRegion.Equals(_pos.CurrentRegion))
+            {
+                
+            }
+
+            _oldRegion = _pos.CurrentRegion;
+        }
+    }
+
+    public class PositionController
+    {
+        public int GlobalX { get; private set; }
+        public int GlobalY { get; private set; }
+        public int GlobalZ { get; private set; }
+
+        public int LocalX { get; private set; }
+        public int LocalY { get; private set; }
+
+        public Region CurrentRegion { get; private set; }
+
+        public bool IsRunning { get; set; }
+    }
+
+    public class Region : IEquatable<Region>
+    {
+        public int X { get; }
+        public int Y { get; }
+
+        public bool Equals(Region other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Region) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (X * 397) ^ Y;
+            }
         }
     }
 }

@@ -263,6 +263,7 @@ namespace cscape
 
                 await SocketSend(socket, blob);
 
+                socket.Blocking = false;
                 Server.Log.Debug(this, "Done socket init.");
             }
             catch (SocketException)

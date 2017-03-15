@@ -23,5 +23,7 @@ namespace cscape
                 IsOwned = true;
             }
         }
+
+        public PositionController Position { get; } = new PositionController();
     }
 }
