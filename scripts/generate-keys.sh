@@ -12,7 +12,7 @@ PUBKEYNAME=cryptokey-public.der
 openssl genrsa -out $KEYNAME $SIZE
 openssl rsa -in $KEYNAME -pubout -outform DER -out $PUBKEYNAME
 
-TDIR=../CScape/Meta
+TDIR=../cscape-netcore
 
 if [[ -z $1 ]] ; then
 	rm $TDIR/$KEYNAME

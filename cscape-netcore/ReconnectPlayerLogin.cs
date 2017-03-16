@@ -13,11 +13,8 @@ namespace cscape
 
         public ReconnectPlayerLogin([NotNull] string username, [NotNull] Socket newConnection, int signlinkUid)
         {
-            if (username == null) throw new ArgumentNullException(nameof(username));
-            if (newConnection == null) throw new ArgumentNullException(nameof(newConnection));
-
-            Username = username;
-            NewConnection = newConnection;
+            Username = username ?? throw new ArgumentNullException(nameof(username));
+            NewConnection = newConnection ?? throw new ArgumentNullException(nameof(newConnection));
             SignlinkUid = signlinkUid;
         }
 
@@ -31,7 +28,7 @@ namespace cscape
             if (player.Connection.IsConnected()) return;
             if (player.SignlinkId != SignlinkUid) return;
 
-            player.Connection = new Player.SocketContext(NewConnection);
+            player.Connection.AssignNewSocket(NewConnection);
             player.Server.Log.Debug(this, $"Reconnected client iid {player.InstanceId}");
         }
     }

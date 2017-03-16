@@ -43,6 +43,7 @@ namespace cscape
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte()
         {
+            
             return Buffer[++_readHead];
         }
 
