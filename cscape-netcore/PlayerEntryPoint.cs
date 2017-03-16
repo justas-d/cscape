@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -27,7 +29,7 @@ namespace cscape
         WorldIsFull = 7,
         LoginServerOffline = 8,
         LoginRatelimitByAddress = 9,
-        BadSessionId = 10,
+        BadSessionId = 10, 
         LoginServerRejected = 11,
         IsNotAMember = 12,
         GeneralFailure = 13,
@@ -83,7 +85,7 @@ namespace cscape
 
             while (true)
             {
-                var socket = await Task.Factory.FromAsync(_socket.BeginAccept, _socket.EndAccept, null);
+                var socket = await _socket.AcceptAsync();
                 if (socket == null || !socket.Connected)
                     continue;
 
@@ -209,11 +211,12 @@ namespace cscape
                         "Overflow detected when reading password.");
                     return;
                 }
+                    
                 username = username.ToLowerInvariant();
 
                 // check if user is logged in
                 var loggedInPlayer = Server.Players.FirstOrDefault(
-                    p => p.Username.Equals(username, StringComparison.InvariantCulture));
+                    p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
                 IPlayerSaveData data = null;
                 if (!isReconnecting) //login
@@ -274,12 +277,11 @@ namespace cscape
             {
                 Server.Log.Debug(this, "ObjectDisposedException in Entry.");
             }
-#if RELEASE
             catch (Exception ex)
             {
                 Server.Log.Exception(this, "Unhandled exception in EntryPoint.", ex);
+                Debug.Fail(ex.ToString());
             }
-#endif
         }
 
         private async Task KillBadConnection(Socket socket, Blob blob, InitResponseCode response, string log = null)
@@ -289,15 +291,18 @@ namespace cscape
             socket?.Dispose();
             if (log != null)
                 Server.Log.Warning(this, null);
+
         }
 
-        private async Task<int> SocketSend(Socket socket, Blob blob)
-            => await Task.Factory.FromAsync((c, o) => socket.BeginSend(blob.Buffer, 0, blob.BytesWritten, SocketFlags.None, c, o),
-                socket.EndSend, null);
+        private static Task<int> SocketSend(Socket socket, Blob blob)
+        {
+            var task = socket.SendAsync(new ArraySegment<byte>(blob.Buffer, 0, blob.BytesWritten), SocketFlags.None);
+            blob.ResetWrite();
+            return task;
+        }
 
-        private static async Task<int> SocketReceive(Socket socket, Blob blob, int len)
-            => await Task.Factory.FromAsync((c, o) => socket.BeginReceive(blob.Buffer, 0, len, SocketFlags.None, c, o),
-                socket.EndReceive, null);
+        private static Task<int> SocketReceive(Socket socket, Blob blob, int len)
+            => socket.ReceiveAsync(new ArraySegment<byte>(blob.Buffer, 0, len), SocketFlags.None);
 
         public void Dispose()
         {

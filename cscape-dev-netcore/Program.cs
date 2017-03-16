@@ -7,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using cscape;
 using Newtonsoft.Json;
-using Sodium;
-using SQLite;
 
 namespace cscape_dev
 {
@@ -17,14 +15,9 @@ namespace cscape_dev
         public IPacketLengthLookup Packet { get; }
         public IPlayerDatabase Player { get; }
 
-        private SQLiteAsyncConnection _db;
-
         public ServerDatabase(string sqliteDbDir, string packetJsonDir)
         {
-            _db = new SQLiteAsyncConnection(sqliteDbDir);
             Packet = JsonConvert.DeserializeObject<PacketLookup>(File.ReadAllText(packetJsonDir));
-
-            Player = new PlayerDb(_db);
         }
     }
 
@@ -32,10 +25,8 @@ namespace cscape_dev
     {
         class SaveData : IPlayerSaveData
         {
-            [PrimaryKey, AutoIncrement]
             public int Id { get; set; }
             public string PasswordHash { get; set; }
-            [MaxLength(Player.MaxUsernameChars), Indexed]
             public string Username { get; set; }
             public byte TitleIcon { get; set; }
 
@@ -73,68 +64,29 @@ namespace cscape_dev
 
         }
 
-        private readonly SQLiteAsyncConnection _db;
-
-        private async Task<SaveData> GetUser(string username)
+        public Task<bool> UserExists(string username)
         {
-            return await _db.Table<SaveData>()
-                            .Where(u => u.Username == username)
-                            .FirstOrDefaultAsync();
+            throw new NotImplementedException();
         }
 
-        public PlayerDb(SQLiteAsyncConnection db)
+        public Task<IPlayerSaveData> Load(string username, string password)
         {
-            if (db == null) throw new ArgumentNullException(nameof(db));
-            _db = db;
-            _db.CreateTableAsync<SaveData>();
-        }
-
-        public async Task<IPlayerSaveData> Load(string username, string password)
-        {
-            var user = await GetUser(username);
-            if (user == null)
-                return null;
-
-            if (!await Task.Run(() => PasswordHash.ScryptHashStringVerify(user.PasswordHash, password)))
-                return null;
-
-            return user;
+            throw new NotImplementedException();
         }
 
         public Task Save(Player player)
         {
-            var data = new SaveData(player);
-            return Save(data);
+            throw new NotImplementedException();
         }
 
-        private async Task Save(SaveData save)
+        public Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd)
         {
-            //todo: test db saving
-            if ((await GetUser(save.Username)) == null)
-                await _db.InsertAsync(save);
-            else
-                await _db.UpdateAsync(save);
-        }
-
-        public async Task<bool> UserExists(string username) => await GetUser(username) != null;
-
-        public async Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd)
-        {
-            if (await UserExists(username))
-                return await Load(username, pwd);
-
-            // todo: default stats
-            var data = new SaveData(
-                username,
-                await Task.Run(() => PasswordHash.ScryptHashString(pwd, PasswordHash.Strength.Medium)));
-
-            await Save(data);
-            return data;
+            throw new NotImplementedException();
         }
 
         public Task<bool> IsValidPassword(string pwdHash, string pwd)
         {
-            return Task.Run(() => PasswordHash.ScryptHashStringVerify(pwdHash, pwd));
+            throw new NotImplementedException();
         }
     }
 

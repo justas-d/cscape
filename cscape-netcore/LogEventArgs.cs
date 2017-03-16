@@ -16,13 +16,14 @@ namespace cscape
         [CanBeNull]
         public Exception Exception { get; }
 
+        /// <exception cref="ArgumentNullException"><paramref name="file"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentOutOfRangeException">Severity is an out-of-range value.</exception>
         internal LogEventArgs([NotNull] string file, int line, [NotNull] string message, LogSeverity severity, [CanBeNull]  Exception exception = null)
         {
             if (file == null) throw new ArgumentNullException(nameof(file));
             if (message == null) throw new ArgumentNullException(nameof(message));
-            if (line <= 0) throw new ArgumentOutOfRangeException(nameof(line));
-            if (!Enum.IsDefined(typeof(LogSeverity), severity))
-                throw new InvalidEnumArgumentException(nameof(severity), (int) severity, typeof(LogSeverity));
+            if (!Enum.IsDefined(typeof(LogSeverity), severity)) throw new ArgumentOutOfRangeException(nameof(severity));
 
             File = file;
             Line = line;

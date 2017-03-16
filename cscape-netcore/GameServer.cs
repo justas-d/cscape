@@ -21,6 +21,15 @@ namespace cscape
 
         public DateTime StartTime { get; private set; }
 
+
+        /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="config.Version"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="config"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="database"/> is <see langword="null"/></exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="config.MaxPlayers"/> is less-or-equals to zero</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="config.Backlog"/> is less-or-equals to zero</exception>
+        /// <exception cref="FileNotFoundException">Condition.</exception>
         public GameServer([NotNull] IGameServerConfig config, [NotNull] IDatabase database)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
@@ -89,7 +98,7 @@ namespace cscape
                     {
                         // todo : exception handle synchronization
                         foreach (var sync in player.SyncMachines)
-                            await sync.Synchronize(player.Connection.Socket);
+                            sync.Synchronize(player.Connection.OutStream);
                     }
 
                     // todo : packet handling, player io
