@@ -1,13 +1,15 @@
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace cscape
 {
     public interface IPlayerDatabase
     {
-        Task<bool> UserExists(string username);
-        Task<IPlayerSaveData> Load(string username, string password);
-        Task Save(Player player);
-        Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd);
-        Task<bool> IsValidPassword(string pwdHash, string pwd);
+        Task<bool> UserExists([NotNull] string username);
+        Task<bool> IsValidPassword([NotNull] string pwdHash, [NotNull] string pwd);
+
+        Task<IPlayerSaveData> Load([NotNull] string username, [NotNull] string password);
+        Task<IPlayerSaveData> Save(Player player);
+        Task<IPlayerSaveData> LoadOrCreateNew([NotNull] string username, [NotNull] string pwd);
     }
 }

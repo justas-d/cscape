@@ -199,7 +199,7 @@ namespace cscape
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             // send region init if regions changed
-            if (!_oldRegion.Equals(_pos.CurrentRegion))
+            if (_oldRegion != null && !_oldRegion.Equals(_pos.CurrentRegion))
             {
                 BeginPacket(stream, RegionInitOpcode);
                 stream.Write16((short)_oldRegion.X);

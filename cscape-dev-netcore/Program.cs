@@ -1,92 +1,167 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using cscape;
+using JetBrains.Annotations;
+using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace cscape_dev
 {
-    class ServerDatabase : IDatabase
+    public class SaveData : IPlayerSaveData
+    {
+        public int Id { get; set; }
+        public string PasswordHash { get; set; }
+        public string Username { get; set; }
+        public byte TitleIcon { get; set; }
+
+        /// <summary>
+        /// SQLite constructor
+        /// </summary>
+        public SaveData()
+        {
+
+        }
+
+        /// <summary>
+        /// New player constructor
+        /// </summary>
+      public SaveData([NotNull] string username, [NotNull] string pwdHash)
+        {
+            Username = username ?? throw new ArgumentNullException(nameof(username));
+            PasswordHash = pwdHash ?? throw new ArgumentNullException(nameof(pwdHash));
+        }
+
+        /// <summary>
+        /// Save existing player constructor
+        /// </summary>
+        public SaveData(Player player)
+        {
+            if (player == null) throw new ArgumentNullException(nameof(player));
+            if (string.IsNullOrEmpty(player.Username)) throw new ArgumentNullException(nameof(player.Username));
+            if (string.IsNullOrEmpty(player.PasswordHash)) throw new ArgumentNullException(nameof(player.PasswordHash));
+
+            Id = player.Id;
+            PasswordHash = player.PasswordHash;
+            Username = player.Username;
+            TitleIcon = player.TitleIcon;
+        }
+
+    }
+
+    public class ServerDatabase : IDatabase, IDisposable
     {
         public IPacketLengthLookup Packet { get; }
-        public IPlayerDatabase Player { get; }
+        public IPlayerDatabase Player => _playerDb;
+
+        private PlayerDb _playerDb;
 
         public ServerDatabase(string sqliteDbDir, string packetJsonDir)
         {
             Packet = JsonConvert.DeserializeObject<PacketLookup>(File.ReadAllText(packetJsonDir));
+            _playerDb = new PlayerDb();
+            _playerDb.Database.Migrate();
+        }
+
+        public void Dispose()
+        {
+            _playerDb?.Dispose();
+            _playerDb = null;
         }
     }
 
-    class PlayerDb : IPlayerDatabase
+    public class PlayerDb : DbContext, IPlayerDatabase
     {
-        class SaveData : IPlayerSaveData
-        {
-            public int Id { get; set; }
-            public string PasswordHash { get; set; }
-            public string Username { get; set; }
-            public byte TitleIcon { get; set; }
+        public DbSet<SaveData> SaveData { get; set; } 
 
-            /// <summary>
-            /// SQLite constructor
-            /// </summary>
-            public SaveData()
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite("Filename=data.db");
+        }
+
+        protected override void OnModelCreating(ModelBuilder model)
+        {
+            model.Entity<SaveData>()
+                .Property(s => s.Username)
+                .IsRequired();
+
+            model.Entity<SaveData>()
+                .Property(s => s.PasswordHash)
+                .IsRequired();
+        }
+
+        public async Task<bool> UserExists([NotNull] string username)
+        {
+            if (username == null) throw new ArgumentNullException(nameof(username));
+            return await SaveData.FirstOrDefaultAsync(s => s.Username == username) != null;
+        }
+
+        public async Task<IPlayerSaveData> Load([NotNull] string username, [NotNull] string password)
+        {
+            if (username == null) throw new ArgumentNullException(nameof(username));
+            if (password == null) throw new ArgumentNullException(nameof(password));
+
+            var data = await SaveData.FirstAsync(s => s.Username == username);
+            if (!await IsValidPassword(data.PasswordHash, password))
+                return null;
+
+            return data;
+        }
+
+        public async Task<IPlayerSaveData> Save([NotNull] Player player)
+        {
+            if (player == null) throw new ArgumentNullException(nameof(player));
+
+            var data = new SaveData(player);
+            await SaveByData(data);
+            return data;
+        }
+
+        private async Task SaveByData(SaveData data)
+        {
+            SaveData.Add(data);
+            await SaveChangesAsync();
+        }
+
+        public async Task<IPlayerSaveData> LoadOrCreateNew([NotNull] string username, [NotNull] string pwd)
+        {
+            if (username == null) throw new ArgumentNullException(nameof(username));
+            if (pwd == null) throw new ArgumentNullException(nameof(pwd));
+
+            if (await UserExists(username))
+                return await Load(username, pwd);
+
+            var data = NewPlayer(username, pwd);
+            await SaveByData(data);
+            return data;
+        }
+
+        private SaveData NewPlayer(string username, string pwd)
+        {
+            return new SaveData(username, pwd)
             {
-
-            }
-
-            /// <summary>
-            /// New player constructor
-            /// </summary>
-            public SaveData(string username, string pwdHash)
-            {
-                Username = username;
-                PasswordHash = pwdHash;
-            }
-
-            /// <summary>
-            /// Save existing player constructor
-            /// </summary>
-            public SaveData(Player player)
-            {
-                if (player == null) throw new ArgumentNullException(nameof(player));
-                if (string.IsNullOrEmpty(player.Username)) throw new ArgumentNullException(nameof(player.Username));
-                if (string.IsNullOrEmpty(player.PasswordHash)) throw new ArgumentNullException(nameof(player.PasswordHash));
-
-                Id = player.Id;
-                PasswordHash = player.PasswordHash;
-                Username = player.Username;
-                TitleIcon = player.TitleIcon;
-            }
-
+                TitleIcon = 0
+                // todo : player defaults here
+            };
         }
 
-        public Task<bool> UserExists(string username)
+        public Task<bool> IsValidPassword([NotNull] string pwdHash, [NotNull] string pwd)
         {
-            throw new NotImplementedException();
-        }
+            if (pwdHash == null) throw new ArgumentNullException(nameof(pwdHash));
+            if (pwd == null) throw new ArgumentNullException(nameof(pwd));
 
-        public Task<IPlayerSaveData> Load(string username, string password)
-        {
-            throw new NotImplementedException();
-        }
+            // NET Core has no bindings for libsodium, so let's just store them in plaintext.
+            // TODO: IF YOU ARE DEVELOPING A SERVER FOR PRODUCTION, IMPLEMENT A PASSWORD HASHING SOLUTION
+            // todo: check up on https://github.com/jedisct1/libsodium/issues/504 for libsodium bindings
 
-        public Task Save(Player player)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> IsValidPassword(string pwdHash, string pwd)
-        {
-            throw new NotImplementedException();
+            return Task.FromResult(pwdHash.Equals(pwd, StringComparison.Ordinal));
         }
     }
 
@@ -99,10 +174,15 @@ namespace cscape_dev
         {
             foreach (var ex in aggEx.InnerExceptions)
                 ExceptionDispatchInfo.Capture(ex).Throw();
+            // Enable all CLR exceptions in the exception settings window to see the stack-trace.
         }
 
         static void Main()
         {
+            // make sure we're invariant
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
             // config
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(File.ReadAllText("config.json"));
             _server = new GameServer(cfg, new ServerDatabase("data.db", "packet-lengths.json"));

@@ -138,7 +138,6 @@ namespace cscape
 
                 // send the packet
                 await SocketSend(socket, blob);
-                blob.ResetWrite();
 
                 // receive login block
                 // header
@@ -286,7 +285,7 @@ namespace cscape
 
         private async Task KillBadConnection(Socket socket, Blob blob, InitResponseCode response, string log = null)
         {
-            blob.Write((byte)InitResponseCode.AccountAlreadyLoggedIn);
+            blob.Write((byte)response);
             await SocketSend(socket, blob);
             socket?.Dispose();
             if (log != null)
