@@ -24,6 +24,6 @@ namespace cscape
             }
         }
 
-        public PositionController Position { get; } = new PositionController();
+        public abstract PositionController Position { get; }
     }
 }

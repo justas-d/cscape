@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace cscape
@@ -19,6 +20,7 @@ namespace cscape
         /// <exception cref="ArgumentNullException"><paramref name="file"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentOutOfRangeException">Severity is an out-of-range value.</exception>
+        [DebuggerStepThrough]
         internal LogEventArgs([NotNull] string file, int line, [NotNull] string message, LogSeverity severity, [CanBeNull]  Exception exception = null)
         {
             if (file == null) throw new ArgumentNullException(nameof(file));

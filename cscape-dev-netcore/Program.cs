@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using cscape;
 using JetBrains.Annotations;
-using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,8 +51,14 @@ namespace cscape_dev
             PasswordHash = player.PasswordHash;
             Username = player.Username;
             TitleIcon = player.TitleIcon;
+            X = player.Position.X;
+            Y = player.Position.Y;
+            Z = player.Position.Z;
         }
 
+        public ushort X { get; set; }
+        public ushort Y { get; set; }
+        public byte Z { get; set; }
     }
 
     public class ServerDatabase : IDatabase, IDisposable
@@ -63,7 +68,7 @@ namespace cscape_dev
 
         private PlayerDb _playerDb;
 
-        public ServerDatabase(string sqliteDbDir, string packetJsonDir)
+        public ServerDatabase(string packetJsonDir)
         {
             Packet = JsonConvert.DeserializeObject<PacketLookup>(File.ReadAllText(packetJsonDir));
             _playerDb = new PlayerDb();
@@ -83,7 +88,7 @@ namespace cscape_dev
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Filename=data.db");
+            optionsBuilder.UseSqlite($"Filename=data.db");
         }
 
         protected override void OnModelCreating(ModelBuilder model)
@@ -147,7 +152,10 @@ namespace cscape_dev
         {
             return new SaveData(username, pwd)
             {
-                TitleIcon = 0
+                TitleIcon = 0,
+                X = 3220,
+                Y = 3200,
+                Z = 0
                 // todo : player defaults here
             };
         }
@@ -185,7 +193,7 @@ namespace cscape_dev
 
             // config
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(File.ReadAllText("config.json"));
-            _server = new GameServer(cfg, new ServerDatabase("data.db", "packet-lengths.json"));
+            _server = new GameServer(cfg, new ServerDatabase("packet-lengths.json"));
 
             _server.Log.LogReceived += (s, l) => LogQueue.Add(l);
 

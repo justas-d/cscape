@@ -61,6 +61,7 @@ namespace cscape
             return GetEnumerator();
         }
 
+        [DebuggerStepThrough]
         public IEnumerator<T> GetEnumerator()
         {
             //todo: internal list that contains all available not null players. return enumerator of that list in the pool enumerator method.

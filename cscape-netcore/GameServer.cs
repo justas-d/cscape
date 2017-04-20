@@ -97,8 +97,10 @@ namespace cscape
                     if (player.Connection.IsConnected())
                     {
                         // todo : exception handle synchronization
-                        foreach (var sync in player.SyncMachines)
+                        foreach (var sync in player.Connection.SyncMachines)
                             sync.Synchronize(player.Connection.OutStream);
+
+                        player.Connection.SendOutStream();
                     }
 
                     // todo : packet handling, player io

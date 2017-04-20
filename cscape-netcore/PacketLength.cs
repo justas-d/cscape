@@ -5,7 +5,6 @@ namespace cscape
     /// </summary>
     public enum PacketLength
     {
-        Variable = 0,
         NextByte = -1,
         NextShort = -2,
         Undefined = -3

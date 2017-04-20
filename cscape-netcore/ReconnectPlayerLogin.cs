@@ -26,7 +26,7 @@ namespace cscape
 
             if (player == null) return;
             if (player.Connection.IsConnected()) return;
-            if (player.SignlinkId != SignlinkUid) return;
+            if (player.Connection.SignlinkId != SignlinkUid) return;
 
             player.Connection.AssignNewSocket(NewConnection);
             player.Server.Log.Debug(this, $"Reconnected client iid {player.InstanceId}");
