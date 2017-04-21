@@ -1,4 +1,6 @@
-namespace cscape
+using CScape.Game.Entity;
+
+namespace CScape
 {
     public interface IPlayerLogin
     {

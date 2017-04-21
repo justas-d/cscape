@@ -1,8 +1,9 @@
 using System;
 using System.Net.Sockets;
+using CScape.Game.Entity;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Network
 {
     public class NormalPlayerLogin : IPlayerLogin
     {

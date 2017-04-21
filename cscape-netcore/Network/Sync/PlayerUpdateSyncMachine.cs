@@ -1,4 +1,6 @@
-namespace cscape
+using CScape.Game.Entity;
+
+namespace CScape.Network.Sync
 {
     public class PlayerUpdateSyncMachine : SyncMachine
     {

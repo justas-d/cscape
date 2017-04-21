@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Sockets;
 using System.Threading.Tasks;
+using CScape.Game.Entity;
+using CScape.Network;
+using CScape.Network.Packet;
 using JetBrains.Annotations;
+using Player = CScape.Game.Entity.Player;
 
-namespace cscape
+namespace CScape
 {
     public class GameServer
     {

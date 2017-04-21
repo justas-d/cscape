@@ -1,6 +1,7 @@
 using System;
+using CScape.Game.Entity;
 
-namespace cscape
+namespace CScape.Network.Sync
 {
     public class RegionSyncMachine : SyncMachine
     {

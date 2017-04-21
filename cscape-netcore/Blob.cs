@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace cscape
+namespace CScape
 {
     internal class CircularBlobException : Exception
     {

@@ -1,4 +1,4 @@
-﻿namespace cscape
+﻿namespace CScape
 {
     public static class Constant
     {

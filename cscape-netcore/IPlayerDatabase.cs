@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
+using CScape.Game.Entity;
 
-namespace cscape
+namespace CScape
 {
     public interface IPlayerDatabase
     {

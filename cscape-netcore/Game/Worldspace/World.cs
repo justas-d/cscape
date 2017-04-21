@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace cscape
+namespace CScape.Game.Worldspace
 {
     public class World
     {

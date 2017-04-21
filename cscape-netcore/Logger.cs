@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape
 {
     public class Logger
     {

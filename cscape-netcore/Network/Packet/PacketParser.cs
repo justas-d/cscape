@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Network.Packet
 {
     public static class PacketParser
     {

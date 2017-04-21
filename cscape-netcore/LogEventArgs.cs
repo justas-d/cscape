@@ -1,9 +1,8 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape
 {
     public sealed class LogEventArgs
     {

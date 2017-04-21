@@ -1,4 +1,6 @@
-namespace cscape
+using CScape.Network.Packet;
+
+namespace CScape
 {
     public interface IDatabase
     {

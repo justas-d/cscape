@@ -1,12 +1,10 @@
-using cscape;
-
-namespace cscape
+namespace CScape.Network.Packet
 {
     public sealed class ChatPacketHandler : IPacketHandler
     {
         public int[] Handles { get; } = {4};
 
-        public void Handle(Player player, int opcode, Blob packet)
+        public void Handle(Game.Entity.Player player, int opcode, Blob packet)
         {
             var effect = packet.ReadByte();
             var color = packet.ReadByte();

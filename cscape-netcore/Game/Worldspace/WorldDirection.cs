@@ -1,4 +1,4 @@
-namespace cscape
+namespace CScape.Game.Worldspace
 {
     public enum WorldDirection
     {

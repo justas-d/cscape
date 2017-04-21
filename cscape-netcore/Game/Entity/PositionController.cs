@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using CScape.Game.Worldspace;
 
-namespace cscape
+namespace CScape.Game.Entity
 {
     public class PositionController
     {

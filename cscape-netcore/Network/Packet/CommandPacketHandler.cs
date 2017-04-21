@@ -1,12 +1,10 @@
-using cscape;
-
-namespace cscape
+namespace CScape.Network.Packet
 {
     public sealed class CommandPacketHandler : IPacketHandler
     {
         public int[] Handles { get; } = { 103 };
 
-        public void Handle(Player player, int opcode, Blob packet)
+        public void Handle(Game.Entity.Player player, int opcode, Blob packet)
         {
             if (packet.TryReadString(255, out string cmd))
                 player.Log.Debug(this, $"Command: {cmd}");

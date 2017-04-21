@@ -1,9 +1,11 @@
 using System;
+using CScape.Network;
+using CScape.Network.Sync;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Game.Entity
 {
-    public sealed partial class Player : Entity
+    public sealed class Player : Entity
     {
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 128;

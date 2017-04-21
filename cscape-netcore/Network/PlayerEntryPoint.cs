@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -13,7 +12,7 @@ using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.OpenSsl;
 
-namespace cscape
+namespace CScape.Network
 {
     public enum InitResponseCode : byte
     {
@@ -197,14 +196,14 @@ namespace cscape
                 // try read user/pass
                 string username;
                 string password;
-                if (!blob.TryReadString(Player.MaxUsernameChars, out username))
+                if (!blob.TryReadString(Game.Entity.Player.MaxUsernameChars, out username))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading username.");
                     return;
                 }
 
-                if (!blob.TryReadString(Player.MaxPasswordChars, out password))
+                if (!blob.TryReadString(Game.Entity.Player.MaxPasswordChars, out password))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading password.");

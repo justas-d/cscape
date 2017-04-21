@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Game.Entity
 {
     public class EntityPool<T> : IEnumerable<T> where T : Entity
     {

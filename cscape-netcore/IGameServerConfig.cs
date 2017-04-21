@@ -1,9 +1,6 @@
-using System;
-using System.ComponentModel;
 using System.Net;
-using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape
 {
     public interface IGameServerConfig
     {

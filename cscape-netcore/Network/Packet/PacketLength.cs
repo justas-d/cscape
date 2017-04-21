@@ -1,4 +1,4 @@
-namespace cscape
+namespace CScape.Network.Packet
 {
     /// <summary>
     /// If not in range, represents the length of bytes in the packet id. If in range, represents the type of length.

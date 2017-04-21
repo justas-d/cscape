@@ -1,7 +1,8 @@
 using System;
+using CScape.Network.Packet;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Network.Sync
 {
     public abstract class SyncMachine
     {

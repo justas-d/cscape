@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace cscape
+namespace CScape
 {
     public static class ExtensionMethods
     {

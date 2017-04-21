@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
 using System.Net.Sockets;
+using CScape.Game.Entity;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Network
 {
     public class ReconnectPlayerLogin : IPlayerLogin
     {

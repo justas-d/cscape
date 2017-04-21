@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 
-namespace cscape
+namespace CScape.Network.Packet
 {
     public class PacketDispatch
     {
@@ -17,7 +17,7 @@ namespace cscape
             RegisterAssembly(server.GetType().GetTypeInfo().Assembly);
         }
 
-        public void Handle([NotNull] Player player, int opcode, [NotNull] Blob packet)
+        public void Handle([NotNull] Game.Entity.Player player, int opcode, [NotNull] Blob packet)
         {
             if (packet == null) throw new ArgumentNullException(nameof(packet));
 

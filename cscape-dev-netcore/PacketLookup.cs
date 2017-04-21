@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using cscape;
+using CScape.Network.Packet;
 using Newtonsoft.Json;
 
 namespace cscape_dev

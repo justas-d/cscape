@@ -1,6 +1,6 @@
 using System;
 
-namespace cscape
+namespace CScape.Game.Entity
 {
     public abstract class Entity
     {
