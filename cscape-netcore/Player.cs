@@ -31,7 +31,6 @@ namespace cscape
         public Player([NotNull] NormalPlayerLogin login)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
-            Connection = new SocketContext(Server, login.Connection, login.SignlinkUid);
 
             Id = login.Data.Id;
             Username = login.Data.Username;
@@ -39,7 +38,7 @@ namespace cscape
             TitleIcon = login.Data.TitleIcon;
             Server = login.Server;
             Position = new PositionController(login.Data.X, login.Data.Y, login.Data.Z);
-        
+            Connection = new SocketContext(login.Server, login.Connection, login.SignlinkUid);
 
             Connection.SyncMachines.Add(new RegionSyncMachine(Server, Position));
             Connection.SyncMachines.Add(new PlayerUpdateSyncMachine(Server, this));

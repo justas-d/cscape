@@ -39,7 +39,7 @@ namespace cscape
 
             _isWritingPacket = true;
             stream.Write(0); // placeholder
-            _payloadLengthIndex = stream.BytesWritten - 1;
+            _payloadLengthIndex = stream.WriteCaret - 1;
 
             if (length == PacketLength.NextShort)
             {
@@ -56,7 +56,7 @@ namespace cscape
             if (!_isWritingPacket) return;
 
             // figure out how big the payload is in bytes.
-            var written = stream.BytesWritten - _payloadLengthIndex - (_isShortLength ? 2 : 1);
+            var written = stream.WriteCaret - _payloadLengthIndex - (_isShortLength ? 2 : 1);
 
             // write it in place of the placeholder 0's
             if (_isShortLength)

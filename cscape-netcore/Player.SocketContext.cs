@@ -9,9 +9,10 @@ namespace cscape
     {
         public class SocketContext
         {
-            public const int OutStreamSize = (byte.MaxValue + 1) * 128; //~62.5MB total mem used with 2000 concurrent players.
+            public const int OutStreamSize = (byte.MaxValue + 1) * 128; 
             public const int InBufferStreamSize = 1024 * 2;
             public const int InStreamSize = InBufferStreamSize * 3;
+            //~78.125MB total mem used with 2000 concurrent players.
 
             // todo : increase poll time if socket is experiencing disconnects?
             public int PollTime { get; } = 1000;
@@ -77,11 +78,7 @@ namespace cscape
 
                     var recv = Socket.Receive(_inBufferStream, 0, avail, SocketFlags.None);
 
-                    for (var i = 0; i < recv; i++)
-                    {
-                        // can't use Blob.WriteBlock since it doesn't use Blob.Write    
-                        InCircularStream.Write(_inBufferStream[i]);
-                    }
+                    InCircularStream.WriteBlock(_inBufferStream, 0, recv);
                 }
                 catch (Exception e) when ( e is CircularBlobException || e is ArgumentOutOfRangeException)
                 {
@@ -115,11 +112,11 @@ namespace cscape
             public void SendOutStream()
             {
                 // return if we're haven't actually written anything to the output blob
-                if (OutStream.BytesWritten <= 0) return;
+                if (OutStream.WriteCaret <= 0) return;
 
                 try
                 {
-                    Socket?.Send(OutStream.Buffer, 0, OutStream.BytesWritten, SocketFlags.None);
+                    Socket?.Send(OutStream.Buffer, 0, OutStream.WriteCaret, SocketFlags.None);
                 }
                 catch (Exception e) when (e is SocketException || e is ObjectDisposedException)
                 {

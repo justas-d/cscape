@@ -289,13 +289,12 @@ namespace cscape
             await SocketSend(socket, blob);
             socket?.Dispose();
             if (log != null)
-                Server.Log.Warning(this, null);
-
+                Server.Log.Warning(this, log);
         }
 
         private static Task<int> SocketSend(Socket socket, Blob blob)
         {
-            var task = socket.SendAsync(new ArraySegment<byte>(blob.Buffer, 0, blob.BytesWritten), SocketFlags.None);
+            var task = socket.SendAsync(new ArraySegment<byte>(blob.Buffer, 0, blob.WriteCaret), SocketFlags.None);
             blob.ResetWrite();
             return task;
         }

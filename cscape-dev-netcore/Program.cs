@@ -70,7 +70,7 @@ namespace cscape_dev
 
         public ServerDatabase(string packetJsonDir)
         {
-            Packet = JsonConvert.DeserializeObject<PacketLookup>(File.ReadAllText(packetJsonDir));
+            Packet = new PacketLookup(packetJsonDir);
             _playerDb = new PlayerDb();
             _playerDb.Database.Migrate();
         }

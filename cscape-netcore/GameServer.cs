@@ -108,7 +108,8 @@ namespace cscape
                         // get their data
                         player.Connection.FlushInput();
 
-                        // parse their data
+                        // todo : parse their data
+                        PacketParser.Parse(this, player.Connection.InCircularStream);
 
                     }
 
@@ -124,7 +125,7 @@ namespace cscape
                 }
 
                 watch.Stop();
-                waitTime = (int)(tickMs - watch.ElapsedMilliseconds);
+                waitTime = Math.Abs(tickMs - (int)watch.ElapsedMilliseconds);
                 watch.Reset();
                 if (waitTime <= 0)
                 {

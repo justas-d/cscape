@@ -14,11 +14,10 @@ namespace cscape
     {
         public byte[] Buffer { get; private set; }
 
-        private int _readHead = -1;
-        private int _writeHead = -1;
+        // or just "Bytes(Read/Written)"
+        public int ReadCaret { get; private set; }
 
-        public int BytesRead => _readHead + 1;
-        public int BytesWritten => _writeHead + 1;
+        public int WriteCaret { get; private set; }
 
         private bool _isInBitMode = false;
 
@@ -50,55 +49,106 @@ namespace cscape
 
         public void WriteBlock(byte[] src, int srcOffset, int count)
         {
-            System.Buffer.BlockCopy(src, srcOffset, Buffer, _writeHead + 1, count);
-            _writeHead += count;
+            if (IsCircular)
+            {
+                for (var i = 0; i < count; i++)
+                    Write(src[i]);
+            }
+            else
+            {
+                System.Buffer.BlockCopy(src, srcOffset, Buffer, WriteCaret, count);
+                WriteCaret += count;
+            }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ResetWrite() => _writeHead = -1;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ResetRead() => _readHead = -1;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte ReadByte()
+        public void ReadBlock(byte[] dest, int destOffset, int count)
         {
             if (IsCircular)
             {
-                var head = ++_readHead % Buffer.Length;
+                for (var i = 0; i < count; i++)
+                    dest[destOffset + count] = ReadByte();
+            }
+            else
+            {
+                System.Buffer.BlockCopy(Buffer, ReadCaret, dest, destOffset, count);
+                ReadCaret += count;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ResetWrite() => WriteCaret = 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ResetRead() => ReadCaret = 0;
+
+        public byte Peek(int lookahead = 0)
+        {
+            var head = ReadCaret + lookahead;
+
+            if (IsCircular)
+            {
+                head %= Buffer.Length; // wraparound
 
                 var maskIndex = head / 8;
                 var bitIndex = head % 8;
 
                 // if the byte we want to read is not masked for reading, throw
-                if (((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 0)
-                    throw new CircularBlobException($"Attempted to read byte that was not masked for reading. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} readHead: {_readHead}");
-
-                // unset flag (num & mask)
-                _queuedForReadMask[maskIndex] &= (byte)~(1 << bitIndex);
-
-                return Buffer[head];
+                if (!CanReadCircular(maskIndex, bitIndex))
+                    throw new CircularBlobException(
+                        $"Attempted to read byte that was not masked for reading. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} ReadCaret: {ReadCaret}");
 
             }
-            return Buffer[++_readHead];
+            return Buffer[head];
+        }
+
+        public byte ReadByte()
+        {
+            var data = Peek();
+
+            if (IsCircular)
+            {
+                // unset flag (num & mask)
+                _queuedForReadMask[ReadCaret / 8] &= (byte) ~(1 << ReadCaret % 8);
+            }
+
+            ++ReadCaret;
+            return data;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ReadSkipByte(int numberOfBytesToSkip = 1) => _readHead = _readHead + numberOfBytesToSkip;
+        private bool CanReadCircular(int maskIndex, int bitIndex)
+            => ((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool CanRead(int lookahead = 0)
+        {
+            if (IsCircular)
+            {
+                var head = (ReadCaret + lookahead) % Buffer.Length;
+                return CanReadCircular(head / 8, head % 8);
+            }
+
+            return ReadCaret + lookahead >= Buffer.Length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ReadSkipByte(int numberOfBytesToSkip = 1)
+        {
+            if (IsCircular) throw new NotImplementedException();
+
+            ReadCaret += numberOfBytesToSkip;
+        }
+
         public short ReadInt16()
         {
             return (short) ((ReadByte() << 8) + ReadByte());
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ReadInt32()
         {
             return (ReadByte() << 24) + (ReadByte() << 16) + ReadInt16();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ReadInt64()
         {
             return (ReadInt32() << 32) + ReadInt32();
@@ -108,14 +158,14 @@ namespace cscape
         {
             if (IsCircular)
             {
-                var head = ++_writeHead % Buffer.Length;
+                var head = WriteCaret++ % Buffer.Length;
 
                 var maskIndex = head / 8;
                 var bitIndex = head % 8;
 
                 // check if readable flag is set
                 if (((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 1)
-                    throw new CircularBlobException($"Attempted to set a byte readable but it's already readable. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} writeHead: {_writeHead}");
+                    throw new CircularBlobException($"Attempted to set a byte readable but it's already readable. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} WriteCaret: {WriteCaret}");
 
                 // set readable flag
                 _queuedForReadMask[maskIndex] |= (byte) (1 << bitIndex);
@@ -124,7 +174,7 @@ namespace cscape
                 return;
             }
 
-            Buffer[++_writeHead] = val;
+            Buffer[WriteCaret++] = val;
         }
 
         public void Write16(short val)
@@ -160,8 +210,8 @@ namespace cscape
             if (_isInBitMode) throw new InvalidOperationException("Already in bit access mode.");
             _isInBitMode = true;
 
-            _readBitPos = BytesRead * 8;
-            _writeBitPos = BytesWritten * 8;
+            _readBitPos = ReadCaret * 8;
+            _writeBitPos = WriteCaret * 8;
         }
 
         public int ReadBits(int i)
@@ -186,8 +236,8 @@ namespace cscape
             if (!_isInBitMode) throw new InvalidOperationException("Not in bit access mode.");
             _isInBitMode = false;
 
-            _readHead = ((_readBitPos + 7) / 8) - 1;
-            _writeHead = ((_writeBitPos + 7) / 8) - 1;
+            ReadCaret = ((_readBitPos + 7) / 8);
+            WriteCaret= ((_writeBitPos + 7) / 8);
         }
 
         public void WriteBits(int numBits, int value)
@@ -217,6 +267,7 @@ namespace cscape
 
         #endregion
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Overwrite(byte[] newbuffer)
         {
             Buffer = newbuffer;
