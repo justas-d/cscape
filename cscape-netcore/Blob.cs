@@ -66,7 +66,7 @@ namespace cscape
             if (IsCircular)
             {
                 for (var i = 0; i < count; i++)
-                    dest[destOffset + count] = ReadByte();
+                    dest[i + destOffset] = ReadByte();
             }
             else
             {

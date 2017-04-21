@@ -21,7 +21,7 @@ namespace cscape
         public IDatabase Database { get; }
 
         public DateTime StartTime { get; private set; }
-
+        public PacketDispatch PacketDispatch { get; }
 
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
@@ -50,6 +50,7 @@ namespace cscape
             Database = database;
 
             Log = new Logger(this);
+            PacketDispatch = new PacketDispatch(this);
             _entry = new PlayerEntryPoint(this);
             Players = new EntityPool<Player>(config.MaxPlayers);
         }
@@ -73,7 +74,7 @@ namespace cscape
             Log.Normal(this, "Server live.");
 
             //TODO: bool to terminate main loop
-            // todo : check for main loop crashes
+            // todo : exception handle all over the main loop
 
             const int tickMs = 600;
             var watch = new Stopwatch();
@@ -87,10 +88,9 @@ namespace cscape
 
                 // ====== BODY ====== 
 
-                IPlayerLogin login;
-                while (_entry.LoginQueue.TryDequeue(out login))
+                while (_entry.LoginQueue.TryDequeue(out IPlayerLogin login))
                     login.Transfer(Players);
-               
+
                 foreach (var player in Players)
                 {
                     if (player.Connection.ManageHardDisconnect(waitTime + watch.ElapsedMilliseconds))
@@ -98,7 +98,6 @@ namespace cscape
 
                     if (player.Connection.IsConnected())
                     {
-                        // todo : exception handle synchronization
                         foreach (var sync in player.Connection.SyncMachines)
                             sync.Synchronize(player.Connection.OutStream);
 
@@ -108,12 +107,10 @@ namespace cscape
                         // get their data
                         player.Connection.FlushInput();
 
-                        // todo : parse their data
-                        PacketParser.Parse(this, player.Connection.InCircularStream);
-
+                        // parse their data
+                        foreach (var p in PacketParser.Parse(this, player.Connection.InCircularStream))
+                            PacketDispatch.Handle(player, p.Opcode, p.Packet);
                     }
-
-                    // todo : packet handling, player io
                 }
 
                 // ====== EPILOGUE ====== 

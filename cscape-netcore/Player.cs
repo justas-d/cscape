@@ -25,6 +25,8 @@ namespace cscape
         [NotNull]
         public GameServer Server { get; }
 
+        public Logger Log => Server.Log;
+
         public override PositionController Position { get; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>

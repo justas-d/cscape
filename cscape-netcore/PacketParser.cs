@@ -1,15 +1,16 @@
-using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace cscape
 {
     public static class PacketParser
     {
-        public static void Parse(GameServer server, Blob packetStream)
+        public static IEnumerable<(int Opcode, Blob Packet)> Parse([NotNull] GameServer server, [NotNull] Blob packetStream)
         {
             while (packetStream.CanRead())
             {
-                // peek everything untill we're 100% have the packet.
+                // peek everything untill we 100% have the packet.
                 var opcodePeek = packetStream.Peek();
                 var lenType = server.Database.Packet.GetIncoming(opcodePeek);
                 var lenPayloadPeek = 0;
@@ -68,16 +69,12 @@ namespace cscape
 
                 Debug.Assert(lenPayload == lenPayloadPeek);
 
-                // todo : build packet, read payload
-                packetStream.ReadBlock(trash, 0, lenPayload);
+                var payload = new byte[lenPayload];
+                packetStream.ReadBlock(payload, 0, lenPayload);
 
-                Console.WriteLine("Packet:\n" +
-                                  $"\tOpcode: {opcode}\n" +
-                                  $"\t   Len: {lenPayload}\n");
+                yield return (opcode, new Blob(payload));
             }
         }
-
-        private static byte[] trash = new byte[1000];
 
         private static void Undefined(GameServer server, byte opcode)
         {
