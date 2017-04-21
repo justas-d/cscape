@@ -3,6 +3,13 @@ using System.Runtime.CompilerServices;
 
 namespace cscape
 {
+    internal class CircularBlobException : Exception
+    {
+        public CircularBlobException(string message) : base(message)
+        {
+        }
+    }
+
     public class Blob
     {
         public byte[] Buffer { get; private set; }
@@ -18,27 +25,32 @@ namespace cscape
         private int _readBitPos = 0;
         private int _writeBitPos = 0;
 
-        /// <summary>
-        /// Wrapper constructor. Wraps a given buffer.
-        /// </summary>
-        public Blob(byte[] existingBuffer)
+        public bool IsCircular { get; }
+        private readonly byte[] _queuedForReadMask = null;
+
+        public Blob(int size, bool isCircular = false) : this(new byte[size], isCircular)
         {
-            Buffer = existingBuffer;
         }
 
-        /// <summary>
-        /// Constructs a new buffer of size.
-        /// </summary>
-        public Blob(int size)
+        public Blob(byte[] buffer, bool isCircular = false)
         {
-            Buffer = new byte[size];
+            Buffer = buffer;
+            IsCircular = isCircular;
+
+            if (isCircular)
+            {
+                var len = buffer.Length / 8;
+                if (buffer.Length % 8 > 0)
+                    len += 1;
+                _queuedForReadMask = new byte[len];
+            }
         }
 
         #region Byte I/O
 
-        public void WriteBlock(byte[] src, int offset, int count)
+        public void WriteBlock(byte[] src, int srcOffset, int count)
         {
-            System.Buffer.BlockCopy(src, offset, Buffer, _writeHead + 1, count);
+            System.Buffer.BlockCopy(src, srcOffset, Buffer, _writeHead + 1, count);
             _writeHead += count;
         }
 
@@ -51,7 +63,23 @@ namespace cscape
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte()
         {
+            if (IsCircular)
+            {
+                var head = ++_readHead % Buffer.Length;
 
+                var maskIndex = head / 8;
+                var bitIndex = head % 8;
+
+                // if the byte we want to read is not masked for reading, throw
+                if (((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 0)
+                    throw new CircularBlobException($"Attempted to read byte that was not masked for reading. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} readHead: {_readHead}");
+
+                // unset flag (num & mask)
+                _queuedForReadMask[maskIndex] &= (byte)~(1 << bitIndex);
+
+                return Buffer[head];
+
+            }
             return Buffer[++_readHead];
         }
 
@@ -78,6 +106,24 @@ namespace cscape
 
         public void Write(byte val)
         {
+            if (IsCircular)
+            {
+                var head = ++_writeHead % Buffer.Length;
+
+                var maskIndex = head / 8;
+                var bitIndex = head % 8;
+
+                // check if readable flag is set
+                if (((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 1)
+                    throw new CircularBlobException($"Attempted to set a byte readable but it's already readable. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} writeHead: {_writeHead}");
+
+                // set readable flag
+                _queuedForReadMask[maskIndex] |= (byte) (1 << bitIndex);
+
+                Buffer[head] = val;
+                return;
+            }
+
             Buffer[++_writeHead] = val;
         }
 
@@ -105,6 +151,8 @@ namespace cscape
         #endregion
 
         #region Bit I/O
+
+        // todo : support circular buffers for bit i/o
 
         /// <exception cref="InvalidOperationException">Already in bit mode.</exception>
         public void BeginBitAccess()
@@ -177,3 +225,4 @@ namespace cscape
         }
     }
 }
+ 

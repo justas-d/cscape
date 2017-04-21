@@ -153,8 +153,8 @@ namespace cscape_dev
             return new SaveData(username, pwd)
             {
                 TitleIcon = 0,
-                X = 3220,
-                Y = 3200,
+                X = 3222,
+                Y = 3218,
                 Z = 0
                 // todo : player defaults here
             };

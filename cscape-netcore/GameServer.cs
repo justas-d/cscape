@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
@@ -72,6 +73,7 @@ namespace cscape
             Log.Normal(this, "Server live.");
 
             //TODO: bool to terminate main loop
+            // todo : check for main loop crashes
 
             const int tickMs = 600;
             var watch = new Stopwatch();
@@ -100,7 +102,14 @@ namespace cscape
                         foreach (var sync in player.Connection.SyncMachines)
                             sync.Synchronize(player.Connection.OutStream);
 
+                        // send our data
                         player.Connection.SendOutStream();
+
+                        // get their data
+                        player.Connection.FlushInput();
+
+                        // parse their data
+
                     }
 
                     // todo : packet handling, player io
