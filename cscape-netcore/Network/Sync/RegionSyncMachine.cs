@@ -28,8 +28,8 @@ namespace CScape.Network.Sync
             if (_oldX == _pos.RegionX && _oldY == _pos.RegionY) return;
 
             stream.BeginPacket(Packet);
-            stream.Write16((short)_pos.RegionX);
-            stream.Write16((short)_pos.RegionY);
+            stream.Write16((short)(_pos.RegionX + 6));
+            stream.Write16((short)(_pos.RegionY + 6));
             stream.EndPacket();
 
             _oldX = _pos.RegionX;

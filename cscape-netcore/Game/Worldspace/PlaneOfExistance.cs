@@ -13,11 +13,34 @@ namespace CScape.Game.Worldspace
 
         private readonly EntityPool<AbstractEntity> _entityPool;
 
+        public bool IsOverworld => Server.Overworld == this;
+
+        private bool _isFreed;
+
         public PlaneOfExistance([NotNull] GameServer server)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
 
             _entityPool = new EntityPool<AbstractEntity>();
+            Server.Entities.Add(_entityPool);
+        }
+
+        ~PlaneOfExistance()
+        {
+            if (!_isFreed && !IsOverworld)
+            {
+                Server.Log.Warning(this, "Finalizer called on unfreed PoE.");
+                Free();
+            }
+        }
+
+        public void Free()
+        {
+            if (_isFreed) return;
+            if(IsOverworld) return;
+
+            Server.Entities.Remove(_entityPool);
+            _isFreed = true;
         }
 
         public void RemoveEntity([NotNull] AbstractEntity ent)

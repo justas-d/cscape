@@ -4,6 +4,9 @@ namespace CScape.Game.Entity
 {
     public sealed class Transform
     {
+        public AbstractEntity Entity { get; }
+        private readonly Observatory _observatory;
+
         public const int MinRegionBorder = 16;
         public const int MaxRegionBorder = 88;
 
@@ -17,9 +20,19 @@ namespace CScape.Game.Entity
         public int LocalX { get; private set; }
         public int LocalY { get; private set; }
 
+        private bool _posDirty;
+
         /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than 4.</exception>
-        public Transform(ushort x, ushort y, byte z)
+        public Transform(AbstractEntity entity, ushort x, ushort y, byte z)
         {
+            Entity = entity;
+
+            var observer = Entity as IObserver;
+            if (observer != null)
+            {
+                _observatory = observer.Observatory;
+            }
+
             SetPosition(x, y, z);
         }
 
@@ -28,6 +41,10 @@ namespace CScape.Game.Entity
         {
             if (z > 4) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than 4.");
 
+            // don't do anything if we're trying to set the position to where we're at right now.
+            if (x == X && y == Y && z == Z)
+                return;
+
             X = x;
             Y = y;
             Z = z;
@@ -35,9 +52,15 @@ namespace CScape.Game.Entity
             RegionX = (X >> 3) - 6;
             RegionY = (Y >> 3) - 6;
 
-            LocalX = x - 8 * RegionX;
-            LocalY = y - 8 * RegionY;
+            LocalX = x - (8 * RegionX);
+            LocalY = y - (8 * RegionY);
+
+            _posDirty = true;
+            _observatory?.Clear();
         }
+
+        public void SetPosition(ushort x, ushort y)
+            => SetPosition(x, y, Z);
 
         /// <summary>
         /// Returns the abs. distance to the given transform.
@@ -47,42 +70,64 @@ namespace CScape.Game.Entity
         {
             return Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
         }
+        // todo : use for in-range calc Math.Max(Math.Abs(other.X - X), Math.Abs(other.Y - Y));
 
         public void TransformLocals(sbyte tx, sbyte ty)
         {
+            // don't do anything if the transform is null
+            if(tx == 0 || ty == 0)
+                return;
+
             LocalX += tx;
             LocalY += ty;
+
+            _posDirty = true;
         }
 
         public void Update()
         {
-            var deltaX = 0;
-            var deltaY = 0;
+            if (!_posDirty)
+                return;
+
+            var dx = 0;
+            var dy = 0;
 
             if (LocalX < MinRegionBorder)
             {
-                deltaX = 4 * 8;
+                dx = 4 * 8;
                 RegionX -= 4;
             }
             else if (LocalX >= MaxRegionBorder)
             {
-                deltaX = -4 * 8;
+                dx = -4 * 8;
                 RegionX += 4;
             }
 
             if (LocalY < MinRegionBorder)
             {
-                deltaY = 4 * 8;
+                dy = 4 * 8;
                 RegionY -= 4;
             }
             else if (LocalY >= MaxRegionBorder)
             {
-                deltaY = -4 * 8;
+                dy = -4 * 8;
                 RegionY += 4;
             }
 
-            LocalX += deltaX;
-            LocalY += deltaY;
+            if (dx != 0 && dy != 0)
+            {
+                LocalX += dx;
+                LocalY += dy;
+
+                // todo : some sort of faster way of find observables that can see this transform
+                // iterating over all players is pretty stupid but it works for now
+                // not all IObservers doesn't necessarily have to be a player as well.
+
+                foreach (var p in Entity.Server.Players)
+                    p.Observatory.PushObservable(Entity);
+            }
+
+            _posDirty = false;
         }
     }
 }

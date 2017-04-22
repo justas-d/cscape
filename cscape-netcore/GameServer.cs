@@ -29,6 +29,8 @@ namespace CScape
         public PlaneOfExistance Overworld { get; }
         public IdPool EntityIdPool { get; } = new IdPool();
 
+        public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
+
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.Version"/> is <see langword="null"/></exception>
@@ -111,6 +113,23 @@ namespace CScape
                     // send them the initial observables
                     foreach (var entity in player.PoE)
                         player.Observatory.PushObservable(entity);
+                }
+
+                // todo : merge entity updates and player updates.
+                // requires that AggregateEntityPool iterates over all entities only once.
+
+                // entity updates
+                // todo : split entity updates into buckets.
+                // e.g: separate EntityPool for entities requiring a Movement update
+                // or seperate EP for ent requiring Position update
+                // or for Ai entities (which could be added to the ai update pool when created and stay there)
+                // etc
+                // these seperate buckets could check for uniqueness.
+
+                foreach (var ent in Entities)
+                {
+                    ent.Movement?.Update();
+                    ent.Position.Update();
                 }
 
                 // Player network management, syncing, packet reading and parsing loop.

@@ -16,16 +16,44 @@ namespace CScape.Game.Entity
 
         [NotNull] private readonly IdPool _idPool;
 
+        [CanBeNull]
+        public virtual MovementController Movement { get; }
+
+        /// <summary>
+        /// Facade constructor
+        /// </summary>
         // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
         protected AbstractEntity(
             [NotNull] GameServer server,
             [NotNull] IdPool idPool,
             [NotNull] Transform pos,
-            PlaneOfExistance poe = null)
+            PlaneOfExistance poe = null,
+            MovementController movement = null)
         {
             Position = pos ?? throw new ArgumentNullException(nameof(pos));
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
+            Movement = movement;
+
+            UniqueEntityId = _idPool.NextId();
+            SetPoE(poe, Server);
+        }
+
+        /// <summary>
+        /// More inline constructor.
+        /// </summary>
+        // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
+        protected AbstractEntity(
+            [NotNull] GameServer server,
+            [NotNull] IdPool idPool,
+            ushort x, ushort y, byte z,
+            PlaneOfExistance poe = null,
+            bool needsMovementController = false)
+        {
+            Server = server ?? throw new ArgumentNullException(nameof(server));
+            _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
+            Position = new Transform(this, x, y, z);
+            Movement = needsMovementController ? new MovementController(Position) : null;
 
             UniqueEntityId = _idPool.NextId();
             SetPoE(poe, Server);

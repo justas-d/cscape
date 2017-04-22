@@ -67,8 +67,10 @@ namespace CScape.Network.Sync
                     stream.WriteBits(1, 1); // setPos flag
                     stream.WriteBits(1, 1); // add to local list
                     stream.WriteBits(7, _local.Position.LocalY); // local y
-                    stream.WriteBits(7, _local.Position.LocalY); // local z
+                    stream.WriteBits(7, _local.Position.LocalX); // local x
                 }
+                else
+                    stream.WriteBits(1, 0);
             }
 
             public void WriteExistingPlayers(Blob stream)

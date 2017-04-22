@@ -11,6 +11,7 @@ namespace CScape.Game.Entity
     public class Observatory : IEnumerable<UpdateObservable>
     {
         public IObserver Observer { get; }
+        private readonly AbstractEntity _ent;
 
         private readonly List<UpdateObservable> _obs = new List<UpdateObservable>();
         private readonly HashSet<uint> _obsExisting = new HashSet<uint>();
@@ -22,6 +23,11 @@ namespace CScape.Game.Entity
             [NotNull] ObservableSyncMachine obsSyncMachine)
         {
             Observer = observer ?? throw new ArgumentNullException(nameof(observer));
+
+            var ent = Observer as AbstractEntity;
+            if (ent != null)
+                _ent = ent;
+
             _obsSyncMachine = obsSyncMachine ?? throw new ArgumentNullException(nameof(obsSyncMachine));
         }
 
@@ -32,7 +38,7 @@ namespace CScape.Game.Entity
             _obsExisting.Clear();
         }
 
-        public void PushObservable(AbstractEntity obs)
+        private void InternalPushObservable(AbstractEntity obs)
         {
             var id = obs.UniqueEntityId;
 
@@ -44,6 +50,19 @@ namespace CScape.Game.Entity
 
             _obsExisting.Add(id);
             _obs.Add(new UpdateObservable(obs));
+        }
+
+        public void PushObservable(AbstractEntity obs)
+        {
+            var observer = obs as IObserver;
+
+            if (observer != null && _ent != null  // check if we can both see each other.
+                && !observer.Equals(_ent)) // make sure we don't recurse if pushing ourselves
+            {
+                observer.Observatory.InternalPushObservable(_ent);
+            }
+
+            InternalPushObservable(obs);
         }
 
         public IEnumerator<UpdateObservable> GetEnumerator()

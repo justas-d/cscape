@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace CScape.Network.Packet
 {
@@ -10,7 +11,9 @@ namespace CScape.Network.Packet
         {
             if (packet.TryReadString(255, out string cmd))
             {
-                switch (cmd)
+                var args = cmd.Split(' ').ToArray();
+
+                switch (args[0])
                 {
                     case "logout":
                         player.Logout(out _);
@@ -24,6 +27,16 @@ namespace CScape.Network.Packet
                     case "gc":
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
+                        break;
+                    case "setpos":
+                        var x = ushort.Parse(args[1]);
+                        var y = ushort.Parse(args[2]);
+                        player.Position.SetPosition(x,y);
+                        break;
+                    case "pos":
+                        player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");
+                        player.SendSystemChatMessage($"LX: {player.Position.LocalX} LY: {player.Position.LocalY}");
+                        player.SendSystemChatMessage($"RX: {player.Position.RegionX} + 6 RY: {player.Position.RegionY} + 6");
                         break;
                     default:
                         player.Log.Debug(this, $"Command: {cmd}");

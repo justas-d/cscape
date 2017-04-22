@@ -29,15 +29,15 @@ namespace CScape.Game.Entity
 
         public Logger Log => Server.Log;
 
-        public MovementController Movement { get; }
         public Observatory Observatory { get; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
             : base(login.Server, 
                   login.Server.EntityIdPool,
-                  new Transform(login.Data.X, login.Data.Y, login.Data.Z),
-                  null) // todo : serialize personalized PoE's
+                  login.Data.X, login.Data.Y, login.Data.Z,
+                  null,// todo : serialize personalized PoE's
+                  true) 
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
 
@@ -47,7 +47,6 @@ namespace CScape.Game.Entity
             TitleIcon = login.Data.TitleIcon;
 
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
-            Movement = new MovementController(Position);
 
             var obsSyncMachine = new ObservableSyncMachine(Server, this);
             Observatory = new Observatory(this, obsSyncMachine);
