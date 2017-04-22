@@ -11,7 +11,7 @@ namespace CScape.Game.Entity
         public int Size => _pool.Count;
 
         /// <returns>-1 if not bound by a size limit.</returns>>
-        public int Capacity { get; }
+        public int Capacity { get; } 
 
         // the pool CANNOT contain null keys.
         private readonly Dictionary<uint, T> _pool;
@@ -25,6 +25,7 @@ namespace CScape.Game.Entity
         public EntityPool()
         {
             _pool = new Dictionary<uint, T>();
+            Capacity = -1;
         }
 
         [CanBeNull]
