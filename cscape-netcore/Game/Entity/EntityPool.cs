@@ -6,56 +6,64 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public class EntityPool<T> : IEnumerable<T> where T : Entity
+    public class EntityPool<T> : IEnumerable<T> where T : AbstractEntity
     {
-        public int Size { get; }
+        public int Size => _pool.Count;
 
-        private readonly Stack<int> _idPool;
-        private readonly T[] _pool;
+        /// <returns>-1 if not bound by a size limit.</returns>>
+        public int Capacity { get; }
 
-        public EntityPool(int size)
+        // the pool CANNOT contain null keys.
+        private readonly Dictionary<uint, T> _pool;
+
+        public EntityPool(int capacity)
         {
-            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size));
+            _pool = new Dictionary<uint, T>(capacity);
+            Capacity = capacity;
+        }
 
-            Size = size;
-            _idPool = new Stack<int>(Size);
-            _pool = new T[Size];
-
-            for (var i = Size - 1; i >= 0; i--)
-                _idPool.Push(i);
+        public EntityPool()
+        {
+            _pool = new Dictionary<uint, T>();
         }
 
         [CanBeNull]
-        public T AtIndex(int index)
+        public T GetById(uint id)
         {
-            return _pool[index];
+            if (!_pool.ContainsKey(id))
+                return null;
+
+            return _pool[id];
         }
 
         public void Add([NotNull] T ent)
         {
-            var id = NextId();
-            ent.InstanceId = id;
-            _pool[id] = ent;
+            if (ent == null) throw new ArgumentNullException(nameof(ent));
+            Debug.Assert(!_pool.ContainsKey(ent.UniqueEntityId));
+
+            _pool[ent.UniqueEntityId] = ent;
         }
 
-        public void Remove([NotNull]T ent) => Remove(ent.InstanceId);
-
-        public void Remove(int index)
+        public void Remove([NotNull] T ent)
         {
-            if(0 > index || index >= Size) throw new ArgumentOutOfRangeException(nameof(index));
+            if (ent == null) throw new ArgumentNullException(nameof(ent));
 
-            _idPool.Push(index);
-            _pool[index] = null;
+            Remove(ent.UniqueEntityId);
         }
 
-        private int NextId()
+        public void Remove(uint id)
         {
-            var pop = _idPool.Pop();
-            Debug.Assert(Size > pop || pop >= 0);
-            Debug.Assert(_pool[pop] == null);
-            return pop;
+            if(!_pool.ContainsKey(id))
+                return;
+
+            Debug.Assert(_pool[id] != null);
+            _pool.Remove(id);
         }
 
+        public bool ContainsId(uint id)
+            => GetById(id) != null;
+
+        [DebuggerStepThrough]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -64,11 +72,10 @@ namespace CScape.Game.Entity
         [DebuggerStepThrough]
         public IEnumerator<T> GetEnumerator()
         {
-            //todo: internal list that contains all available not null players. return enumerator of that list in the pool enumerator method.
-            foreach (var p in _pool)
+            foreach (var p in _pool.Values)
             {
-                if (p != null)
-                    yield return p;
+                Debug.Assert(p != null);
+                yield return p;
             }
         }
     }

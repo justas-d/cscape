@@ -8,5 +8,12 @@
             32767, 65535, 131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215, 33554431, 67108863,
             134217727, 268435455, 536870911, 1073741823, 2147483647,
         };
+
+        public static class SyncMachineOrder
+        {
+            public const int Observer = 0;
+            public const int PlayerUpdate = 1;
+            public const int Region = 2;
+        }
     }
 }

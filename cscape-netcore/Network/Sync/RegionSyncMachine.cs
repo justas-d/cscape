@@ -5,14 +5,16 @@ namespace CScape.Network.Sync
 {
     public class RegionSyncMachine : SyncMachine
     {
-        private readonly PositionController _pos;
+        public override int Order => Constant.SyncMachineOrder.Region;
+
+        private readonly Transform _pos;
 
         private int _oldX;
         private int _oldY;
 
         public const int RegionInitOpcode = 73;
 
-        public RegionSyncMachine(GameServer server, PositionController pos) : base(server)
+        public RegionSyncMachine(GameServer server, Transform pos) : base(server)
         {
             _pos = pos;
         }

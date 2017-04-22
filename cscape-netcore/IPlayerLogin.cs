@@ -1,9 +1,11 @@
 using CScape.Game.Entity;
+using JetBrains.Annotations;
 
 namespace CScape
 {
     public interface IPlayerLogin
     {
-        void Transfer(EntityPool<Player> players);
+        [CanBeNull]
+        Player Transfer(EntityPool<Player> players);
     }
 }

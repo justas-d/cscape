@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CScape.Game.Entity;
 using JetBrains.Annotations;
 
 namespace CScape.Network.Packet
@@ -17,9 +18,11 @@ namespace CScape.Network.Packet
             RegisterAssembly(server.GetType().GetTypeInfo().Assembly);
         }
 
-        public void Handle([NotNull] Game.Entity.Player player, int opcode, [NotNull] Blob packet)
+        public void Handle([NotNull] Player player, int opcode, [NotNull] Blob packet)
         {
             if (packet == null) throw new ArgumentNullException(nameof(packet));
+
+            player.Connection.UpdateLastPacketReceivedTime();
 
             if (_handlers.ContainsKey(opcode))
             {

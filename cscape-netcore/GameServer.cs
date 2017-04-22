@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CScape.Game.Entity;
+using CScape.Game.Worldspace;
 using CScape.Network;
 using CScape.Network.Packet;
 using JetBrains.Annotations;
-using Player = CScape.Game.Entity.Player;
 
 namespace CScape
 {
@@ -26,6 +26,9 @@ namespace CScape
         public DateTime StartTime { get; private set; }
         public PacketDispatch PacketDispatch { get; }
 
+        public PlaneOfExistance Overworld { get; }
+        public IdPool EntityIdPool { get; } = new IdPool();
+
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.Version"/> is <see langword="null"/></exception>
@@ -37,7 +40,6 @@ namespace CScape
         public GameServer([NotNull] IGameServerConfig config, [NotNull] IDatabase database)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            if (database == null) throw new ArgumentNullException(nameof(database));
 
             // verify config
             if (config.Version == null) throw new ArgumentNullException(nameof(config.Version));
@@ -49,12 +51,14 @@ namespace CScape
             if (!File.Exists(config.PrivateLoginKeyDir))
                 throw new FileNotFoundException($"Could not find private login key in directory: {config.PrivateLoginKeyDir}");
 
+            Database = database ?? throw new ArgumentNullException(nameof(database));
             Config = config;
-            Database = database;
 
             Log = new Logger(this);
             PacketDispatch = new PacketDispatch(this);
             _entry = new PlayerEntryPoint(this);
+
+            Overworld = new PlaneOfExistance(this);
             Players = new EntityPool<Player>(config.MaxPlayers);
         }
 
@@ -67,7 +71,6 @@ namespace CScape
             //todo run the entry point task with a cancellation token
 #pragma warning disable 4014
             Task.Run(_entry.StartListening).ContinueWith(t =>
-#pragma warning restore 4014
             {
                 Log.Debug(this, $"EntryPoint listen task terminated in status: Completed: {t.IsCompleted} Faulted: {t.IsFaulted} Cancelled: {t.IsCanceled}");
                 if (t.Exception != null)
@@ -81,8 +84,10 @@ namespace CScape
 
             const int tickMs = 600;
             var watch = new Stopwatch();
+            var deltaTime = 0;
             var waitTime = 0;
-            var playerRemoveQueue = new Queue<int>();
+            bool overtime;
+            var playerRemoveQueue = new Queue<uint>();
             while (true)
             {
                 // ====== PROLOGUE ====== 
@@ -91,13 +96,28 @@ namespace CScape
 
                 // ====== BODY ====== 
 
+                // handle new logins
                 while (_entry.LoginQueue.TryDequeue(out IPlayerLogin login))
-                    login.Transfer(Players);
+                {
+                    var player = login.Transfer(Players);
 
+                    // reconnecting transfers can fail, returning a null.
+                    if (player == null)
+                        continue;
+
+                    // add the player itself their world
+                    player.PoE.AddEntity(player);
+
+                    // send them the initial observables
+                    foreach (var entity in player.PoE)
+                        player.Observatory.PushObservable(entity);
+                }
+
+                // Player network management, syncing, packet reading and parsing loop.
                 foreach (var player in Players)
                 {
-                    if (player.Connection.ManageHardDisconnect(waitTime + watch.ElapsedMilliseconds))
-                        playerRemoveQueue.Enqueue(player.InstanceId);
+                    if (player.Connection.ManageHardDisconnect(deltaTime + watch.ElapsedMilliseconds))
+                        playerRemoveQueue.Enqueue(player.UniqueEntityId);
 
                     if (player.Connection.IsConnected())
                     {
@@ -117,6 +137,8 @@ namespace CScape
                 }
 
                 // ====== EPILOGUE ====== 
+
+                // clean dead players
                 if (playerRemoveQueue.Count > 0)
                 {
                     Log.Debug(this, $"Reaping {playerRemoveQueue.Count} players.");
@@ -124,15 +146,18 @@ namespace CScape
                         Players.Remove(playerRemoveQueue.Dequeue());
                 }
 
+                // handle tick delays
                 watch.Stop();
-                waitTime = Math.Abs(tickMs - (int)watch.ElapsedMilliseconds);
                 watch.Reset();
-                if (waitTime <= 0)
-                {
+
+                waitTime = Math.Abs(tickMs - (int)watch.ElapsedMilliseconds);
+                overtime = waitTime < tickMs;
+                if (overtime)
                     Log.Warning(this, $"Tick process time too slow! need to wait for {waitTime}ms. Tick target ms: {tickMs}ms.");
-                    continue;
-                }
-                await Task.Delay(waitTime);
+                else
+                    await Task.Delay(waitTime);
+
+                deltaTime = overtime ? tickMs : waitTime;
             }
         }
     }

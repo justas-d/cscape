@@ -59,7 +59,7 @@ namespace CScape.Network
         {
             Server = server;
             Endpoint = server.Config.ListenEndPoint;
-            Backlog = server.Config.Backlog;
+            Backlog = Convert.ToInt32(server.Config.Backlog);
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             _socket.SendTimeout = 5000;
             _socket.ReceiveTimeout = 5000;
@@ -213,6 +213,7 @@ namespace CScape.Network
                 username = username.ToLowerInvariant();
 
                 // check if user is logged in
+                // todo : is finding loggedInPlayer by calling Server.Players.FirstOrDefault on the entry thread thread safe?
                 var loggedInPlayer = Server.Players.FirstOrDefault(
                     p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
@@ -251,7 +252,7 @@ namespace CScape.Network
                 if (isReconnecting)
                 {
                     blob.Write((byte) InitResponseCode.ReconnectDone);
-                    LoginQueue.Enqueue(new ReconnectPlayerLogin(username, socket, signlinkUid));
+                    LoginQueue.Enqueue(new ReconnectPlayerLogin(loggedInPlayer, socket, signlinkUid));
                 }
 
                 else

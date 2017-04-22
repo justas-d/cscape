@@ -1,6 +1,6 @@
 namespace CScape.Game.Worldspace
 {
-    public enum WorldDirection
+    public enum Direction
     {
         None = -1,
         NorthWest = 0,

@@ -6,6 +6,8 @@ namespace CScape.Network.Sync
 {
     public abstract class SyncMachine
     {
+        public abstract int Order { get; }
+
         public GameServer Server { get; }
 
         public SyncMachine(GameServer server)

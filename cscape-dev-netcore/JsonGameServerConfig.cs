@@ -37,7 +37,9 @@ namespace cscape_dev
         public int Backlog { get; }
 
         [JsonConstructor]
-        private JsonGameServerConfig(string version, int revision, string privateLoginKeyDir, int maxPlayers, EndPoint listenEndPoint, int backlog)
+        private JsonGameServerConfig(string version, int revision, 
+            string privateLoginKeyDir, int maxPlayers, 
+            EndPoint listenEndPoint, int backlog)
         {
             Version = version;
             Revision = revision;

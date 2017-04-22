@@ -14,20 +14,20 @@ namespace CScape.Network
 
         public NormalPlayerLogin([NotNull] GameServer server, [NotNull] IPlayerSaveData data, [NotNull] Socket connection, int signlinkUid)
         {
-            if (server == null) throw new ArgumentNullException(nameof(server));
-            if (data == null) throw new ArgumentNullException(nameof(data));
-            if (connection == null) throw new ArgumentNullException(nameof(connection));
-
-            Server = server;
-            Data = data;
-            Connection = connection;
+            Server = server ?? throw new ArgumentNullException(nameof(server));
+            Data = data ?? throw new ArgumentNullException(nameof(data));
+            Connection = connection ?? throw new ArgumentNullException(nameof(connection));
             SignlinkUid = signlinkUid;
         }
 
-        public void Transfer([NotNull] EntityPool<Player> players)
+        public Player Transfer([NotNull] EntityPool<Player> players)
         {
             if (players == null) throw new ArgumentNullException(nameof(players));
-            players.Add(new Player(this));
+
+            var player = new Player(this);
+            players.Add(player);
+
+            return player;
         }
     }
 }

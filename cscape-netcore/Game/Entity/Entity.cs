@@ -1,29 +1,71 @@
 using System;
+using CScape.Game.Worldspace;
+using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public abstract class Entity
+    /// <summary>
+    /// Something that can be observed and it's observation can be synced.
+    /// </summary>
+    public abstract class AbstractEntity : IEquatable<AbstractEntity>
     {
-        /// <summary>
-        /// Whether the entity is owned by an entity pool.
-        /// </summary>
-        public bool IsOwned { get; private set; }
+        public uint UniqueEntityId { get; }
+        [NotNull] public Transform Position { get; }
+        [NotNull] public PlaneOfExistance PoE { get; private set; }
+        [NotNull] public GameServer Server { get; }
 
-        private int _instanceId;
+        [NotNull] private readonly IdPool _idPool;
 
-        public int InstanceId
+        // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
+        protected AbstractEntity(
+            [NotNull] GameServer server,
+            [NotNull] IdPool idPool,
+            [NotNull] Transform pos,
+            PlaneOfExistance poe = null)
         {
-            get { return _instanceId; }
-            set
-            {
-                if(IsOwned)
-                    throw new InvalidOperationException("Tried to set entity id when it's already owned.");
+            Position = pos ?? throw new ArgumentNullException(nameof(pos));
+            _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
+            Server = server ?? throw new ArgumentNullException(nameof(server));
 
-                _instanceId = value;
-                IsOwned = true;
-            }
+            UniqueEntityId = _idPool.NextId();
+            SetPoE(poe, Server);
         }
 
-        public abstract PositionController Position { get; }
+        ~AbstractEntity()
+        {
+            _idPool.FreeId(UniqueEntityId);
+            Server.Log.Debug(this, $"Freeing entity id {UniqueEntityId}");
+        }
+
+        public void SetPoE(PlaneOfExistance poe, [NotNull] GameServer server)
+        {
+            if (server == null) throw new ArgumentNullException(nameof(server));
+
+            PoE = poe ?? server.Overworld;
+        }
+
+        public abstract void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew);
+
+        #region IEquatable
+        public bool Equals(AbstractEntity other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return UniqueEntityId == other.UniqueEntityId;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((AbstractEntity) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (int) UniqueEntityId;
+        }
+        #endregion
     }
 }

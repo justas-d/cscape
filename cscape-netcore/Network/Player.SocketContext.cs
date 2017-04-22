@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
@@ -13,16 +14,20 @@ namespace CScape.Network
         public const int InStreamSize = InBufferStreamSize * 3;
         //~78.125MB total mem used with 2000 concurrent players.
 
-        // todo : increase poll time if socket is experiencing disconnects?
-        public int PollTime { get; } = 1000;
-
         /// <summary>
         /// In milliseconds, the delay between a socket dying and it's player being removed
         /// from the player entity pool. todo Default: 60 seconds.
         /// </summary>
         public long ReapTimeMs { get; } = 1000 * 2;
 
-        private long _deadForMs = 0;
+        /// <summary>
+        /// In milliseconds, the maximum number of ms that can ellapse without receiving a packet.
+        /// If this number is exceeded (by _msSinceNoPacket), the socket is considered dead.
+        /// </summary>
+        public const int MaxNoPacketIntervalMsg = 5 * 1000;
+
+        private long _msSinceNoPacket;
+        private long _deadForMs;
 
         [CanBeNull]
         public Socket Socket { get; private set; }
@@ -42,7 +47,7 @@ namespace CScape.Network
 
         public int SignlinkId { get; }
 
-        [NotNull] public readonly List<SyncMachine> SyncMachines = new List<SyncMachine>();
+        [NotNull] public List<SyncMachine> SyncMachines { get; private set;  } = new List<SyncMachine>();
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
         public SocketContext([NotNull] GameServer server, [NotNull] Socket socket, int signLink)
@@ -71,6 +76,9 @@ namespace CScape.Network
         /// </summary>
         public void FlushInput()
         {
+            if (Socket == null)
+                return;
+
             try
             {
                 var avail = Socket.Available;
@@ -100,19 +108,28 @@ namespace CScape.Network
 
         public bool IsConnected()
         {
-            if (Socket == null) return false;
-
-            var part1 = Socket.Poll(PollTime, SelectMode.SelectRead);
-            var part2 = Socket.Available == 0;
-            if (part1 && part2)
+            if (Socket == null)
                 return false;
+
+            if (_msSinceNoPacket >= MaxNoPacketIntervalMsg)
+            {
+                Socket.Dispose();
+                return false;
+            }
+
             return true;
+        }
+
+        public void UpdateLastPacketReceivedTime()
+        {
+            _msSinceNoPacket = 0;
         }
 
         public void SendOutStream()
         {
             // return if we're haven't actually written anything to the output blob
-            if (OutStream.WriteCaret <= 0) return;
+            if (OutStream.WriteCaret <= 0)
+                return;
 
             try
             {
@@ -132,15 +149,21 @@ namespace CScape.Network
         /// Checks for "hard disconnects" (force closes of the client/socket).
         /// Manages the state of the socket while in one. 
         /// </summary>
-        /// <param name="time">Milliseconds that have elapsed since the last call to this method.</param>
+        /// <param name="deltaTime">Milliseconds that have elapsed since the last call to this method.</param>
         /// <returns>Returns true when the owning player can be removed from the</returns>
-        public bool ManageHardDisconnect(long time)
+        public bool ManageHardDisconnect(long deltaTime)
         {
+            _msSinceNoPacket += deltaTime;
             if (IsConnected()) return false;
 
             Socket = null;
-            _deadForMs = _deadForMs + time;
+            _deadForMs = _deadForMs + deltaTime;
             return _deadForMs >= ReapTimeMs;
+        }
+
+        public void SortSyncMachines()
+        {
+            SyncMachines.Sort((x, y) => x.Order.CompareTo(y.Order));
         }
     }
 }

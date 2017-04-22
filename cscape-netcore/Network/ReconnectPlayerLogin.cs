@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Sockets;
 using CScape.Game.Entity;
 using JetBrains.Annotations;
@@ -8,29 +7,30 @@ namespace CScape.Network
 {
     public class ReconnectPlayerLogin : IPlayerLogin
     {
-        public string Username { get; }
         public Socket NewConnection { get; }
+        public Player Existing { get; }
         public int SignlinkUid { get; }
 
-        public ReconnectPlayerLogin([NotNull] string username, [NotNull] Socket newConnection, int signlinkUid)
+        public ReconnectPlayerLogin([NotNull] Player existing, [NotNull] Socket newConnection, int signlinkUid)
         {
-            Username = username ?? throw new ArgumentNullException(nameof(username));
             NewConnection = newConnection ?? throw new ArgumentNullException(nameof(newConnection));
+            Existing = existing ?? throw new ArgumentNullException(nameof(existing));
             SignlinkUid = signlinkUid;
         }
 
-        public void Transfer([NotNull] EntityPool<Player> players)
+        public Player Transfer([NotNull] EntityPool<Player> players)
         {
             if (players == null) throw new ArgumentNullException(nameof(players));
 
-            var player = players.FirstOrDefault(p => p.Username == Username);
+            if (Existing.Connection.IsConnected()) return null;
+            if (Existing.Connection.SignlinkId != SignlinkUid) return null;
 
-            if (player == null) return;
-            if (player.Connection.IsConnected()) return;
-            if (player.Connection.SignlinkId != SignlinkUid) return;
+            Existing.Connection.AssignNewSocket(NewConnection);
+            Existing.Observatory.Clear();
 
-            player.Connection.AssignNewSocket(NewConnection);
-            player.Server.Log.Debug(this, $"Reconnected client iid {player.InstanceId}");
+            Existing.Server.Log.Debug(this, $"Reconnected client iid {Existing.UniqueEntityId}");
+
+            return Existing;
         }
     }
 }
