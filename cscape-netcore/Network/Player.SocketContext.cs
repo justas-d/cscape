@@ -19,7 +19,7 @@ namespace CScape.Network
         /// In milliseconds, the delay between a socket dying and it's player being removed
         /// from the player entity pool. todo Default: 60 seconds.
         /// </summary>
-        public long ReapTimeMs { get; } = 1000 * 2;
+        public long ReapTimeMs { get; } = 1000 * 10;
 
         /// <summary>
         /// In milliseconds, the maximum number of ms that can ellapse without receiving a packet.
@@ -85,7 +85,8 @@ namespace CScape.Network
         /// </summary>
         public void FlushInput()
         {
-            ThrowIfDisposed();
+            if (IsDisposed)
+                return;
 
             try
             {
@@ -138,10 +139,10 @@ namespace CScape.Network
 
         public void SendOutStream()
         {
-            ThrowIfDisposed();
+            if (IsDisposed)
+                return;
 
             // return if we're haven't actually written anything to the output blob
-
             if (OutStream.WriteCaret <= 0)
                 return;
 
@@ -167,10 +168,8 @@ namespace CScape.Network
         /// <returns>Returns true when the owning player can be removed from the</returns>
         public bool ManageHardDisconnect(long deltaTime)
         {
-            if (IsDisposed)
-                return true;
-
             _msSinceNoPacket += deltaTime;
+
             if (IsConnected()) return false;
 
             _deadForMs = _deadForMs + deltaTime;

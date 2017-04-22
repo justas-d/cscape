@@ -135,12 +135,8 @@ namespace CScape
                         player.Connection.SendOutStream();
 
                         // if the logoff flag is set, log the player off.
-                        if (player.LogoffFlag)
-                        {
-                            player.Connection.Dispose(); // shut down the connection
-                            player.Save(); // queue save
-                            playerRemoveQueue.Enqueue(player.UniqueEntityId);
-                        }
+                        if (player.LogoutMethod != Player.LogoutType.None)
+                            LogoutManager.PostLogout(player, playerRemoveQueue);
                     }
                 }
 

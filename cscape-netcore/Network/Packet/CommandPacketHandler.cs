@@ -12,8 +12,11 @@ namespace CScape.Network.Packet
             {
                 switch (cmd)
                 {
-                    case "logoff":
-                        player.Logoff(out _);
+                    case "logout":
+                        player.Logout(out _);
+                        break;
+                    case "forcelogout":
+                        player.ForcedLogout();
                         break;
                     case "id":
                         player.SendSystemChatMessage($"UniqueEntityId: {player.UniqueEntityId}");

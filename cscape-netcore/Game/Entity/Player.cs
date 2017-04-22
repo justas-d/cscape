@@ -92,33 +92,48 @@ namespace CScape.Game.Entity
             => Connection.SendMessage(new SystemChatMessagePacket(msg));
 
         /// <summary>
-        /// Set by the Logoff method, checked in the main loop.
-        /// </summary>
-        internal bool LogoffFlag { get; set; }
-
-        /// <summary>
-        /// Provides a way to cleanly log off of the world.
-        /// Imposes checks to make sure the player doesn't log off when they can't.
+        /// Provides a way to cleanly logout of the world.
+        /// Imposes checks to make sure the player doesn't logout when they can't.
         /// Socket is immediatelly closed.
         /// Player data is saved.
         /// </summary>
-        /// <param name="reason">The reason for which the player cannot log off.</param>
-        /// <returns>Can or cannot the player log off</returns>
-        public bool Logoff([CanBeNull] out string reason)
+        /// <param name="reason">The reason for which the player cannot logout.</param>
+        /// <returns>Can or cannot the player logout.</returns>
+        public bool Logout([CanBeNull] out string reason)
         {
             reason = null;
 
-            if (LogoffFlag)
+            if (LogoutMethod != LogoutType.None)
                 return false;
-
-            LogoffFlag = true;
 
             // todo : do logoff checks, i.e in combat or something
 
-            PoE.RemoveEntity(this); // remove from world
-            LogoffPacket.Static.Send(Connection.OutStream); // write logoff message
-
+            LogoutMethod = LogoutType.Clean;
+            LogoutManager.PreLogout(this);
             return true;
+        }
+
+        /// <summary>
+        /// Sends a logoff packet then forcefully drops the connection. 
+        /// Keeps the player alive in the world.
+        /// Should only be used when something goes wrong.
+        /// </summary>
+        public void ForcedLogout()
+        {
+            if (LogoutMethod != LogoutType.None)
+                return;
+
+            LogoutMethod = LogoutType.Forced;
+            LogoutManager.PreLogout(this);
+        }
+
+        internal LogoutType LogoutMethod { get; set; }
+
+        internal enum LogoutType
+        {
+            None,
+            Clean,
+            Forced
         }
     }
 }
