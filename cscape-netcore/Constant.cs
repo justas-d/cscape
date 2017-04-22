@@ -9,11 +9,15 @@
             134217727, 268435455, 536870911, 1073741823, 2147483647,
         };
 
+        public const byte StringNullTerminator = 10;
+
         public static class SyncMachineOrder
         {
             public const int Observer = 0;
             public const int PlayerUpdate = 1;
             public const int Region = 2;
+
+            public const int Message = 3;
         }
     }
 }

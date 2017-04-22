@@ -13,7 +13,7 @@ namespace CScape
 {
     public class GameServer
     {
-        private readonly PlayerEntryPoint _entry;
+        internal readonly SocketAndPlayerDatabaseDispatch InternalEntry;
         public Logger Log { get; }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace CScape
 
             Log = new Logger(this);
             PacketDispatch = new PacketDispatch(this);
-            _entry = new PlayerEntryPoint(this);
+            InternalEntry = new SocketAndPlayerDatabaseDispatch(this);
 
             Overworld = new PlaneOfExistance(this);
             Players = new EntityPool<Player>(config.MaxPlayers);
@@ -70,7 +70,7 @@ namespace CScape
 
             //todo run the entry point task with a cancellation token
 #pragma warning disable 4014
-            Task.Run(_entry.StartListening).ContinueWith(t =>
+            Task.Run(InternalEntry.StartListening).ContinueWith(t =>
             {
                 Log.Debug(this, $"EntryPoint listen task terminated in status: Completed: {t.IsCompleted} Faulted: {t.IsFaulted} Cancelled: {t.IsCanceled}");
                 if (t.Exception != null)
@@ -97,7 +97,7 @@ namespace CScape
                 // ====== BODY ====== 
 
                 // handle new logins
-                while (_entry.LoginQueue.TryDequeue(out IPlayerLogin login))
+                while (InternalEntry.LoginQueue.TryDequeue(out IPlayerLogin login))
                 {
                     var player = login.Transfer(Players);
 
@@ -124,15 +124,23 @@ namespace CScape
                         foreach (var sync in player.Connection.SyncMachines)
                             sync.Synchronize(player.Connection.OutStream);
 
-                        // send our data
-                        player.Connection.SendOutStream();
-
                         // get their data
                         player.Connection.FlushInput();
 
                         // parse their data
                         foreach (var p in PacketParser.Parse(this, player.Connection.InCircularStream))
                             PacketDispatch.Handle(player, p.Opcode, p.Packet);
+
+                        // send our data
+                        player.Connection.SendOutStream();
+
+                        // if the logoff flag is set, log the player off.
+                        if (player.LogoffFlag)
+                        {
+                            player.Connection.Dispose(); // shut down the connection
+                            player.Save(); // queue save
+                            playerRemoveQueue.Enqueue(player.UniqueEntityId);
+                        }
                     }
                 }
 

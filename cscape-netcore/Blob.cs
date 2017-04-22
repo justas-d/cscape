@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace CScape
 {
@@ -16,7 +17,7 @@ namespace CScape
 
         // or just "Bytes(Read/Written)"
         public int ReadCaret { get; private set; }
-
+ 
         public int WriteCaret { get; private set; }
 
         private bool _isInBitMode = false;
@@ -152,6 +153,32 @@ namespace CScape
         public long ReadInt64()
         {
             return (ReadInt32() << 32) + ReadInt32();
+        }
+
+        public bool TryReadString(int maxLength, out string rsString)
+        {
+            var builder = new StringBuilder(maxLength);
+            var retval = true;
+
+            try
+            {
+                byte c;
+                while ((c = ReadByte()) != Constant.StringNullTerminator)
+                    builder.Append(Convert.ToChar(c));
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                retval = false;
+            }
+            rsString = builder.ToString();
+            return retval;
+        }
+
+        public void WriteString(string str)
+        {
+            foreach (var c in str)
+                Write((byte)c);
+            Write(Constant.StringNullTerminator);
         }
 
         public void Write(byte val)

@@ -100,7 +100,7 @@ namespace CScape.Network.Sync
         }
 
         private readonly MessageBuilder _builder = new MessageBuilder();
-        public const int PlayerUpdatePacketId = 81;
+        public const int Packet = 81;
 
         public PlayerUpdateSyncMachine(GameServer server) : base(server)
         {
@@ -119,11 +119,10 @@ namespace CScape.Network.Sync
 
         public override int Order => Constant.SyncMachineOrder.PlayerUpdate;
 
-        public override void Synchronize(Blob stream)
+        public override void Synchronize(OutBlob stream)
         {
             // todo : implement all types of player updating
-            BeginPacket(stream, PlayerUpdatePacketId);
-
+            stream.BeginPacket(Packet);
 
             stream.BeginBitAccess();
 
@@ -136,7 +135,7 @@ namespace CScape.Network.Sync
 
             _builder.WriteFlags(stream);
 
-            EndPacket(stream);
+            stream.EndPacket();
         }
     }
 }

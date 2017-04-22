@@ -36,19 +36,24 @@ namespace cscape_dev
         /// <summary>
         /// Save existing player constructor
         /// </summary>
-        public SaveData(Player player)
+        public SaveData([NotNull] Player player)
         {
-            if (player == null) throw new ArgumentNullException(nameof(player));
-            if (string.IsNullOrEmpty(player.Username)) throw new ArgumentNullException(nameof(player.Username));
-            if (string.IsNullOrEmpty(player.PasswordHash)) throw new ArgumentNullException(nameof(player.PasswordHash));
+            Update(player);
+        }
 
-            Id = player.Id;
-            PasswordHash = player.PasswordHash;
-            Username = player.Username;
-            TitleIcon = player.TitleIcon;
-            X = player.Position.X;
-            Y = player.Position.Y;
-            Z = player.Position.Z;
+        public void Update([NotNull] IPlayerSaveData data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (string.IsNullOrEmpty(data.Username)) throw new ArgumentNullException(nameof(data.Username));
+            if (string.IsNullOrEmpty(data.PasswordHash)) throw new ArgumentNullException(nameof(data.PasswordHash));
+
+            Id = data.Id;
+            PasswordHash = data.PasswordHash;
+            Username = data.Username;
+            TitleIcon = data.TitleIcon;
+            X = data.X;
+            Y = data.Y;
+            Z = data.Z;
         }
     }
 }

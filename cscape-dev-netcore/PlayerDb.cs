@@ -38,8 +38,8 @@ namespace cscape_dev
             if (username == null) throw new ArgumentNullException(nameof(username));
             if (password == null) throw new ArgumentNullException(nameof(password));
 
-            var data = await SaveData.FirstAsync(s => s.Username == username);
-            if (!await IsValidPassword(data.PasswordHash, password))
+            var data = await SaveData.FirstOrDefaultAsync(s => s.Username == username);
+            if (data == null || !await IsValidPassword(data.PasswordHash, password))
                 return null;
 
             return data;
@@ -56,7 +56,13 @@ namespace cscape_dev
 
         private async Task SaveByData(SaveData data)
         {
-            SaveData.Add(data);
+            var existing = await SaveData.FirstOrDefaultAsync(s => s.Id == data.Id);
+            if (existing == null)
+                SaveData.Add(data);
+            else
+            {
+                existing.Update(data);
+            }
             await SaveChangesAsync();
         }
 

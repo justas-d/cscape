@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using CScape.Game.Entity;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Encodings;
@@ -42,7 +43,7 @@ namespace CScape.Network
     /// <summary>
     /// Handles incoming connections and sets them up for the game loop.
     /// </summary>
-    public class PlayerEntryPoint : IDisposable
+    public class SocketAndPlayerDatabaseDispatch : IDisposable
     {
         public GameServer Server { get; }
         public EndPoint Endpoint { get; }
@@ -54,8 +55,9 @@ namespace CScape.Network
         private readonly IAsymmetricBlockCipher _crypto;
 
         public ConcurrentQueue<IPlayerLogin> LoginQueue { get; } = new ConcurrentQueue<IPlayerLogin>();
+        public  ConcurrentQueue<Player> SaveQueue { get; } = new ConcurrentQueue<Player>();
 
-        public PlayerEntryPoint(GameServer server)
+        public SocketAndPlayerDatabaseDispatch(GameServer server)
         {
             Server = server;
             Endpoint = server.Config.ListenEndPoint;
@@ -84,6 +86,12 @@ namespace CScape.Network
 
             while (true)
             {
+                while (SaveQueue.TryDequeue(out Player player))
+                {
+                    await Server.Database.Player.Save(player);
+                    Server.Log.Debug(this, $"Saved {player.Username}");
+                }
+
                 var socket = await _socket.AcceptAsync();
                 if (socket == null || !socket.Connected)
                     continue;

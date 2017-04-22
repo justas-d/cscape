@@ -34,7 +34,7 @@ namespace CScape.Game.Entity
 
         // todo : public void PushToNpcSyncMachine(Npc npc)
 
-        public override void Synchronize(Blob stream)
+        public override void Synchronize(OutBlob stream)
         {
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)

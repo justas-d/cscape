@@ -20,6 +20,16 @@ namespace CScape.Game.Worldspace
             _entityPool = new EntityPool<AbstractEntity>();
         }
 
+        public void RemoveEntity([NotNull] AbstractEntity ent)
+        {
+            if (ent == null) throw new ArgumentNullException(nameof(ent));
+
+            if(!ContainsObservable(ent))
+                return;
+
+            _entityPool.Remove(ent);
+        }
+
         public void AddEntity([NotNull] AbstractEntity ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));

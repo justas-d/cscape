@@ -4,10 +4,11 @@ using System.Linq;
 using System.Net.Sockets;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace CScape.Network
 {
-    public class SocketContext
+    public class SocketContext : IDisposable
     {
         public const int OutStreamSize = (byte.MaxValue + 1) * 128;
         public const int InBufferStreamSize = 1024 * 2;
@@ -33,7 +34,7 @@ namespace CScape.Network
         public Socket Socket { get; private set; }
 
         [NotNull]
-        public Blob OutStream { get; }
+        public OutBlob OutStream { get; }
 
         [NotNull]
         public Blob InCircularStream { get; }
@@ -47,25 +48,33 @@ namespace CScape.Network
 
         public int SignlinkId { get; }
 
-        [NotNull] public List<SyncMachine> SyncMachines { get; private set;  } = new List<SyncMachine>();
+        public bool IsDisposed { get; private set; }
+
+        [NotNull] public List<SyncMachine> SyncMachines { get; } = new List<SyncMachine>();
+        private readonly MessageSyncMachine _msgSync;
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
         public SocketContext([NotNull] GameServer server, [NotNull] Socket socket, int signLink)
         {
+            Server = server ?? throw new ArgumentNullException(nameof(server));
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             Socket.Blocking = false;
 
-            OutStream = new Blob(OutStreamSize);
+            OutStream = new OutBlob(server, OutStreamSize);
             InCircularStream = new Blob(InStreamSize, true);
             _inBufferStream = new byte[InBufferStreamSize];
 
-            Server = server;
             SignlinkId = signLink;
+
+            _msgSync = new MessageSyncMachine(Server);
+            SyncMachines.Add(_msgSync);
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
         public void AssignNewSocket([NotNull] Socket socket)
         {
+            ThrowIfDisposed();
+
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _deadForMs = 0;
         }
@@ -76,8 +85,7 @@ namespace CScape.Network
         /// </summary>
         public void FlushInput()
         {
-            if (Socket == null)
-                return;
+            ThrowIfDisposed();
 
             try
             {
@@ -102,18 +110,20 @@ namespace CScape.Network
         private void HandleSocketOrDisposedException(Exception e)
         {
             Log.Debug(this, $"Socket or Disposed exception: {e.Message}");
-            Socket?.Dispose();
-            Socket = null;
+            Dispose();
         }
 
         public bool IsConnected()
         {
+            if (IsDisposed)
+                return false;
+
             if (Socket == null)
                 return false;
 
             if (_msSinceNoPacket >= MaxNoPacketIntervalMsg)
             {
-                Socket.Dispose();
+                Dispose();
                 return false;
             }
 
@@ -122,18 +132,22 @@ namespace CScape.Network
 
         public void UpdateLastPacketReceivedTime()
         {
+            ThrowIfDisposed();
             _msSinceNoPacket = 0;
         }
 
         public void SendOutStream()
         {
+            ThrowIfDisposed();
+
             // return if we're haven't actually written anything to the output blob
+
             if (OutStream.WriteCaret <= 0)
                 return;
 
             try
             {
-                Socket?.Send(OutStream.Buffer, 0, OutStream.WriteCaret, SocketFlags.None);
+                Socket.Send(OutStream.Buffer, 0, OutStream.WriteCaret, SocketFlags.None);
             }
             catch (Exception e) when (e is SocketException || e is ObjectDisposedException)
             {
@@ -153,17 +167,39 @@ namespace CScape.Network
         /// <returns>Returns true when the owning player can be removed from the</returns>
         public bool ManageHardDisconnect(long deltaTime)
         {
+            if (IsDisposed)
+                return true;
+
             _msSinceNoPacket += deltaTime;
             if (IsConnected()) return false;
 
-            Socket = null;
             _deadForMs = _deadForMs + deltaTime;
             return _deadForMs >= ReapTimeMs;
         }
 
         public void SortSyncMachines()
         {
+            ThrowIfDisposed();
             SyncMachines.Sort((x, y) => x.Order.CompareTo(y.Order));
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (IsDisposed) throw new ObjectDisposedException("SocketContext");
+        }
+
+        public void SendMessage(IPacket smsg)
+            => _msgSync.Enqueue(smsg);
+
+        public void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            SyncMachines.Clear();
+            Socket?.Dispose();
+            Socket = null;
+            IsDisposed = true;
         }
     }
 }

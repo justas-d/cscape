@@ -1,12 +1,11 @@
 using System;
-using System.Linq;
 using CScape.Network;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public sealed class Player : AbstractEntity, IObserver
+    public sealed class Player : AbstractEntity, IObserver, IPlayerSaveData
     {
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 128;
@@ -21,6 +20,9 @@ namespace CScape.Game.Entity
         public string PasswordHash { get; private set; }
 
         public byte TitleIcon { get; set; }
+        public ushort X => Position.X;
+        public ushort Y => Position.Y;
+        public byte Z => Position.Z;
 
         [NotNull]
         public SocketContext Connection { get; }
@@ -75,6 +77,48 @@ namespace CScape.Game.Entity
         {
             if (isNew)
                 sync.PushToPlayerSyncMachine(this);
+        }
+
+        /// <summary>
+        /// Queues a player for saving.
+        /// </summary>
+        public void Save()
+            => Server.InternalEntry.SaveQueue.Enqueue(this);
+
+        /// <summary>
+        /// Sends a system chat message to this player.
+        /// </summary>
+        public void SendSystemChatMessage(string msg)
+            => Connection.SendMessage(new SystemChatMessagePacket(msg));
+
+        /// <summary>
+        /// Set by the Logoff method, checked in the main loop.
+        /// </summary>
+        internal bool LogoffFlag { get; set; }
+
+        /// <summary>
+        /// Provides a way to cleanly log off of the world.
+        /// Imposes checks to make sure the player doesn't log off when they can't.
+        /// Socket is immediatelly closed.
+        /// Player data is saved.
+        /// </summary>
+        /// <param name="reason">The reason for which the player cannot log off.</param>
+        /// <returns>Can or cannot the player log off</returns>
+        public bool Logoff([CanBeNull] out string reason)
+        {
+            reason = null;
+
+            if (LogoffFlag)
+                return false;
+
+            LogoffFlag = true;
+
+            // todo : do logoff checks, i.e in combat or something
+
+            PoE.RemoveEntity(this); // remove from world
+            LogoffPacket.Static.Send(Connection.OutStream); // write logoff message
+
+            return true;
         }
     }
 }

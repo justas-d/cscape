@@ -27,6 +27,9 @@ namespace CScape.Network
             var player = new Player(this);
             players.Add(player);
 
+            if (!string.IsNullOrEmpty(Server.Config.Greeting))
+                player.SendSystemChatMessage(Server.Config.Greeting);
+
             return player;
         }
     }
