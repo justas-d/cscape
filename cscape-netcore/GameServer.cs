@@ -128,7 +128,7 @@ namespace CScape
                         player.Connection.FlushInput();
 
                         // parse their data
-                        foreach (var p in PacketParser.Parse(this, player.Connection.InCircularStream))
+                        foreach (var p in PacketParser.Parse(player, this, player.Connection.InCircularStream))
                             PacketDispatch.Handle(player, p.Opcode, p.Packet);
 
                         // send our data

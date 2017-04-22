@@ -46,7 +46,7 @@ namespace CScape.Game.Entity
             PasswordHash = login.Data.PasswordHash;
             TitleIcon = login.Data.TitleIcon;
 
-            Connection = new SocketContext(login.Server, login.Connection, login.SignlinkUid);
+            Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
             Movement = new MovementController(Position);
 
             var obsSyncMachine = new ObservableSyncMachine(Server, this);

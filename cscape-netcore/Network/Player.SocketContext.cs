@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using CScape.Game.Entity;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
@@ -46,6 +47,8 @@ namespace CScape.Network
 
         private Logger Log => Server.Log;
 
+        [NotNull]
+        public Player Player { get; }
         public int SignlinkId { get; }
 
         public bool IsDisposed { get; private set; }
@@ -54,10 +57,11 @@ namespace CScape.Network
         private readonly MessageSyncMachine _msgSync;
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
-        public SocketContext([NotNull] GameServer server, [NotNull] Socket socket, int signLink)
+        public SocketContext([NotNull] Player player, [NotNull] GameServer server, [NotNull] Socket socket, int signLink)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
+            Player = player ?? throw new ArgumentNullException(nameof(player));
             Socket.Blocking = false;
 
             OutStream = new OutBlob(server, OutStreamSize);
@@ -99,7 +103,7 @@ namespace CScape.Network
             }
             catch (Exception e) when (e is CircularBlobException || e is ArgumentOutOfRangeException)
             {
-                // todo : drop the player FlushInput fails.
+                Player.ForcedLogout();
                 Log.Warning(this, $"Exception on flush: {e.Message}.");
             }
             catch (Exception e) when (e is SocketException || e is ObjectDisposedException)

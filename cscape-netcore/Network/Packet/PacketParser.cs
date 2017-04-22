@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using CScape.Game.Entity;
 using JetBrains.Annotations;
 
 namespace CScape.Network.Packet
 {
     public static class PacketParser
     {
-        public static IEnumerable<(int Opcode, Blob Packet)> Parse([NotNull] GameServer server, [NotNull] Blob packetStream)
+        public static IEnumerable<(int Opcode, Blob Packet)> Parse([NotNull] Player player, [NotNull] GameServer server, [NotNull] Blob packetStream)
         {
             while (packetStream.CanRead())
             {
+                // todo : rewrite the peeking in packet parsing with try/catches and blob state resets on catch
                 // peek everything untill we 100% have the packet.
                 var opcodePeek = packetStream.Peek();
                 var lenType = server.Database.Packet.GetIncoming(opcodePeek);
@@ -33,7 +35,7 @@ namespace CScape.Network.Packet
                         break;
 
                     case PacketLength.Undefined:
-                        Undefined(server, opcodePeek);
+                        Undefined(player, server, opcodePeek);
                         break;
 
                     default:
@@ -60,7 +62,7 @@ namespace CScape.Network.Packet
                         lenPayload = packetStream.ReadInt16();
                         break;
                     case PacketLength.Undefined:
-                        Undefined(server, opcode);
+                        Undefined(player, server, opcode);
                         break;
                     default:
                         lenPayload = (byte) lenType;
@@ -76,12 +78,12 @@ namespace CScape.Network.Packet
             }
         }
 
-        private static void Undefined(GameServer server, byte opcode)
+        private static void Undefined(Player player, GameServer server, byte opcode)
         {
             var msg = $"Undefined packet opcode: {opcode}";
             server.Log.Warning(typeof(PacketParser), msg);
             Debug.Fail(msg);
-            // todo : drop player when we're sent undefined packets
+            player.ForcedLogout();
 
 #if DEBUG
             server.Database.Packet.Reload();
