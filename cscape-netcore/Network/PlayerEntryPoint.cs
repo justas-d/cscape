@@ -152,7 +152,6 @@ namespace CScape.Network
                     return;
                 }
 
-                //todo reconnect logic
                 var isReconnecting = magic == reconnectMagic;
 
                 //1 - length

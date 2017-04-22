@@ -32,11 +32,8 @@ namespace CScape.Game.Entity
             _obsExisting.Clear();
         }
 
-        // todo : call PushObservable when a observable enter the world/becomes visible (logon)
         public void PushObservable(AbstractEntity obs)
         {
-            // todo : when a player connects, iterate over each observable in their area and push it.
-
             var id = obs.UniqueEntityId;
 
             if (_obsExisting.Contains(id))
