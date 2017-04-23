@@ -2,7 +2,7 @@ namespace CScape
 {
     public interface IPlayerSaveData
     {
-        int Id { get; }
+        int DatabaseId { get; }
         string PasswordHash { get; }
         string Username { get; }
         byte TitleIcon { get; }

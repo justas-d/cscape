@@ -14,7 +14,7 @@ namespace CScape.Network.Sync
             private Player _local;
             private bool _isLocalNew;
 
-            private readonly HashSet<Player> _syncPlayers = new HashSet<Player>();
+            private readonly List<Player> _syncPlayers = new List<Player>();
             private readonly Queue<Player> _newPlayers = new Queue<Player>();
 
             public void SetLocalPlayer(Player player)
@@ -59,8 +59,6 @@ namespace CScape.Network.Sync
                 {
                     stream.WriteBits(1, 1); // continue reading? or just "does need updating at all"? If 0, no flag updates will be read for local.
 
-                    // for now, simple init-spam updating will do
-
                     stream.WriteBits(2, 3); // type
 
                     stream.WriteBits(2, _local.Position.Z); // plane
@@ -76,15 +74,30 @@ namespace CScape.Network.Sync
             public void WriteExistingPlayers(Blob stream)
             {
                 // todo : WriteExistingPlayers
-                // do range checking here as well, delete if out of range.
+                // todo : check if the player has been destroyed by calling Player.IsDestroyed during existing player updating.
+
+                // do range checking here, delete if out of range.
+
                 stream.WriteBits(8, 0); // count of existing update players
+
+                // k1 <- 3 will remove a player from the client's existing player list.
             }
 
             public void WriteNewPlayers(Blob stream)
             {
                 // todo : WriteNewPlayers
                 // no range checking needed
+
+                // before writing a new player here, check if it already exists
+                // in the _syncPlayers container.
+
                 stream.WriteBits(11, 2047); // index (in this case 2047 is the break flag)
+
+                /*
+                 *  Instead of writing some kind of unique index for the new player,
+                 *  write the index at which this new player will be stored in
+                 *  the _syncPlayers container.
+                 */
             }
 
             public void WriteFlags(Blob stream)
@@ -125,6 +138,7 @@ namespace CScape.Network.Sync
         {
             // todo : implement all types of player updating
             stream.BeginPacket(Packet);
+
 
             stream.BeginBitAccess();
 

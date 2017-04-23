@@ -18,9 +18,6 @@ namespace CScape.Game.Entity
             _pools.Remove(delPool);
         }
 
-        /// <summary>
-        /// Does NOT guarantee that it will iterate over each entity once.
-        /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
             return _pools.SelectMany(pool => pool).GetEnumerator();

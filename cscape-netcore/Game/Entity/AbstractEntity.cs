@@ -11,6 +11,8 @@ namespace CScape.Game.Entity
     {
         public uint UniqueEntityId { get; }
         [NotNull] public Transform Position { get; }
+
+        // internally it can be null, but for outside viewers it should always exist
         [NotNull] public PlaneOfExistance PoE { get; private set; }
         [NotNull] public GameServer Server { get; }
 
@@ -18,6 +20,8 @@ namespace CScape.Game.Entity
 
         [CanBeNull]
         public virtual MovementController Movement { get; }
+
+        public bool IsDestroyed { get; private set; }
 
         /// <summary>
         /// Facade constructor
@@ -36,42 +40,87 @@ namespace CScape.Game.Entity
             Movement = movement;
 
             UniqueEntityId = _idPool.NextId();
-            SetPoE(poe, Server);
+            InitPoE(poe, Server.Overworld);
         }
 
         /// <summary>
-        /// More inline constructor.
+        /// Player AbstractEntity constructor
         /// </summary>
-        // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
+        //Player will call PoE due to PoE.AddEntity attempting to access Player.Observatory before it is set.
+        // ReSharper disable once NotNullMemberIsNotInitialized
         protected AbstractEntity(
             [NotNull] GameServer server,
             [NotNull] IdPool idPool,
-            ushort x, ushort y, byte z,
-            PlaneOfExistance poe = null,
-            bool needsMovementController = false)
+            ushort x, ushort y, byte z)
         {
-            Server = server ?? throw new ArgumentNullException(nameof(server));
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
+            Server = server ?? throw new ArgumentNullException(nameof(server));
             Position = new Transform(this, x, y, z);
-            Movement = needsMovementController ? new MovementController(Position) : null;
-
+            Movement = new MovementController(Position);
             UniqueEntityId = _idPool.NextId();
-            SetPoE(poe, Server);
         }
 
         ~AbstractEntity()
         {
-            _idPool.FreeId(UniqueEntityId);
-            Server.Log.Debug(this, $"Freeing entity id {UniqueEntityId}");
+            if (!IsDestroyed)
+            {
+                _idPool.FreeId(UniqueEntityId);
+                Server.Log.Debug(this, $"Destroyed unfreed entity id {UniqueEntityId}");
+            }
         }
 
-        public void SetPoE(PlaneOfExistance poe, [NotNull] GameServer server)
+        protected void InitPoE(PlaneOfExistance fromCtor, [NotNull] PlaneOfExistance overworld)
         {
-            if (server == null) throw new ArgumentNullException(nameof(server));
+            if (overworld == null) throw new ArgumentNullException(nameof(overworld));
+            var poe = fromCtor ?? overworld;
 
-            PoE = poe ?? server.Overworld;
+            PoE = poe;
+            PoE.AddEntity(this);
         }
 
+        /// <summary>
+        /// Cleanly switches the PoE of the entity.
+        /// </summary>
+        public void SwitchPoE([NotNull] PlaneOfExistance newPoe)
+        {
+            if (newPoe == null) throw new ArgumentNullException(nameof(newPoe));
+            if (newPoe == PoE)
+                return;
+
+            PoE.RemoveEntity(this);
+            PoE = newPoe;
+            PoE.AddEntity(this);
+        }
+
+        /// <summary>
+        /// Destroys the Entity, making sure it doesn't exist in the world any longer, frees up its id.
+        /// Overriding this method should be done by overriding the virtual method 
+        /// InternalDestroy(), which is called after AbstractEntity.Destroy().
+        /// </summary>
+        public void Destroy()
+        {
+            if (IsDestroyed)
+            {
+                Server.Log.Warning(this, "Tried to destroy a destroyed entity.");
+                return;
+            }
+
+            PoE.RemoveEntity(this);
+            _idPool.FreeId(UniqueEntityId);
+            
+            InternalDestroy();
+
+            IsDestroyed = true;
+        }
+
+        protected virtual void InternalDestroy() { }
+        /// <summary>
+        /// Called every update tick, if scheduled for updating.
+        /// The entity is responible for scheduling it's own updates.
+        /// No need to call base.Update(). 
+        /// </summary>
+        /// <param name="loop">The tick loop where the entity can schedule the next update.</param>
+        public virtual void Update(MainLoop loop) { }
         public abstract void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew);
 
         #region IEquatable

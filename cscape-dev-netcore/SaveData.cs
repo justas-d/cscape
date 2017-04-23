@@ -7,7 +7,7 @@ namespace cscape_dev
 {
     public class SaveData : IPlayerSaveData
     {
-        public int Id { get; set; }
+        public int DatabaseId { get; set; }
         public string PasswordHash { get; set; }
         public string Username { get; set; }
         public byte TitleIcon { get; set; }
@@ -47,7 +47,7 @@ namespace cscape_dev
             if (string.IsNullOrEmpty(data.Username)) throw new ArgumentNullException(nameof(data.Username));
             if (string.IsNullOrEmpty(data.PasswordHash)) throw new ArgumentNullException(nameof(data.PasswordHash));
 
-            Id = data.Id;
+            DatabaseId = data.DatabaseId;
             PasswordHash = data.PasswordHash;
             Username = data.Username;
             TitleIcon = data.TitleIcon;

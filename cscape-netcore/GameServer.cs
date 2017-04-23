@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CScape.Game.Entity;
 using CScape.Game.Worldspace;
 using CScape.Network;
-using CScape.Network.Packet;
 using JetBrains.Annotations;
 
 namespace CScape
@@ -16,20 +14,17 @@ namespace CScape
         internal readonly SocketAndPlayerDatabaseDispatch InternalEntry;
         public Logger Log { get; }
 
-        /// <summary>
-        /// A pool of players currently playing.
-        /// </summary>
-        public EntityPool<Player> Players { get; }
         public IGameServerConfig Config { get; }
         public IDatabase Database { get; }
 
         public DateTime StartTime { get; private set; }
-        public PacketDispatch PacketDispatch { get; }
 
+        private MainLoop Loop { get; }
         public PlaneOfExistance Overworld { get; }
         public IdPool EntityIdPool { get; } = new IdPool();
-
         public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
+
+        public int PlayerCount { get; private set; }
 
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
@@ -49,19 +44,16 @@ namespace CScape
             if (config.ListenEndPoint == null) throw new ArgumentNullException(nameof(config.ListenEndPoint));
             if (config.MaxPlayers <= 0) throw new ArgumentOutOfRangeException(nameof(config.MaxPlayers));
             if (config.Backlog <= 0) throw new ArgumentOutOfRangeException(nameof(config.Backlog));
-
-            if (!File.Exists(config.PrivateLoginKeyDir))
-                throw new FileNotFoundException($"Could not find private login key in directory: {config.PrivateLoginKeyDir}");
-
+            if (!File.Exists(config.PrivateLoginKeyDir)) throw new FileNotFoundException($"Could not find private login key in directory: {config.PrivateLoginKeyDir}");
             Database = database ?? throw new ArgumentNullException(nameof(database));
+
             Config = config;
-
             Log = new Logger(this);
-            PacketDispatch = new PacketDispatch(this);
-            InternalEntry = new SocketAndPlayerDatabaseDispatch(this);
-
+            Loop = new MainLoop(this, Config.TickTime);
+            InternalEntry = new SocketAndPlayerDatabaseDispatch(this, Loop.LoginQueue);
             Overworld = new PlaneOfExistance(this);
-            Players = new EntityPool<Player>(config.MaxPlayers);
+
+            // todo : take into account Config.MaxPlayers (return status in "QueryServerState" method for login dispatch)?
         }
 
         public async Task Start()
@@ -79,109 +71,23 @@ namespace CScape
                     Log.Exception(this, "EntryPoint contained exception.", t.Exception);
             });
 
-            Log.Normal(this, "Server live.");
+            await Loop.Run();
+        }
 
-            //TODO: bool to terminate main loop
-            // todo : exception handle all over the main loop
+        public HashSet<Player> Players { get;} = new HashSet<Player>();
 
-            const int tickMs = 600;
-            var watch = new Stopwatch();
-            var deltaTime = 0;
-            var waitTime = 0;
-            bool overtime;
-            var playerRemoveQueue = new Queue<uint>();
-            while (true)
-            {
-                // ====== PROLOGUE ====== 
+        internal void RegisterNewPlayer(Player player)
+        {
+            Log.Debug(this, $"Registering new player: {player.Username}.");
+            if (!Players.Add(player))
+                Log.Warning(this, $"Tried to register existing player: {player.Username}.");
+        }
 
-                watch.Start();
-
-                // ====== BODY ====== 
-
-                // handle new logins
-                while (InternalEntry.LoginQueue.TryDequeue(out IPlayerLogin login))
-                {
-                    var player = login.Transfer(Players);
-
-                    // reconnecting transfers can fail, returning a null.
-                    if (player == null)
-                        continue;
-
-                    // add the player itself their world
-                    player.PoE.AddEntity(player);
-
-                    // send them the initial observables
-                    foreach (var entity in player.PoE)
-                        player.Observatory.PushObservable(entity);
-                }
-
-                // todo : merge entity updates and player updates.
-                // requires that AggregateEntityPool iterates over all entities only once.
-
-                // entity updates
-                // todo : split entity updates into buckets.
-                // e.g: separate EntityPool for entities requiring a Movement update
-                // or seperate EP for ent requiring Position update
-                // or for Ai entities (which could be added to the ai update pool when created and stay there)
-                // etc
-                // these seperate buckets could check for uniqueness.
-
-                foreach (var ent in Entities)
-                {
-                    ent.Movement?.Update();
-                    ent.Position.Update();
-                }
-
-                // Player network management, syncing, packet reading and parsing loop.
-                foreach (var player in Players)
-                {
-                    if (player.Connection.ManageHardDisconnect(deltaTime + watch.ElapsedMilliseconds))
-                        playerRemoveQueue.Enqueue(player.UniqueEntityId);
-
-                    if (player.Connection.IsConnected())
-                    {
-                        foreach (var sync in player.Connection.SyncMachines)
-                            sync.Synchronize(player.Connection.OutStream);
-
-                        // get their data
-                        player.Connection.FlushInput();
-
-                        // parse their data
-                        foreach (var p in PacketParser.Parse(player, this, player.Connection.InCircularStream))
-                            PacketDispatch.Handle(player, p.Opcode, p.Packet);
-
-                        // send our data
-                        player.Connection.SendOutStream();
-
-                        // if the logoff flag is set, log the player off.
-                        if (player.LogoutMethod != Player.LogoutType.None)
-                            LogoutManager.PostLogout(player, playerRemoveQueue);
-                    }
-                }
-
-                // ====== EPILOGUE ====== 
-
-                // clean dead players
-                if (playerRemoveQueue.Count > 0)
-                {
-                    Log.Debug(this, $"Reaping {playerRemoveQueue.Count} players.");
-                    while (playerRemoveQueue.Count > 0)
-                        Players.Remove(playerRemoveQueue.Dequeue());
-                }
-
-                // handle tick delays
-                watch.Stop();
-                watch.Reset();
-
-                waitTime = Math.Abs(tickMs - (int)watch.ElapsedMilliseconds);
-                overtime = waitTime < tickMs;
-                if (overtime)
-                    Log.Warning(this, $"Tick process time too slow! need to wait for {waitTime}ms. Tick target ms: {tickMs}ms.");
-                else
-                    await Task.Delay(waitTime);
-
-                deltaTime = overtime ? tickMs : waitTime;
-            }
+        internal void UnregisterPlayer(Player player)
+        {
+            Log.Debug(this, $"Unregistering player: {player.Username}.");
+            if(!Players.Remove(player))
+                Log.Warning(this, $"Tried to unregister player that is not registered: {player.Username}");
         }
     }
 }

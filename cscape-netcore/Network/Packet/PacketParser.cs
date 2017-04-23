@@ -7,7 +7,8 @@ namespace CScape.Network.Packet
 {
     public static class PacketParser
     {
-        public static IEnumerable<(int Opcode, Blob Packet)> Parse([NotNull] Player player, [NotNull] GameServer server, [NotNull] Blob packetStream)
+        public static IEnumerable<(int Opcode, Blob Packet)> 
+            Parse([NotNull] Player player, [NotNull] GameServer server, [NotNull] Blob packetStream)
         {
             while (packetStream.CanRead())
             {

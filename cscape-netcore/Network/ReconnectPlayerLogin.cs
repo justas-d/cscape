@@ -18,19 +18,15 @@ namespace CScape.Network
             SignlinkUid = signlinkUid;
         }
 
-        public Player Transfer([NotNull] EntityPool<Player> players)
+        public void Transfer(MainLoop ignored)
         {
-            if (players == null) throw new ArgumentNullException(nameof(players));
-
-            if (Existing.Connection.IsConnected()) return null;
-            if (Existing.Connection.SignlinkId != SignlinkUid) return null;
+            if (Existing.Connection.IsConnected()) return;
+            if (Existing.Connection.SignlinkId != SignlinkUid) return;
 
             Existing.Connection.AssignNewSocket(NewConnection);
             Existing.Observatory.Clear();
 
             Existing.Server.Log.Debug(this, $"Reconnected client iid {Existing.UniqueEntityId}");
-
-            return Existing;
         }
     }
 }

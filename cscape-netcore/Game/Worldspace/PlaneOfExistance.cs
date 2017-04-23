@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CScape.Game.Entity;
 using JetBrains.Annotations;
 
@@ -10,11 +11,9 @@ namespace CScape.Game.Worldspace
     {
         [NotNull]
         public GameServer Server { get; }
-
-        private readonly EntityPool<AbstractEntity> _entityPool;
-
         public bool IsOverworld => Server.Overworld == this;
 
+        private readonly EntityPool<AbstractEntity> _entityPool;
         private bool _isFreed;
 
         public PlaneOfExistance([NotNull] GameServer server)
@@ -43,26 +42,45 @@ namespace CScape.Game.Worldspace
             _isFreed = true;
         }
 
-        public void RemoveEntity([NotNull] AbstractEntity ent)
+        /// <summary>
+        /// !!Should only be called by AbstractEntity.
+        /// </summary>
+        internal void RemoveEntity([NotNull] AbstractEntity ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
-            if(!ContainsObservable(ent))
+            if(!ContainsEntity(ent))
                 return;
 
             _entityPool.Remove(ent);
         }
 
-        public void AddEntity([NotNull] AbstractEntity ent)
+        /// <summary>
+        /// !!Should only be called by AbstractEntity.
+        /// </summary>
+        internal void AddEntity([NotNull] AbstractEntity ent)
         {
+            // an entity can only belong to one poe at a time.
+            if (ent.PoE != this)
+                Debug.Fail("PoE tried to AddEntity on a entity that is in a different PoE.");
+
             if (ent == null) throw new ArgumentNullException(nameof(ent));
-            if (ContainsObservable(ent))
+            if (ContainsEntity(ent))
                 return;
+
+            // if we're adding a new observer, push them our observables
+            var observer = ent as IObserver;
+            if (observer != null)
+            {
+                observer.Observatory.Clear();
+                foreach(var e in this)
+                    observer.Observatory.PushObservable(e);
+            }
 
             _entityPool.Add(ent);
         }
 
-        public bool ContainsObservable([NotNull] AbstractEntity obs)
+        public bool ContainsEntity([NotNull] AbstractEntity obs)
         {
             if (obs == null) throw new ArgumentNullException(nameof(obs));
             return _entityPool.ContainsId(obs.UniqueEntityId);

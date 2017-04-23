@@ -13,18 +13,24 @@ namespace cscape_dev
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite($"Filename=data.db");
+            optionsBuilder.UseSqlite("Filename=data.db");
         }
 
         protected override void OnModelCreating(ModelBuilder model)
         {
-            model.Entity<SaveData>()
-                .Property(s => s.Username)
-                .IsRequired();
+            model.Entity<SaveData>(b =>
+            {
+                b.Property(s => s.DatabaseId)
+                    .IsRequired();
 
-            model.Entity<SaveData>()
-                .Property(s => s.PasswordHash)
-                .IsRequired();
+                b.HasKey(s => s.DatabaseId);
+
+                b.Property(s => s.Username)
+                    .IsRequired();
+
+                b.Property(s => s.PasswordHash)
+                    .IsRequired();
+            });
         }
 
         public async Task<bool> UserExists([NotNull] string username)
@@ -56,7 +62,7 @@ namespace cscape_dev
 
         private async Task SaveByData(SaveData data)
         {
-            var existing = await SaveData.FirstOrDefaultAsync(s => s.Id == data.Id);
+            var existing = await SaveData.FirstOrDefaultAsync(s => s.DatabaseId == data.DatabaseId);
             if (existing == null)
                 SaveData.Add(data);
             else

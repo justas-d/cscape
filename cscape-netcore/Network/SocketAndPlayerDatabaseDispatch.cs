@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using CScape.Game.Entity;
+using JetBrains.Annotations;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Encodings;
@@ -45,6 +46,7 @@ namespace CScape.Network
     /// </summary>
     public class SocketAndPlayerDatabaseDispatch : IDisposable
     {
+        private readonly ConcurrentQueue<IPlayerLogin> _loginQueue;
         public GameServer Server { get; }
         public EndPoint Endpoint { get; }
         public int Backlog { get; }
@@ -54,11 +56,11 @@ namespace CScape.Network
 
         private readonly IAsymmetricBlockCipher _crypto;
 
-        public ConcurrentQueue<IPlayerLogin> LoginQueue { get; } = new ConcurrentQueue<IPlayerLogin>();
-        public  ConcurrentQueue<Player> SaveQueue { get; } = new ConcurrentQueue<Player>();
+        public ConcurrentQueue<Player> SaveQueue { get; } = new ConcurrentQueue<Player>();
 
-        public SocketAndPlayerDatabaseDispatch(GameServer server)
+        public SocketAndPlayerDatabaseDispatch(GameServer server, [NotNull] ConcurrentQueue<IPlayerLogin> loginQueue)
         {
+            _loginQueue = loginQueue ?? throw new ArgumentNullException(nameof(loginQueue));
             Server = server;
             Endpoint = server.Config.ListenEndPoint;
             Backlog = Convert.ToInt32(server.Config.Backlog);
@@ -259,7 +261,7 @@ namespace CScape.Network
                 if (isReconnecting)
                 {
                     blob.Write((byte) InitResponseCode.ReconnectDone);
-                    LoginQueue.Enqueue(new ReconnectPlayerLogin(loggedInPlayer, socket, signlinkUid));
+                    _loginQueue.Enqueue(new ReconnectPlayerLogin(loggedInPlayer, socket, signlinkUid));
                 }
 
                 else
@@ -267,7 +269,7 @@ namespace CScape.Network
                     blob.Write((byte) InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
                     blob.Write(data.TitleIcon);
-                    LoginQueue.Enqueue(new NormalPlayerLogin(Server, data, socket, signlinkUid));
+                    _loginQueue.Enqueue(new NormalPlayerLogin(Server, data, socket, signlinkUid));
                 }
 
                 await SocketSend(socket, blob);

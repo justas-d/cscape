@@ -14,6 +14,8 @@ namespace CScape
         EndPoint ListenEndPoint { get; }
         int Backlog { get; }
 
+        int TickTime { get; }
+
         [NotNull]
         string PrivateLoginKeyDir { get; }
         string Greeting { get; }

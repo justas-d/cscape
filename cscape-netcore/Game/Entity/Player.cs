@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using CScape.Network;
+using CScape.Network.Packet;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
@@ -10,7 +12,7 @@ namespace CScape.Game.Entity
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 128;
 
-        public int Id { get; }
+        public int DatabaseId { get; }
         //todo: change username feature
 
         [NotNull]
@@ -35,13 +37,11 @@ namespace CScape.Game.Entity
         public Player([NotNull] NormalPlayerLogin login) 
             : base(login.Server, 
                   login.Server.EntityIdPool,
-                  login.Data.X, login.Data.Y, login.Data.Z,
-                  null,// todo : serialize personalized PoE's
-                  true) 
+                  login.Data.X, login.Data.Y, login.Data.Z)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
 
-            Id = login.Data.Id;
+            DatabaseId = login.Data.DatabaseId;
             Username = login.Data.Username;
             PasswordHash = login.Data.PasswordHash;
             TitleIcon = login.Data.TitleIcon;
@@ -55,11 +55,69 @@ namespace CScape.Game.Entity
             Connection.SyncMachines.Add(obsSyncMachine);
 
             Connection.SortSyncMachines();
+
+            // todo : serialize personalized PoE's
+            InitPoE(null, Server.Overworld);
+            Server.RegisterNewPlayer(this);
         }
+
+        public override void Update(MainLoop loop)
+        {
+            // todo : figure out if we need to update a player/abstract entity if they have been Destroy()'ed.
+
+            if (IsDestroyed)
+            {
+                var msg = $"Updating destroyed player {Username}";
+                Log.Warning(this, msg);
+                Debug.Fail(msg);
+            }
+
+            // check for hard disconnects
+            // returning true would mean that we need to reap the player out of the world.
+            // false indicates that the connection is still good, or the connection has been reaped and we need to keep the player alive until the method says otherwise.
+            if (Connection.ManageHardDisconnect(loop.DeltaTime + loop.ElapsedMilliseconds))
+            {
+                Log.Debug(this, $"Reaping {Username}");
+                Destroy();
+                return;
+            }
+
+            if (Connection.IsConnected())
+            {
+                foreach (var sync in Connection.SyncMachines)
+                    sync.Synchronize(Connection.OutStream);
+
+                // get their data
+                Connection.FlushInput();
+
+                // parse their data
+                foreach (var p in PacketParser.Parse(this, Server, Connection.InCircularStream))
+                    loop.PacketDispatch.Handle(this, p.Opcode, p.Packet);
+
+                // send our data
+                Connection.SendOutStream();
+
+                // if the logoff flag is set, log the player off.
+                if (LogoutMethod != LogoutType.None)
+                {
+                    Connection.Dispose(); // shut down the connection
+                    Save(); // queue save
+
+                    // queue the player for removal from playing list, since they cleanly logged out.
+                    if (LogoutMethod == LogoutType.Clean)
+                        Destroy();
+                }
+            }
+
+            loop.Player.Enqueue(this);
+        }
+
+        protected override void InternalDestroy()
+            => Server.UnregisterPlayer(this);
 
         public bool CanSee(AbstractEntity obs)
         {
-            if (!PoE.ContainsObservable(obs))
+            if (!PoE.ContainsEntity(obs))
                 return false;
 
             if (obs is Player)
@@ -108,7 +166,7 @@ namespace CScape.Game.Entity
             // todo : do logoff checks, i.e in combat or something
 
             LogoutMethod = LogoutType.Clean;
-            LogoutManager.PreLogout(this);
+            LogoffPacket.Static.Send(Connection.OutStream);
             return true;
         }
 
@@ -123,12 +181,12 @@ namespace CScape.Game.Entity
                 return;
 
             LogoutMethod = LogoutType.Forced;
-            LogoutManager.PreLogout(this);
+            LogoffPacket.Static.Send(Connection.OutStream);
         }
 
-        internal LogoutType LogoutMethod { get; set; }
+        private LogoutType LogoutMethod { get; set; }
 
-        internal enum LogoutType
+        private enum LogoutType
         {
             None,
             Clean,

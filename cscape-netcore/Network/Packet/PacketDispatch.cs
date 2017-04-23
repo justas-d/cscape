@@ -9,13 +9,13 @@ namespace CScape.Network.Packet
 {
     public class PacketDispatch
     {
+        [NotNull] public MainLoop Loop { get; }
         private readonly Dictionary<int, IPacketHandler> _handlers = new Dictionary<int, IPacketHandler>();
-        public GameServer Server { get; }
 
-        public PacketDispatch([NotNull] GameServer server)
+        public PacketDispatch([NotNull] MainLoop loop)
         {
-            Server = server ?? throw new ArgumentNullException(nameof(server));
-            RegisterAssembly(server.GetType().GetTypeInfo().Assembly);
+            Loop = loop;
+            RegisterAssembly(loop.GetType().GetTypeInfo().Assembly);
         }
 
         public void Handle([NotNull] Player player, int opcode, [NotNull] Blob packet)
@@ -30,7 +30,7 @@ namespace CScape.Network.Packet
                 return;
             }
 
-            Server.Log.Debug(this, $"Unhandled packet opcode: {opcode}.");
+            Loop.Server.Log.Debug(this, $"Unhandled packet opcode: {opcode}.");
         }
 
         public void RegisterAssembly([NotNull] Assembly asm)
@@ -49,7 +49,7 @@ namespace CScape.Network.Packet
                     if (_handlers.ContainsKey(op))
                     {
                         var existing = _handlers[op];
-                        Server.Log.Warning(this,
+                        Loop.Server.Log.Warning(this,
                             $"Assembly: {asm.GetName().Name} " +
                             $"IPacketHandler: {handler.GetType().Name} " +
                             $"Opcode: {op} overrides " +
@@ -58,7 +58,7 @@ namespace CScape.Network.Packet
                     }
 
                     _handlers[op] = handler;
-                    Server.Log.Debug(this, $"Registered {handler.GetType().Name} IPacketHandler.");
+                    Loop.Server.Log.Debug(this, $"Registered {handler.GetType().Name} IPacketHandler.");
                 }
             }
         }

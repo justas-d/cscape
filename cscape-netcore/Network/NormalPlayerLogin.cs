@@ -20,17 +20,14 @@ namespace CScape.Network
             SignlinkUid = signlinkUid;
         }
 
-        public Player Transfer([NotNull] EntityPool<Player> players)
+        public void Transfer(MainLoop loop)
         {
-            if (players == null) throw new ArgumentNullException(nameof(players));
-
             var player = new Player(this);
-            players.Add(player);
 
             if (!string.IsNullOrEmpty(Server.Config.Greeting))
                 player.SendSystemChatMessage(Server.Config.Greeting);
 
-            return player;
+            loop.Player.Enqueue(player);
         }
     }
 }
