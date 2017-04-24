@@ -74,7 +74,7 @@ namespace CScape
             await Loop.Run();
         }
 
-        public HashSet<Player> Players { get;} = new HashSet<Player>();
+        public HashSet<Player> Players { get; } = new HashSet<Player>();
 
         internal void RegisterNewPlayer(Player player)
         {

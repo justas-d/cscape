@@ -104,6 +104,7 @@ namespace CScape
                     Movement.Dequeue().Movement?.Update();
 
                 // write & send
+                // todo : offload write & send to a different thread?
                 foreach (var p in Player)
                 {
                     // write our data
