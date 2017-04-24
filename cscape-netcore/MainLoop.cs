@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +16,7 @@ namespace CScape
         /// Defines a queue for entities that need to be updated.
         /// Only one of the same entity can exist in the queue.
         /// </summary>
-        public sealed class UniqueEntUpdateQueue<T> where T : AbstractEntity
+        public sealed class UniqueEntUpdateQueue<T> : IEnumerable<T> where T : AbstractEntity
         {
             private readonly HashSet<uint> _idSet = new HashSet<uint>();
             private readonly Queue<T> _entQueue = new Queue<T>();
@@ -36,11 +37,20 @@ namespace CScape
             }
 
             public int EntCount => _entQueue.Count;
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return _entQueue.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
         }
 
         // update queues
         [NotNull] public UniqueEntUpdateQueue<AbstractEntity> Movement { get; } = new UniqueEntUpdateQueue<AbstractEntity>();
-        [NotNull] public UniqueEntUpdateQueue<AbstractEntity> Position { get; } = new UniqueEntUpdateQueue<AbstractEntity>();
         [NotNull] public UniqueEntUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
         [NotNull] public ConcurrentQueue<IPlayerLogin> LoginQueue { get; } = new ConcurrentQueue<IPlayerLogin>();
 
@@ -71,27 +81,43 @@ namespace CScape
 
             while (true)
             {
-                // ====== PROLOGUE ====== 
-
                 _tickWatch.Start();
-
-                // ====== BODY ====== 
 
                 // handle new logins
                 while (LoginQueue.TryDequeue(out IPlayerLogin login))
                     login.Transfer(this);
 
-                var size = Player.EntCount;
-                for(var i = 0; i < size; ++i)
-                    Player.Dequeue().Update(this);
+                // get & parse their data
+                foreach (var p in Player)
+                {
+                    // get 
+                    p.Connection.FlushInput();
 
-                size = Movement.EntCount;
+                    // parse
+                    foreach (var pack in PacketParser.Parse(p, Server, p.Connection.InCircularStream))
+                        PacketDispatch.Handle(p, pack.Opcode, pack.Packet);
+                }
+
+                // movement updates
+                var size = Movement.EntCount;
                 for (var i = 0; i < size; ++i)
                     Movement.Dequeue().Movement?.Update();
 
-                size = Position.EntCount;
+                // write & send
+                foreach (var p in Player)
+                {
+                    // write our data
+                    foreach (var sync in p.Connection.SyncMachines)
+                        sync.Synchronize(p.Connection.OutStream);
+
+                    // send our data
+                    p.Connection.SendOutStream();
+                }
+
+                // player entity updating.
+                size = Player.EntCount;
                 for (var i = 0; i < size; ++i)
-                    Position.Dequeue().Position.Update();
+                    Player.Dequeue().Update(this);
 
                 // handle tick delays
                 _tickWatch.Stop();

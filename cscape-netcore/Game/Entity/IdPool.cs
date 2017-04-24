@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CScape.Game.Entity
@@ -6,22 +7,26 @@ namespace CScape.Game.Entity
     {
         private uint _next = 0;
 
-        // as the server's uptime grows, the _recycle queue in IdPool also grows
-        // todo : new IdPool algorithm that is not memory intensive.
-        // reset _next to n if _recycle contains all integers up to n? how would we know that?
-        private readonly Queue<uint> _recycle = new Queue<uint>();
+        private readonly HashSet<uint> _used = new HashSet<uint>();
 
         public uint NextId()
         {
-            if (_recycle.Count > 0)
-                return _recycle.Dequeue();
+            unchecked
+            {
+                // skip used id's.
+                while (_used.Contains(_next++)) { }
 
-            return _next++;
+                _used.Add(_next);
+                return _next;
+            }
         }
 
         public void FreeId(uint id)
         {
-            _recycle.Enqueue(id);
+            if (!_used.Contains(id))
+                throw new InvalidOperationException($"Tried to free unused id {id}");
+
+            _used.Remove(id);
         }
     }
 }

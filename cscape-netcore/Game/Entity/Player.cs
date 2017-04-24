@@ -84,19 +84,6 @@ namespace CScape.Game.Entity
 
             if (Connection.IsConnected())
             {
-                foreach (var sync in Connection.SyncMachines)
-                    sync.Synchronize(Connection.OutStream);
-
-                // get their data
-                Connection.FlushInput();
-
-                // parse their data
-                foreach (var p in PacketParser.Parse(this, Server, Connection.InCircularStream))
-                    loop.PacketDispatch.Handle(this, p.Opcode, p.Packet);
-
-                // send our data
-                Connection.SendOutStream();
-
                 // if the logoff flag is set, log the player off.
                 if (LogoutMethod != LogoutType.None)
                 {
@@ -105,7 +92,11 @@ namespace CScape.Game.Entity
 
                     // queue the player for removal from playing list, since they cleanly logged out.
                     if (LogoutMethod == LogoutType.Clean)
+                    {
                         Destroy();
+                        return;
+                    }
+                        
                 }
             }
 
@@ -120,14 +111,16 @@ namespace CScape.Game.Entity
             if (!PoE.ContainsEntity(obs))
                 return false;
 
+            const int maxrange = 15;
+
             if (obs is Player)
             {
-                // todo : viewing distance that changes depending on the players we have to sync (so that we don't overflow)
+                // todo : adjust maxrange if the player update packet gets too big or too small.
+                // keep the max at 15, min at 0.
+                
             }
 
-            const int range = 8; // todo : figure out how many tiles the player can see in total.
-
-            return obs.Position.AbsoluteDistanceTo(Position) <= range;
+            return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= maxrange;
         }
 
         public override void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew)

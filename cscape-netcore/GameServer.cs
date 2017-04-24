@@ -19,7 +19,7 @@ namespace CScape
 
         public DateTime StartTime { get; private set; }
 
-        private MainLoop Loop { get; }
+        internal MainLoop Loop { get; }
         public PlaneOfExistance Overworld { get; }
         public IdPool EntityIdPool { get; } = new IdPool();
         public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
