@@ -19,6 +19,7 @@ namespace CScape.Game.Entity
         public void ResetMovementQueue() => _movementQueue.Clear();
         public void QueueMovement(Direction direction) => _movementQueue.Enqueue(direction);
 
+
         public static (sbyte x, sbyte y) GetDelta(Direction dir)
         {
             const sbyte dn = 1;
@@ -55,30 +56,26 @@ namespace CScape.Game.Entity
             // no op
             if (_movementQueue.Count == 0)
             {
-                MoveUpdate.Noop = true;
+                MoveUpdate.Type = MoveUpdateData.MoveType.Noop;
                 return;
             }
 
-            (sbyte x, sbyte y) Move(Direction dir1)
+            void Move(Direction dir, out byte updateDir)
             {
-                var (x,y) = GetDelta(dir1);
-                Position.TransformLocals(x,y);
-                MoveUpdate.Noop = false;
-                return (x, y);
+                updateDir = (byte)dir;
+                Position.TransformLocals(GetDelta(dir));
             }
 
             // walk
             if (IsRunning && _movementQueue.Count == 1 || !IsRunning)
             {
-                MoveUpdate.Dir1 = Move(_movementQueue.Dequeue());
-                MoveUpdate.Run = false;
+                Move(_movementQueue.Dequeue(), out MoveUpdate.Dir1);
             }
             // run
             if (IsRunning && _movementQueue.Count >= 2)
             {
-                MoveUpdate.Dir1 = Move(_movementQueue.Dequeue());
-                MoveUpdate.Dir2 = Move(_movementQueue.Dequeue());
-                MoveUpdate.Run = true;
+                Move(_movementQueue.Dequeue(), out MoveUpdate.Dir1);
+                Move(_movementQueue.Dequeue(), out MoveUpdate.Dir2);
             }
         }
 
@@ -86,11 +83,17 @@ namespace CScape.Game.Entity
 
         internal class MoveUpdateData
         {
-            public bool Noop;
-            public bool Run;
+            public enum MoveType
+            {
+                Noop,
+                Walk,
+                Run
+            }
 
-            public (sbyte, sbyte) Dir1;
-            public (sbyte, sbyte) Dir2;
+            public MoveType Type;
+
+            public byte Dir1;
+            public byte Dir2;
         }
     }
 }

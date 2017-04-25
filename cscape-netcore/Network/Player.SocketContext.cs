@@ -77,8 +77,6 @@ namespace CScape.Network
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
         public void AssignNewSocket([NotNull] Socket socket)
         {
-            ThrowIfDisposed();
-
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _deadForMs = 0;
         }

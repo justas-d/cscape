@@ -68,6 +68,8 @@ namespace CScape.Game.Worldspace
             if (ContainsEntity(ent))
                 return;
 
+            _entityPool.Add(ent);
+
             // if we're adding a new observer, push them our observables
             var observer = ent as IObserver;
             if (observer != null)
@@ -76,8 +78,6 @@ namespace CScape.Game.Worldspace
                 foreach(var e in this)
                     observer.Observatory.PushObservable(e);
             }
-
-            _entityPool.Add(ent);
         }
 
         public bool ContainsEntity([NotNull] AbstractEntity obs)

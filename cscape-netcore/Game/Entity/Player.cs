@@ -1,37 +1,61 @@
 using System;
 using System.Diagnostics;
 using CScape.Network;
-using CScape.Network.Packet;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public sealed class Player : AbstractEntity, IObserver, IPlayerSaveData
+    [DebuggerDisplay("Name {Username}")]
+    public sealed class Player : AbstractEntity, IFlagSyncableEntity, IObserver
     {
+        [Flags]
+        public enum UpdateFlags
+        {
+            Chat = 0x80,
+            InteractEnt = 0x1,
+            Appearance = 0x10,
+            FacingCoordinate = 0x2,
+        }
+
+        public UpdateFlags Flags { get; private set; }
+
+        public int HasFlags => Flags != 0 ? 1 : 0;
+
+        public void SetFlag(UpdateFlags flag)
+            => Flags |= flag;
+
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 128;
 
         public int DatabaseId { get; }
         //todo: change username feature
 
-        [NotNull]
-        public string Username { get; private set; }
+        [NotNull] public string Username { get; private set; }
         //todo: change password feature
-        [NotNull]
-        public string PasswordHash { get; private set; }
+        [NotNull] public string PasswordHash { get; private set; }
 
         public byte TitleIcon { get; set; }
-        public ushort X => Position.X;
-        public ushort Y => Position.Y;
-        public byte Z => Position.Z;
+
+        [NotNull] private PlayerAppearance _appearance;
+
+        [NotNull]
+        public PlayerAppearance Appearance
+        {
+            get => _appearance;
+            set
+            {
+                _appearance = value;
+                SetFlag(UpdateFlags.Appearance);
+            }
+        }
 
         [NotNull]
         public SocketContext Connection { get; }
 
-        public Logger Log => Server.Log;
+        [NotNull] public Logger Log => Server.Log;
 
-        public Observatory Observatory { get; }
+        [NotNull] public Observatory Observatory { get; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 

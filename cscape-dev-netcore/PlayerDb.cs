@@ -10,6 +10,7 @@ namespace cscape_dev
     public class PlayerDb : DbContext, IPlayerDatabase
     {
         public DbSet<SaveData> SaveData { get; set; }
+        public DbSet<PlayerAppearance> Appearances { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

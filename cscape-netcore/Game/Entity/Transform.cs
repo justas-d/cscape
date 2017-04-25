@@ -79,6 +79,9 @@ namespace CScape.Game.Entity
             return Math.Max(Math.Abs(X - other.X), Math.Abs(Y - other.Y));
         }
 
+        public void TransformLocals((sbyte, sbyte) tuple)
+            => TransformLocals(tuple.Item1, tuple.Item2);
+
         public void TransformLocals(sbyte tx, sbyte ty)
         {
             // don't do anything if the transform is null

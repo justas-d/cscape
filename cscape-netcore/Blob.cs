@@ -22,8 +22,8 @@ namespace CScape
 
         private bool _isInBitMode = false;
 
-        private int _readBitPos = 0;
-        private int _writeBitPos = 0;
+        public int BitReadCaret { get; set; }
+        public int BitWriteCaret { get; set; }
 
         public bool IsCircular { get; }
         private readonly byte[] _queuedForReadMask = null;
@@ -237,16 +237,16 @@ namespace CScape
             if (_isInBitMode) throw new InvalidOperationException("Already in bit access mode.");
             _isInBitMode = true;
 
-            _readBitPos = ReadCaret * 8;
-            _writeBitPos = WriteCaret * 8;
+            BitReadCaret = ReadCaret * 8;
+            BitWriteCaret = WriteCaret * 8;
         }
 
         public int ReadBits(int i)
         {
-            var k = _readBitPos >> 3;
-            var l = 8 - (_readBitPos & 7);
+            var k = BitReadCaret >> 3;
+            var l = 8 - (BitReadCaret & 7);
             var i1 = 0;
-            _readBitPos += i;
+            BitReadCaret += i;
             for (; i > l; l = 8)
             {
                 i1 += (Buffer[k++] & Constant.MaskForBit[l]) << i - l;
@@ -263,15 +263,15 @@ namespace CScape
             if (!_isInBitMode) throw new InvalidOperationException("Not in bit access mode.");
             _isInBitMode = false;
 
-            ReadCaret = ((_readBitPos + 7) / 8);
-            WriteCaret= ((_writeBitPos + 7) / 8);
+            ReadCaret = ((BitReadCaret + 7) / 8);
+            WriteCaret= ((BitWriteCaret + 7) / 8);
         }
 
         public void WriteBits(int numBits, int value)
         {
-            int bytePos = _writeBitPos >> 3;
-            int bitOffset = 8 - (_writeBitPos & 7);
-            _writeBitPos += numBits;
+            int bytePos = BitWriteCaret >> 3;
+            int bitOffset = 8 - (BitWriteCaret & 7);
+            BitWriteCaret += numBits;
 
             for (; numBits > bitOffset; bitOffset = 8)
             {

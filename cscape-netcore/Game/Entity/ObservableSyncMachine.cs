@@ -12,12 +12,15 @@ namespace CScape.Game.Entity
         public Player LocalPlayer { get; }
 
         private readonly PlayerUpdateSyncMachine _playerSync;
+        private readonly NpcUpdateSyncMachine _npcSync;
 
         public ObservableSyncMachine(GameServer server, Player player) : base(server)
         {
             LocalPlayer = player;
 
             _playerSync = new PlayerUpdateSyncMachine(server);
+            _npcSync = new NpcUpdateSyncMachine(server);
+
             LocalPlayer.Connection.SyncMachines.Add(_playerSync);
         }
 
@@ -31,6 +34,9 @@ namespace CScape.Game.Entity
 
         public void PushToPlayerSyncMachine(Player player)
             => _playerSync.PushPlayer(player, LocalPlayer.Equals(player));
+
+        public void PushToNpcSyncMachine(Npc npc)
+            => _npcSync.PushNpc(npc);
 
         // todo : public void PushToNpcSyncMachine(Npc npc)
 
