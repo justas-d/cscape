@@ -1,50 +1,71 @@
 using System;
 using System.Diagnostics;
+using CScape.Data;
 using CScape.Network;
-using CScape.Network.Packet;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public sealed class Player : AbstractEntity, IObserver, IPlayerSaveData
+    //todo: change username feature
+    //todo: change password feature
+
+    [DebuggerDisplay("Name {Username}")]
+    public sealed class Player : AbstractEntity, IObserver
     {
-        public const int MaxUsernameChars = 12;
-        public const int MaxPasswordChars = 128;
+        public int Pid { get; }
 
-        public int DatabaseId { get; }
-        //todo: change username feature
+        [Flags]
+        public enum UpdateFlags
+        {
+            Chat = 0x80,
+            InteractEnt = 0x1,
+            Appearance = 0x10,
+            FacingCoordinate = 0x2,
+        }
 
+        public UpdateFlags Flags { get; private set; }
+
+        public void SetFlag(UpdateFlags flag)
+            => Flags |= flag;
+
+        [NotNull]  public string Username => _model.Username;
+        [NotNull]  public string Password => _model.PasswordHash;
+        public byte TitleIcon => _model.TitleIcon;
+
+        [NotNull] private PlayerAppearance _appearance;
         [NotNull]
-        public string Username { get; private set; }
-        //todo: change password feature
-        [NotNull]
-        public string PasswordHash { get; private set; }
+        public PlayerAppearance Appearance
+        {
+            get => _appearance;
+            set
+            {
+                // ReSharper disable once ConstantNullCoalescingCondition
+                var val = value ?? PlayerAppearance.Default;
+                _appearance = val;
+                _model.SetAppearance(val);
+                SetFlag(UpdateFlags.Appearance);
+            }
+        }
+       
+        [NotNull] public SocketContext Connection { get; }
+        [NotNull] public Logger Log => Server.Log;
+        [NotNull] public Observatory Observatory { get; }
+        [NotNull] private readonly PlayerModel _model;
 
-        public byte TitleIcon { get; set; }
-        public ushort X => Position.X;
-        public ushort Y => Position.Y;
-        public byte Z => Position.Z;
-
-        [NotNull]
-        public SocketContext Connection { get; }
-
-        public Logger Log => Server.Log;
-
-        public Observatory Observatory { get; }
+        public bool NeedsInitWhenLocal { get; private set; } = true;
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
             : base(login.Server, 
                   login.Server.EntityIdPool,
-                  login.Data.X, login.Data.Y, login.Data.Z)
+                  login.Model.X, login.Model.Y, login.Model.Z)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
 
-            DatabaseId = login.Data.DatabaseId;
-            Username = login.Data.Username;
-            PasswordHash = login.Data.PasswordHash;
-            TitleIcon = login.Data.TitleIcon;
+            _model = login.Model;
+            Appearance = new PlayerAppearance(_model);
+            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId());
 
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 
@@ -64,6 +85,9 @@ namespace CScape.Game.Entity
         public override void Update(MainLoop loop)
         {
             // todo : figure out if we need to update a player/abstract entity if they have been Destroy()'ed.
+            _model.SetPosition(Position);
+            Flags = 0;
+            NeedsInitWhenLocal = false;
 
             if (IsDestroyed)
             {
@@ -84,33 +108,43 @@ namespace CScape.Game.Entity
 
             if (Connection.IsConnected())
             {
-                foreach (var sync in Connection.SyncMachines)
-                    sync.Synchronize(Connection.OutStream);
-
-                // get their data
-                Connection.FlushInput();
-
-                // parse their data
-                foreach (var p in PacketParser.Parse(this, Server, Connection.InCircularStream))
-                    loop.PacketDispatch.Handle(this, p.Opcode, p.Packet);
-
-                // send our data
-                Connection.SendOutStream();
-
                 // if the logoff flag is set, log the player off.
                 if (LogoutMethod != LogoutType.None)
                 {
                     Connection.Dispose(); // shut down the connection
-                    Save(); // queue save
+                    Server.SavePlayers();
 
                     // queue the player for removal from playing list, since they cleanly logged out.
                     if (LogoutMethod == LogoutType.Clean)
+                    {
                         Destroy();
+                        return;
+                    }
+                        
                 }
             }
 
             loop.Player.Enqueue(this);
         }
+
+        /// <summary>
+        /// Forcibly teleports the player to the given coords.
+        /// Use this instead of manually setting player position.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        public void ForceTeleport(ushort x, ushort y, byte z)
+        {
+            if (Position.X == x && Position.Y == y && Position.Z == z)
+                return;
+
+            Position.SetPosition(x,y,z);
+            NeedsInitWhenLocal = true;
+        }
+
+        public void ForceTeleport(ushort x, ushort y)
+            => ForceTeleport(x, y, Position.Z);
 
         protected override void InternalDestroy()
             => Server.UnregisterPlayer(this);
@@ -120,14 +154,16 @@ namespace CScape.Game.Entity
             if (!PoE.ContainsEntity(obs))
                 return false;
 
+            const int maxrange = 15;
+
             if (obs is Player)
             {
-                // todo : viewing distance that changes depending on the players we have to sync (so that we don't overflow)
+                // todo : adjust maxrange if the player update packet gets too big or too small.
+                // keep the max at 15, min at 0.
+                
             }
 
-            const int range = 8; // todo : figure out how many tiles the player can see in total.
-
-            return obs.Position.AbsoluteDistanceTo(Position) <= range;
+            return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= maxrange;
         }
 
         public override void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew)
@@ -135,12 +171,6 @@ namespace CScape.Game.Entity
             if (isNew)
                 sync.PushToPlayerSyncMachine(this);
         }
-
-        /// <summary>
-        /// Queues a player for saving.
-        /// </summary>
-        public void Save()
-            => Server.InternalEntry.SaveQueue.Enqueue(this);
 
         /// <summary>
         /// Sends a system chat message to this player.

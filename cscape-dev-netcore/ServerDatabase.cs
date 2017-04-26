@@ -16,7 +16,7 @@ namespace cscape_dev
         {
             Packet = new PacketLookup(packetJsonDir);
             _playerDb = new PlayerDb();
-            _playerDb.Database.Migrate();
+            _playerDb.Database.EnsureCreated();
         }
 
         public void Dispose()

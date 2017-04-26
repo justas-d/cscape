@@ -20,17 +20,16 @@ namespace CScape.Game.Entity
         public int LocalX { get; private set; }
         public int LocalY { get; private set; }
 
-        private bool _posDirty;
-
         /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than 4.</exception>
         public Transform(AbstractEntity entity, ushort x, ushort y, byte z)
         {
             Entity = entity;
 
-            var observer = Entity as IObserver;
-            if (observer != null)
+            switch (entity)
             {
-                _observatory = observer.Observatory;
+                case IObserver observer:
+                    _observatory = observer.Observatory;
+                    break;
             }
 
             SetPosition(x, y, z);
@@ -55,7 +54,7 @@ namespace CScape.Game.Entity
             LocalX = x - (8 * RegionX);
             LocalY = y - (8 * RegionY);
 
-            _posDirty = true;
+            Update();
             _observatory?.Clear();
         }
 
@@ -63,14 +62,25 @@ namespace CScape.Game.Entity
             => SetPosition(x, y, Z);
 
         /// <summary>
-        /// Returns the abs. distance to the given transform.
+        /// Returns the absolute distance to the given transform.
         /// Does not take into account the z planes of both transforms.
         /// </summary>
         public int AbsoluteDistanceTo(Transform other)
         {
             return Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
         }
-        // todo : use for in-range calc Math.Max(Math.Abs(other.X - X), Math.Abs(other.Y - Y));
+
+        /// <summary>
+        /// Returns the maximum distances of absoulte x and y position differences 
+        /// between this and the other transform.
+        /// </summary>
+        public int MaxDistanceTo(Transform other)
+        {
+            return Math.Max(Math.Abs(X - other.X), Math.Abs(Y - other.Y));
+        }
+
+        public void TransformLocals((sbyte, sbyte) tuple)
+            => TransformLocals(tuple.Item1, tuple.Item2);
 
         public void TransformLocals(sbyte tx, sbyte ty)
         {
@@ -80,15 +90,11 @@ namespace CScape.Game.Entity
 
             LocalX += tx;
             LocalY += ty;
-
-            _posDirty = true;
+            Update();
         }
 
-        public void Update()
+        private void Update()
         {
-            if (!_posDirty)
-                return;
-
             var dx = 0;
             var dy = 0;
 
@@ -121,13 +127,11 @@ namespace CScape.Game.Entity
 
                 // todo : some sort of faster way of find observables that can see this transform
                 // iterating over all players is pretty stupid but it works for now
-                // not all IObservers doesn't necessarily have to be a player as well.
+                // IObservers don't necessarily have to be a player as well.
 
                 foreach (var p in Entity.Server.Players)
                     p.Observatory.PushObservable(Entity);
             }
-
-            _posDirty = false;
         }
     }
 }

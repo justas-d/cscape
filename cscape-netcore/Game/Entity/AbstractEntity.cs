@@ -1,5 +1,6 @@
 using System;
-using CScape.Game.Worldspace;
+using CScape.Data;
+using CScape.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
@@ -30,11 +31,11 @@ namespace CScape.Game.Entity
         protected AbstractEntity(
             [NotNull] GameServer server,
             [NotNull] IdPool idPool,
-            [NotNull] Transform pos,
+            ushort x, ushort y, byte z,
             PlaneOfExistance poe = null,
             MovementController movement = null)
         {
-            Position = pos ?? throw new ArgumentNullException(nameof(pos));
+            Position = new Transform(this, x ,y ,z);
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Movement = movement;

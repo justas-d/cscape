@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using CScape.Data;
 using CScape.Game.Entity;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Crypto;
@@ -56,7 +57,21 @@ namespace CScape.Network
 
         private readonly IAsymmetricBlockCipher _crypto;
 
-        public ConcurrentQueue<Player> SaveQueue { get; } = new ConcurrentQueue<Player>();
+        private readonly object _saveLock = new object();
+        private bool _saveFlag;
+
+        public bool SaveFlag
+        {
+            get
+            {
+                lock (_saveLock) return _saveFlag;
+            }
+            set
+            {
+                lock (_saveLock) _saveFlag = value;
+            }
+        }
+        
 
         public SocketAndPlayerDatabaseDispatch(GameServer server, [NotNull] ConcurrentQueue<IPlayerLogin> loginQueue)
         {
@@ -88,10 +103,11 @@ namespace CScape.Network
 
             while (true)
             {
-                while (SaveQueue.TryDequeue(out Player player))
+                if (SaveFlag)
                 {
-                    await Server.Database.Player.Save(player);
-                    Server.Log.Debug(this, $"Saved {player.Username}");
+                    await Server.Database.Player.Save();
+                    Server.Log.Debug(this, $"Saving db");
+                    SaveFlag = false;
                 }
 
                 var socket = await _socket.AcceptAsync();
@@ -131,7 +147,7 @@ namespace CScape.Network
                 }
 
                 // another byte contains a bit of the username but we dont care about that
-                blob.ReadSkipByte();
+                blob.ReadCaret++;
 
                 for (var i = 0; i < initMagicZeroCount; i++)
                     blob.Write(0);
@@ -167,7 +183,7 @@ namespace CScape.Network
                 //1 - length
                 //2  - 255
                 // skip 'em
-                blob.ReadSkipByte(2);
+                blob.ReadCaret += 2;
 
                 // verify revision
                 var revision = blob.ReadInt16();
@@ -205,14 +221,14 @@ namespace CScape.Network
                 // try read user/pass
                 string username;
                 string password;
-                if (!blob.TryReadString(Game.Entity.Player.MaxUsernameChars, out username))
+                if (!blob.TryReadString(PlayerModel.MaxUsernameChars, out username))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading username.");
                     return;
                 }
 
-                if (!blob.TryReadString(Game.Entity.Player.MaxPasswordChars, out password))
+                if (!blob.TryReadString(PlayerModel.MaxPasswordChars, out password))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading password.");
@@ -226,23 +242,7 @@ namespace CScape.Network
                 var loggedInPlayer = Server.Players.FirstOrDefault(
                     p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
-                IPlayerSaveData data = null;
-                if (!isReconnecting) //login
-                {
-                    if (loggedInPlayer != null)
-                    {
-                        await KillBadConnection(socket, blob, InitResponseCode.AccountAlreadyLoggedIn);
-                        return;
-                    }
-
-                    data = await Server.Database.Player.LoadOrCreateNew(username, password);
-                    if (data == null)
-                    {
-                        await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
-                        return;
-                    }
-                }
-                else //reconnect
+                if (isReconnecting)
                 {
                     if (loggedInPlayer == null)
                     {
@@ -251,25 +251,43 @@ namespace CScape.Network
                         return;
                     }
 
-                    if (!await Server.Database.Player.IsValidPassword(loggedInPlayer.PasswordHash, password))
+                    if (!await Server.Database.Player.IsValidPassword(loggedInPlayer.Password, password))
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
                         return;
                     }
-                }
 
-                if (isReconnecting)
-                {
-                    blob.Write((byte) InitResponseCode.ReconnectDone);
+                    blob.Write((byte)InitResponseCode.ReconnectDone);
                     _loginQueue.Enqueue(new ReconnectPlayerLogin(loggedInPlayer, socket, signlinkUid));
                 }
-
                 else
                 {
-                    blob.Write((byte) InitResponseCode.LoginDone);
+                    if (loggedInPlayer != null)
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.AccountAlreadyLoggedIn);
+                        return;
+                    }
+
+                    PlayerModel model;
+                    if (await Server.Database.Player.GetPlayer(username) == null)
+                    {
+                        model = await Server.Database.Player.CreatePlayer(username, password);
+                    }
+                    else
+                    {
+                        model = await Server.Database.Player.GetPlayer(username, password);
+                    }
+
+                    if (model == null)
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
+                        return;
+                    }
+
+                    blob.Write((byte)InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
-                    blob.Write(data.TitleIcon);
-                    _loginQueue.Enqueue(new NormalPlayerLogin(Server, data, socket, signlinkUid));
+                    blob.Write(model.TitleIcon);
+                    _loginQueue.Enqueue(new NormalPlayerLogin(Server, model, socket, signlinkUid));
                 }
 
                 await SocketSend(socket, blob);

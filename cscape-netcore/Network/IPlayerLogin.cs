@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace CScape
+namespace CScape.Network
 {
     public interface IPlayerLogin
     {

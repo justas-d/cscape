@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cscape-netcore", "cscape-ne
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cscape-dev-netcore", "cscape-dev-netcore\cscape-dev-netcore.csproj", "{40F9D482-6ED9-4EA9-AB15-854631C933AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{E9E13F17-EA0B-4064-8218-DB57675C73B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{40F9D482-6ED9-4EA9-AB15-854631C933AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40F9D482-6ED9-4EA9-AB15-854631C933AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40F9D482-6ED9-4EA9-AB15-854631C933AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9E13F17-EA0B-4064-8218-DB57675C73B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9E13F17-EA0B-4064-8218-DB57675C73B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9E13F17-EA0B-4064-8218-DB57675C73B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9E13F17-EA0B-4064-8218-DB57675C73B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,15 +1,15 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CScape;
 using CScape.Game.Entity;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace cscape_dev
 {
     public class PlayerDb : DbContext, IPlayerDatabase
     {
-        public DbSet<SaveData> SaveData { get; set; }
+        public DbSet<PlayerModel> SaveData { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -18,95 +18,62 @@ namespace cscape_dev
 
         protected override void OnModelCreating(ModelBuilder model)
         {
-            model.Entity<SaveData>(b =>
+            model.Entity<PlayerModel>(b =>
             {
-                b.Property(s => s.DatabaseId)
-                    .IsRequired();
-
-                b.HasKey(s => s.DatabaseId);
-
-                b.Property(s => s.Username)
-                    .IsRequired();
-
-                b.Property(s => s.PasswordHash)
-                    .IsRequired();
+                b.HasKey(c => c.Username);
+                b.Property(s => s.Username).IsRequired();
+                b.Property(s => s.PasswordHash).IsRequired();
+                b.Property(s => s.X).IsRequired();
+                b.Property(s => s.Y).IsRequired();
+                b.Property(s => s.Z).IsRequired();
             });
         }
 
-        public async Task<bool> UserExists([NotNull] string username)
+        public Task<PlayerModel> GetPlayer(string username)
         {
-            if (username == null) throw new ArgumentNullException(nameof(username));
-            return await SaveData.FirstOrDefaultAsync(s => s.Username == username) != null;
+            return SaveData.FindAsync(username.ToLowerInvariant());
         }
 
-        public async Task<IPlayerSaveData> Load([NotNull] string username, [NotNull] string password)
+        public async Task<PlayerModel> GetPlayer(string username, string password)
         {
-            if (username == null) throw new ArgumentNullException(nameof(username));
-            if (password == null) throw new ArgumentNullException(nameof(password));
+            var player = await GetPlayer(username);
 
-            var data = await SaveData.FirstOrDefaultAsync(s => s.Username == username);
-            if (data == null || !await IsValidPassword(data.PasswordHash, password))
+            if (player == null)
                 return null;
 
-            return data;
+            if(!InternalIsValidPwd(player.PasswordHash, password))
+                return null;
+
+            return player;
         }
 
-        public async Task<IPlayerSaveData> Save([NotNull] Player player)
+        public async Task Save()
         {
-            if (player == null) throw new ArgumentNullException(nameof(player));
-
-            var data = new SaveData(player);
-            await SaveByData(data);
-            return data;
-        }
-
-        private async Task SaveByData(SaveData data)
-        {
-            var existing = await SaveData.FirstOrDefaultAsync(s => s.DatabaseId == data.DatabaseId);
-            if (existing == null)
-                SaveData.Add(data);
-            else
-            {
-                existing.Update(data);
-            }
             await SaveChangesAsync();
         }
 
-        public async Task<IPlayerSaveData> LoadOrCreateNew([NotNull] string username, [NotNull] string pwd)
+        public async Task<PlayerModel> CreatePlayer(string username, string password)
         {
-            if (username == null) throw new ArgumentNullException(nameof(username));
-            if (pwd == null) throw new ArgumentNullException(nameof(pwd));
+            if ((await GetPlayer(username)) != null)
+                return null;
 
-            if (await UserExists(username))
-                return await Load(username, pwd);
-
-            var data = NewPlayer(username, pwd);
-            await SaveByData(data);
-            return data;
+            var model = new PlayerModel(username, password);
+            SaveData.Add(model);
+            await Save();
+            return model;
         }
 
-        private SaveData NewPlayer(string username, string pwd)
+        private bool InternalIsValidPwd(string p1, string p2)
         {
-            return new SaveData(username, pwd)
-            {
-                TitleIcon = 0,
-                X = 3222,
-                Y = 3218,
-                Z = 0
-                // todo : player defaults here
-            };
+            return p1.Equals(p2, StringComparison.Ordinal);
         }
 
-        public Task<bool> IsValidPassword([NotNull] string pwdHash, [NotNull] string pwd)
+        public Task<bool> IsValidPassword(string pwd1, string pwd2)
         {
-            if (pwdHash == null) throw new ArgumentNullException(nameof(pwdHash));
-            if (pwd == null) throw new ArgumentNullException(nameof(pwd));
-
             // NET Core has no bindings for libsodium, so let's just store them in plaintext.
             // TODO: IF YOU ARE DEVELOPING A SERVER FOR PRODUCTION, IMPLEMENT A PASSWORD HASHING SOLUTION
             // todo: check up on https://github.com/jedisct1/libsodium/issues/504 for libsodium bindings
-
-            return Task.FromResult(pwdHash.Equals(pwd, StringComparison.Ordinal));
+            return Task.FromResult(InternalIsValidPwd(pwd1, pwd2));
         }
     }
 }

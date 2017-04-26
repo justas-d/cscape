@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using CScape.Data;
 using CScape.Game.Entity;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
@@ -38,7 +39,7 @@ namespace CScape.Network
         public OutBlob OutStream { get; }
 
         [NotNull]
-        public Blob InCircularStream { get; }
+        public CircularBlob InCircularStream { get; }
 
         private readonly byte[] _inBufferStream; // for buffering writes to InCircularStream
 
@@ -65,7 +66,7 @@ namespace CScape.Network
             Socket.Blocking = false;
 
             OutStream = new OutBlob(server, OutStreamSize);
-            InCircularStream = new Blob(InStreamSize, true);
+            InCircularStream = new CircularBlob(InStreamSize);
             _inBufferStream = new byte[InBufferStreamSize];
 
             SignlinkId = signLink;
@@ -77,8 +78,6 @@ namespace CScape.Network
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
         public void AssignNewSocket([NotNull] Socket socket)
         {
-            ThrowIfDisposed();
-
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _deadForMs = 0;
         }

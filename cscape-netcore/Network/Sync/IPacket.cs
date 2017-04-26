@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using CScape.Data;
+using JetBrains.Annotations;
 
 namespace CScape.Network.Sync
 {

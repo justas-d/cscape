@@ -1,3 +1,5 @@
+using CScape.Data;
+
 namespace CScape.Network.Packet
 {
     public sealed class ChatPacketHandler : IPacketHandler

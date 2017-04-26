@@ -8,14 +8,15 @@ namespace CScape.Network
     public class NormalPlayerLogin : IPlayerLogin
     {
         public GameServer Server { get; }
-        public IPlayerSaveData Data { get; }
+        public PlayerModel Model { get; }
         public Socket Connection { get; }
         public int SignlinkUid { get; }
 
-        public NormalPlayerLogin([NotNull] GameServer server, [NotNull] IPlayerSaveData data, [NotNull] Socket connection, int signlinkUid)
+        public NormalPlayerLogin([NotNull] GameServer server, [NotNull] PlayerModel model,
+            [NotNull] Socket connection, int signlinkUid)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
-            Data = data ?? throw new ArgumentNullException(nameof(data));
+            Model = model ?? throw new ArgumentNullException(nameof(model));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
             SignlinkUid = signlinkUid;
         }

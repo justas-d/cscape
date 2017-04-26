@@ -8,7 +8,7 @@ namespace CScape.Game.Entity
     /// <summary>
     /// Manages what an observer can see.
     /// </summary>
-    public class Observatory : IEnumerable<UpdateObservable>
+    public class Observatory : IEnumerable<UpdateObservable>, IObservatory
     {
         public IObserver Observer { get; }
         private readonly AbstractEntity _ent;

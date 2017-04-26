@@ -1,27 +1,54 @@
+using System;
 using System.Collections.Generic;
 
 namespace CScape.Game.Entity
 {
+    // todo : catch OutOfIdException
+    public class OutOfIdException : Exception
+    {
+        
+    }
+
     public sealed class IdPool
     {
         private uint _next = 0;
+        private readonly uint _limit;
 
-        // as the server's uptime grows, the _recycle queue in IdPool also grows
-        // todo : new IdPool algorithm that is not memory intensive.
-        // reset _next to n if _recycle contains all integers up to n? how would we know that?
-        private readonly Queue<uint> _recycle = new Queue<uint>();
+        private readonly HashSet<uint> _used = new HashSet<uint>();
+
+        public IdPool(uint limit = uint.MaxValue)
+        {
+            _limit = limit;
+        }
 
         public uint NextId()
         {
-            if (_recycle.Count > 0)
-                return _recycle.Dequeue();
+            unchecked
+            {
+                if(_used.Count >= _limit)
+                    throw new OutOfIdException();
 
-            return _next++;
+                if (_next == _limit)
+                    _next = 0;
+
+                // skip used id's.
+                while(_used.Contains(_next))
+                {
+                    if (++_next >= _limit)
+                        _next = 0;
+                } 
+
+                _used.Add(_next);
+                return _next;
+            }
         }
 
         public void FreeId(uint id)
         {
-            _recycle.Enqueue(id);
+            if (!_used.Contains(id))
+                throw new InvalidOperationException($"Tried to free unused id {id}");
+
+            _used.Remove(id);
         }
     }
 }

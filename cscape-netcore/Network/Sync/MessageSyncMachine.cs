@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CScape.Data;
 
 namespace CScape.Network.Sync
 {

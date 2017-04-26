@@ -1,3 +1,4 @@
+using CScape.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Network.Packet
