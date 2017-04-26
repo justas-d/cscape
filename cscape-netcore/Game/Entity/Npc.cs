@@ -1,10 +1,11 @@
 using System;
-using CScape.Game.Worldspace;
+using CScape.Data;
+using CScape.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public class Npc : AbstractEntity, IFlagSyncableEntity
+    public class Npc : AbstractEntity
     {
         [Flags]
         public enum UpdateFlags
@@ -13,8 +14,6 @@ namespace CScape.Game.Entity
         }
 
         public UpdateFlags Flags { get; private set; }
-
-        public int HasFlags => Flags != 0 ? 1 : 0;
 
         public void SetFlag(UpdateFlags flag)
             => Flags |= flag;
@@ -30,8 +29,9 @@ namespace CScape.Game.Entity
 
         public override void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew)
         {
-            if(isNew)
-                sync.PushToNpcSyncMachine(this);
+            throw new NotImplementedException();
+            //if(isNew)
+                //sync.PushToNpcSyncMachine(this);
         }
     }
 }

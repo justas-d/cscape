@@ -1,15 +1,15 @@
 using System.Threading.Tasks;
 using CScape.Game.Entity;
+using JetBrains.Annotations;
 
 namespace CScape
 {
     public interface IPlayerDatabase
     {
-        Task<bool> UserExists(string username);
-        Task<bool> IsValidPassword(string pwdHash, string pwd);
-
-        Task<IPlayerSaveData> Load(string username, string password);
-        Task<IPlayerSaveData> Save(Player player);
-        Task<IPlayerSaveData> LoadOrCreateNew(string username, string pwd);
+        [CanBeNull] Task<PlayerModel> GetPlayer(string username);
+        [CanBeNull] Task<PlayerModel> GetPlayer(string username, string password);
+        Task Save();
+        [CanBeNull] Task<PlayerModel> CreatePlayer(string username, string password);
+        Task<bool> IsValidPassword(string pwd1, string pwd2);
     }
 }

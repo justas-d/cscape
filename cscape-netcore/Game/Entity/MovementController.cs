@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using CScape.Game.Worldspace;
+using CScape.Game.World;
 
 namespace CScape.Game.Entity
 {

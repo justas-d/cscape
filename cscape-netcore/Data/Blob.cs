@@ -2,78 +2,43 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace CScape
+namespace CScape.Data
 {
-    internal class CircularBlobException : Exception
-    {
-        public CircularBlobException(string message) : base(message)
-        {
-        }
-    }
-
     public class Blob
     {
         public byte[] Buffer { get; private set; }
 
         // or just "Bytes(Read/Written)"
-        public int ReadCaret { get; private set; }
+        public int ReadCaret { get; set; }
  
-        public int WriteCaret { get; private set; }
+        public int WriteCaret { get; set; }
 
         private bool _isInBitMode = false;
 
         public int BitReadCaret { get; set; }
         public int BitWriteCaret { get; set; }
 
-        public bool IsCircular { get; }
-        private readonly byte[] _queuedForReadMask = null;
-
-        public Blob(int size, bool isCircular = false) : this(new byte[size], isCircular)
+        public Blob(int size) : this(new byte[size])
         {
         }
 
-        public Blob(byte[] buffer, bool isCircular = false)
+        public Blob(byte[] buffer)
         {
             Buffer = buffer;
-            IsCircular = isCircular;
-
-            if (isCircular)
-            {
-                var len = buffer.Length / 8;
-                if (buffer.Length % 8 > 0)
-                    len += 1;
-                _queuedForReadMask = new byte[len];
-            }
         }
 
         #region Byte I/O
 
         public void WriteBlock(byte[] src, int srcOffset, int count)
         {
-            if (IsCircular)
-            {
-                for (var i = 0; i < count; i++)
-                    Write(src[i]);
-            }
-            else
-            {
-                System.Buffer.BlockCopy(src, srcOffset, Buffer, WriteCaret, count);
-                WriteCaret += count;
-            }
+            System.Buffer.BlockCopy(src, srcOffset, Buffer, WriteCaret, count);
+            WriteCaret += count;
         }
 
         public void ReadBlock(byte[] dest, int destOffset, int count)
         {
-            if (IsCircular)
-            {
-                for (var i = 0; i < count; i++)
-                    dest[i + destOffset] = ReadByte();
-            }
-            else
-            {
-                System.Buffer.BlockCopy(Buffer, ReadCaret, dest, destOffset, count);
-                ReadCaret += count;
-            }
+            System.Buffer.BlockCopy(Buffer, ReadCaret, dest, destOffset, count);
+            ReadCaret += count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,62 +48,19 @@ namespace CScape
         public void ResetRead() => ReadCaret = 0;
 
         public byte Peek(int lookahead = 0)
-        {
-            var head = ReadCaret + lookahead;
+            => Buffer[ReadCaret + lookahead];
 
-            if (IsCircular)
-            {
-                head %= Buffer.Length; // wraparound
-
-                var maskIndex = head / 8;
-                var bitIndex = head % 8;
-
-                // if the byte we want to read is not masked for reading, throw
-                if (!CanReadCircular(maskIndex, bitIndex))
-                    throw new CircularBlobException(
-                        $"Attempted to read byte that was not masked for reading. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} ReadCaret: {ReadCaret}");
-
-            }
-            return Buffer[head];
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte()
         {
             var data = Peek();
-
-            if (IsCircular)
-            {
-                // unset flag (num & mask)
-                _queuedForReadMask[ReadCaret / 8] &= (byte) ~(1 << ReadCaret % 8);
-            }
-
             ++ReadCaret;
             return data;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool CanReadCircular(int maskIndex, int bitIndex)
-            => ((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 1;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool CanRead(int lookahead = 0)
-        {
-            if (IsCircular)
-            {
-                var head = (ReadCaret + lookahead) % Buffer.Length;
-                return CanReadCircular(head / 8, head % 8);
-            }
-
-            return ReadCaret + lookahead >= Buffer.Length;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ReadSkipByte(int numberOfBytesToSkip = 1)
-        {
-            if (IsCircular) throw new NotImplementedException();
-
-            ReadCaret += numberOfBytesToSkip;
-        }
+            => ReadCaret + lookahead >= Buffer.Length;
 
         public short ReadInt16()
         {
@@ -181,28 +103,9 @@ namespace CScape
             Write(Constant.StringNullTerminator);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(byte val)
-        {
-            if (IsCircular)
-            {
-                var head = WriteCaret++ % Buffer.Length;
-
-                var maskIndex = head / 8;
-                var bitIndex = head % 8;
-
-                // check if readable flag is set
-                if (((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 1)
-                    throw new CircularBlobException($"Attempted to set a byte readable but it's already readable. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} WriteCaret: {WriteCaret}");
-
-                // set readable flag
-                _queuedForReadMask[maskIndex] |= (byte) (1 << bitIndex);
-
-                Buffer[head] = val;
-                return;
-            }
-
-            Buffer[WriteCaret++] = val;
-        }
+            => Buffer[WriteCaret++] = val;
 
         public void Write16(short val)
         {
@@ -214,22 +117,19 @@ namespace CScape
         {
             Write((byte) (val >> 24));
             Write((byte) (val >> 16));
-            Write16((short) val);
+            Write((byte)(val >> 8));
+            Write((byte)val);
         }
 
         public void Write64(long val)
         {
-            Write((byte) (val >> 48));
-            Write((byte) (val >> 40));
-            Write((byte) (val >> 32));
-            Write32((int) val);
+            Write32((int)(val >> 32));
+            Write32((int)val);
         }
 
         #endregion
 
         #region Bit I/O
-
-        // todo : support circular buffers for bit i/o
 
         /// <exception cref="InvalidOperationException">Already in bit mode.</exception>
         public void BeginBitAccess()

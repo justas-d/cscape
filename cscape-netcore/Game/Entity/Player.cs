@@ -1,14 +1,20 @@
 using System;
 using System.Diagnostics;
+using CScape.Data;
 using CScape.Network;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
+    //todo: change username feature
+    //todo: change password feature
+
     [DebuggerDisplay("Name {Username}")]
-    public sealed class Player : AbstractEntity, IFlagSyncableEntity, IObserver
+    public sealed class Player : AbstractEntity, IObserver
     {
+        public int Pid { get; }
+
         [Flags]
         public enum UpdateFlags
         {
@@ -20,55 +26,46 @@ namespace CScape.Game.Entity
 
         public UpdateFlags Flags { get; private set; }
 
-        public int HasFlags => Flags != 0 ? 1 : 0;
-
         public void SetFlag(UpdateFlags flag)
             => Flags |= flag;
 
-        public const int MaxUsernameChars = 12;
-        public const int MaxPasswordChars = 128;
-
-        public int DatabaseId { get; }
-        //todo: change username feature
-
-        [NotNull] public string Username { get; private set; }
-        //todo: change password feature
-        [NotNull] public string PasswordHash { get; private set; }
-
-        public byte TitleIcon { get; set; }
+        [NotNull]  public string Username => _model.Username;
+        [NotNull]  public string Password => _model.PasswordHash;
+        public byte TitleIcon => _model.TitleIcon;
 
         [NotNull] private PlayerAppearance _appearance;
-
         [NotNull]
         public PlayerAppearance Appearance
         {
             get => _appearance;
             set
             {
-                _appearance = value;
+                // ReSharper disable once ConstantNullCoalescingCondition
+                var val = value ?? PlayerAppearance.Default;
+                _appearance = val;
+                _model.SetAppearance(val);
                 SetFlag(UpdateFlags.Appearance);
             }
         }
-
-        [NotNull]
-        public SocketContext Connection { get; }
-
+       
+        [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
-
         [NotNull] public Observatory Observatory { get; }
+        [NotNull] private readonly PlayerModel _model;
+
+        public bool NeedsInitWhenLocal { get; private set; } = true;
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
             : base(login.Server, 
                   login.Server.EntityIdPool,
-                  login.Data.X, login.Data.Y, login.Data.Z)
+                  login.Model.X, login.Model.Y, login.Model.Z)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
 
-            DatabaseId = login.Data.DatabaseId;
-            Username = login.Data.Username;
-            PasswordHash = login.Data.PasswordHash;
-            TitleIcon = login.Data.TitleIcon;
+            _model = login.Model;
+            Appearance = new PlayerAppearance(_model);
+            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId());
 
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 
@@ -88,6 +85,9 @@ namespace CScape.Game.Entity
         public override void Update(MainLoop loop)
         {
             // todo : figure out if we need to update a player/abstract entity if they have been Destroy()'ed.
+            _model.SetPosition(Position);
+            Flags = 0;
+            NeedsInitWhenLocal = false;
 
             if (IsDestroyed)
             {
@@ -112,7 +112,7 @@ namespace CScape.Game.Entity
                 if (LogoutMethod != LogoutType.None)
                 {
                     Connection.Dispose(); // shut down the connection
-                    Save(); // queue save
+                    Server.SavePlayers();
 
                     // queue the player for removal from playing list, since they cleanly logged out.
                     if (LogoutMethod == LogoutType.Clean)
@@ -126,6 +126,25 @@ namespace CScape.Game.Entity
 
             loop.Player.Enqueue(this);
         }
+
+        /// <summary>
+        /// Forcibly teleports the player to the given coords.
+        /// Use this instead of manually setting player position.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        public void ForceTeleport(ushort x, ushort y, byte z)
+        {
+            if (Position.X == x && Position.Y == y && Position.Z == z)
+                return;
+
+            Position.SetPosition(x,y,z);
+            NeedsInitWhenLocal = true;
+        }
+
+        public void ForceTeleport(ushort x, ushort y)
+            => ForceTeleport(x, y, Position.Z);
 
         protected override void InternalDestroy()
             => Server.UnregisterPlayer(this);
@@ -152,12 +171,6 @@ namespace CScape.Game.Entity
             if (isNew)
                 sync.PushToPlayerSyncMachine(this);
         }
-
-        /// <summary>
-        /// Queues a player for saving.
-        /// </summary>
-        public void Save()
-            => Server.InternalEntry.SaveQueue.Enqueue(this);
 
         /// <summary>
         /// Sends a system chat message to this player.

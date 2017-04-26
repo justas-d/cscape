@@ -1,4 +1,5 @@
-﻿using CScape.Network.Sync;
+﻿using CScape.Data;
+using CScape.Network.Sync;
 
 namespace CScape.Game.Entity
 {
@@ -12,14 +13,12 @@ namespace CScape.Game.Entity
         public Player LocalPlayer { get; }
 
         private readonly PlayerUpdateSyncMachine _playerSync;
-        private readonly NpcUpdateSyncMachine _npcSync;
 
         public ObservableSyncMachine(GameServer server, Player player) : base(server)
         {
             LocalPlayer = player;
 
-            _playerSync = new PlayerUpdateSyncMachine(server);
-            _npcSync = new NpcUpdateSyncMachine(server);
+            _playerSync = new PlayerUpdateSyncMachine(server, LocalPlayer);
 
             LocalPlayer.Connection.SyncMachines.Add(_playerSync);
         }
@@ -30,13 +29,10 @@ namespace CScape.Game.Entity
         }
 
         public void Clear()
-            => _playerSync.Clear(LocalPlayer);
+            => _playerSync.Clear();
 
         public void PushToPlayerSyncMachine(Player player)
-            => _playerSync.PushPlayer(player, LocalPlayer.Equals(player));
-
-        public void PushToNpcSyncMachine(Npc npc)
-            => _npcSync.PushNpc(npc);
+            => _playerSync.PushPlayer(player);
 
         // todo : public void PushToNpcSyncMachine(Npc npc)
 

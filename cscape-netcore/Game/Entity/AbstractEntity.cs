@@ -1,5 +1,6 @@
 using System;
-using CScape.Game.Worldspace;
+using CScape.Data;
+using CScape.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity

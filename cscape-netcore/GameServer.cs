@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using CScape.Game.Entity;
-using CScape.Game.Worldspace;
+using CScape.Game.World;
 using CScape.Network;
 using JetBrains.Annotations;
 
@@ -11,7 +11,7 @@ namespace CScape
 {
     public class GameServer
     {
-        internal readonly SocketAndPlayerDatabaseDispatch InternalEntry;
+        private readonly SocketAndPlayerDatabaseDispatch _entry;
         public Logger Log { get; }
 
         public IGameServerConfig Config { get; }
@@ -22,9 +22,10 @@ namespace CScape
         internal MainLoop Loop { get; }
         public PlaneOfExistance Overworld { get; }
         public IdPool EntityIdPool { get; } = new IdPool();
+        public IdPool PlayerIdPool { get; }
         public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
 
-        public int PlayerCount { get; private set; }
+        public HashSet<Player> Players { get; } = new HashSet<Player>();
 
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
@@ -50,9 +51,9 @@ namespace CScape
             Config = config;
             Log = new Logger(this);
             Loop = new MainLoop(this, Config.TickTime);
-            InternalEntry = new SocketAndPlayerDatabaseDispatch(this, Loop.LoginQueue);
+            _entry = new SocketAndPlayerDatabaseDispatch(this, Loop.LoginQueue);
             Overworld = new PlaneOfExistance(this);
-
+            PlayerIdPool = new IdPool(Convert.ToUInt32(config.MaxPlayers));
             // todo : take into account Config.MaxPlayers (return status in "QueryServerState" method for login dispatch)?
         }
 
@@ -64,7 +65,7 @@ namespace CScape
 
             //todo run the entry point task with a cancellation token
 #pragma warning disable 4014
-            Task.Run(InternalEntry.StartListening).ContinueWith(t =>
+            Task.Run(_entry.StartListening).ContinueWith(t =>
             {
                 Log.Debug(this, $"EntryPoint listen task terminated in status: Completed: {t.IsCompleted} Faulted: {t.IsFaulted} Cancelled: {t.IsCanceled}");
                 if (t.Exception != null)
@@ -74,7 +75,8 @@ namespace CScape
             await Loop.Run();
         }
 
-        public HashSet<Player> Players { get; } = new HashSet<Player>();
+        public void SavePlayers()
+            => _entry.SaveFlag = true;
 
         internal void RegisterNewPlayer(Player player)
         {

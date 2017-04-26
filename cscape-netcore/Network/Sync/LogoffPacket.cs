@@ -1,4 +1,6 @@
-﻿namespace CScape.Network.Sync
+﻿using CScape.Data;
+
+namespace CScape.Network.Sync
 {
     public sealed class SystemChatMessagePacket : IPacket
     {

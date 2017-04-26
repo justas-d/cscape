@@ -1,6 +1,6 @@
 namespace CScape.Game.Entity
 {
-    public sealed class PlayerAppearance
+    public class PlayerAppearance : IPlayerAppearance
     {
         public enum OverheadType : byte
         {
@@ -37,7 +37,6 @@ namespace CScape.Game.Entity
         public const int FeetIndex = 10;
         public const int BeardIndex = 11;
 
-
         public int? this[int index]
         {
             get
@@ -66,14 +65,22 @@ namespace CScape.Game.Entity
             }
         }
 
+        public static PlayerAppearance Default { get; } = new PlayerAppearance();
 
-        public static PlayerAppearance Default { get; } = new PlayerAppearance(0, 18, 26, 33, 36, 42, 10,
-            GenderType.Male, OverheadType.None, 0, 0, 0, 0, 0);
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public PlayerAppearance() : this(0, 18, 26, 33, 36, 42, 10, 
+            GenderType.Male, OverheadType.None, 0, 0, 0, 0, 0)
+        {
+            
+        }
 
         public PlayerAppearance(int head, int chest, int arms, int hands, int legs, 
             int feet, int beard, GenderType gender, OverheadType overhead,
             byte skinColor, byte hairColor, byte torsoColor, byte legColor, byte feetColor)
         {
+
             Head = head;
             Chest = chest;
             Arms = arms;
@@ -90,7 +97,7 @@ namespace CScape.Game.Entity
             FeetColor = feetColor;
         }
 
-        public PlayerAppearance(PlayerAppearance cpy)
+        public PlayerAppearance(IPlayerAppearance cpy)
         {
             Head = cpy.Head;
             Chest = cpy.Chest;

@@ -1,4 +1,5 @@
 using System;
+using CScape.Data;
 using CScape.Game.Entity;
 
 namespace CScape.Network.Sync

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using CScape.Data;
 
 namespace CScape.Network.Packet
 {
@@ -31,7 +32,7 @@ namespace CScape.Network.Packet
                     case "setpos":
                         var x = ushort.Parse(args[1]);
                         var y = ushort.Parse(args[2]);
-                        player.Position.SetPosition(x,y);
+                        player.ForceTeleport(x,y);
                         break;
                     case "pos":
                         player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");

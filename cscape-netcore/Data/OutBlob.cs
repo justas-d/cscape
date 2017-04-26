@@ -1,13 +1,13 @@
 using System;
 using CScape.Network.Packet;
 
-namespace CScape
+namespace CScape.Data
 {
     public class OutBlob : Blob
     {
         public GameServer Server { get; }
 
-        public OutBlob(GameServer server, int size) : base(new byte[size], (bool) false)
+        public OutBlob(GameServer server, int size) : base(new byte[size])
         {
             Server = server;
         }

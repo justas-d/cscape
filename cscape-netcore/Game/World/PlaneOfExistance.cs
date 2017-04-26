@@ -5,7 +5,7 @@ using System.Diagnostics;
 using CScape.Game.Entity;
 using JetBrains.Annotations;
 
-namespace CScape.Game.Worldspace
+namespace CScape.Game.World
 {
     public class PlaneOfExistance : IEnumerable<AbstractEntity>
     {
