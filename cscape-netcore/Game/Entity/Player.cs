@@ -72,6 +72,7 @@ namespace CScape.Game.Entity
         [NotNull] private readonly PlayerModel _model;
 
         public bool NeedsInitWhenLocal { get; private set; } = true;
+        public bool TeleporToDestWhenWalking { get; private set; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 

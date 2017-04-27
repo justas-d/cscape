@@ -57,7 +57,7 @@ namespace CScape.Game.Entity
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Position = new Transform(this, x, y, z);
-            Movement = new MovementController(Position);
+            Movement = new MovementController(this);
             UniqueEntityId = _idPool.NextId();
         }
 

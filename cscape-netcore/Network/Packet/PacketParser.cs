@@ -37,7 +37,7 @@ namespace CScape.Network.Packet
 
                     case PacketLength.Undefined:
                         Undefined(player, server, opcodePeek);
-                        break;
+                        yield break;
 
                     default:
                         lenPayloadPeek = (byte) lenType;
@@ -64,7 +64,7 @@ namespace CScape.Network.Packet
                         break;
                     case PacketLength.Undefined:
                         Undefined(player, server, opcode);
-                        break;
+                        yield break;
                     default:
                         lenPayload = (byte) lenType;
                         break;
@@ -83,10 +83,10 @@ namespace CScape.Network.Packet
         {
             var msg = $"Undefined packet opcode: {opcode}";
             server.Log.Warning(typeof(PacketParser), msg);
-            Debug.Fail(msg);
             player.ForcedLogout();
 
 #if DEBUG
+            Debug.Fail(msg);
             server.Database.Packet.Reload();
 #endif
         }
