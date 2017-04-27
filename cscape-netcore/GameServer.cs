@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Threading.Tasks;
 using CScape.Game.Entity;
@@ -25,7 +26,9 @@ namespace CScape
         public IdPool PlayerIdPool { get; }
         public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
 
-        public HashSet<Player> Players { get; } = new HashSet<Player>();
+        public ImmutableHashSet<Player> Players { get; private set; } = ImmutableHashSet<Player>.Empty;
+
+        public bool IsLoginEnbled { get; set; } = true;
 
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
@@ -54,7 +57,24 @@ namespace CScape
             _entry = new SocketAndPlayerDatabaseDispatch(this, Loop.LoginQueue);
             Overworld = new PlaneOfExistance(this);
             PlayerIdPool = new IdPool(Convert.ToUInt32(config.MaxPlayers));
-            // todo : take into account Config.MaxPlayers (return status in "QueryServerState" method for login dispatch)?
+        }
+
+        [Flags]
+        public enum ServerStateFlags
+        {
+            None,
+            PlayersFull,
+            LoginDisabled
+        }
+
+        public ServerStateFlags GetState()
+        {
+            ServerStateFlags ret = 0;
+            if (Players.Count >= Config.MaxPlayers)
+                ret |= ServerStateFlags.PlayersFull;
+            if(!IsLoginEnbled)
+                ret |= ServerStateFlags.LoginDisabled;
+            return ret;
         }
 
         public async Task Start()
@@ -81,15 +101,28 @@ namespace CScape
         internal void RegisterNewPlayer(Player player)
         {
             Log.Debug(this, $"Registering new player: {player.Username}.");
-            if (!Players.Add(player))
+
+            if (Players.Contains(player))
+            {
                 Log.Warning(this, $"Tried to register existing player: {player.Username}.");
+                return;
+            }
+
+            Players = Players.Add(player);
+
         }
 
         internal void UnregisterPlayer(Player player)
         {
             Log.Debug(this, $"Unregistering player: {player.Username}.");
-            if(!Players.Remove(player))
+
+            if (!Players.Contains(player))
+            {
                 Log.Warning(this, $"Tried to unregister player that is not registered: {player.Username}");
+                return;
+            }
+
+            Players = Players.Remove(player);
         }
     }
 }

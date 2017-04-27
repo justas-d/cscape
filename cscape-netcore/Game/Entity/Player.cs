@@ -15,6 +15,8 @@ namespace CScape.Game.Entity
     {
         public int Pid { get; }
 
+        #region sync vars
+
         [Flags]
         public enum UpdateFlags
         {
@@ -29,9 +31,18 @@ namespace CScape.Game.Entity
         public void SetFlag(UpdateFlags flag)
             => Flags |= flag;
 
-        [NotNull]  public string Username => _model.Username;
-        [NotNull]  public string Password => _model.PasswordHash;
-        public byte TitleIcon => _model.TitleIcon;
+
+        [CanBeNull] private ChatMessage _lastChatMessage;
+
+        [CanBeNull] public ChatMessage LastChatMessage
+        {
+            get => _lastChatMessage;
+            set
+            {
+                _lastChatMessage = value;
+                SetFlag(UpdateFlags.Chat);
+            }
+        }
 
         [NotNull] private PlayerAppearance _appearance;
         [NotNull]
@@ -47,7 +58,14 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Appearance);
             }
         }
-       
+        
+
+        #endregion
+
+        [NotNull] public string Username => _model.Username;
+        [NotNull] public string Password => _model.PasswordHash;
+        public byte TitleIcon => _model.TitleIcon;
+
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
         [NotNull] public Observatory Observatory { get; }
@@ -84,10 +102,13 @@ namespace CScape.Game.Entity
 
         public override void Update(MainLoop loop)
         {
-            // todo : figure out if we need to update a player/abstract entity if they have been Destroy()'ed.
+            // sync db model
             _model.SetPosition(Position);
+
+            // reset sync vars
             Flags = 0;
             NeedsInitWhenLocal = false;
+
 
             if (IsDestroyed)
             {

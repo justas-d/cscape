@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using CScape.Data;
 using CScape.Game.Entity;
 using JetBrains.Annotations;
@@ -11,6 +12,8 @@ namespace CScape.Network.Sync
     {
         private sealed class PlayerUpdateState : IEquatable<PlayerUpdateState>
         {
+            private readonly bool _isLocal;
+
             [NotNull]
             public Player Player { get; }
 
@@ -18,8 +21,9 @@ namespace CScape.Network.Sync
 
             private readonly uint _id;
 
-            public PlayerUpdateState([NotNull] Player player)
+            public PlayerUpdateState([NotNull] Player player, bool isLocal)
             {
+                _isLocal = isLocal;
                 Player = player ?? throw new ArgumentNullException(nameof(player));
                 _id = player.UniqueEntityId;
             }
@@ -34,7 +38,17 @@ namespace CScape.Network.Sync
                 => GetCombinedFlags() != 0;
 
             public Player.UpdateFlags GetCombinedFlags()
-                => Player.Flags | _localFlags;
+            {
+                var ret = Player.Flags | _localFlags;
+
+                if (_isLocal)
+                {
+                    if (ret.HasFlag(Player.UpdateFlags.Chat) && !Player.LastChatMessage.IsForced)
+                        ret &= ~Player.UpdateFlags.Chat;
+                }
+
+                return ret;
+            }
 
             public void ResetLocalFlags()
                 => _localFlags = 0;
@@ -71,7 +85,7 @@ namespace CScape.Network.Sync
 
         public PlayerUpdateSyncMachine(GameServer server, [NotNull] Player localPlayer) : base(server)
         {
-            _local = new PlayerUpdateState(localPlayer ?? throw new ArgumentNullException(nameof(localPlayer)));
+            _local = new PlayerUpdateState(localPlayer ?? throw new ArgumentNullException(nameof(localPlayer)), true);
         }
 
         public void Clear()
@@ -124,9 +138,7 @@ namespace CScape.Network.Sync
             // 3
             if (_local.Player.NeedsInitWhenLocal)
             {
-                stream.WriteBits(1,
-                    1); // continue reading? or just "does need updating at all"? If 0, no flag updates will be read for local.
-
+                stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 3); // type
 
                 stream.WriteBits(2, _local.Player.Position.Z); // plane
@@ -138,19 +150,30 @@ namespace CScape.Network.Sync
             // 1
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
             {
+                stream.WriteBits(1, 1); // continue reading?
+                stream.WriteBits(2, 1); // type
+
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(1, _local.NeedsUpdateInt()); // add to needs updating list
             }
             // 2
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
             {
+                stream.WriteBits(1, 1); // continue reading?
+                stream.WriteBits(2, 2); // type
+
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir2);
                 stream.WriteBits(1, _local.NeedsUpdateInt()); // add to needs updating list
             }
             // 0
+            else if(_local.NeedsUpdate())
+            {
+                stream.WriteBits(1, 1); // continue reading?
+                stream.WriteBits(2, 0); // type
+            }
             else
-                stream.WriteBits(1, 0); // 0
+                stream.WriteBits(1, 0); // continue reading?
 
             #endregion
 
@@ -235,7 +258,7 @@ namespace CScape.Network.Sync
                  *  appearance.
                  */
 
-                var update = new PlayerUpdateState(player);
+                var update = new PlayerUpdateState(player, false);
                 // todo : keep track of appearance stream buffering in the client.
 
                 update.SetLocalFlag(Player.UpdateFlags.Appearance);
@@ -275,6 +298,14 @@ namespace CScape.Network.Sync
             var headerPh = new PlaceholderHandle(stream, 2);
 
             // write flags
+            if (flags.HasFlag(Player.UpdateFlags.Chat))
+            {
+                stream.Write((byte)((byte)upd.Player.LastChatMessage.Color));
+                stream.Write((byte)((byte)upd.Player.LastChatMessage.Effects));
+                stream.Write(upd.Player.TitleIcon);
+                stream.WriteString(upd.Player.LastChatMessage.Message);
+            }
+
             if (flags.HasFlag(Player.UpdateFlags.Appearance))
                 WriteAppearance(upd.Player, stream);
 
@@ -291,6 +322,7 @@ namespace CScape.Network.Sync
             upd.ResetLocalFlags();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteAppearance(Player player, Blob stream)
         {
             const int equipSlotSize = 12;

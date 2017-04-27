@@ -8,12 +8,11 @@ namespace CScape.Network.Packet
 {
     public static class PacketParser
     {
-        public static IEnumerable<(int Opcode, Blob Packet)> 
+        public static IEnumerable<(int Opcode, Blob Packet)>
             Parse([NotNull] Player player, [NotNull] GameServer server, [NotNull] CircularBlob packetStream)
         {
             while (packetStream.CanRead())
             {
-                // todo : rewrite the peeking in packet parsing with try/catches and blob state resets on catch
                 // peek everything untill we 100% have the packet.
                 var opcodePeek = packetStream.Peek();
                 var lenType = server.Database.Packet.GetIncoming(opcodePeek);

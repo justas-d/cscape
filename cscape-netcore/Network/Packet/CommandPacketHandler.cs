@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using CScape.Data;
+using CScape.Game.Entity;
 
 namespace CScape.Network.Packet
 {
@@ -38,6 +39,9 @@ namespace CScape.Network.Packet
                         player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");
                         player.SendSystemChatMessage($"LX: {player.Position.LocalX} LY: {player.Position.LocalY}");
                         player.SendSystemChatMessage($"RX: {player.Position.RegionX} + 6 RY: {player.Position.RegionY} + 6");
+                        break;
+                    case "ftext":
+                        player.LastChatMessage = new ChatMessage(player, "Forced text", ChatMessage.TextColor.Cyan, ChatMessage.TextEffect.Wave, true);
                         break;
                     default:
                         player.Log.Debug(this, $"Command: {cmd}");

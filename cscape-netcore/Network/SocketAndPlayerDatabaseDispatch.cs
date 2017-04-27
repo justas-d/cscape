@@ -40,6 +40,7 @@ namespace CScape.Network
         InMembersArea = 17,
         InvalidLoginServer = 20,
         TransferringAccount = 21, // send extra byte for countdown on the client's end
+        // todo : ratelimiting for login requests
     }
 
     /// <summary>
@@ -71,7 +72,7 @@ namespace CScape.Network
                 lock (_saveLock) _saveFlag = value;
             }
         }
-        
+
 
         public SocketAndPlayerDatabaseDispatch(GameServer server, [NotNull] ConcurrentQueue<IPlayerLogin> loginQueue)
         {
@@ -152,8 +153,19 @@ namespace CScape.Network
                 for (var i = 0; i < initMagicZeroCount; i++)
                     blob.Write(0);
 
+                var sState = Server.GetState();
+                if (sState.HasFlag(GameServer.ServerStateFlags.PlayersFull))
+                {
+                    await KillBadConnection(socket, blob, InitResponseCode.WorldIsFull);
+                    return;
+                }
+                if (sState.HasFlag(GameServer.ServerStateFlags.LoginDisabled))
+                {
+                    await KillBadConnection(socket, blob, InitResponseCode.LoginServerOffline);
+                    return;
+                }
+
                 // initMagicZeroCount can be any InitResponseCode
-                // todo some sort of function that inspects the state of the server and returns an appropriate InitResponseCode
                 blob.Write((byte) InitResponseCode.ContinueToCredentials);
 
                 // write server isaac key
@@ -238,7 +250,6 @@ namespace CScape.Network
                 username = username.ToLowerInvariant();
 
                 // check if user is logged in
-                // todo : is finding loggedInPlayer by calling Server.Players.FirstOrDefault on the entry thread thread safe?
                 var loggedInPlayer = Server.Players.FirstOrDefault(
                     p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 

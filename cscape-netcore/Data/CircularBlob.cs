@@ -45,7 +45,7 @@ namespace CScape.Data
             var bitIndex = head % 8;
 
             // check if readable flag is set
-            if (((_queuedForReadMask[maskIndex] >> bitIndex) & 1) == 1)
+            if (CanReadCircular(maskIndex, bitIndex))
                 throw new CircularBlobException(
                     $"Attempted to set a byte readable but it's already readable. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} WriteCaret: {WriteCaret}");
 
@@ -73,7 +73,7 @@ namespace CScape.Data
             // if the byte we want to read is not masked for reading, throw
             if (!CanReadCircular(maskIndex, bitIndex))
                 throw new CircularBlobException(
-                    $"Attempted to read byte that was not masked for reading. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} ReadCaret: {ReadCaret}");
+                    $"Attempted to look at byte that was not masked for reading. MaskIndex: {maskIndex} BitIndex: {bitIndex} BufferSize: {Buffer.Length} MaskSize: {_queuedForReadMask.Length} ReadCaret: {ReadCaret}");
 
             return Buffer[head];
         }
@@ -81,6 +81,7 @@ namespace CScape.Data
         public byte ReadByte()
         {
             var data = Peek();
+
             // unset flag (num & mask)
             _queuedForReadMask[ReadCaret / 8] &= (byte) ~(1 << ReadCaret % 8);
 
