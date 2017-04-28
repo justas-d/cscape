@@ -43,6 +43,9 @@ namespace CScape.Network.Packet
                     case "ftext":
                         player.LastChatMessage = new ChatMessage(player, "Forced text", ChatMessage.TextColor.Cyan, ChatMessage.TextEffect.Wave, true);
                         break;
+                    case "run":
+                        player.Movement.IsRunning = true;
+                        break;
                     default:
                         player.Log.Debug(this, $"Command: {cmd}");
                         break;

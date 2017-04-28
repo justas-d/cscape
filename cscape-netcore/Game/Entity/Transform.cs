@@ -6,6 +6,8 @@ namespace CScape.Game.Entity
     {
         public AbstractEntity Entity { get; }
         private readonly Observatory _observatory;
+        private int _regionX;
+        private int _regionY;
 
         public const int MinRegionBorder = 16;
         public const int MaxRegionBorder = 88;
@@ -14,8 +16,28 @@ namespace CScape.Game.Entity
         public ushort Y { get; private set; }
         public byte Z { get; private set; }
 
-        public int RegionX { get; private set; }
-        public int RegionY { get; private set; }
+        public int RegionX
+        {
+            get => _regionX;
+            private set
+            {
+                _regionX = value;
+                BaseX = (ushort) (_regionX * 8);
+            }
+        }
+
+        public int RegionY
+        {
+            get => _regionY;
+            private set
+            {
+                _regionY = value;
+                BaseY = (ushort)(_regionY * 8);
+            }
+        }
+
+        public ushort BaseX { get; private set; }
+        public ushort BaseY { get; private set; }
 
         public int LocalX { get; private set; }
         public int LocalY { get; private set; }
@@ -54,7 +76,7 @@ namespace CScape.Game.Entity
             LocalX = x - (8 * RegionX);
             LocalY = y - (8 * RegionY);
 
-            Update();
+            Update(false);
             _observatory?.Clear();
         }
 
@@ -85,7 +107,7 @@ namespace CScape.Game.Entity
         public void TransformLocals(sbyte tx, sbyte ty)
         {
             // don't do anything if the transform is null
-            if(tx == 0 || ty == 0)
+            if(tx == 0 && ty == 0)
                 return;
 
             LocalX += tx;
@@ -93,7 +115,7 @@ namespace CScape.Game.Entity
             Update();
         }
 
-        private void Update()
+        private void Update(bool updateObservatories = true)
         {
             var dx = 0;
             var dy = 0;
@@ -120,18 +142,22 @@ namespace CScape.Game.Entity
                 RegionY += 4;
             }
 
-            if (dx != 0 && dy != 0)
+            if (dx != 0 || dy != 0)
             {
                 LocalX += dx;
                 LocalY += dy;
-
-                // todo : some sort of faster way of find observables that can see this transform
-                // iterating over all players is pretty stupid but it works for now
-                // IObservers don't necessarily have to be a player as well.
-
-                foreach (var p in Entity.Server.Players)
-                    p.Observatory.PushObservable(Entity);
             }
+
+            X = (ushort) (BaseX + LocalX);
+            Y = (ushort)(BaseY + LocalY);
+
+            // todo : some sort of faster way of find observables that can see this transform
+            // iterating over all players is pretty stupid but it works for now
+            // IObservers don't necessarily have to be a player as well.
+
+            if(updateObservatories)
+            foreach (var p in Entity.Server.Players)
+                p.Observatory.PushObservable(Entity);
         }
     }
 }

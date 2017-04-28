@@ -8,7 +8,7 @@ namespace CScape.Game.Entity
     /// <summary>
     /// Something that can be observed and it's observation can be synced.
     /// </summary>
-    public abstract class AbstractEntity : IEquatable<AbstractEntity>
+    public abstract class AbstractEntity : IEquatable<AbstractEntity>, IEntity
     {
         public uint UniqueEntityId { get; }
         [NotNull] public Transform Position { get; }
@@ -18,9 +18,6 @@ namespace CScape.Game.Entity
         [NotNull] public GameServer Server { get; }
 
         [NotNull] private readonly IdPool _idPool;
-
-        [CanBeNull]
-        public virtual MovementController Movement { get; }
 
         public bool IsDestroyed { get; private set; }
 
@@ -32,13 +29,11 @@ namespace CScape.Game.Entity
             [NotNull] GameServer server,
             [NotNull] IdPool idPool,
             ushort x, ushort y, byte z,
-            PlaneOfExistance poe = null,
-            MovementController movement = null)
+            PlaneOfExistance poe = null)
         {
             Position = new Transform(this, x ,y ,z);
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
-            Movement = movement;
 
             UniqueEntityId = _idPool.NextId();
             InitPoE(poe, Server.Overworld);
@@ -57,7 +52,6 @@ namespace CScape.Game.Entity
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Position = new Transform(this, x, y, z);
-            Movement = new MovementController(Position);
             UniqueEntityId = _idPool.NextId();
         }
 

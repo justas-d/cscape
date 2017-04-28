@@ -10,8 +10,14 @@ namespace CScape.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
+    public interface IMovingEntity : IEntity
+    {
+        Transform Position { get; }
+        MovementController Movement { get; }
+    }
+
     [DebuggerDisplay("Name {Username}")]
-    public sealed class Player : AbstractEntity, IObserver
+    public sealed class Player : AbstractEntity, IObserver, IMovingEntity
     {
         public int Pid { get; }
 
@@ -70,8 +76,10 @@ namespace CScape.Game.Entity
         [NotNull] public Logger Log => Server.Log;
         [NotNull] public Observatory Observatory { get; }
         [NotNull] private readonly PlayerModel _model;
+        [NotNull] public MovementController Movement { get; }
 
         public bool NeedsInitWhenLocal { get; private set; } = true;
+        public bool TeleporToDestWhenWalking { get; private set; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
@@ -84,6 +92,7 @@ namespace CScape.Game.Entity
             _model = login.Model;
             Appearance = new PlayerAppearance(_model);
             Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId());
+            Movement = new MovementController(this);
 
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 

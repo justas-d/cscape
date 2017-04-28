@@ -1,82 +1,66 @@
-using System;
-using System.Collections.Generic;
 using CScape.Game.World;
+using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
     public sealed class MovementController
     {
-        public Transform Position { get; }
+        [CanBeNull] private IDirectionsProvider _directions;
+        public IMovingEntity Entity { get; }
         public bool IsRunning { get; set; }
 
-        private readonly Queue<Direction> _movementQueue = new Queue<Direction>();
-
-        public MovementController(Transform position)
+        public MovementController(IMovingEntity entity)
         {
-            Position = position;
+            Entity = entity;
         }
 
-        public void ResetMovementQueue() => _movementQueue.Clear();
-        public void QueueMovement(Direction direction) => _movementQueue.Enqueue(direction);
-
-
-        public static (sbyte x, sbyte y) GetDelta(Direction dir)
+        [CanBeNull] public IDirectionsProvider Directions
         {
-            const sbyte dn = 1;
-            const sbyte ds = -1;
-            const sbyte dw = -1;
-            const sbyte de = 1;
-            switch (dir)
+            get => _directions;
+            set
             {
-                case Direction.None:
-                    return (0, 0);
-                case Direction.NorthWest:
-                    return (dw, dn);
-                case Direction.North:
-                    return (0, dn);
-                case Direction.NorthEast:
-                    return (de, dn);
-                case Direction.West:
-                    return (dw, 0);
-                case Direction.East:
-                    return (de, 0);
-                case Direction.SouthWest:
-                    return (dw, ds);
-                case Direction.South:
-                    return (0, ds);
-                case Direction.SouthEast:
-                    return (de, ds);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dir), dir, null);
+                _directions = value;
+                Entity.Server.Loop.Movement.Enqueue(Entity);
             }
         }
 
         public void Update()
         {
             // no op
-            if (_movementQueue.Count == 0)
+            if (Directions == null || Directions.IsDone())
             {
                 MoveUpdate.Type = MoveUpdateData.MoveType.Noop;
+                _directions = null;
                 return;
             }
 
-            void Move(Direction dir, out byte updateDir)
+            void Move((sbyte, sbyte) d, out byte updateDir)
             {
-                updateDir = (byte)dir;
-                Position.TransformLocals(GetDelta(dir));
+                updateDir = (byte) DirectionHelper.GetDirection(d);
+                Entity.Position.TransformLocals(d);
             }
 
-            // walk
-            if (IsRunning && _movementQueue.Count == 1 || !IsRunning)
+            if (IsRunning)
             {
-                Move(_movementQueue.Dequeue(), out MoveUpdate.Dir1);
+                Move(Directions.GetNextDir(), out MoveUpdate.Dir1);
+
+                // if no more dirs to target, but we're running, finish the run by just walking
+                if (Directions.IsDone())
+                    MoveUpdate.Type = MoveUpdateData.MoveType.Walk;
+                else // continue running if we still have dirs
+                {
+                    Move(Directions.GetNextDir(), out MoveUpdate.Dir2);
+                    MoveUpdate.Type = MoveUpdateData.MoveType.Run;
+                }
+
             }
-            // run
-            if (IsRunning && _movementQueue.Count >= 2)
+            else
             {
-                Move(_movementQueue.Dequeue(), out MoveUpdate.Dir1);
-                Move(_movementQueue.Dequeue(), out MoveUpdate.Dir2);
+                Move(Directions.GetNextDir(), out MoveUpdate.Dir1);
+                MoveUpdate.Type = MoveUpdateData.MoveType.Walk;
             }
+
+            Entity.Server.Loop.Movement.Enqueue(Entity);
         }
 
         internal MoveUpdateData MoveUpdate { get; } = new MoveUpdateData();
