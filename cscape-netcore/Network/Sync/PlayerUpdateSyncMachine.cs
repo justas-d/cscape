@@ -262,6 +262,8 @@ namespace CScape.Network.Sync
                 // todo : keep track of appearance stream buffering in the client.
 
                 update.SetLocalFlag(Player.UpdateFlags.Appearance);
+                update.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
+
                 _syncPlayers = _syncPlayers.Add(update);
 
                 stream.WriteBits(1, 1); // has flags. Since this is somebody we haven't seen, write their appearance.
@@ -284,12 +286,6 @@ namespace CScape.Network.Sync
 
         private void WriteFlags(PlayerUpdateState upd, Blob stream)
         {
-            /*
-             * We won't want to sync the chat flag to the local player,
-             * so todo check if we're writing flags for the local player before checking the chat flag.
-             * if we're writing chat for local, remove chat from flags
-             */
-
             var flags = upd.GetCombinedFlags();
 
             if (flags == 0)
@@ -300,14 +296,22 @@ namespace CScape.Network.Sync
             // write flags
             if (flags.HasFlag(Player.UpdateFlags.Chat))
             {
-                stream.Write((byte)((byte)upd.Player.LastChatMessage.Color));
-                stream.Write((byte)((byte)upd.Player.LastChatMessage.Effects));
+                stream.Write(((byte)upd.Player.LastChatMessage.Color));
+                stream.Write(((byte)upd.Player.LastChatMessage.Effects));
                 stream.Write(upd.Player.TitleIcon);
                 stream.WriteString(upd.Player.LastChatMessage.Message);
             }
 
             if (flags.HasFlag(Player.UpdateFlags.Appearance))
                 WriteAppearance(upd.Player, stream);
+
+            if (flags.HasFlag(Player.UpdateFlags.FacingCoordinate))
+            {
+                stream.Write16((short) 
+                    (((upd.Player.LastMovedDirection.x + upd.Player.Position.X) * 2) + 1));
+                stream.Write16((short) 
+                    (((upd.Player.LastMovedDirection.y + upd.Player.Position.Y) * 2) + 1));
+            }
 
             // todo : the rest of the updates flags.
             // THEY NEED TO FOLLOW A STRICT ORDER

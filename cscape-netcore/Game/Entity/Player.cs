@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using CScape.Data;
+using CScape.Game.World;
 using CScape.Network;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
@@ -9,12 +10,6 @@ namespace CScape.Game.Entity
 {
     //todo: change username feature
     //todo: change password feature
-
-    public interface IMovingEntity : IEntity
-    {
-        Transform Position { get; }
-        MovementController Movement { get; }
-    }
 
     [DebuggerDisplay("Name {Username}")]
     public sealed class Player : AbstractEntity, IObserver, IMovingEntity
@@ -64,7 +59,8 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Appearance);
             }
         }
-        
+
+        public (sbyte x, sbyte y) LastMovedDirection { get; set; }
 
         #endregion
 

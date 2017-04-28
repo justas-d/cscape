@@ -5,7 +5,8 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public class Npc : AbstractEntity, IMovingEntity
+    // todo : npc
+    public class Npc : AbstractEntity
     {
         [Flags]
         public enum UpdateFlags
@@ -26,7 +27,7 @@ namespace CScape.Game.Entity
             ushort x, ushort y, byte z,
             PlaneOfExistance poe = null) : base(server, idPool, x,y,z, poe)
         {
-            Movement = new MovementController(this);
+            //Movement = new MovementController(this);
         }
 
         public override void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew)

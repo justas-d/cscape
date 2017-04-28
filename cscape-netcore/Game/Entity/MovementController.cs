@@ -36,8 +36,9 @@ namespace CScape.Game.Entity
 
             void Move((sbyte, sbyte) d, out byte updateDir)
             {
-                updateDir = (byte) DirectionHelper.GetDirection(d);
+                updateDir = (byte)DirectionHelper.GetDirection(d);
                 Entity.Position.TransformLocals(d);
+                Entity.LastMovedDirection = d;
             }
 
             if (IsRunning)
