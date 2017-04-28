@@ -4,6 +4,8 @@ namespace CScape.Game.World
 {
     public static class DirectionHelper
     {
+        public static readonly (sbyte, sbyte) NoopDelta = (0, 0);
+
         public static (sbyte x, sbyte y) GetDelta(Direction dir)
         {
             const sbyte dn = 1;

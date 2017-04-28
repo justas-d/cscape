@@ -17,7 +17,7 @@ namespace CScape
         /// Defines a queue for entities that need to be updated.
         /// Only one of the same entity can exist in the queue.
         /// </summary>
-        public sealed class UniqueEntUpdateQueue<T> : IEnumerable<T> where T : AbstractEntity
+        public sealed class UniqueEntUpdateQueue<T> : IEnumerable<T> where T : IEntity
         {
             private readonly HashSet<uint> _idSet = new HashSet<uint>();
             private readonly Queue<T> _entQueue = new Queue<T>();
@@ -51,7 +51,7 @@ namespace CScape
         }
 
         // update queues
-        [NotNull] public UniqueEntUpdateQueue<AbstractEntity> Movement { get; } = new UniqueEntUpdateQueue<AbstractEntity>();
+        [NotNull] public UniqueEntUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
         [NotNull] public UniqueEntUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
         [NotNull] public ConcurrentQueue<IPlayerLogin> LoginQueue { get; } = new ConcurrentQueue<IPlayerLogin>();
 
@@ -102,7 +102,7 @@ namespace CScape
                 // movement updates
                 var size = Movement.EntCount;
                 for (var i = 0; i < size; ++i)
-                    Movement.Dequeue().Movement?.Update();
+                    Movement.Dequeue().Movement.Update();
 
                 // write & send
                 // todo : offload write & send to a different thread?

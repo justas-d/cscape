@@ -142,7 +142,7 @@ namespace CScape.Game.Entity
                 RegionY += 4;
             }
 
-            if (dx != 0 && dy != 0)
+            if (dx != 0 || dy != 0)
             {
                 LocalX += dx;
                 LocalY += dy;
