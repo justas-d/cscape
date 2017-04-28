@@ -84,8 +84,8 @@ namespace CScape.Game.Entity
         private (ushort x, ushort y)? _facingCoordinate;
         [NotNull] public MovementController Movement { get; }
 
-        public bool NeedsInitWhenLocal { get; private set; } = true;
-        public bool TeleporToDestWhenWalking { get; private set; }
+        public bool NeedsPositionInit { get; private set; } = true;
+        public bool TeleportToDestWhenWalking { get; set; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
@@ -122,7 +122,7 @@ namespace CScape.Game.Entity
 
             // reset sync vars
             Flags = 0;
-            NeedsInitWhenLocal = false;
+            NeedsPositionInit = false;
 
 
             if (IsDestroyed)
@@ -156,7 +156,6 @@ namespace CScape.Game.Entity
                         Destroy();
                         return;
                     }
-                        
                 }
             }
 
@@ -175,8 +174,9 @@ namespace CScape.Game.Entity
             if (Position.X == x && Position.Y == y && Position.Z == z)
                 return;
 
+            Observatory.Clear();
             Position.SetPosition(x,y,z);
-            NeedsInitWhenLocal = true;
+            NeedsPositionInit = true;
         }
 
         public void ForceTeleport(ushort x, ushort y)
@@ -192,11 +192,12 @@ namespace CScape.Game.Entity
 
             const int maxrange = 15;
 
-            if (obs is Player)
+            var player = obs as Player;
+            if (player != null)
             {
                 // todo : adjust maxrange if the player update packet gets too big or too small.
                 // keep the max at 15, min at 0.
-                
+
             }
 
             return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= maxrange;

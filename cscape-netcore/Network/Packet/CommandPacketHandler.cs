@@ -9,7 +9,7 @@ namespace CScape.Network.Packet
     {
         public int[] Handles { get; } = { 103 };
 
-        public void Handle(Game.Entity.Player player, int opcode, Blob packet)
+        public void Handle(Player player, int opcode, Blob packet)
         {
             if (packet.TryReadString(255, out string cmd))
             {
@@ -50,6 +50,9 @@ namespace CScape.Network.Packet
                         break;
                     case "run":
                         player.Movement.IsRunning = true;
+                        break;
+                    case "walktp":
+                        player.TeleportToDestWhenWalking = !player.TeleportToDestWhenWalking;
                         break;
                     default:
                         player.Log.Debug(this, $"Command: {cmd}");

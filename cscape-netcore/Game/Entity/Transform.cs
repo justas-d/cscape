@@ -32,7 +32,7 @@ namespace CScape.Game.Entity
             private set
             {
                 _regionY = value;
-                BaseY = (ushort)(_regionY * 8);
+                BaseY = (ushort) (_regionY * 8);
             }
         }
 
@@ -54,11 +54,11 @@ namespace CScape.Game.Entity
                     break;
             }
 
-            SetPosition(x, y, z);
+            SetPosition(x, y, z, false);
         }
 
         /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than 4.</exception>
-        public void SetPosition(ushort x, ushort y, byte z)
+        public void SetPosition(ushort x, ushort y, byte z, bool updateObservatories = true)
         {
             if (z > 4) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than 4.");
 
@@ -76,7 +76,7 @@ namespace CScape.Game.Entity
             LocalX = x - (8 * RegionX);
             LocalY = y - (8 * RegionY);
 
-            Update(false);
+            Update(updateObservatories);
             _observatory?.Clear();
         }
 
@@ -107,7 +107,7 @@ namespace CScape.Game.Entity
         public void TransformLocals(sbyte tx, sbyte ty)
         {
             // don't do anything if the transform is null
-            if(tx == 0 && ty == 0)
+            if (tx == 0 && ty == 0)
                 return;
 
             LocalX += tx;
@@ -149,15 +149,15 @@ namespace CScape.Game.Entity
             }
 
             X = (ushort) (BaseX + LocalX);
-            Y = (ushort)(BaseY + LocalY);
+            Y = (ushort) (BaseY + LocalY);
 
             // todo : some sort of faster way of find observables that can see this transform
             // iterating over all players is pretty stupid but it works for now
             // IObservers don't necessarily have to be a player as well.
 
-            if(updateObservatories)
-            foreach (var p in Entity.Server.Players)
-                p.Observatory.PushObservable(Entity);
+            if (updateObservatories)
+                foreach (var p in Entity.Server.Players)
+                    p.Observatory.PushObservable(Entity);
         }
     }
 }

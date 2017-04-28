@@ -14,6 +14,8 @@ namespace CScape.Network.Sync
         {
             private readonly bool _isLocal;
 
+            public bool IsNew { get; set; } = true;
+
             [NotNull]
             public Player Player { get; }
 
@@ -77,7 +79,7 @@ namespace CScape.Network.Sync
 
         [NotNull] private readonly HashSet<uint> _syncPlayerIds = new HashSet<uint>();
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;
-        [NotNull] private readonly Queue<Player> _newPlayerQueue = new Queue<Player>();
+        [NotNull] private readonly Queue<PlayerUpdateState> _initQueue = new Queue<PlayerUpdateState>();
 
         [NotNull] private readonly PlayerUpdateState _local;
 
@@ -92,7 +94,7 @@ namespace CScape.Network.Sync
         {
             _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;
             _syncPlayerIds.Clear();
-            _newPlayerQueue.Clear();
+            _initQueue.Clear();
         }
 
         public void PushPlayer(Player player)
@@ -103,7 +105,13 @@ namespace CScape.Network.Sync
             if (_syncPlayerIds.Contains(player.UniqueEntityId))
                 return;
 
-            _newPlayerQueue.Enqueue(player);
+            _initQueue.Enqueue(new PlayerUpdateState(player, false));
+        }
+
+        private void RemoveFromSyncList(PlayerUpdateState upd)
+        {
+            _syncPlayers = _syncPlayers.Remove(upd);
+            _syncPlayerIds.Remove(upd.Player.UniqueEntityId);
         }
 
         public override void Synchronize(OutBlob stream)
@@ -136,7 +144,7 @@ namespace CScape.Network.Sync
            *      7 bits - local x
            */
             // 3
-            if (_local.Player.NeedsInitWhenLocal)
+            if (_local.Player.NeedsPositionInit)
             {
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 3); // type
@@ -183,22 +191,26 @@ namespace CScape.Network.Sync
             stream.WriteBits(8, 0); // placeholder for the count of existing update ents
 
             var written = 0;
+
             foreach (var ent in _syncPlayers)
             {
                 // check if the entity is still qualified for updates
                 if (ent.Player.IsDestroyed || !_local.Player.CanSee(ent.Player))
                 {
-                    // send remove payload
-                    stream.WriteBits(1, 1); // is not noop?
-                    stream.WriteBits(2, 3); // type
-                    // remove internally
-                    _syncPlayers = _syncPlayers.Remove(ent);
-                    _syncPlayerIds.Remove(ent.Player.UniqueEntityId);
+                    RemoveFromSyncList(ent);
                     continue;
                 }
 
+                // tp handling
+                if (ent.Player.NeedsPositionInit)
+                {
+                    stream.WriteBits(1, 1); // is not noop?
+                    stream.WriteBits(2, 3); // type
+
+                    _initQueue.Enqueue(ent);
+                }
                 // run
-                if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
+                else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 2); // type
@@ -219,6 +231,7 @@ namespace CScape.Network.Sync
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 0); // type
+                    
                 }
                 // absolutely no update
                 else
@@ -228,7 +241,6 @@ namespace CScape.Network.Sync
 
                 written++;
             }
-
             var actualPos = stream.BitWriteCaret;
             stream.BitWriteCaret = countPos;
 
@@ -236,15 +248,22 @@ namespace CScape.Network.Sync
             stream.WriteBits(8, written);
 
             stream.BitWriteCaret = actualPos;
-
             #endregion
 
             #region _newPlayerQueue
 
-            while (_newPlayerQueue.Count > 0)
+            while (_initQueue.Count > 0)
             {
-                var player = _newPlayerQueue.Dequeue();
-                stream.WriteBits(11, player.Pid); // id
+                var upd = _initQueue.Dequeue();
+
+                if (upd.IsNew)
+                {
+                    _syncPlayers = _syncPlayers.Add(upd);
+                    _syncPlayerIds.Add(upd.Player.UniqueEntityId);
+                }
+
+                // todo : more efficient way of storing id's of sync player states in update sync machine.
+                stream.WriteBits(11, _syncPlayers.IndexOf(upd)+1); // id
 
                 /*
                  * 1 bit - add to upd list?
@@ -258,18 +277,19 @@ namespace CScape.Network.Sync
                  *  appearance.
                  */
 
-                var update = new PlayerUpdateState(player, false);
                 // todo : keep track of appearance stream buffering in the client.
+                if(upd.IsNew)
+                {
+                    upd.SetLocalFlag(Player.UpdateFlags.Appearance);
+                    upd.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
 
-                update.SetLocalFlag(Player.UpdateFlags.Appearance);
-                update.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
+                    upd.IsNew = false;
+                }
 
-                _syncPlayers = _syncPlayers.Add(update);
-
-                stream.WriteBits(1, 1); // has flags. Since this is somebody we haven't seen, write their appearance.
+                stream.WriteBits(1, upd.NeedsUpdateInt()); // needs update?
                 stream.WriteBits(1, 1); // todo :  setpos flag
-                stream.WriteBits(5, player.Position.Y - _local.Player.Position.Y); // ydelta
-                stream.WriteBits(5, player.Position.X - _local.Player.Position.X); // xdelta
+                stream.WriteBits(5, upd.Player.Position.Y - _local.Player.Position.Y); // ydelta
+                stream.WriteBits(5, upd.Player.Position.X - _local.Player.Position.X); // xdelta
             }
             stream.WriteBits(11, 2047);
 

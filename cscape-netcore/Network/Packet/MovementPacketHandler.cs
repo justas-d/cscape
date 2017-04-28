@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CScape.Data;
 using CScape.Game.Entity;
-using CScape.Game.World;
 
 namespace CScape.Network.Packet
 {
@@ -33,13 +31,18 @@ namespace CScape.Network.Packet
             var isRunning = packet.ReadByte() == 1;
             var reference = deltaWaypoints[0];
 
-            if (player.TeleporToDestWhenWalking)
+            if (player.TeleportToDestWhenWalking)
             {
-                var expX = player.Position.BaseX + reference.x + deltaWaypoints.LastOrDefault().x;
-                var expY = player.Position.BaseY + reference.y + deltaWaypoints.LastOrDefault().y;
+                var expX = player.Position.BaseX + reference.x;
+                var expY = player.Position.BaseY + reference.y;
+
+                if (deltaWaypoints.Length > 1)
+                {
+                    expX += deltaWaypoints.LastOrDefault().x;
+                    expY += deltaWaypoints.LastOrDefault().y;
+                }
 
                 player.ForceTeleport((ushort) expX, (ushort) expY);
-
                 return;
             }
 
