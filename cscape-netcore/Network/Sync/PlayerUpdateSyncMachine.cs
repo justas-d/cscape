@@ -73,6 +73,11 @@ namespace CScape.Network.Sync
             {
                 return (int) _id;
             }
+
+            public override string ToString()
+            {
+                return Player + $" IsNew: {IsNew} IsLocal: {_isLocal}";
+            }
         }
 
         public override int Order => Constant.SyncMachineOrder.PlayerUpdate;
@@ -102,9 +107,10 @@ namespace CScape.Network.Sync
             if (player.Equals(_local.Player))
                 return;
 
+
             if (_syncPlayerIds.Contains(player.UniqueEntityId))
                 return;
-
+                
             _initQueue.Enqueue(new PlayerUpdateState(player, false));
         }
 
@@ -175,18 +181,22 @@ namespace CScape.Network.Sync
                 stream.WriteBits(1, _local.NeedsUpdateInt()); // add to needs updating list
             }
             // 0
-            else if(_local.NeedsUpdate())
+            else if (_local.NeedsUpdate())
             {
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 0); // type
             }
             else
+            {
                 stream.WriteBits(1, 0); // continue reading?
+            }
+                
 
             #endregion
 
             #region _syncPlayers
 
+            var beforeCount = _syncPlayers.Count;
             var countPos = stream.BitWriteCaret;
             stream.WriteBits(8, 0); // placeholder for the count of existing update ents
 
@@ -197,12 +207,12 @@ namespace CScape.Network.Sync
                 // check if the entity is still qualified for updates
                 if (ent.Player.IsDestroyed || !_local.Player.CanSee(ent.Player))
                 {
+                    stream.WriteBits(1, 1); // is not noop?
+                    stream.WriteBits(2, 3); // type
                     RemoveFromSyncList(ent);
-                    continue;
                 }
-
                 // tp handling
-                if (ent.Player.NeedsPositionInit)
+                else if (ent.Player.NeedsPositionInit)
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 3); // type
@@ -262,9 +272,7 @@ namespace CScape.Network.Sync
                     _syncPlayerIds.Add(upd.Player.UniqueEntityId);
                 }
 
-                // todo : numberOfPlayers > 2 syncing is absolutely fucked.
-                // todo : more efficient way of storing id's of sync player states in update sync machine.
-                stream.WriteBits(11, _syncPlayers.IndexOf(upd)+1); // id
+                stream.WriteBits(11, upd.Player.Pid + 1); // id
 
                 /*
                  * 1 bit - add to upd list?
@@ -292,6 +300,7 @@ namespace CScape.Network.Sync
                 stream.WriteBits(5, upd.Player.Position.Y - _local.Player.Position.Y); // ydelta
                 stream.WriteBits(5, upd.Player.Position.X - _local.Player.Position.X); // xdelta
             }
+
             stream.WriteBits(11, 2047);
 
             #endregion

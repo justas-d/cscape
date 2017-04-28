@@ -24,7 +24,8 @@ namespace CScape.Network.Packet
                         player.ForcedLogout();
                         break;
                     case "id":
-                        player.SendSystemChatMessage($"UniqueEntityId: {player.UniqueEntityId}");
+                        player.SendSystemChatMessage($"UEI: {player.UniqueEntityId}");
+                        player.SendSystemChatMessage($"PID: {player.Pid}");
                         break;
                     case "gc":
                         GC.Collect();

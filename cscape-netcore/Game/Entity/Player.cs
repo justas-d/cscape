@@ -11,7 +11,6 @@ namespace CScape.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
-    [DebuggerDisplay("Name {Username}")]
     public sealed class Player : AbstractEntity, IObserver, IMovingEntity
     {
         public int Pid { get; }
@@ -31,7 +30,6 @@ namespace CScape.Game.Entity
 
         private void SetFlag(UpdateFlags flag)
             => Flags |= flag;
-
 
         [CanBeNull] private ChatMessage _lastChatMessage;
 
@@ -263,6 +261,11 @@ namespace CScape.Game.Entity
             None,
             Clean,
             Forced
+        }
+
+        public override string ToString()
+        {
+            return $"Player \"{Username}\" (UEI: {UniqueEntityId} PID: {Pid})";
         }
     }
 }
