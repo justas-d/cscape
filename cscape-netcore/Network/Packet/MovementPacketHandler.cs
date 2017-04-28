@@ -21,12 +21,8 @@ namespace CScape.Network.Packet
         {
             var deltaWaypoints = new (sbyte x, sbyte y)[(packet.Buffer.Length - 1) / 2];
 
-            Console.WriteLine("Waypoints:");
             for (var i = 0; i < deltaWaypoints.Length; i++)
-            {
                 deltaWaypoints[i] = ((sbyte) packet.ReadByte(), (sbyte) packet.ReadByte());
-                Console.WriteLine($"\t{deltaWaypoints[i].x} {deltaWaypoints[i].y}");
-            }
 
             var isRunning = packet.ReadByte() == 1;
             var reference = deltaWaypoints[0];

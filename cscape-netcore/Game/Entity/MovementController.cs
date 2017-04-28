@@ -24,12 +24,23 @@ namespace CScape.Game.Entity
             }
         }
 
+        public void DisposeDirections()
+        {
+            if (Directions != null)
+            {
+                Directions.Dispose();
+                Directions = null;
+            }
+        }
+
         public void Update()
         {
-            // no op
+            // no op forever
             if (Directions == null || Directions.IsDone())
             {
                 MoveUpdate.Type = MoveUpdateData.MoveType.Noop;
+
+                Directions?.Dispose();
                 _directions = null;
                 return;
             }

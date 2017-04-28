@@ -33,12 +33,17 @@ namespace CScape.Game.World
             }
         }
 
+        protected virtual void InternalFree() { }
+        protected virtual void InternalRemoveEntity([NotNull]AbstractEntity ent) { }
+        protected virtual void InternalAddEntity([NotNull] AbstractEntity ent) { }
+
         public void Free()
         {
             if (_isFreed) return;
             if(IsOverworld) return;
 
             Server.Entities.Remove(_entityPool);
+            InternalFree();
             _isFreed = true;
         }
 
@@ -53,6 +58,7 @@ namespace CScape.Game.World
                 return;
 
             _entityPool.Remove(ent);
+            InternalRemoveEntity(ent);
         }
 
         /// <summary>
@@ -78,6 +84,8 @@ namespace CScape.Game.World
                 foreach(var e in this)
                     observer.Observatory.PushObservable(e);
             }
+
+            InternalAddEntity(ent);
         }
 
         public bool ContainsEntity([NotNull] AbstractEntity obs)
@@ -92,4 +100,4 @@ namespace CScape.Game.World
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
     }
-}
+};

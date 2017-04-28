@@ -110,6 +110,10 @@ namespace CScape.Game.Entity
 
             Connection.SortSyncMachines();
 
+            Connection.SendMessage(SetPlayerOptionPacket.Follow);
+            Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
+            Connection.SendMessage(SetPlayerOptionPacket.Report);
+
             // todo : serialize personalized PoE's
             InitPoE(null, Server.Overworld);
             Server.RegisterNewPlayer(this);
@@ -177,6 +181,8 @@ namespace CScape.Game.Entity
             Observatory.Clear();
             Position.SetPosition(x,y,z);
             NeedsPositionInit = true;
+
+            Movement.DisposeDirections();
         }
 
         public void ForceTeleport(ushort x, ushort y)
@@ -197,7 +203,6 @@ namespace CScape.Game.Entity
             {
                 // todo : adjust maxrange if the player update packet gets too big or too small.
                 // keep the max at 15, min at 0.
-
             }
 
             return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= maxrange;

@@ -262,6 +262,7 @@ namespace CScape.Network.Sync
                     _syncPlayerIds.Add(upd.Player.UniqueEntityId);
                 }
 
+                // todo : numberOfPlayers > 2 syncing is absolutely fucked.
                 // todo : more efficient way of storing id's of sync player states in update sync machine.
                 stream.WriteBits(11, _syncPlayers.IndexOf(upd)+1); // id
 
@@ -278,7 +279,7 @@ namespace CScape.Network.Sync
                  */
 
                 // todo : keep track of appearance stream buffering in the client.
-                if(upd.IsNew)
+                if (upd.IsNew)
                 {
                     upd.SetLocalFlag(Player.UpdateFlags.Appearance);
                     upd.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
