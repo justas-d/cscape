@@ -35,6 +35,11 @@ namespace CScape.Network.Packet
                         var y = ushort.Parse(args[2]);
                         player.ForceTeleport(x,y);
                         break;
+                    case "flook":
+                        var fx = ushort.Parse(args[1]);
+                        var fy = ushort.Parse(args[2]);
+                        player.FacingCoordinate = (fx, fy);
+                        break;
                     case "pos":
                         player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");
                         player.SendSystemChatMessage($"LX: {player.Position.LocalX} LY: {player.Position.LocalY}");

@@ -307,10 +307,18 @@ namespace CScape.Network.Sync
 
             if (flags.HasFlag(Player.UpdateFlags.FacingCoordinate))
             {
-                stream.Write16((short) 
-                    (((upd.Player.LastMovedDirection.x + upd.Player.Position.X) * 2) + 1));
-                stream.Write16((short) 
-                    (((upd.Player.LastMovedDirection.y + upd.Player.Position.Y) * 2) + 1));
+                if (upd.Player.FacingCoordinate != null)
+                {
+                    stream.Write16((short) ((upd.Player.FacingCoordinate.Value.x * 2) + 1));
+                    stream.Write16((short) ((upd.Player.FacingCoordinate.Value.y * 2) + 1));
+                }
+                else
+                {
+                    stream.Write16((short)
+                        (((upd.Player.LastMovedDirection.x + upd.Player.Position.X) * 2) + 1));
+                    stream.Write16((short)
+                        (((upd.Player.LastMovedDirection.y + upd.Player.Position.Y) * 2) + 1));
+                }
             }
 
             // todo : the rest of the updates flags.

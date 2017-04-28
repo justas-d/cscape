@@ -29,7 +29,7 @@ namespace CScape.Game.Entity
 
         public UpdateFlags Flags { get; private set; }
 
-        public void SetFlag(UpdateFlags flag)
+        private void SetFlag(UpdateFlags flag)
             => Flags |= flag;
 
 
@@ -46,8 +46,7 @@ namespace CScape.Game.Entity
         }
 
         [NotNull] private PlayerAppearance _appearance;
-        [NotNull]
-        public PlayerAppearance Appearance
+        [NotNull] public PlayerAppearance Appearance
         {
             get => _appearance;
             set
@@ -60,7 +59,17 @@ namespace CScape.Game.Entity
             }
         }
 
-        public (sbyte x, sbyte y) LastMovedDirection { get; set; }
+        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
+
+        [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
+        {
+            get => _facingCoordinate;
+            set
+            {
+                _facingCoordinate = value; 
+                SetFlag(UpdateFlags.FacingCoordinate);
+            }
+        }
 
         #endregion
 
@@ -72,6 +81,7 @@ namespace CScape.Game.Entity
         [NotNull] public Logger Log => Server.Log;
         [NotNull] public Observatory Observatory { get; }
         [NotNull] private readonly PlayerModel _model;
+        private (ushort x, ushort y)? _facingCoordinate;
         [NotNull] public MovementController Movement { get; }
 
         public bool NeedsInitWhenLocal { get; private set; } = true;
