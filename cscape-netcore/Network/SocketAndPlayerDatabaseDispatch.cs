@@ -250,7 +250,7 @@ namespace CScape.Network
                 username = username.ToLowerInvariant();
 
                 // check if user is logged in
-                var loggedInPlayer = Server.Players.FirstOrDefault(
+                var loggedInPlayer = Server.Players.Values.FirstOrDefault(
                     p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
                 if (isReconnecting)

@@ -95,7 +95,7 @@ namespace CScape.Game.Entity
 
             _model = login.Model;
             Appearance = new PlayerAppearance(_model);
-            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId());
+            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId() + 1);
             Movement = new MovementController(this);
 
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);

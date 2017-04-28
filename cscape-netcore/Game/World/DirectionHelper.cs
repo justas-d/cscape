@@ -4,7 +4,41 @@ namespace CScape.Game.World
 {
     public static class DirectionHelper
     {
-        public static readonly (sbyte, sbyte) NoopDelta = (0, 0);
+        public static readonly (sbyte x, sbyte y) NoopDelta = (0, 0);
+
+        public static (sbyte x, sbyte y) Invert((sbyte x, sbyte y) dir)
+        {
+            dir.x *= -1;
+            dir.y *= -1;
+            return dir;
+        }
+
+        public static Direction Invert(Direction dir)
+        {
+            switch (dir)
+            {
+                case Direction.None:
+                    return Direction.None;
+                case Direction.NorthWest:
+                    return Direction.SouthEast;
+                case Direction.North:
+                    return Direction.South;
+                case Direction.NorthEast:
+                    return Direction.SouthWest;
+                case Direction.West:
+                    return Direction.East;
+                case Direction.East:
+                    return Direction.West;
+                case Direction.SouthWest:
+                    return Direction.NorthEast;
+                case Direction.South:
+                    return Direction.North;
+                case Direction.SouthEast:
+                    return Direction.NorthWest;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(dir));
+        }
 
         public static (sbyte x, sbyte y) GetDelta(Direction dir)
         {
@@ -32,9 +66,9 @@ namespace CScape.Game.World
                     return (0, ds);
                 case Direction.SouthEast:
                     return (de, ds);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dir), dir, null);
             }
+
+            throw new ArgumentOutOfRangeException(nameof(dir), dir, null);
         }
 
         /// <summary>
