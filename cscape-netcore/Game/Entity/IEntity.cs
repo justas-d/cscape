@@ -1,8 +1,9 @@
+using System;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public interface IEntity
+    public interface IEntity : IEquatable<IEntity>
     {
         uint UniqueEntityId { get; }
         bool IsDestroyed { get; }
