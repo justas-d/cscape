@@ -14,6 +14,7 @@ namespace CScape.Network.Packet
                 return;
 
             player.Movement.Directions = new FollowDirectionProvider(player, followTarget);
+            player.InteractingEntity = followTarget;
         }
     }
 }

@@ -19,6 +19,9 @@ namespace CScape.Game.Entity
             get => _directions;
             set
             {
+                // if we're overwriting, we have to dispose existing provider.
+                Directions?.Dispose();
+
                 _directions = value;
                 Entity.Server.Loop.Movement.Enqueue(Entity);
             }
@@ -46,6 +49,8 @@ namespace CScape.Game.Entity
             }
 
             // helper methods
+            var didMove = false;
+
             bool IsNoop((sbyte x, sbyte y) d)
                 => d.x == DirectionHelper.NoopDelta.x && d.y == DirectionHelper.NoopDelta.y;
 
@@ -54,6 +59,7 @@ namespace CScape.Game.Entity
                 updateDir = (byte) DirectionHelper.GetDirection(d);
                 Entity.Position.TransformLocals(d);
                 Entity.LastMovedDirection = d;
+                didMove = true;
             }
 
             void Walk((sbyte, sbyte) d)
@@ -101,6 +107,9 @@ namespace CScape.Game.Entity
                     // active direction provided no directions, be idle.
                     MoveUpdate.Type = MoveUpdateData.MoveType.Noop;
             }
+
+            if(didMove)
+                Entity.OnMoved();
 
             Entity.Server.Loop.Movement.Enqueue(Entity);
         }

@@ -1,7 +1,6 @@
 using System;
 using CScape;
 using CScape.Network.Packet;
-using Microsoft.EntityFrameworkCore;
 
 namespace cscape_dev
 {

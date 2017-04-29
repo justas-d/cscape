@@ -31,6 +31,8 @@ namespace CScape.Game.Entity
         public byte LegColor { get; set; } = 0;
         public byte FeetColor { get; set; } = 0;
 
+        public bool IsMember { get; set; } = true;
+
         private PlayerModel()
         {
             

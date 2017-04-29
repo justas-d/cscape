@@ -7,5 +7,6 @@ namespace CScape.Game.Entity
         uint UniqueEntityId { get; }
         bool IsDestroyed { get; }
         [NotNull] GameServer Server { get; }
+        [NotNull] Transform Position { get; }
     }
 }

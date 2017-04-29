@@ -18,6 +18,7 @@ namespace CScape.Network.Packet
         {
             Us = us;
             Target = target ?? throw new ArgumentNullException(nameof(target));
+            us.InteractingEntity = target;
         }
 
         public (sbyte x, sbyte y) GetNextDir()
@@ -29,7 +30,7 @@ namespace CScape.Network.Packet
 
             // todo : collision checking in FollowDirectionProvider
 
-            var offset = DirectionHelper.Invert(((sbyte x, sbyte y)) Target.LastMovedDirection);
+            var offset = DirectionHelper.Invert(Target.LastMovedDirection);
             var target = (TargPos.X + offset.x, TargPos.Y + offset.y);
 
             var diffX = Us.Position.X < target.Item1 ? (sbyte)1 : (sbyte)-1;
@@ -53,6 +54,9 @@ namespace CScape.Network.Packet
             return false;
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+            Us.InteractingEntity = null;
+        }
     }
 }
