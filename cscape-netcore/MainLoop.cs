@@ -82,7 +82,7 @@ namespace CScape
 
             while (true)
             {
-                _tickWatch.Start();
+                _tickWatch.Restart();
 
                 // handle new logins
                 while (LoginQueue.TryDequeue(out IPlayerLogin login))
@@ -122,15 +122,8 @@ namespace CScape
                     Player.Dequeue().Update(this);
 
                 // handle tick delays
-                _tickWatch.Stop();
-                _tickWatch.Reset();
-
                 var waitTime = Math.Abs(MaxTickTime - Convert.ToInt32(_tickWatch.ElapsedMilliseconds));
-                var overtime = waitTime < MaxTickTime;
-                if (overtime)
-                    Log.Warning(this, $"Tick process time too slow! need to wait for {waitTime}ms. Tick target ms: {MaxTickTime}ms.");
-                else
-                    await Task.Delay(waitTime);
+                await Task.Delay(waitTime);
 
                 DeltaTime = waitTime;
             }
