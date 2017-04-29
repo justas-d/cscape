@@ -32,6 +32,9 @@ namespace CScape.Game.Entity
             => Flags |= flag;
 
         [CanBeNull] private ChatMessage _lastChatMessage;
+        [CanBeNull] private IEntity _interactingEntity;
+        [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
+        [NotNull] private PlayerAppearance _appearance;
 
         [CanBeNull] public ChatMessage LastChatMessage
         {
@@ -42,8 +45,15 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Chat);
             }
         }
-
-        [NotNull] private PlayerAppearance _appearance;
+        [CanBeNull] public IEntity InteractingEntity
+        {
+            get => _interactingEntity;
+            set
+            {
+                _interactingEntity = value;
+                SetFlag(UpdateFlags.InteractEnt);
+            }
+        }
         [NotNull] public PlayerAppearance Appearance
         {
             get => _appearance;
@@ -56,21 +66,20 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Appearance);
             }
         }
-
-        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
-
+        [NotNull] public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
         [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
         {
             get => _facingCoordinate;
             set
             {
-                _facingCoordinate = value; 
+                _facingCoordinate = value;
                 SetFlag(UpdateFlags.FacingCoordinate);
             }
         }
-
+        
         #endregion
 
+        public bool IsMember => _model.IsMember;
         [NotNull] public string Username => _model.Username;
         [NotNull] public string Password => _model.PasswordHash;
         public byte TitleIcon => _model.TitleIcon;
@@ -79,7 +88,6 @@ namespace CScape.Game.Entity
         [NotNull] public Logger Log => Server.Log;
         [NotNull] public Observatory Observatory { get; }
         [NotNull] private readonly PlayerModel _model;
-        private (ushort x, ushort y)? _facingCoordinate;
         [NotNull] public MovementController Movement { get; }
 
         public bool NeedsPositionInit { get; private set; } = true;
@@ -95,7 +103,7 @@ namespace CScape.Game.Entity
 
             _model = login.Model;
             Appearance = new PlayerAppearance(_model);
-            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId());
+            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId() + 1);
             Movement = new MovementController(this);
 
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
@@ -108,13 +116,19 @@ namespace CScape.Game.Entity
 
             Connection.SortSyncMachines();
 
+            // todo : serialize personalized PoE's (or something, probably not)
+            InitPoE(null, Server.Overworld);
+            Server.RegisterNewPlayer(this);
+
+            Connection.SendMessage(new InitializePlayerPacket(this));
             Connection.SendMessage(SetPlayerOptionPacket.Follow);
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
+        }
 
-            // todo : serialize personalized PoE's
-            InitPoE(null, Server.Overworld);
-            Server.RegisterNewPlayer(this);
+        public void OnMoved()
+        {
+            FacingCoordinate = null;
         }
 
         public override void Update(MainLoop loop)
@@ -125,7 +139,11 @@ namespace CScape.Game.Entity
             // reset sync vars
             Flags = 0;
             NeedsPositionInit = false;
+            Movement.MoveUpdate.Reset();
 
+            // reset InteractingEntity if we can't see it anymore.
+            if (InteractingEntity != null && !CanSee(InteractingEntity))
+                InteractingEntity = null;
 
             if (IsDestroyed)
             {
@@ -189,8 +207,11 @@ namespace CScape.Game.Entity
         protected override void InternalDestroy()
             => Server.UnregisterPlayer(this);
 
-        public bool CanSee(AbstractEntity obs)
+        public bool CanSee(IEntity obs)
         {
+            if (obs.IsDestroyed)
+                return false;
+
             if (!PoE.ContainsEntity(obs))
                 return false;
 

@@ -156,7 +156,7 @@ namespace CScape.Game.Entity
             // IObservers don't necessarily have to be a player as well.
 
             if (updateObservatories)
-                foreach (var p in Entity.Server.Players)
+                foreach (var p in Entity.Server.Players.Values)
                     p.Observatory.PushObservable(Entity);
         }
     }

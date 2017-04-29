@@ -4,6 +4,9 @@ namespace CScape.Game.Entity
     {
         Transform Position { get; }
         MovementController Movement { get; }
-        (sbyte x, sbyte y) LastMovedDirection { set; }
+        (sbyte x, sbyte y) LastMovedDirection { get; set; }
+        IEntity InteractingEntity { get; set; }
+
+        void OnMoved();
     }
 }

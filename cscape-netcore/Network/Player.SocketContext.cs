@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using CScape.Data;
 using CScape.Game.Entity;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace CScape.Network
 {
@@ -55,6 +53,9 @@ namespace CScape.Network
         public bool IsDisposed { get; private set; }
 
         [NotNull] public List<SyncMachine> SyncMachines { get; } = new List<SyncMachine>();
+
+        public bool DebugPackets { get; set; }
+
         private readonly MessageSyncMachine _msgSync;
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>

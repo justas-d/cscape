@@ -12,8 +12,7 @@ namespace CScape.Network.Sync
     {
         private sealed class PlayerUpdateState : IEquatable<PlayerUpdateState>
         {
-            private readonly bool _isLocal;
-
+            public bool IsLocal { get; }
             public bool IsNew { get; set; } = true;
 
             [NotNull]
@@ -25,7 +24,7 @@ namespace CScape.Network.Sync
 
             public PlayerUpdateState([NotNull] Player player, bool isLocal)
             {
-                _isLocal = isLocal;
+                IsLocal = isLocal;
                 Player = player ?? throw new ArgumentNullException(nameof(player));
                 _id = player.UniqueEntityId;
             }
@@ -43,7 +42,7 @@ namespace CScape.Network.Sync
             {
                 var ret = Player.Flags | _localFlags;
 
-                if (_isLocal)
+                if (IsLocal)
                 {
                     if (ret.HasFlag(Player.UpdateFlags.Chat) && !Player.LastChatMessage.IsForced)
                         ret &= ~Player.UpdateFlags.Chat;
@@ -76,7 +75,7 @@ namespace CScape.Network.Sync
 
             public override string ToString()
             {
-                return Player + $" IsNew: {IsNew} IsLocal: {_isLocal}";
+                return Player + $" IsNew: {IsNew} IsLocal: {IsLocal}";
             }
         }
 
@@ -272,7 +271,7 @@ namespace CScape.Network.Sync
                     _syncPlayerIds.Add(upd.Player.UniqueEntityId);
                 }
 
-                stream.WriteBits(11, upd.Player.Pid + 1); // id
+                stream.WriteBits(11, upd.Player.Pid); // id
 
                 /*
                  * 1 bit - add to upd list?
@@ -330,6 +329,22 @@ namespace CScape.Network.Sync
                 stream.Write(((byte)upd.Player.LastChatMessage.Effects));
                 stream.Write(upd.Player.TitleIcon);
                 stream.WriteString(upd.Player.LastChatMessage.Message);
+            }
+
+            if (flags.HasFlag(Player.UpdateFlags.InteractEnt))
+            {
+                if (upd.Player.InteractingEntity == null)
+                    stream.Write16(-1);
+                else
+                {
+                    var interactPlayer = upd.Player.InteractingEntity as Player;
+                    if (interactPlayer != null)
+                        stream.Write16((short) (interactPlayer.Pid | 0x8000));
+
+                    // todo : write Player.UpdateFlags.InteractEnt for npcs
+
+                }
+
             }
 
             if (flags.HasFlag(Player.UpdateFlags.Appearance))

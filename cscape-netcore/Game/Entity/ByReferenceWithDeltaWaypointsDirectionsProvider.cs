@@ -11,7 +11,6 @@ namespace CScape.Game.Entity
         private readonly (sbyte x, sbyte y)[] _deltaWaypoints;
         private  (int, int) _target;
         private readonly IEnumerator<(sbyte, sbyte)> _nextProvider;
-        private int _idx;
         private bool _isFirst = true;
 
         [NotNull]
@@ -32,7 +31,7 @@ namespace CScape.Game.Entity
             _nextProvider = NextProvider();
         }
 
-        public (sbyte, sbyte) GetNextDir()
+        public (sbyte x, sbyte y) GetNextDir()
         {
             return _nextProvider.Current;
         }
@@ -82,7 +81,7 @@ namespace CScape.Game.Entity
         /// <param name="local"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        private IEnumerable<(sbyte x, sbyte y)> Interpolate((int x, int y) local, (int x, int y) target)
+        private static IEnumerable<(sbyte x, sbyte y)> Interpolate((int x, int y) local, (int x, int y) target)
         {
             var max = Math.Max(Math.Abs(local.x - target.x), Math.Abs(local.y - target.y));
             if (max == 0)

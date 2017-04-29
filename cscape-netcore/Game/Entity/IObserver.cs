@@ -3,6 +3,6 @@
     public interface IObserver
     {
         Observatory Observatory { get; }
-        bool CanSee(AbstractEntity obs);
+        bool CanSee(IEntity obs);
     }
 }

@@ -25,11 +25,19 @@ namespace CScape.Network.Packet
 
             player.Connection.UpdateLastPacketReceivedTime();
 
+            
+
             if (_handlers.ContainsKey(opcode))
             {
+                if (player.Connection.DebugPackets)
+                    player.SendSystemChatMessage($"{opcode:000} {_handlers[opcode].GetType().Name}");
+
                 _handlers[opcode].Handle(player, opcode, packet);
                 return;
             }
+
+            if (player.Connection.DebugPackets)
+                player.SendSystemChatMessage(opcode.ToString());
 
             Loop.Server.Log.Debug(this, $"Unhandled packet opcode: {opcode}.");
         }

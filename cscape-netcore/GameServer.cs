@@ -26,7 +26,7 @@ namespace CScape
         public IdPool PlayerIdPool { get; }
         public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
 
-        public ImmutableHashSet<Player> Players { get; private set; } = ImmutableHashSet<Player>.Empty;
+        public ImmutableDictionary<int, Player> Players { get; private set; } = ImmutableDictionary<int, Player>.Empty;
 
         public bool IsLoginEnbled { get; set; } = true;
 
@@ -98,31 +98,42 @@ namespace CScape
         public void SavePlayers()
             => _entry.SaveFlag = true;
 
+        [CanBeNull]
+        public Player GetPlayerByPid(int pid)
+        {
+            if (!Players.ContainsKey(pid))
+            {
+                Log.Warning(this, $"Attempted to get unregistered pid: {pid}");
+                return null;
+            }
+            
+            return Players[pid];
+        }
+
         internal void RegisterNewPlayer(Player player)
         {
             Log.Debug(this, $"Registering new player: {player.Username}.");
 
-            if (Players.Contains(player))
+            if (Players.ContainsKey(player.Pid))
             {
                 Log.Warning(this, $"Tried to register existing player: {player.Username}.");
                 return;
             }
 
-            Players = Players.Add(player);
-
+            Players = Players.Add(player.Pid, player);
         }
 
         internal void UnregisterPlayer(Player player)
         {
             Log.Debug(this, $"Unregistering player: {player.Username}.");
 
-            if (!Players.Contains(player))
+            if (!Players.ContainsKey(player.Pid))
             {
                 Log.Warning(this, $"Tried to unregister player that is not registered: {player.Username}");
                 return;
             }
 
-            Players = Players.Remove(player);
+            Players = Players.Remove(player.Pid);
         }
     }
 }

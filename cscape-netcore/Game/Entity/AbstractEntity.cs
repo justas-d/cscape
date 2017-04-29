@@ -8,7 +8,7 @@ namespace CScape.Game.Entity
     /// <summary>
     /// Something that can be observed and it's observation can be synced.
     /// </summary>
-    public abstract class AbstractEntity : IEquatable<AbstractEntity>, IEntity
+    public abstract class AbstractEntity : IEntity
     {
         public uint UniqueEntityId { get; }
         [NotNull] public Transform Position { get; }
@@ -119,7 +119,7 @@ namespace CScape.Game.Entity
         public abstract void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew);
 
         #region IEquatable
-        public bool Equals(AbstractEntity other)
+        public bool Equals(IEntity other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -131,7 +131,7 @@ namespace CScape.Game.Entity
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((AbstractEntity) obj);
+            return Equals((IEntity) obj);
         }
 
         public override int GetHashCode()

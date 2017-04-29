@@ -88,7 +88,7 @@ namespace CScape.Game.World
             InternalAddEntity(ent);
         }
 
-        public bool ContainsEntity([NotNull] AbstractEntity obs)
+        public bool ContainsEntity([NotNull] IEntity obs)
         {
             if (obs == null) throw new ArgumentNullException(nameof(obs));
             return _entityPool.ContainsId(obs.UniqueEntityId);
