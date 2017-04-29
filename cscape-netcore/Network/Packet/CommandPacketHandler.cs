@@ -55,8 +55,11 @@ namespace CScape.Network.Packet
                     case "walktp":
                         player.TeleportToDestWhenWalking = !player.TeleportToDestWhenWalking;
                         break;
+                    case "pd":
+                        player.Connection.DebugPackets = !player.Connection.DebugPackets;
+                        break;
                     default:
-                        player.Log.Debug(this, $"Command: {cmd}");
+                        player.SendSystemChatMessage($"Unknown command: \"{cmd}\"");
                         break;
 
                 }
