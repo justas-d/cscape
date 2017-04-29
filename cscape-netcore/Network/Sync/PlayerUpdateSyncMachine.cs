@@ -272,7 +272,7 @@ namespace CScape.Network.Sync
                     _syncPlayerIds.Add(upd.Player.UniqueEntityId);
                 }
 
-                stream.WriteBits(11, upd.Player.Pid + 1); // id
+                stream.WriteBits(11, upd.Player.Pid); // id
 
                 /*
                  * 1 bit - add to upd list?
