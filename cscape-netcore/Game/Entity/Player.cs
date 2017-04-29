@@ -125,7 +125,7 @@ namespace CScape.Game.Entity
             // reset sync vars
             Flags = 0;
             NeedsPositionInit = false;
-
+            Movement.MoveUpdate.Reset();
 
             if (IsDestroyed)
             {
