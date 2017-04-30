@@ -1,72 +1,30 @@
-using System;
-using System.Linq;
+using System.Reflection;
 using CScape.Data;
+using CScape.Game.Commands;
 using CScape.Game.Entity;
 
 namespace CScape.Network.Packet
 {
     public sealed class CommandPacketHandler : IPacketHandler
     {
+        public GameServer Server { get; }
         public int[] Handles { get; } = { 103 };
+
+        private readonly CommandDispatch _cmds = new CommandDispatch();
+
+        public CommandPacketHandler(GameServer server)
+        {
+            Server = server;
+            _cmds.RegisterAssembly(Server.GetType().GetTypeInfo().Assembly);
+        }
 
         public void Handle(Player player, int opcode, Blob packet)
         {
             if (packet.TryReadString(255, out string cmd))
             {
-                var args = cmd.Split(' ').ToArray();
-
-                switch (args[0])
-                {
-                    case "logout":
-                        player.Logout(out _);
-                        break;
-                    case "forcelogout":
-                        player.ForcedLogout();
-                        break;
-                    case "id":
-                        player.SendSystemChatMessage($"UEI: {player.UniqueEntityId}");
-                        player.SendSystemChatMessage($"PID: {player.Pid}");
-                        break;
-                    case "gc":
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        break;
-                    case "setpos":
-                        var x = ushort.Parse(args[1]);
-                        var y = ushort.Parse(args[2]);
-                        player.ForceTeleport(x,y);
-                        break;
-                    case "flook":
-                        var fx = ushort.Parse(args[1]);
-                        var fy = ushort.Parse(args[2]);
-                        player.FacingCoordinate = (fx, fy);
-                        break;
-                    case "pos":
-                        player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");
-                        player.SendSystemChatMessage($"LX: {player.Position.LocalX} LY: {player.Position.LocalY}");
-                        player.SendSystemChatMessage($"RX: {player.Position.RegionX} + 6 RY: {player.Position.RegionY} + 6");
-                        break;
-                    case "ftext":
-                        player.LastChatMessage = new ChatMessage(player, "Forced text", ChatMessage.TextColor.Cyan, ChatMessage.TextEffect.Wave, true);
-                        break;
-                    case "run":
-                        player.Movement.IsRunning = true;
-                        break;
-                    case "walktp":
-                        player.TeleportToDestWhenWalking = !player.TeleportToDestWhenWalking;
-                        break;
-                    case "pd":
-                        player.Connection.DebugPackets = !player.Connection.DebugPackets;
-                        break;
-                    default:
-                        player.SendSystemChatMessage($"Unknown command: \"{cmd}\"");
-                        break;
-
-                }
+                if (!_cmds.Dispatch(player, cmd))
+                    player.SendSystemChatMessage($"Unknown command: \"{cmd}\"");
             }
-                
-            else
-                player.Log.Warning(this, "Couldn't commmand.");
         }
     }
 }

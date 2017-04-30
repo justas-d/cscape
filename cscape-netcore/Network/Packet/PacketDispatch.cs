@@ -25,18 +25,16 @@ namespace CScape.Network.Packet
 
             player.Connection.UpdateLastPacketReceivedTime();
 
-            
-
             if (_handlers.ContainsKey(opcode))
             {
-                if (player.Connection.DebugPackets)
+                if (player.DebugPackets)
                     player.SendSystemChatMessage($"{opcode:000} {_handlers[opcode].GetType().Name}");
 
                 _handlers[opcode].Handle(player, opcode, packet);
                 return;
             }
 
-            if (player.Connection.DebugPackets)
+            if (player.DebugPackets)
                 player.SendSystemChatMessage(opcode.ToString());
 
             Loop.Server.Log.Debug(this, $"Unhandled packet opcode: {opcode}.");
@@ -50,7 +48,25 @@ namespace CScape.Network.Packet
             {
                 if (!type.GetInterfaces().Contains(typeof(IPacketHandler))) continue;
 
-                var handler = (IPacketHandler) Activator.CreateInstance(type);
+                // create instance of the handler
+                // some handler classes might have a GameServer arg in their ctor, handle it
+                IPacketHandler handler;
+
+                try
+                {
+                    handler = (IPacketHandler)Activator.CreateInstance(type, Loop.Server);
+                }
+                catch(Exception)
+                {
+                    handler = (IPacketHandler)Activator.CreateInstance(type);
+                }
+
+                if (handler == null)
+                {
+                    Loop.Server.Log.Warning(this, $"Failed to instantiate IPacketHandler {type.Name}: Could not find valid constructor. Only public constructors that take onle GameServer as a paramater or ones that take no params are considered valid.");
+                    continue;
+                }
+
                 var opcodes = (int[]) handler.GetType().GetRuntimeProperty("Handles").GetValue(handler);
 
                 foreach (var op in opcodes)

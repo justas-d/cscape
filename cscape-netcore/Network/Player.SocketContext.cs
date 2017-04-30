@@ -54,8 +54,6 @@ namespace CScape.Network
 
         [NotNull] public List<SyncMachine> SyncMachines { get; } = new List<SyncMachine>();
 
-        public bool DebugPackets { get; set; }
-
         private readonly MessageSyncMachine _msgSync;
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>

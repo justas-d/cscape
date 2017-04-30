@@ -13,6 +13,9 @@ namespace CScape.Game.Entity
 
     public sealed class Player : AbstractEntity, IObserver, IMovingEntity
     {
+        public bool DebugCommands { get; set; }
+        public bool DebugPackets { get; set; }
+
         public int Pid { get; }
 
         #region sync vars
