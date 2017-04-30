@@ -9,14 +9,14 @@ namespace CScape.Game.Commands
         [NotNull] public Player Callee { get; }
         [NotNull] public Command CommandModel { get; }
         [CanBeNull] public string Data { get; }
-        [NotNull] public string RawData { get; }
+        [NotNull] public string UnparsedData { get; }
 
-        public CommandContext([NotNull] Player callee, [NotNull] Command commandModel, [CanBeNull] string data, [NotNull] string rawData)
+        public CommandContext([NotNull] Player callee, [NotNull] Command commandModel, [CanBeNull] string data, [NotNull] string unparsedData)
         {
             Callee = callee ?? throw new ArgumentNullException(nameof(callee));
             CommandModel = commandModel ?? throw new ArgumentNullException(nameof(commandModel));
             Data = data;
-            RawData = rawData;
+            UnparsedData = unparsedData;
         }
     }
 }

@@ -104,7 +104,7 @@ namespace CScape.Game.Commands
                     // parse data if needed
                     string data = null;
                     if (cmd.NoArgExecTarg == null)
-                        data = input.Substring(input.IndexOf(word, StringComparison.Ordinal)).TrimStart();
+                        data = input.Substring(input.IndexOf(word, StringComparison.Ordinal) + word.Length).TrimStart();
 
                     try
                     {

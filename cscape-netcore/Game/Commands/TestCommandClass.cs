@@ -30,10 +30,10 @@ namespace CScape.Game.Commands
             ctx.Callee.Movement.IsRunning = true;
         }
 
-        [CommandMethod]
-        public void PredTest(CommandContext ctx)
+        [CommandMethod("data")]
+        public void DataCallback(CommandContext ctx)
         {
-            ctx.Callee.SendSystemChatMessage("Called.");
+            ctx.Callee.SendSystemChatMessage($"\"{ctx.Data}\"");
         }
 
         [CommandMethod("pos get")]
