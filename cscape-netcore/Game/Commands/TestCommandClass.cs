@@ -48,7 +48,19 @@ namespace CScape.Game.Commands
         [CommandMethod("pos set")]
         public void SetPos(CommandContext ctx)
         {
-            // todo : params for commands
+            ushort x = 0;
+            ushort y = 0;
+            var z = ctx.Callee.Position.Z;
+
+            if (!Paramaters.Read(ctx, p =>
+            {
+                p.ReadNumber("x coordinate", ref x);
+                p.ReadNumber("y coordinate", ref y);
+                p.ReadNumber("z coordinate", ref z, true);
+            }))
+                return;
+
+            ctx.Callee.ForceTeleport(x, y, z);
         }
 
         [CommandMethod]
