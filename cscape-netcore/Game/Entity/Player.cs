@@ -16,6 +16,24 @@ namespace CScape.Game.Entity
         public bool DebugCommands { get; set; }
         public bool DebugPackets { get; set; }
 
+        public bool DebugStats
+        {
+            get => _debugStatSync?.IsEnabled ?? false;
+            set
+            {
+                if (value && _debugStatSync == null)
+                {
+                    _debugStatSync = new DebugStatSyncMachine(Server);
+                    Connection.SyncMachines.Add(_debugStatSync);
+                    Connection.SortSyncMachines();
+                }
+
+                _debugStatSync.IsEnabled = value;
+            }
+        }
+
+        private DebugStatSyncMachine _debugStatSync;
+
         public int Pid { get; }
 
         #region sync vars

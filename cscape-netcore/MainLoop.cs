@@ -64,13 +64,14 @@ namespace CScape
         public long ElapsedMilliseconds => _tickWatch.ElapsedMilliseconds;
 
         public long DeltaTime { get; private set; }
-        public int MaxTickTime { get; }
+        public long TickProcessTime { get; private set; }
+        public int TickRate { get; set; }
 
-        public MainLoop([NotNull] GameServer server, int tickTime)
+        public MainLoop([NotNull] GameServer server, int tickRate)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
             PacketDispatch = new PacketDispatch(this);
-            MaxTickTime = tickTime;
+            TickRate = tickRate;
         }
 
         public async Task Run()
@@ -122,10 +123,11 @@ namespace CScape
                     Player.Dequeue().Update(this);
 
                 // handle tick delays
-                var waitTime = Math.Abs(MaxTickTime - Convert.ToInt32(_tickWatch.ElapsedMilliseconds));
+                TickProcessTime = _tickWatch.ElapsedMilliseconds;
+                var waitTime = Math.Abs(TickRate - Convert.ToInt32(TickProcessTime));
                 await Task.Delay(waitTime);
 
-                DeltaTime = waitTime;
+                DeltaTime = waitTime + TickProcessTime;
             }
         }
     }

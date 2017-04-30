@@ -3,6 +3,21 @@ namespace CScape.Game.Commands
     [CommandsClass]
     public sealed class TestCommandClass
     {
+        [CommandMethod("tickrate")]
+        public void SetTickRate(CommandContext ctx)
+        {
+            var tickrate = 0;
+            if (!Paramaters.Read(ctx, p => p.ReadNumber("tickrate", ref tickrate))) return;
+            ctx.Callee.Server.Loop.TickRate = tickrate;
+        }
+
+        [CommandMethod("debug stats")]
+        public void ToggleDebugStats(CommandContext ctx)
+        {
+            ctx.Callee.DebugStats = !ctx.Callee.DebugStats;
+            ctx.Callee.SendSystemChatMessage("Toggling stat debug.");
+        }
+
         [CommandMethod("debug packet")]
         public void ToggleDebugPackets(CommandContext ctx)
         {

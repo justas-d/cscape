@@ -18,6 +18,7 @@
             public const int PlayerUpdate = 2;
             public const int NpcUpdate = 3;
             public const int Message = 4;
+            public const int DebugStat = 5;
         }
     }
 }
