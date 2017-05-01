@@ -37,7 +37,7 @@ namespace CScape.Network
         public OutBlob OutStream { get; }
 
         [NotNull]
-        public CircularBlob InCircularStream { get; }
+        public CircularBlob InCircularStream { get; private set; }
 
         private readonly byte[] _inBufferStream; // for buffering writes to InCircularStream
 
@@ -79,6 +79,11 @@ namespace CScape.Network
         {
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             _deadForMs = 0;
+            IsDisposed = false;
+
+            // reset streams
+            OutStream.ResetHeads();
+            InCircularStream = new CircularBlob(InStreamSize);
         }
 
         /// <summary>
@@ -197,7 +202,6 @@ namespace CScape.Network
             if (IsDisposed)
                 return;
 
-            SyncMachines.Clear();
             Socket?.Dispose();
             Socket = null;
             IsDisposed = true;

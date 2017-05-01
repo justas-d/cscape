@@ -1,8 +1,27 @@
+using CScape.Game.World;
+
 namespace CScape.Game.Commands
 {
     [CommandsClass]
     public sealed class TestCommandClass
     {
+        private PlaneOfExistance _diffPoe;
+
+        [CommandMethod("poe")]
+        public void SwitchPoe(CommandContext ctx)
+        {
+            if (_diffPoe == null)
+                _diffPoe = new PlaneOfExistance(ctx.Callee.Server);
+
+            ctx.Callee.SwitchPoE(_diffPoe);
+        }
+
+        [CommandMethod("ow")]
+        public void PoeOverworld(CommandContext ctx)
+        {
+            ctx.Callee.SwitchPoE(ctx.Callee.Server.Overworld);
+        }
+
         [CommandMethod("tickrate")]
         public void SetTickRate(CommandContext ctx)
         {

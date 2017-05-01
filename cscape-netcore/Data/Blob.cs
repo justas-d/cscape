@@ -59,6 +59,13 @@ namespace CScape.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResetRead() => ReadCaret = 0;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ResetHeads()
+        {
+            ResetWrite();
+            ResetRead();
+        }
+
         public byte Peek(int lookahead = 0)
             => Buffer[ReadCaret + lookahead];
 

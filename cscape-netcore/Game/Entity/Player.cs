@@ -11,7 +11,7 @@ namespace CScape.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
-    public sealed class Player : AbstractEntity, IObserver, IMovingEntity
+    public sealed class Player : AbstractEntity, IMovingObserver
     {
         #region debug vars
 
@@ -243,6 +243,9 @@ namespace CScape.Game.Entity
                 return false;
 
             if (!PoE.ContainsEntity(obs))
+                return false;
+
+            if (obs.Position.Z != Position.Z)
                 return false;
 
             const int maxrange = 15;
