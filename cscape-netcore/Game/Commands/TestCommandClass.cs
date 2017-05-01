@@ -7,7 +7,7 @@ namespace CScape.Game.Commands
         public void SetTickRate(CommandContext ctx)
         {
             var tickrate = 0;
-            if (!Paramaters.Read(ctx, p => p.ReadNumber("tickrate", ref tickrate))) return;
+            if (!ctx.Read(p => p.ReadNumber("tickrate", ref tickrate))) return;
             ctx.Callee.Server.Loop.TickRate = tickrate;
         }
 
@@ -67,7 +67,7 @@ namespace CScape.Game.Commands
             ushort y = 0;
             var z = ctx.Callee.Position.Z;
 
-            if (!Paramaters.Read(ctx, p =>
+            if (!ctx.Read(p =>
             {
                 p.ReadNumber("x coordinate", ref x);
                 p.ReadNumber("y coordinate", ref y);

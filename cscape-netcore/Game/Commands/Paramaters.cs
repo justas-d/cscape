@@ -4,21 +4,27 @@ namespace CScape.Game.Commands
 {
     public static class Paramaters
     {
-        public static bool Read(CommandContext ctx, Action<ParamaterLexer> builder)
+        public static bool Read(this CommandContext ctx, Action<ParamaterLexer> builder)
         {
             try
             {
-                builder(new ParamaterLexer(ctx.Data));
+                var lexer = new ParamaterLexer(ctx.Data);
+                builder(lexer);
+
+                if (lexer.DidFail)
+                {
+                    if (lexer.FailParamExpected != null)
+                    {
+                        ctx.Callee.SendSystemChatMessage(
+                            $"Invalid type for argument {lexer.FailedOnParam}. Expected: {lexer.FailParamExpected.Name}.");
+                    }
+                    else
+                        ctx.Callee.SendSystemChatMessage($"Missing argument: {lexer.FailedOnParam}.");
+
+                    return false;
+                }
+
                 return true;
-            }
-            catch (ParamaterLexer.ParamParseException pex)
-            {
-                ctx.Callee.SendSystemChatMessage(
-                    $"Invalid type for argument {pex.ParamName}. Expected: {pex.ParamType}.");
-            }
-            catch (ParamaterLexer.ParamNotFoundException nfex)
-            {
-                ctx.Callee.SendSystemChatMessage($"Missing argument: {nfex.ParamName}.");
             }
             catch (Exception ex)
             {

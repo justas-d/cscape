@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
-using CScape.Game.Commands;
 using CScape.Game.Entity;
 using CScape.Game.World;
 using CScape.Network;
-using CScape.Network.Packet;
 using JetBrains.Annotations;
 
 namespace CScape
@@ -44,7 +40,7 @@ namespace CScape
         public GameServer([NotNull] IGameServerConfig config, [NotNull] IDatabase database)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-
+            
             // verify config
             if (config.Version == null) throw new ArgumentNullException(nameof(config.Version));
             if (config.PrivateLoginKeyDir == null) throw new ArgumentNullException(nameof(config.PrivateLoginKeyDir));
