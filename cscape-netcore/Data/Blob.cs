@@ -41,6 +41,18 @@ namespace CScape.Data
             ReadCaret += count;
         }
 
+        /// <summary>
+        /// Flushes everything under the write caret into the given blob, past it's write head.
+        /// </summary>
+        /// <param name="blob"></param>
+        public void FlushInto(Blob blob)
+        {
+            if (WriteCaret + blob.WriteCaret >= blob.Buffer.Length)
+                throw new ArgumentOutOfRangeException();
+
+            blob.WriteBlock(Buffer, 0, WriteCaret);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResetWrite() => WriteCaret = 0;
 

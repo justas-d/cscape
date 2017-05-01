@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using CScape.Data;
 using CScape.Game.Entity;
 using CScape.Network;
 using CScape.Network.Packet;
@@ -85,9 +86,13 @@ namespace CScape
             {
                 _tickWatch.Restart();
 
+                //================================================
+
                 // handle new logins
                 while (LoginQueue.TryDequeue(out IPlayerLogin login))
                     login.Transfer(this);
+
+                //================================================
 
                 // get & parse their data
                 foreach (var p in Player)
@@ -100,10 +105,14 @@ namespace CScape
                         PacketDispatch.Handle(p, pack.Opcode, pack.Packet);
                 }
 
+                //================================================
+
                 // movement updates
                 var size = Movement.EntCount;
                 for (var i = 0; i < size; ++i)
                     Movement.Dequeue().Movement.Update();
+
+                //================================================
 
                 // write & send
                 // todo : offload write & send to a different thread?
@@ -117,10 +126,14 @@ namespace CScape
                     p.Connection.SendOutStream();
                 }
 
+                //================================================
+
                 // player entity updating.
                 size = Player.EntCount;
                 for (var i = 0; i < size; ++i)
                     Player.Dequeue().Update(this);
+
+                //================================================
 
                 // handle tick delays
                 TickProcessTime = _tickWatch.ElapsedMilliseconds;

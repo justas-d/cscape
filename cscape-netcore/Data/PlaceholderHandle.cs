@@ -22,7 +22,7 @@ namespace CScape.Data
             StartIndex = startIndex;
             Size = size;
             if (origBlob == null) throw new ArgumentNullException(nameof(origBlob));
-            if (startIndex <= 0 || startIndex >= origBlob.Buffer.Length) throw new ArgumentOutOfRangeException(nameof(startIndex));
+            if (startIndex < 0 || startIndex >= origBlob.Buffer.Length) throw new ArgumentOutOfRangeException(nameof(startIndex));
             if (size <= 0 || startIndex + size >= origBlob.Buffer.Length) throw new ArgumentOutOfRangeException(nameof(size));
             
             // write placeholder 0's

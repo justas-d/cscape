@@ -13,6 +13,8 @@ namespace CScape.Game.Entity
 
     public sealed class Player : AbstractEntity, IObserver, IMovingEntity
     {
+        #region debug vars
+
         public bool DebugCommands { get; set; }
         public bool DebugPackets { get; set; }
 
@@ -34,9 +36,11 @@ namespace CScape.Game.Entity
 
         private DebugStatSyncMachine _debugStatSync;
 
-        public int Pid { get; }
+        #endregion
 
         #region sync vars
+
+        public int Pid { get; }
 
         [Flags]
         public enum UpdateFlags
@@ -85,9 +89,10 @@ namespace CScape.Game.Entity
                 _appearance = val;
                 _model.SetAppearance(val);
                 SetFlag(UpdateFlags.Appearance);
+                IsAppearanceDirty = true;
             }
         }
-        [NotNull] public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
+        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
         [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
         {
             get => _facingCoordinate;
@@ -97,7 +102,11 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.FacingCoordinate);
             }
         }
-        
+
+        public const int MaxAppearanceUpdateSize = 64;
+        public Blob AppearanceUpdateCache { get; set; }= new Blob(MaxAppearanceUpdateSize);
+        public bool IsAppearanceDirty { get; set; }
+
         #endregion
 
         public bool IsMember => _model.IsMember;

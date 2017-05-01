@@ -348,7 +348,7 @@ namespace CScape.Network.Sync
             }
 
             if (flags.HasFlag(Player.UpdateFlags.Appearance))
-                WriteAppearance(upd.Player, stream);
+                WriteAppearance(upd, stream);
 
             if (flags.HasFlag(Player.UpdateFlags.FacingCoordinate))
             {
@@ -380,54 +380,71 @@ namespace CScape.Network.Sync
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteAppearance(Player player, Blob stream)
+        private void WriteAppearance(PlayerUpdateState upd, Blob stream)
         {
-            const int equipSlotSize = 12;
+            // Cache is invalidated only when the invalidation bool flag is set.
+            // check if cache is not ok.
 
-            const int plrObjMagic = 0x100;
-            const int itemMagic = 0x200;
+            var cache = upd.Player.AppearanceUpdateCache;
 
-            var sizePh = new PlaceholderHandle(stream, 1);
-
-            stream.Write((byte) player.Appearance.Gender);
-            stream.Write((byte) player.Appearance.Overhead);
-
-            /* 
-             * todo : some equipped items conflict with body parts 
-             * write body model if chest doesn't conceal the body
-             * write head model if head item doesn't fully conceal the head.
-             * write beard model if head item doesn't fully conceal the head.
-             */
-            for (var i = 0; i < equipSlotSize; i++)
+            if (upd.Player.IsAppearanceDirty)
             {
-                if (player.Appearance[i] != null)
-                    stream.Write16((short) (player.Appearance[i].Value + plrObjMagic));
-                else
-                    stream.Write(0);
+                upd.Player.Log.Debug(this, $"Rewriting appearance cache for {upd}");
+
+                upd.Player.IsAppearanceDirty = false;
+                cache.ResetWrite();
+
+                const int equipSlotSize = 12;
+
+                const int plrObjMagic = 0x100;
+                const int itemMagic = 0x200;
+
+                var sizePh = new PlaceholderHandle(cache, 1);
+
+                cache.Write((byte) upd.Player.Appearance.Gender);
+                cache.Write((byte) upd.Player.Appearance.Overhead);
+
+                /* 
+                 * todo : some equipped items conflict with body parts 
+                 * write body model if chest doesn't conceal the body
+                 * write head model if head item doesn't fully conceal the head.
+                 * write beard model if head item doesn't fully conceal the head.
+                 */
+                for (var i = 0; i < equipSlotSize; i++)
+                {
+                    // todo : write equipment
+                    if (upd.Player.Appearance[i] != null)
+                        cache.Write16((short) (upd.Player.Appearance[i].Value + plrObjMagic));
+                    else
+                        cache.Write(0);
+                }
+
+                cache.Write(upd.Player.Appearance.HairColor);
+                cache.Write(upd.Player.Appearance.TorsoColor);
+                cache.Write(upd.Player.Appearance.LegColor);
+                cache.Write(upd.Player.Appearance.FeetColor);
+                cache.Write(upd.Player.Appearance.SkinColor);
+
+                // upd.Player animation indices
+                cache.Write16(0x328); // standAnimIndex
+                cache.Write16(0x337); // standTurnAnimIndex
+                cache.Write16(0x333); // walkAnimIndex
+                cache.Write16(0x334); // turn180AnimIndex
+                cache.Write16(0x335); // turn90CWAnimIndex
+                cache.Write16(0x336); // turn90CCWAnimIndex
+                cache.Write16(0x338); // runAnimIndex
+
+                cache.Write64(StringToLong(upd.Player.Username));
+                cache.Write(3); // todo : cmb
+                cache.Write16(0); // ...skill???
+
+                sizePh.WriteSize();
+
+                // todo : proper calculation of cmb lvl
             }
 
-            stream.Write(player.Appearance.HairColor);
-            stream.Write(player.Appearance.TorsoColor);
-            stream.Write(player.Appearance.LegColor);
-            stream.Write(player.Appearance.FeetColor);
-            stream.Write(player.Appearance.SkinColor);
-
-            // player animation indices
-            stream.Write16(0x328); // standAnimIndex
-            stream.Write16(0x337); // standTurnAnimIndex
-            stream.Write16(0x333); // walkAnimIndex
-            stream.Write16(0x334); // turn180AnimIndex
-            stream.Write16(0x335); // turn90CWAnimIndex
-            stream.Write16(0x336); // turn90CCWAnimIndex
-            stream.Write16(0x338); // runAnimIndex
-
-            stream.Write64(StringToLong(player.Username));
-            stream.Write(128); //cmb
-            stream.Write16(0); // ...skill???
-
-            sizePh.WriteSize();
-
-            // todo : proper calculation of cmb lvl
+            // cache is either ok, or we rewrote it. Eitherway, flush it into the stream.
+            cache.FlushInto(stream);
         }
 
         //smh
