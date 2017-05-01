@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public class EntityPool<T> : IEnumerable<T> where T : AbstractEntity
+    public class EntityPool<T> : IEnumerable<T> where T : class, IEntity
     {
         public int Size => _pool.Count;
 

@@ -11,7 +11,7 @@ namespace CScape.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
-    public sealed class Player : AbstractEntity, IMovingObserver
+    public sealed class Player : WorldEntity, IMovingEntity, IObserver
     {
         #region debug vars
 
@@ -57,7 +57,7 @@ namespace CScape.Game.Entity
             => Flags |= flag;
 
         [CanBeNull] private ChatMessage _lastChatMessage;
-        [CanBeNull] private IEntity _interactingEntity;
+        [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
         [NotNull] private PlayerAppearance _appearance;
 
@@ -70,7 +70,7 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Chat);
             }
         }
-        [CanBeNull] public IEntity InteractingEntity
+        public IWorldEntity InteractingEntity
         {
             get => _interactingEntity;
             set
@@ -116,9 +116,9 @@ namespace CScape.Game.Entity
 
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
-        [NotNull] public Observatory Observatory { get; }
+        public IObservatory Observatory { get; }
         [NotNull] private readonly PlayerModel _model;
-        [NotNull] public MovementController Movement { get; }
+        public MovementController Movement { get; }
 
         public bool NeedsPositionInit { get; private set; } = true;
         public bool TeleportToDestWhenWalking { get; set; }
@@ -126,28 +126,25 @@ namespace CScape.Game.Entity
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
             : base(login.Server, 
-                  login.Server.EntityIdPool,
-                  login.Model.X, login.Model.Y, login.Model.Z)
+                  login.Server.EntityIdPool)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
-
             _model = login.Model;
-            Appearance = new PlayerAppearance(_model);
             Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId() + 1);
-            Movement = new MovementController(this);
-
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 
             var obsSyncMachine = new ObservableSyncMachine(Server, this);
             Observatory = new Observatory(this, obsSyncMachine);
+            Position.SetPosition(login.Model.X, login.Model.Y, login.Model.Z);
+
+            Appearance = new PlayerAppearance(_model);
+            Movement = new MovementController(this);
 
             Connection.SyncMachines.Add(new RegionSyncMachine(Server, Position));
             Connection.SyncMachines.Add(obsSyncMachine);
 
             Connection.SortSyncMachines();
 
-            // todo : serialize personalized PoE's (or something, probably not)
-            InitPoE(null, Server.Overworld);
             Server.RegisterNewPlayer(this);
 
             Connection.SendMessage(new InitializePlayerPacket(this));
@@ -212,6 +209,12 @@ namespace CScape.Game.Entity
             loop.Player.Enqueue(this);
         }
 
+        public override void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew)
+        {
+            if (isNew)
+                sync.PushToPlayerSyncMachine(this);
+        }
+
         /// <summary>
         /// Forcibly teleports the player to the given coords.
         /// Use this instead of manually setting player position.
@@ -237,7 +240,7 @@ namespace CScape.Game.Entity
         protected override void InternalDestroy()
             => Server.UnregisterPlayer(this);
 
-        public bool CanSee(IEntity obs)
+        public override bool CanSee(IWorldEntity obs)
         {
             if (obs.IsDestroyed)
                 return false;
@@ -258,12 +261,6 @@ namespace CScape.Game.Entity
             }
 
             return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= maxrange;
-        }
-
-        public override void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew)
-        {
-            if (isNew)
-                sync.PushToPlayerSyncMachine(this);
         }
 
         /// <summary>

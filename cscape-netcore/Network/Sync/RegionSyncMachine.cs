@@ -26,15 +26,15 @@ namespace CScape.Network.Sync
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             // send region init if regions changed
-            if (_oldX == _pos.RegionX && _oldY == _pos.RegionY) return;
+            if (_oldX == _pos.ClientRegionX && _oldY == _pos.ClientRegionY) return;
 
             stream.BeginPacket(Packet);
-            stream.Write16((short)(_pos.RegionX + 6));
-            stream.Write16((short)(_pos.RegionY + 6));
+            stream.Write16((short)(_pos.ClientRegionX + 6));
+            stream.Write16((short)(_pos.ClientRegionY + 6));
             stream.EndPacket();
 
-            _oldX = _pos.RegionX;
-            _oldY = _pos.RegionY;
+            _oldX = _pos.ClientRegionX;
+            _oldY = _pos.ClientRegionY;
         }
     }
 }

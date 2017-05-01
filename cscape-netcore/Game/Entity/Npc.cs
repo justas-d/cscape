@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace CScape.Game.Entity
 {
     // todo : npc
-    public class Npc : AbstractEntity
+    public class Npc : WorldEntity
     {
         [Flags]
         public enum UpdateFlags
@@ -24,18 +24,26 @@ namespace CScape.Game.Entity
         public Npc(
             [NotNull] GameServer server, 
             [NotNull] IdPool idPool,
-            ushort x, ushort y, byte z,
-            PlaneOfExistance poe = null) : base(server, idPool, x,y,z, poe)
+            ushort x, ushort y, byte z) : base(server, idPool)
         {
             //Movement = new MovementController(this);
         }
 
-        public override void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew)
+        public override void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew)
         {
             throw new NotImplementedException();
             //if(isNew)
-                //sync.PushToNpcSyncMachine(this);
+            //sync.PushToNpcSyncMachine(this);
         }
 
+        public override bool CanSee(IWorldEntity ent)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Update(MainLoop loop)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

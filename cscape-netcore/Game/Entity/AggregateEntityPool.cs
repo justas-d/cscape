@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CScape.Game.Entity
 {
-    public class AggregateEntityPool<T> : IEnumerable<T> where T : AbstractEntity
+    public class AggregateEntityPool<T> : IEnumerable<T> where T : class, IEntity
     {
         private readonly HashSet<EntityPool<T>> _pools = new HashSet<EntityPool<T>>();
 

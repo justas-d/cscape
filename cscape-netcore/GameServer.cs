@@ -23,7 +23,8 @@ namespace CScape
         public PlaneOfExistance Overworld { get; }
         public IdPool EntityIdPool { get; } = new IdPool();
         public IdPool PlayerIdPool { get; }
-        public AggregateEntityPool<AbstractEntity> Entities { get; } = new AggregateEntityPool<AbstractEntity>();
+        public AggregateEntityPool<IWorldEntity> Entities { get; } 
+            = new AggregateEntityPool<IWorldEntity>();
 
         public ImmutableDictionary<int, Player> Players { get; private set; } = ImmutableDictionary<int, Player>.Empty;
 

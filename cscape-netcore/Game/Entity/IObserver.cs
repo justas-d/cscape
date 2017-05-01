@@ -1,8 +1,15 @@
-﻿namespace CScape.Game.Entity
+using JetBrains.Annotations;
+
+namespace CScape.Game.Entity
 {
-    public interface IObserver
+    /// <summary>
+    /// Defines a world entity that observes and tracks other entities.
+    /// </summary>
+    public interface IObserver : IWorldEntity
     {
-        Observatory Observatory { get; }
-        bool CanSee(IEntity obs);
+        /// <summary>
+        /// The observatory which keeps track of world entities that this IObserver can see.
+        /// </summary>
+        [NotNull] IObservatory Observatory { get; }
     }
 }

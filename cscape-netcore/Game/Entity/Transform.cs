@@ -1,13 +1,18 @@
 using System;
+using System.Linq;
+using CScape.Game.World;
 
 namespace CScape.Game.Entity
 {
     public sealed class Transform
     {
-        public AbstractEntity Entity { get; }
-        private readonly Observatory _observatory;
-        private int _regionX;
-        private int _regionY;
+        public const int MaxZ = 4;
+
+        public IWorldEntity Entity { get; }
+        private readonly IObserver _asObserver;
+
+        private int _clientRegionX;
+        private int _clientRegionY;
 
         public const int MinRegionBorder = 16;
         public const int MaxRegionBorder = 88;
@@ -16,25 +21,27 @@ namespace CScape.Game.Entity
         public ushort Y { get; private set; }
         public byte Z { get; private set; }
 
-        public int RegionX
+        // 8x8 on client
+        public int ClientRegionX
         {
-            get => _regionX;
+            get => _clientRegionX;
             private set
             {
-                _regionX = value;
-                BaseX = (ushort) (_regionX * 8);
+                _clientRegionX = value;
+                BaseX = (ushort) (_clientRegionX * 8);
+            }
+        }
+        public int ClientRegionY
+        {
+            get => _clientRegionY;
+            private set
+            {
+                _clientRegionY = value;
+                BaseY = (ushort) (_clientRegionY * 8);
             }
         }
 
-        public int RegionY
-        {
-            get => _regionY;
-            private set
-            {
-                _regionY = value;
-                BaseY = (ushort) (_regionY * 8);
-            }
-        }
+        public Region Region { get; private set; }
 
         public ushort BaseX { get; private set; }
         public ushort BaseY { get; private set; }
@@ -42,42 +49,34 @@ namespace CScape.Game.Entity
         public int LocalX { get; private set; }
         public int LocalY { get; private set; }
 
-        /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than 4.</exception>
-        public Transform(AbstractEntity entity, ushort x, ushort y, byte z)
+        /// <summary>
+        /// Lightweight constructor.
+        /// Position must be set immediatelly after.
+        /// </summary>
+        public Transform(IWorldEntity entity)
         {
             Entity = entity;
+            _asObserver = entity as IObserver;
 
-            switch (entity)
-            {
-                case IObserver observer:
-                    _observatory = observer.Observatory;
-                    break;
-            }
-
-            SetPosition(x, y, z, false);
         }
 
-        /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than 4.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than MaxZ.</exception>
         public void SetPosition(ushort x, ushort y, byte z, bool updateObservatories = true)
         {
-            if (z > 4) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than 4.");
-
-            // don't do anything if we're trying to set the position to where we're at right now.
-            if (x == X && y == Y && z == Z)
-                return;
+            if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than 4.");
 
             X = x;
             Y = y;
             Z = z;
 
-            RegionX = (X >> 3) - 6;
-            RegionY = (Y >> 3) - 6;
+            ClientRegionX = (X >> 3) - 6;
+            ClientRegionY = (Y >> 3) - 6;
 
-            LocalX = x - (8 * RegionX);
-            LocalY = y - (8 * RegionY);
+            LocalX = x - (8 * ClientRegionX);
+            LocalY = y - (8 * ClientRegionY);
 
+            _asObserver?.Observatory?.Clear();
             Update(updateObservatories);
-            _observatory?.Clear();
         }
 
         public void SetPosition(ushort x, ushort y)
@@ -123,23 +122,23 @@ namespace CScape.Game.Entity
             if (LocalX < MinRegionBorder)
             {
                 dx = 4 * 8;
-                RegionX -= 4;
+                ClientRegionX -= 4;
             }
             else if (LocalX >= MaxRegionBorder)
             {
                 dx = -4 * 8;
-                RegionX += 4;
+                ClientRegionX += 4;
             }
 
             if (LocalY < MinRegionBorder)
             {
                 dy = 4 * 8;
-                RegionY -= 4;
+                ClientRegionY -= 4;
             }
             else if (LocalY >= MaxRegionBorder)
             {
                 dy = -4 * 8;
-                RegionY += 4;
+                ClientRegionY += 4;
             }
 
             if (dx != 0 || dy != 0)
@@ -151,13 +150,17 @@ namespace CScape.Game.Entity
             X = (ushort) (BaseX + LocalX);
             Y = (ushort) (BaseY + LocalY);
 
-            // todo : some sort of faster way of find observables that can see this transform
-            // iterating over all players is pretty stupid but it works for now
-            // IObservers don't necessarily have to be a player as well.
+            // update region
+            Region?.RemoveEntity(Entity);
+            Region = Entity.PoE.GetRegion(X >> Region.Shift, Y >> Region.Shift);
+            Region.AddEntity(Entity);
 
+            // todo : IObservers don't necessarily have to be a player as well.
             if (updateObservatories)
-                foreach (var p in Entity.Server.Players.Values)
-                    p.Observatory.PushObservable(Entity);
+            {
+                foreach (var p in Region.GetNearbyInclusive().SelectMany(r => r.Players))
+                    p.Observatory.RecursivePushObservable(Entity);
+            }
         }
     }
 }

@@ -76,7 +76,7 @@ namespace CScape.Game.Commands
             var player = ctx.Callee;
             player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");
             player.SendSystemChatMessage($"LX: {player.Position.LocalX} LY: {player.Position.LocalY}");
-            player.SendSystemChatMessage($"RX: {player.Position.RegionX} + 6 RY: {player.Position.RegionY} + 6");
+            player.SendSystemChatMessage($"RX: {player.Position.ClientRegionX} + 6 RY: {player.Position.ClientRegionY} + 6");
         }
 
         [CommandMethod("pos set")]
