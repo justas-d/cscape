@@ -118,10 +118,25 @@ namespace CScape.Game.Entity
         [NotNull] public Logger Log => Server.Log;
         public IObservatory Observatory { get; }
         [NotNull] private readonly PlayerModel _model;
+        private int _otherPlayerViewRange = MaxViewRange;
         public MovementController Movement { get; }
 
         public bool NeedsPositionInit { get; private set; } = true;
         public bool TeleportToDestWhenWalking { get; set; }
+
+        /// <summary>
+        /// The player cannot see any entities who are further then this many tiles away from the player.
+        /// </summary>
+        public const int MaxViewRange = 15;
+
+        /// <summary>
+        /// The player cannot see any players who are further then this many tiles away from the player.
+        /// </summary>
+        public int OtherPlayerMaxViewRange
+        {
+            get => _otherPlayerViewRange;
+            set => _otherPlayerViewRange = value.Clamp(0, MaxViewRange);
+        }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) 
@@ -251,16 +266,11 @@ namespace CScape.Game.Entity
             if (obs.Position.Z != Position.Z)
                 return false;
 
-            const int maxrange = 15;
+            var range = MaxViewRange;
+            if (obs is Player)
+                range = OtherPlayerMaxViewRange;
 
-            var player = obs as Player;
-            if (player != null)
-            {
-                // todo : adjust maxrange if the player update packet gets too big or too small.
-                // keep the max at 15, min at 0.
-            }
-
-            return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= maxrange;
+            return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= range;
         }
 
         /// <summary>

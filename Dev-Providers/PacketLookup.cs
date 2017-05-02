@@ -3,7 +3,7 @@ using System.IO;
 using CScape.Network.Packet;
 using Newtonsoft.Json;
 
-namespace cscape_dev
+namespace CScape.Dev.Providers
 {
     public class PacketLookup : IPacketLengthLookup
     {

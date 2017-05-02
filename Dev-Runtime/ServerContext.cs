@@ -1,21 +1,21 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using CScape;
+using CScape.Dev.Providers;
 using Newtonsoft.Json;
 
-namespace cscape_dev
+namespace CScape.Dev.Runtime
 {
-    static class Program
+    public class ServerContext
     {
-        private static readonly BlockingCollection<LogEventArgs> LogQueue = new BlockingCollection<LogEventArgs>();
-        private static GameServer _server;
+        private readonly BlockingCollection<LogEventArgs> _logQueue = new BlockingCollection<LogEventArgs>();
+        private GameServer _server;
 
         private static void HandleAggregateException(AggregateException aggEx)
         {
@@ -24,17 +24,21 @@ namespace cscape_dev
             // Enable all CLR exceptions in the exception settings window to see the stack-trace.
         }
 
-        static void Main()
+        public void Start()
         {
             // make sure we're invariant
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
+            // cd into build dir
+            var dir = System.IO.Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
+            Directory.SetCurrentDirectory(dir);
+
             // config
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(File.ReadAllText("config.json"));
             _server = new GameServer(cfg, new ServerDatabase("packet-lengths.json"));
 
-            _server.Log.LogReceived += (s, l) => LogQueue.Add(l);
+            _server.Log.LogReceived += (s, l) => _logQueue.Add(l);
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
@@ -46,11 +50,11 @@ namespace cscape_dev
 
             ThreadPool.QueueUserWorkItem(o =>
             {
-                foreach (var log in LogQueue.GetConsumingEnumerable())
+                foreach (var log in _logQueue.GetConsumingEnumerable())
                     WriteLog(log);
             });
 
-            Task.Run(_server.Start).ContinueWith(t =>
+            Task.Run((Func<Task>) _server.Start).ContinueWith(t =>
             {
                 if (t.IsFaulted && t.Exception != null)
                     HandleAggregateException(t.Exception);
@@ -60,7 +64,7 @@ namespace cscape_dev
                 Console.ReadLine();
         }
 
-        private static void WriteIntoDelegate(Action<string> writeDel, LogEventArgs l, double sec)
+        private void WriteIntoDelegate(Action<string> writeDel, LogEventArgs l, double sec)
         {
             string header = $"[{sec,4:N6}] ";
             writeDel(header + l.Message);
@@ -73,15 +77,16 @@ namespace cscape_dev
 
         }
 
-        private static void WriteLog(LogEventArgs log)
+        private void WriteLog(LogEventArgs log)
         {
             var time = log.Time - _server.StartTime;
 #if DEBUG
             if (log.Severity == LogSeverity.Debug)
-                WriteIntoDelegate(w => Debug.Write(w), log, time.TotalSeconds);
+                WriteIntoDelegate(w => Debug.Write((string) w), log, time.TotalSeconds);
             else
 #endif
                 WriteIntoDelegate(Console.Write, log, time.TotalSeconds);
         }
+
     }
 }

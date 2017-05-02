@@ -1,8 +1,7 @@
 using System;
-using CScape;
 using CScape.Network.Packet;
 
-namespace cscape_dev
+namespace CScape.Dev.Providers
 {
     public class ServerDatabase : IDatabase, IDisposable
     {

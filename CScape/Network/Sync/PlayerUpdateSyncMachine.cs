@@ -106,7 +106,6 @@ namespace CScape.Network.Sync
             if (player.Equals(_local.Player))
                 return;
 
-
             if (_syncPlayerIds.Contains(player.UniqueEntityId))
                 return;
                 

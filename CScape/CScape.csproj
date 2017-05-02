@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <RootNamespace>CScape</RootNamespace>
-    <AssemblyName>CScape-netcore</AssemblyName>
+    <AssemblyName>CScape</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

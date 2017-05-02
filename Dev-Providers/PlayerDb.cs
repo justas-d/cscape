@@ -1,11 +1,9 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using CScape;
 using CScape.Game.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace cscape_dev
+namespace CScape.Dev.Providers
 {
     public class PlayerDb : DbContext, IPlayerDatabase
     {

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Net;
-using CScape;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace cscape_dev
+namespace CScape.Dev.Providers
 {
     public class JsonGameServerConfig : IGameServerConfig
     {
