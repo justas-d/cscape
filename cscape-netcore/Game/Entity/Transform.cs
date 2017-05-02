@@ -31,6 +31,7 @@ namespace CScape.Game.Entity
                 BaseX = (ushort) (_clientRegionX * 8);
             }
         }
+
         public int ClientRegionY
         {
             get => _clientRegionY;
@@ -75,7 +76,7 @@ namespace CScape.Game.Entity
             LocalX = x - (8 * ClientRegionX);
             LocalY = y - (8 * ClientRegionY);
 
-            _asObserver?.Observatory?.Clear();
+            _asObserver?.Observatory.Clear();
             Update(updateObservatories);
         }
 
@@ -151,9 +152,13 @@ namespace CScape.Game.Entity
             Y = (ushort) (BaseY + LocalY);
 
             // update region
-            Region?.RemoveEntity(Entity);
-            Region = Entity.PoE.GetRegion(X >> Region.Shift, Y >> Region.Shift);
-            Region.AddEntity(Entity);
+            var region = Entity.PoE.GetRegion(X >> Region.Shift, Y >> Region.Shift);
+            if (Region != region)
+            {
+                Region?.RemoveEntity(Entity);
+                Region = region;
+                Region.AddEntity(Entity);
+            }
 
             // todo : IObservers don't necessarily have to be a player as well.
             if (updateObservatories)

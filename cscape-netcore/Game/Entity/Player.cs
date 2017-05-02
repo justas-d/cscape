@@ -15,9 +15,9 @@ namespace CScape.Game.Entity
     {
         #region debug vars
 
-        public bool DebugCommands { get; set; }
-        public bool DebugPackets { get; set; }
-
+        public bool DebugCommands = false;
+        public bool DebugPackets = false;
+        public bool DebugRegion = true;
         public bool DebugStats
         {
             get => _debugStatSync?.IsEnabled ?? false;
@@ -268,6 +268,12 @@ namespace CScape.Game.Entity
         /// </summary>
         public void SendSystemChatMessage(string msg)
             => Connection.SendMessage(new SystemChatMessagePacket(msg));
+
+        public void DebugMsg(string msg, ref bool toggle)
+        {
+            if(toggle)
+                SendSystemChatMessage(msg);
+        }
 
         /// <summary>
         /// Provides a way to cleanly logout of the world.
