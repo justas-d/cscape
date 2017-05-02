@@ -5,57 +5,37 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    /// <summary>
-    /// Something that can be observed and it's observation can be synced.
-    /// </summary>
-    public abstract class AbstractEntity : IEntity
+    public abstract class WorldEntity : IWorldEntity
     {
         public uint UniqueEntityId { get; }
-        [NotNull] public Transform Position { get; }
+        public Transform Position { get; }
 
-        // internally it can be null, but for outside viewers it should always exist
-        [NotNull] public PlaneOfExistance PoE { get; private set; }
-        [NotNull] public GameServer Server { get; }
+        public PlaneOfExistance PoE { get; private set; }
+        public GameServer Server { get; }
 
         [NotNull] private readonly IdPool _idPool;
 
         public bool IsDestroyed { get; private set; }
 
         /// <summary>
-        /// Facade constructor
+        /// Lightweight transform constructor.
+        /// Transform position must be initialized.
         /// </summary>
         // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
-        protected AbstractEntity(
+        protected WorldEntity(
             [NotNull] GameServer server,
             [NotNull] IdPool idPool,
-            ushort x, ushort y, byte z,
             PlaneOfExistance poe = null)
         {
-            Position = new Transform(this, x ,y ,z);
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
 
             UniqueEntityId = _idPool.NextId();
             InitPoE(poe, Server.Overworld);
+            Position = new Transform(this);
         }
 
-        /// <summary>
-        /// Player AbstractEntity constructor
-        /// </summary>
-        //Player will call PoE due to PoE.AddEntity attempting to access Player.Observatory before it is set.
-        // ReSharper disable once NotNullMemberIsNotInitialized
-        protected AbstractEntity(
-            [NotNull] GameServer server,
-            [NotNull] IdPool idPool,
-            ushort x, ushort y, byte z)
-        {
-            _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
-            Server = server ?? throw new ArgumentNullException(nameof(server));
-            Position = new Transform(this, x, y, z);
-            UniqueEntityId = _idPool.NextId();
-        }
-
-        ~AbstractEntity()
+        ~WorldEntity()
         {
             if (!IsDestroyed)
             {
@@ -64,7 +44,7 @@ namespace CScape.Game.Entity
             }
         }
 
-        protected void InitPoE(PlaneOfExistance fromCtor, [NotNull] PlaneOfExistance overworld)
+        private void InitPoE(PlaneOfExistance fromCtor, [NotNull] PlaneOfExistance overworld)
         {
             if (overworld == null) throw new ArgumentNullException(nameof(overworld));
             var poe = fromCtor ?? overworld;
@@ -87,11 +67,8 @@ namespace CScape.Game.Entity
             PoE.AddEntity(this);
         }
 
-        /// <summary>
-        /// Destroys the Entity, making sure it doesn't exist in the world any longer, frees up its id.
-        /// Overriding this method should be done by overriding the virtual method 
-        /// InternalDestroy(), which is called after AbstractEntity.Destroy().
-        /// </summary>
+        public abstract bool CanSee(IWorldEntity ent);
+        
         public void Destroy()
         {
             if (IsDestroyed)
@@ -109,14 +86,9 @@ namespace CScape.Game.Entity
         }
 
         protected virtual void InternalDestroy() { }
-        /// <summary>
-        /// Called every update tick, if scheduled for updating.
-        /// The entity is responible for scheduling it's own updates.
-        /// No need to call base.Update(). 
-        /// </summary>
-        /// <param name="loop">The tick loop where the entity can schedule the next update.</param>
-        public virtual void Update(MainLoop loop) { }
-        public abstract void SyncObservable(ObservableSyncMachine sync, Blob blob, bool isNew);
+
+        public abstract void Update(MainLoop loop);
+        public abstract void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew);
 
         #region IEquatable
         public bool Equals(IEntity other)

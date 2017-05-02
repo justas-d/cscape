@@ -41,7 +41,7 @@ namespace CScape.Game.Entity
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)
             {
-                obs.Observable.SyncObservable(this, stream, obs.IsNew);
+                obs.Observable.SyncTo(this, stream, obs.IsNew);
                 obs.IsNew = false;
             }
         }

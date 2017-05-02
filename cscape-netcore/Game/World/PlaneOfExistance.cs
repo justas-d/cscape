@@ -7,20 +7,23 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.World
 {
-    public class PlaneOfExistance : IEnumerable<AbstractEntity>
+    public class PlaneOfExistance : IEnumerable<IWorldEntity>
     {
         [NotNull]
         public GameServer Server { get; }
         public bool IsOverworld => Server.Overworld == this;
 
-        private readonly EntityPool<AbstractEntity> _entityPool;
+        private readonly EntityPool<IWorldEntity> _entityPool;
         private bool _isFreed;
+
+        private readonly Dictionary<(ushort, ushort), Region> _regions = 
+            new Dictionary<(ushort, ushort), Region>();
 
         public PlaneOfExistance([NotNull] GameServer server)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
 
-            _entityPool = new EntityPool<AbstractEntity>();
+            _entityPool = new EntityPool<IWorldEntity>();
             Server.Entities.Add(_entityPool);
         }
 
@@ -34,8 +37,18 @@ namespace CScape.Game.World
         }
 
         protected virtual void InternalFree() { }
-        protected virtual void InternalRemoveEntity([NotNull]AbstractEntity ent) { }
-        protected virtual void InternalAddEntity([NotNull] AbstractEntity ent) { }
+        protected virtual void InternalRemoveEntity([NotNull]IWorldEntity ent) { }
+        protected virtual void InternalAddEntity([NotNull] IWorldEntity ent) { }
+
+        [NotNull]
+        public Region GetRegion(int rx, int ry)
+        {
+            var key = ((ushort)rx, (ushort)ry);
+            if (!_regions.ContainsKey(key))
+                _regions.Add(key, new Region(this, (ushort)rx, (ushort)ry));
+
+            return _regions[key];
+        }
 
         public void Free()
         {
@@ -50,7 +63,7 @@ namespace CScape.Game.World
         /// <summary>
         /// !!Should only be called by AbstractEntity.
         /// </summary>
-        internal void RemoveEntity([NotNull] AbstractEntity ent)
+        internal void RemoveEntity([NotNull] IWorldEntity ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
@@ -64,37 +77,40 @@ namespace CScape.Game.World
         /// <summary>
         /// !!Should only be called by AbstractEntity.
         /// </summary>
-        internal void AddEntity([NotNull] AbstractEntity ent)
+        internal void AddEntity([NotNull] IWorldEntity ent)
         {
+            if (ent == null) throw new ArgumentNullException(nameof(ent));
+
             // an entity can only belong to one poe at a time.
             if (ent.PoE != this)
                 Debug.Fail("PoE tried to AddEntity on a entity that is in a different PoE.");
 
-            if (ent == null) throw new ArgumentNullException(nameof(ent));
             if (ContainsEntity(ent))
                 return;
 
             _entityPool.Add(ent);
 
+            /*
             // if we're adding a new observer, push them our observables
             var observer = ent as IObserver;
             if (observer != null)
             {
                 observer.Observatory.Clear();
                 foreach(var e in this)
-                    observer.Observatory.PushObservable(e);
+                    observer.Observatory.RecursivePushObservable(e);
             }
+            */
 
             InternalAddEntity(ent);
         }
 
-        public bool ContainsEntity([NotNull] IEntity obs)
+        public bool ContainsEntity([NotNull] IWorldEntity obs)
         {
             if (obs == null) throw new ArgumentNullException(nameof(obs));
             return _entityPool.ContainsId(obs.UniqueEntityId);
         }
 
-        public IEnumerator<AbstractEntity> GetEnumerator()
+        public IEnumerator<IWorldEntity> GetEnumerator()
             => _entityPool.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()

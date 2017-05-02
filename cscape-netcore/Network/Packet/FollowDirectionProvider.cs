@@ -8,12 +8,12 @@ namespace CScape.Network.Packet
     public sealed class FollowDirectionProvider : IDirectionsProvider
     {
         [NotNull]
-        public IMovingObserver Us { get; }
+        public IMovingEntity Us { get; }
 
         public IMovingEntity Target { get; }
         private Transform TargPos => Target.Position;
 
-        public FollowDirectionProvider([NotNull] IMovingObserver us, [NotNull] IMovingEntity target)
+        public FollowDirectionProvider([NotNull] IMovingEntity us, [NotNull] IMovingEntity target)
         {
             Us = us;
             Target = target ?? throw new ArgumentNullException(nameof(target));
