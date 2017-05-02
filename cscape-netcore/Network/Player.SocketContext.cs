@@ -10,10 +10,10 @@ namespace CScape.Network
 {
     public class SocketContext : IDisposable
     {
-        public const int OutStreamSize = (byte.MaxValue + 1) * 128;
-        public const int InBufferStreamSize = 1024 * 2;
-        public const int InStreamSize = InBufferStreamSize * 3;
-        //~78.125MB total mem used with 2000 concurrent players.
+        public const int OutStreamSize = 5000;
+        public const int InBufferStreamSize = 1024;
+        public const int InStreamSize = InBufferStreamSize * 2;
+        //~15.40MB total mem used with 2000 concurrent players.
 
         /// <summary>
         /// In milliseconds, the delay between a socket dying and it's player being removed
