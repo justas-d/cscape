@@ -1,5 +1,7 @@
-﻿using CScape.Data;
+﻿using System;
+using CScape.Data;
 using CScape.Network.Sync;
+using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
@@ -12,14 +14,15 @@ namespace CScape.Game.Entity
 
         public Player LocalPlayer { get; }
 
+        private readonly PlayerObservatory _playerObservatory;
         private readonly PlayerUpdateSyncMachine _playerSync;
 
-        public ObservableSyncMachine(GameServer server, Player player) : base(server)
+        public ObservableSyncMachine([NotNull] Player player, [NotNull] PlayerObservatory playerObservatory) : base(player.Server)
         {
-            LocalPlayer = player;
+            _playerObservatory = playerObservatory ?? throw new ArgumentNullException(nameof(playerObservatory));
+            LocalPlayer = player ?? throw new ArgumentNullException(nameof(player));
 
-            _playerSync = new PlayerUpdateSyncMachine(server, LocalPlayer);
-
+            _playerSync = new PlayerUpdateSyncMachine(player.Server, LocalPlayer);
             LocalPlayer.Connection.SyncMachines.Add(_playerSync);
         }
 
@@ -40,10 +43,7 @@ namespace CScape.Game.Entity
         {
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)
-            {
-                obs.Observable.SyncTo(this, stream, obs.IsNew);
-                obs.IsNew = false;
-            }
+                obs.SyncTo(this, stream, _playerObservatory.PopIsNew(obs));
         }
     }
 }

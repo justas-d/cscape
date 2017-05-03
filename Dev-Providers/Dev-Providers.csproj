@@ -27,6 +27,12 @@
     <None Update="cryptokey-private.pem">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="cryptokey-public.der">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="cryptokey-public.pem">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="packet-lengths.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

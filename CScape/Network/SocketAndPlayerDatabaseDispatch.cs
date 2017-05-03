@@ -179,7 +179,9 @@ namespace CScape.Network
                 // receive login block
                 // header
                 await SocketReceive(socket, blob, blob.Buffer.Length);
-                blob.Overwrite(_crypto.ProcessBlock(blob.Buffer, 0, blob.Buffer.Length));
+                // todo : catch crypto exceptions
+                var decrypted = _crypto.ProcessBlock(blob.Buffer, 0, blob.Buffer.Length);
+                blob.Overwrite(decrypted, 0, 0);
 
                 // verify login header magic
                 magic = blob.ReadByte();
@@ -333,12 +335,16 @@ namespace CScape.Network
         private static Task<int> SocketSend(Socket socket, Blob blob)
         {
             var task = socket.SendAsync(new ArraySegment<byte>(blob.Buffer, 0, blob.WriteCaret), SocketFlags.None);
-            blob.ResetWrite();
+            blob.ResetHeads();
             return task;
         }
 
         private static Task<int> SocketReceive(Socket socket, Blob blob, int len)
-            => socket.ReceiveAsync(new ArraySegment<byte>(blob.Buffer, 0, len), SocketFlags.None);
+        {
+            var task = socket.ReceiveAsync(new ArraySegment<byte>(blob.Buffer, 0, len), SocketFlags.None);
+            blob.ResetHeads();
+            return task;
+        }
 
         public void Dispose()
         {

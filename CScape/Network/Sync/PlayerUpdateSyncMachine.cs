@@ -32,27 +32,34 @@ namespace CScape.Network.Sync
             public void SetLocalFlag(Player.UpdateFlags flag)
                 => _localFlags |= flag;
 
-            public int NeedsUpdateInt()
-                => NeedsUpdate() ? 1 : 0;
-
-            public bool NeedsUpdate()
-                => GetCombinedFlags() != 0;
+            private Player.UpdateFlags? _cCombined = null;
 
             public Player.UpdateFlags GetCombinedFlags()
             {
-                var ret = Player.Flags | _localFlags;
-
-                if (IsLocal)
+                if (_cCombined == null)
                 {
-                    if (ret.HasFlag(Player.UpdateFlags.Chat) && !Player.LastChatMessage.IsForced)
-                        ret &= ~Player.UpdateFlags.Chat;
+                    var ret = Player.Flags | _localFlags;
+
+                    if (ret != 0)
+                    {
+                        if (IsLocal)
+                        {
+                            if (ret.HasFlag(Player.UpdateFlags.Chat) &&
+                                (Player.LastChatMessage == null || !Player.LastChatMessage.IsForced))
+                                ret &= ~Player.UpdateFlags.Chat;
+                        }
+                    }
+                    _cCombined = ret;
                 }
 
-                return ret;
+                return _cCombined.Value;
             }
 
-            public void ResetLocalFlags()
-                => _localFlags = 0;
+            public void PostUpdate()
+            {
+                _cCombined = null;
+                _localFlags = 0;
+            }
 
             public bool Equals(PlayerUpdateState other)
             {
@@ -118,6 +125,7 @@ namespace CScape.Network.Sync
             _syncPlayerIds.Remove(upd.Player.UniqueEntityId);
         }
 
+        // player should not be modified when updating.
         public override void Synchronize(OutBlob stream)
         {
             stream.BeginPacket(Packet);
@@ -155,7 +163,7 @@ namespace CScape.Network.Sync
 
                 stream.WriteBits(2, _local.Player.Position.Z); // plane
                 stream.WriteBits(1, 1); // todo :  setpos flag
-                stream.WriteBits(1, _local.NeedsUpdateInt()); // add to needs updating list
+                stream.WriteBits(1, _local.Player.Flags != 0 ? 1 : 0); // add to needs updating list
                 stream.WriteBits(7, _local.Player.Position.LocalY); // local y
                 stream.WriteBits(7, _local.Player.Position.LocalX); // local x
             }
@@ -166,7 +174,7 @@ namespace CScape.Network.Sync
                 stream.WriteBits(2, 1); // type
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
-                stream.WriteBits(1, _local.NeedsUpdateInt()); // add to needs updating list
+                stream.WriteBits(1, _local.Player.Flags != 0 ? 1 : 0); // add to needs updating list
             }
             // 2
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
@@ -176,10 +184,10 @@ namespace CScape.Network.Sync
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir2);
-                stream.WriteBits(1, _local.NeedsUpdateInt()); // add to needs updating list
+                stream.WriteBits(1, _local.Player.Flags != 0 ? 1 : 0); // add to needs updating list
             }
             // 0
-            else if (_local.NeedsUpdate())
+            else if (_local.Player.Flags != 0)
             {
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 0); // type
@@ -224,7 +232,7 @@ namespace CScape.Network.Sync
                     stream.WriteBits(2, 2); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir2);
-                    stream.WriteBits(1, ent.NeedsUpdateInt()); // needs update?
+                    stream.WriteBits(1, ent.Player.Flags != 0 ? 1 : 0); // needs update?
                 }
                 // walk
                 else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
@@ -232,10 +240,10 @@ namespace CScape.Network.Sync
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 1); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
-                    stream.WriteBits(1, ent.NeedsUpdateInt()); // needs update?
+                    stream.WriteBits(1, ent.Player.Flags != 0 ? 1 : 0); // needs update?
                 }
                 // no pos update, just needs a flag update
-                else if (ent.NeedsUpdate())
+                else if (ent.Player.Flags != 0)
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 0); // type
@@ -288,12 +296,14 @@ namespace CScape.Network.Sync
                 if (upd.IsNew)
                 {
                     upd.SetLocalFlag(Player.UpdateFlags.Appearance);
-                    upd.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
+
+                    if(!upd.IsLocal)
+                        upd.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
 
                     upd.IsNew = false;
                 }
 
-                stream.WriteBits(1, upd.NeedsUpdateInt()); // needs update?
+                stream.WriteBits(1, upd.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
                 stream.WriteBits(1, 1); // todo :  setpos flag
                 stream.WriteBits(5, upd.Player.Position.Y - _local.Player.Position.Y); // ydelta
                 stream.WriteBits(5, upd.Player.Position.X - _local.Player.Position.X); // xdelta
@@ -317,7 +327,10 @@ namespace CScape.Network.Sync
             var flags = upd.GetCombinedFlags();
 
             if (flags == 0)
+            {
+                upd.PostUpdate();
                 return;
+            }
 
             var headerPh = new PlaceholderHandle(stream, 2);
 
@@ -375,7 +388,7 @@ namespace CScape.Network.Sync
                 stream.Write((byte)((short)flags >> 8));
             });
 
-            upd.ResetLocalFlags();
+            upd.PostUpdate();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

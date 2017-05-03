@@ -15,6 +15,7 @@ namespace CScape.Game.Entity
 
         [NotNull] private readonly IdPool _idPool;
 
+        public bool NeedsSightEvaluation { get; set; }
         public bool IsDestroyed { get; private set; }
 
         /// <summary>
@@ -31,6 +32,7 @@ namespace CScape.Game.Entity
             Server = server ?? throw new ArgumentNullException(nameof(server));
 
             UniqueEntityId = _idPool.NextId();
+
             InitPoE(poe, Server.Overworld);
             Position = new Transform(this);
         }
@@ -65,6 +67,7 @@ namespace CScape.Game.Entity
             PoE.RemoveEntity(this);
             PoE = newPoe;
             PoE.AddEntity(this);
+            Position.UpdateRegion();
         }
 
         public abstract bool CanSee(IWorldEntity ent);

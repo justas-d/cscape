@@ -108,8 +108,12 @@ namespace CScape.Game.Entity
                     MoveUpdate.Type = MoveUpdateData.MoveType.Noop;
             }
 
-            if(didMove)
+            if (didMove)
+            {
+                Entity.NeedsSightEvaluation = true;
                 Entity.OnMoved();
+            }
+                
 
             Entity.Server.Loop.Movement.Enqueue(Entity);
         }

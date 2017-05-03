@@ -58,11 +58,11 @@ namespace CScape.Game.Entity
         {
             Entity = entity;
             _asObserver = entity as IObserver;
-
+            Entity.NeedsSightEvaluation = true;
         }
 
         /// <exception cref="ArgumentOutOfRangeException">Z cannot be larger than MaxZ.</exception>
-        public void SetPosition(ushort x, ushort y, byte z, bool updateObservatories = true)
+        public void SetPosition(ushort x, ushort y, byte z)
         {
             if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than 4.");
 
@@ -76,8 +76,9 @@ namespace CScape.Game.Entity
             LocalX = x - (8 * ClientRegionX);
             LocalY = y - (8 * ClientRegionY);
 
-            _asObserver?.Observatory.Clear();
-            Update(updateObservatories);
+            Entity.NeedsSightEvaluation = true;
+            _asObserver?.Observatory?.Clear();
+            Update();
         }
 
         public void SetPosition(ushort x, ushort y)
@@ -115,7 +116,18 @@ namespace CScape.Game.Entity
             Update();
         }
 
-        private void Update(bool updateObservatories = true)
+        public void UpdateRegion()
+        {
+            var region = Entity.PoE.GetRegion(X >> Region.Shift, Y >> Region.Shift);
+            if (Region != region)
+            {
+                Region?.RemoveEntity(Entity);
+                Region = region;
+                Region.AddEntity(Entity);
+            }
+        }
+
+        private void Update()
         {
             var dx = 0;
             var dy = 0;
@@ -152,20 +164,10 @@ namespace CScape.Game.Entity
             Y = (ushort) (BaseY + LocalY);
 
             // update region
-            var region = Entity.PoE.GetRegion(X >> Region.Shift, Y >> Region.Shift);
-            if (Region != region)
-            {
-                Region?.RemoveEntity(Entity);
-                Region = region;
-                Region.AddEntity(Entity);
-            }
+            UpdateRegion();
 
-            // todo : IObservers don't necessarily have to be a player as well.
-            if (updateObservatories)
-            {
-                foreach (var p in Region.GetNearbyInclusive().SelectMany(r => r.Players))
-                    p.Observatory.RecursivePushObservable(Entity);
-            }
+            foreach (var o in Region.GetNearbyInclusive().SelectMany(e => e.Observers))
+                o.Observatory.DoubleEndedPushObservable(Entity);
         }
     }
 }

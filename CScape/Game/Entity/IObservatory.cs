@@ -2,8 +2,14 @@
 
 namespace CScape.Game.Entity
 {
-    public interface IObservatory
+    public interface IObservatory : IEnumerable<IWorldEntity>
     {
+        /// <summary>
+        /// When set, will re-evaluate all sight for all region-local players.
+        /// Is automatically unset after that has been done.
+        /// </summary>
+        bool ReevaluateSightOverride { get; set; }
+
         /// <summary>
         /// The IObserver which owns this IObservatory
         /// </summary>
@@ -15,19 +21,24 @@ namespace CScape.Game.Entity
         void Clear();
 
         /// <summary>
-        /// Enumerates all tracked IWorldEntities
-        /// </summary>
-        /// <returns></returns>
-        IEnumerator<UpdateObservable> GetEnumerator();
-
-        /// <summary>
         /// Pushes a world entity to this observable.
         /// </summary>
-        void PushObservable(IWorldEntity obs);
+        void PushObservable(IWorldEntity ent);
 
         /// <summary>
         /// Pushes a world entity to this observable AND to the world entity if it's an IObserver.
         /// </summary>
-        void RecursivePushObservable(IWorldEntity obs);
+        void DoubleEndedPushObservable(IWorldEntity obs);
+
+        /// <summary>
+        /// Pops and returns the is new value for the entity.
+        /// </summary>
+        bool PopIsNew(IWorldEntity ent);
+
+        /// <summary>
+        /// Removes the given entity from the observatory.
+        /// </summary>
+        void Remove(IWorldEntity ent);
+
     }
 }

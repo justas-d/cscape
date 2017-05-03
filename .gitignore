@@ -288,3 +288,4 @@ __pycache__/
 
 crypto* 
 sqlite3.dll
+*.diagsession

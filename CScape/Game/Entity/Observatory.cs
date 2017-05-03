@@ -1,86 +1,114 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    /// <summary>
-    /// Manages what an observer can see.
-    /// </summary>
-    public class Observatory : IEnumerable<UpdateObservable>, IObservatory
+    public class PlayerObservatory : IObservatory
     {
         public IObserver Observer { get; }
-        private readonly IWorldEntity _ent;
 
-        private readonly List<UpdateObservable> _obs = new List<UpdateObservable>();
-        private readonly HashSet<uint> _obsExisting = new HashSet<uint>();
+        private readonly HashSet<IWorldEntity> _seeableEntities = new HashSet<IWorldEntity>();
+        private readonly HashSet<uint> _newEntityIds = new HashSet<uint>();
 
-        private readonly ObservableSyncMachine _obsSyncMachine;
+        public ObservableSyncMachine Sync { get; }
 
-        public Observatory(
-            [NotNull] IObserver observer,
-            [NotNull] ObservableSyncMachine obsSyncMachine)
+        public bool ReevaluateSightOverride { get; set; }
+
+        public PlayerObservatory([NotNull] Player observer)
         {
             Observer = observer ?? throw new ArgumentNullException(nameof(observer));
-
-            var ent = Observer as IWorldEntity;
-            if (ent != null)
-            { }
-                _ent = ent;
-
-            _obsSyncMachine = obsSyncMachine ?? throw new ArgumentNullException(nameof(obsSyncMachine));
+            Sync = new ObservableSyncMachine(observer, this);
+            observer.Connection.SyncMachines.Add(Sync);
         }
 
         public void Clear()
         {
-            _obs.Clear();
-            _obsSyncMachine.Clear();
-            _obsExisting.Clear();
+            // perform a double ended clear
+            foreach (var ent in _seeableEntities.OfType<IObserver>().Where(e => !e.Equals(Observer)))
+                ent.Observatory.Remove(Observer);
+
+            _seeableEntities.Clear();
+            _newEntityIds.Clear();
+            Sync.Clear();
         }
 
-        public void PushObservable(IWorldEntity obs)
+        public void Remove(IWorldEntity ent)
         {
-            var id = obs.UniqueEntityId;
-
-            if (_obsExisting.Contains(id))
-                return;
-
-            if (!Observer.CanSee(obs))
-                return;
-
-            _obsExisting.Add(id);
-            _obs.Add(new UpdateObservable(obs));
+            _seeableEntities.Remove(ent);
+            _newEntityIds.Remove(ent.UniqueEntityId);
         }
 
-        public void RecursivePushObservable(IWorldEntity obs)
+        /// <summary>
+        /// Enumerates all tracked IWorldEntities
+        /// </summary>
+        public IEnumerator<IWorldEntity> GetEnumerator()
         {
-            var observer = obs as IObserver;
-
-            if (observer != null && _ent != null  // check if we can both see each other.
-                && !observer.Equals(_ent)) // make sure we don't recurse if pushing ourselves
+            // re evaluate the sightlines for all entities in our region that require it.
+            foreach (var ent in Observer.Position.Region.GetNearbyInclusive().SelectMany(e => e.WorldEntities))
             {
-                observer.Observatory.PushObservable(_ent);
+                if (ReevaluateSightOverride || ent.NeedsSightEvaluation)
+                    DoubleEndedPushObservable(ent);
             }
 
-            PushObservable(obs);
+            ReevaluateSightOverride = false;
+
+            // return the entities that we can see.
+            return _seeableEntities.GetEnumerator();
         }
 
-        public IEnumerator<UpdateObservable> GetEnumerator()
+        public void PushObservable(IWorldEntity ent)
         {
-            // backwards iterate _obs so we can delete and yield in the same loop.
-            for (var i = _obs.Count - 1; i >= 0; i--)
+            if (ent == null)
+                return;
+
+            // can see : keep or add
+            if (Observer.CanSee(ent))
             {
-                if (Observer.CanSee(_obs[i].Observable))
-                    yield return _obs[i];
-                else
-                {
-                    _obsExisting.Remove(_obs[i].Observable.UniqueEntityId);
-                    _obs.RemoveAt(i);
-                }
+                // keep
+                if (_seeableEntities.Contains(ent))
+                    return;
+
+                // add
+                _seeableEntities.Add(ent);
+                _newEntityIds.Add(ent.UniqueEntityId);
             }
+            // can't see : remove
+            else
+               Remove(ent);
         }
 
+        public void DoubleEndedPushObservable(IWorldEntity ent)
+        {
+            if (ent == null)
+                return;
+
+            // push our observable to the other entities observatory if it has one.
+            var asObs = ent as IObserver;
+            if (!ent.Equals(Observer)) // make sure we don't do this if we're pushing our own observer
+                asObs?.Observatory.PushObservable(Observer);
+
+            // push new entity to observables
+            PushObservable(ent);
+        }
+
+        public bool PopIsNew(IWorldEntity ent)
+        {
+            if (ent == null) return false;
+
+            if (_newEntityIds.Contains(ent.UniqueEntityId))
+            {
+                _newEntityIds.Remove(ent.UniqueEntityId);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Enumerates all tracked IWorldEntities
+        /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

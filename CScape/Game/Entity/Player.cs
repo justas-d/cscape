@@ -93,13 +93,15 @@ namespace CScape.Game.Entity
             }
         }
         public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
+
         [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
         {
             get => _facingCoordinate;
             set
             {
                 _facingCoordinate = value;
-                SetFlag(UpdateFlags.FacingCoordinate);
+                if(value != null)
+                    SetFlag(UpdateFlags.FacingCoordinate);
             }
         }
 
@@ -116,7 +118,9 @@ namespace CScape.Game.Entity
 
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
-        public IObservatory Observatory { get; }
+        public IObservatory Observatory => _observatory;
+        private PlayerObservatory _observatory;
+
         [NotNull] private readonly PlayerModel _model;
         private int _otherPlayerViewRange = MaxViewRange;
         public MovementController Movement { get; }
@@ -135,7 +139,14 @@ namespace CScape.Game.Entity
         public int OtherPlayerMaxViewRange
         {
             get => _otherPlayerViewRange;
-            set => _otherPlayerViewRange = value.Clamp(0, MaxViewRange);
+            set
+            {
+                var newRange = value.Clamp(0, MaxViewRange);
+                if (newRange != _otherPlayerViewRange)
+                    Observatory.ReevaluateSightOverride = true;
+
+                _otherPlayerViewRange = newRange;
+            }
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
@@ -144,20 +155,17 @@ namespace CScape.Game.Entity
                   login.Server.EntityIdPool)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
+
             _model = login.Model;
             Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId() + 1);
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 
-            var obsSyncMachine = new ObservableSyncMachine(Server, this);
-            Observatory = new Observatory(this, obsSyncMachine);
             Position.SetPosition(login.Model.X, login.Model.Y, login.Model.Z);
-
+            _observatory = new PlayerObservatory(this);
             Appearance = new PlayerAppearance(_model);
             Movement = new MovementController(this);
 
             Connection.SyncMachines.Add(new RegionSyncMachine(Server, Position));
-            Connection.SyncMachines.Add(obsSyncMachine);
-
             Connection.SortSyncMachines();
 
             Server.RegisterNewPlayer(this);
@@ -181,6 +189,7 @@ namespace CScape.Game.Entity
             // reset sync vars
             Flags = 0;
             NeedsPositionInit = false;
+            NeedsSightEvaluation = false;
             Movement.MoveUpdate.Reset();
 
             // reset InteractingEntity if we can't see it anymore.
@@ -242,7 +251,6 @@ namespace CScape.Game.Entity
             if (Position.X == x && Position.Y == y && Position.Z == z)
                 return;
 
-            Observatory.Clear();
             Position.SetPosition(x,y,z);
             NeedsPositionInit = true;
 
@@ -260,17 +268,17 @@ namespace CScape.Game.Entity
             if (obs.IsDestroyed)
                 return false;
 
-            if (!PoE.ContainsEntity(obs))
+            if (obs.Position.Z != Position.Z)
                 return false;
 
-            if (obs.Position.Z != Position.Z)
+            if (!PoE.ContainsEntity(obs))
                 return false;
 
             var range = MaxViewRange;
             if (obs is Player)
                 range = OtherPlayerMaxViewRange;
 
-            return Math.Abs(obs.Position.MaxDistanceTo(Position)) <= range;
+            return obs.Position.MaxDistanceTo(Position) <= range;
         }
 
         /// <summary>

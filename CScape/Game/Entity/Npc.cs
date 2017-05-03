@@ -23,8 +23,7 @@ namespace CScape.Game.Entity
 
         public Npc(
             [NotNull] GameServer server, 
-            [NotNull] IdPool idPool,
-            ushort x, ushort y, byte z) : base(server, idPool)
+            [NotNull] IdPool idPool) : base(server, idPool)
         {
             //Movement = new MovementController(this);
         }

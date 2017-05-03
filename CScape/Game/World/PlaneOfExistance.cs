@@ -83,24 +83,15 @@ namespace CScape.Game.World
 
             // an entity can only belong to one poe at a time.
             if (ent.PoE != this)
+            {
                 Debug.Fail("PoE tried to AddEntity on a entity that is in a different PoE.");
+                throw new InvalidOperationException("PoE tried to AddEntity on a entity that is in a different PoE.");
+            }
 
             if (ContainsEntity(ent))
                 return;
 
             _entityPool.Add(ent);
-
-            /*
-            // if we're adding a new observer, push them our observables
-            var observer = ent as IObserver;
-            if (observer != null)
-            {
-                observer.Observatory.Clear();
-                foreach(var e in this)
-                    observer.Observatory.RecursivePushObservable(e);
-            }
-            */
-
             InternalAddEntity(ent);
         }
 

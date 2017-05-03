@@ -15,7 +15,7 @@ namespace CScape.Dev.Runtime
     public class ServerContext
     {
         private readonly BlockingCollection<LogEventArgs> _logQueue = new BlockingCollection<LogEventArgs>();
-        private GameServer _server;
+        public GameServer Server { get; private set; }
 
         private static void HandleAggregateException(AggregateException aggEx)
         {
@@ -36,9 +36,9 @@ namespace CScape.Dev.Runtime
 
             // config
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(File.ReadAllText("config.json"));
-            _server = new GameServer(cfg, new ServerDatabase("packet-lengths.json"));
+            Server = new GameServer(cfg, new ServerDatabase("packet-lengths.json"));
 
-            _server.Log.LogReceived += (s, l) => _logQueue.Add(l);
+            Server.Log.LogReceived += (s, l) => _logQueue.Add(l);
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
@@ -54,14 +54,7 @@ namespace CScape.Dev.Runtime
                     WriteLog(log);
             });
 
-            Task.Run((Func<Task>) _server.Start).ContinueWith(t =>
-            {
-                if (t.IsFaulted && t.Exception != null)
-                    HandleAggregateException(t.Exception);
-            });
-
-            while (true)
-                Console.ReadLine();
+            Server.Start().GetAwaiter().GetResult();
         }
 
         private void WriteIntoDelegate(Action<string> writeDel, LogEventArgs l, double sec)
@@ -79,7 +72,7 @@ namespace CScape.Dev.Runtime
 
         private void WriteLog(LogEventArgs log)
         {
-            var time = log.Time - _server.StartTime;
+            var time = log.Time - Server.StartTime;
 #if DEBUG
             if (log.Severity == LogSeverity.Debug)
                 WriteIntoDelegate(w => Debug.Write((string) w), log, time.TotalSeconds);

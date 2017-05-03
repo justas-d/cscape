@@ -15,6 +15,8 @@ namespace CScape.Game.World
         public const int Shift = 4;
 
         [NotNull] public HashSet<Player> Players { get; } = new HashSet<Player>();
+        [NotNull] public HashSet<IObserver> Observers { get; } = new HashSet<IObserver>();
+        [NotNull] public HashSet<IWorldEntity> WorldEntities { get; } = new HashSet<IWorldEntity>();
 
         public Region([NotNull] PlaneOfExistance poe, ushort x, ushort y)
         {
@@ -37,11 +39,15 @@ namespace CScape.Game.World
             if (ent.Position.Region != this)
                 throw new InvalidOperationException("ent.Position.Region must be set to the AddEntity region.");
 
+            WorldEntities.Add(ent);
             switch (ent)
             {
                 case Player p:
                     p.DebugMsg($"Region.AddEntity {X} {Y}", ref p.DebugRegion);
                     Players.Add(p);
+                    break;
+                case IObserver o:
+                    Observers.Add(o);
                     break;
             }
         }
@@ -50,11 +56,15 @@ namespace CScape.Game.World
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
+            WorldEntities.Remove(ent);
             switch (ent)
             {
                 case Player p:
                     p.DebugMsg($"Region.RemoveEntity {X} {Y}", ref p.DebugRegion);
                     Players.Remove(p);
+                    break;
+                case IObserver o:
+                    Observers.Remove(o);
                     break;
             }
         }

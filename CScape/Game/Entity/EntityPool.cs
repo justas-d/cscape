@@ -52,7 +52,7 @@ namespace CScape.Game.Entity
         }
 
         public bool ContainsId(uint id)
-            => GetById(id) != null;
+            => _pool.ContainsKey(id);
 
         [DebuggerStepThrough]
         IEnumerator IEnumerable.GetEnumerator()

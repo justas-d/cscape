@@ -214,11 +214,11 @@ namespace CScape.Data
         #endregion
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Overwrite(byte[] newbuffer)
+        public void Overwrite(byte[] newbuffer, int readhead, int writehead)
         {
             Buffer = newbuffer;
-            ResetWrite();
-            ResetRead();
+            ReadCaret = readhead;
+            WriteCaret = writehead;
         }
     }
 }
