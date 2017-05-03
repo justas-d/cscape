@@ -20,10 +20,10 @@ namespace CScape.Network
 
         public void Transfer(MainLoop ignored)
         {
-            if (Existing.Connection.IsConnected()) return;
-            if (Existing.Connection.SignlinkId != SignlinkUid) return;
+            Existing.Connection.Reconnect(NewConnection, SignlinkUid);
 
-            Existing.Connection.AssignNewSocket(NewConnection);
+            Existing.RegionSync.ForceUpdate = true;
+            Existing.Observatory.ReevaluateSightOverride = true;
             Existing.Observatory.Clear();
 
             Existing.Server.Log.Debug(this, $"Reconnected client iid {Existing.UniqueEntityId}");

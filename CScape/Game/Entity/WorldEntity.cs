@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using CScape.Data;
 using CScape.Game.World;
 using JetBrains.Annotations;
@@ -71,7 +74,7 @@ namespace CScape.Game.Entity
         }
 
         public abstract bool CanSee(IWorldEntity ent);
-        
+
         public void Destroy()
         {
             if (IsDestroyed)
@@ -81,12 +84,37 @@ namespace CScape.Game.Entity
             }
 
             PoE.RemoveEntity(this);
-            _idPool.FreeId(UniqueEntityId);
-            
+
+            foreach (var cnt in _containers)
+            {
+                Debug.Assert(cnt != null);
+                cnt.Remove(this);
+            }
+
+            Debug.Assert(_containers.Count == 0);
             InternalDestroy();
 
+            _idPool.FreeId(UniqueEntityId);
             IsDestroyed = true;
         }
+
+        IEnumerable<IRegisteredCollection> IWorldEntity.Containers
+            => _containers;
+
+        public void RegisterContainer(IRegisteredCollection cont)
+        {
+            if (cont == null) throw new ArgumentNullException(nameof(cont));
+            _containers = _containers.Add(cont);
+        }
+
+        public void UnregisterContainer(IRegisteredCollection cont)
+        {
+            if (cont == null) throw new ArgumentNullException(nameof(cont));
+            _containers = _containers.Remove(cont);
+        }
+
+        private ImmutableList<IRegisteredCollection> _containers 
+            = ImmutableList<IRegisteredCollection>.Empty;
 
         protected virtual void InternalDestroy() { }
 
@@ -94,6 +122,7 @@ namespace CScape.Game.Entity
         public abstract void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew);
 
         #region IEquatable
+
         public bool Equals(IEntity other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -113,6 +142,7 @@ namespace CScape.Game.Entity
         {
             return (int) UniqueEntityId;
         }
+
         #endregion
     }
 }

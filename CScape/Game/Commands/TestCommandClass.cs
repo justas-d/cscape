@@ -7,11 +7,17 @@ namespace CScape.Game.Commands
     {
         private PlaneOfExistance _diffPoe;
 
-        [CommandMethod("poe")]
+        [CommandMethod("poe now")]
+        public void PrintPoe(CommandContext ctx)
+        {
+            ctx.Callee.SendSystemChatMessage(ctx.Callee.PoE.ToString());
+        }
+
+        [CommandMethod("poe test")]
         public void SwitchPoe(CommandContext ctx)
         {
             if (_diffPoe == null)
-                _diffPoe = new PlaneOfExistance(ctx.Callee.Server);
+                _diffPoe = new PlaneOfExistance("test_poe", ctx.Callee.Server);
 
             ctx.Callee.SwitchPoE(_diffPoe);
         }

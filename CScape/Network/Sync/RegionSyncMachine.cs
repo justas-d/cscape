@@ -8,6 +8,11 @@ namespace CScape.Network.Sync
     {
         public override int Order => Constant.SyncMachineOrder.Region;
 
+        /// <summary>
+        /// Schedules a forced region update during the next sync round.
+        /// </summary>
+        public bool ForceUpdate { private get; set; }
+
         private readonly Transform _pos;
 
         private int _oldX;
@@ -26,7 +31,7 @@ namespace CScape.Network.Sync
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             // send region init if regions changed
-            if (_oldX == _pos.ClientRegionX && _oldY == _pos.ClientRegionY) return;
+            if ((_oldX == _pos.ClientRegionX && _oldY == _pos.ClientRegionY) || ForceUpdate) return;
 
             stream.BeginPacket(Packet);
             stream.Write16((short)(_pos.ClientRegionX + 6));
@@ -35,6 +40,7 @@ namespace CScape.Network.Sync
 
             _oldX = _pos.ClientRegionX;
             _oldY = _pos.ClientRegionY;
+            ForceUpdate = false;
         }
     }
 }

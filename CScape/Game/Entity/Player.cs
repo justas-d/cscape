@@ -40,6 +40,8 @@ namespace CScape.Game.Entity
 
         #region sync vars
 
+        [NotNull] public RegionSyncMachine RegionSync { get; }
+
         public int Pid { get; }
 
         [Flags]
@@ -160,12 +162,13 @@ namespace CScape.Game.Entity
             Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId() + 1);
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 
-            Position.SetPosition(login.Model.X, login.Model.Y, login.Model.Z);
             _observatory = new PlayerObservatory(this);
+            Position.SetPosition(login.Model.X, login.Model.Y, login.Model.Z);
             Appearance = new PlayerAppearance(_model);
             Movement = new MovementController(this);
 
-            Connection.SyncMachines.Add(new RegionSyncMachine(Server, Position));
+            RegionSync = new RegionSyncMachine(Server, Position);
+            Connection.SyncMachines.Add(RegionSync);
             Connection.SortSyncMachines();
 
             Server.RegisterNewPlayer(this);

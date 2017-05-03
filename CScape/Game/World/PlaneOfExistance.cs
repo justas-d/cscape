@@ -9,6 +9,8 @@ namespace CScape.Game.World
 {
     public class PlaneOfExistance : IEnumerable<IWorldEntity>
     {
+        [NotNull] public string Name { get; }
+
         [NotNull]
         public GameServer Server { get; }
         public bool IsOverworld => Server.Overworld == this;
@@ -19,8 +21,9 @@ namespace CScape.Game.World
         private readonly Dictionary<(ushort, ushort), Region> _regions = 
             new Dictionary<(ushort, ushort), Region>();
 
-        public PlaneOfExistance([NotNull] GameServer server)
+        public PlaneOfExistance(string name, [NotNull] GameServer server)
         {
+            Name = name;
             Server = server ?? throw new ArgumentNullException(nameof(server));
 
             _entityPool = new EntityPool<IWorldEntity>();
@@ -106,5 +109,8 @@ namespace CScape.Game.World
 
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
+
+        public override string ToString()
+            => $"Plane of existance: {Name}";
     }
 };

@@ -77,7 +77,7 @@ namespace CScape.Game.Entity
             LocalY = y - (8 * ClientRegionY);
 
             Entity.NeedsSightEvaluation = true;
-            _asObserver?.Observatory?.Clear();
+            _asObserver?.Observatory.Clear();
             Update();
         }
 
@@ -119,12 +119,16 @@ namespace CScape.Game.Entity
         public void UpdateRegion()
         {
             var region = Entity.PoE.GetRegion(X >> Region.Shift, Y >> Region.Shift);
+
             if (Region != region)
             {
                 Region?.RemoveEntity(Entity);
                 Region = region;
                 Region.AddEntity(Entity);
             }
+
+            foreach (var o in Region.GetNearbyInclusive().SelectMany(e => e.Observers))
+                o.Observatory.DoubleEndedPushObservable(Entity);
         }
 
         private void Update()
@@ -165,9 +169,6 @@ namespace CScape.Game.Entity
 
             // update region
             UpdateRegion();
-
-            foreach (var o in Region.GetNearbyInclusive().SelectMany(e => e.Observers))
-                o.Observatory.DoubleEndedPushObservable(Entity);
         }
     }
 }

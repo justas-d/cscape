@@ -75,9 +75,13 @@ namespace CScape.Network
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="socket"/> is <see langword="null"/></exception>
-        public void AssignNewSocket([NotNull] Socket socket)
+        public void Reconnect([NotNull] Socket socket, int signlink)
         {
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
+
+            if (!CanReconnect(signlink))
+                return;
+
             _deadForMs = 0;
             IsDisposed = false;
 
@@ -85,6 +89,9 @@ namespace CScape.Network
             OutStream.ResetHeads();
             InCircularStream = new CircularBlob(InStreamSize);
         }
+
+        public bool CanReconnect(int signlink)
+            => signlink == SignlinkId && !IsConnected();
 
         /// <summary>
         /// Flushes all passively buffered data received into the circular input stream.

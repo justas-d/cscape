@@ -257,6 +257,7 @@ namespace CScape.Network
 
                 if (isReconnecting)
                 {
+                    // check if valid user
                     if (loggedInPlayer == null)
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
@@ -264,12 +265,23 @@ namespace CScape.Network
                         return;
                     }
 
+                    // check if we can reconnect
+                    if (!loggedInPlayer.Connection.CanReconnect(signlinkUid))
+
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                            "Tried to reconnect but player is not available for reconnecting.");
+                        return;
+                    }
+
+                    // check if the password matches
                     if (!await Server.Database.Player.IsValidPassword(loggedInPlayer.Password, password))
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
                         return;
                     }
 
+                    // all's good, queue reconnect.
                     blob.Write((byte)InitResponseCode.ReconnectDone);
                     _loginQueue.Enqueue(new ReconnectPlayerLogin(loggedInPlayer, socket, signlinkUid));
                 }

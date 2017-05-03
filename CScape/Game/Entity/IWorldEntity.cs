@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CScape.Data;
 using CScape.Game.World;
 using JetBrains.Annotations;
@@ -48,5 +49,16 @@ namespace CScape.Game.Entity
         /// InternalDestroy(), which is called after AbstractEntity.Destroy().
         /// </summary>
         void Destroy();
+
+        /// <summary>
+        /// Registered containers which have a reference to this object.
+        /// To register an entity belonging to a container, is to subscribe
+        /// to the removal of said entity from the container whenever
+        /// the entity is destroyed.
+        /// </summary>
+        IEnumerable<IRegisteredCollection> Containers { get; }
+
+        void RegisterContainer(IRegisteredCollection cont);
+        void UnregisterContainer(IRegisteredCollection cont);
     }
 }

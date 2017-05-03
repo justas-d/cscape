@@ -55,7 +55,7 @@ namespace CScape
             Log = new Logger(this);
             Loop = new MainLoop(this, Config.TickTime);
             _entry = new SocketAndPlayerDatabaseDispatch(this, Loop.LoginQueue);
-            Overworld = new PlaneOfExistance(this);
+            Overworld = new PlaneOfExistance("Overworld", this);
             PlayerIdPool = new IdPool(Convert.ToUInt32(config.MaxPlayers));
         }
 
