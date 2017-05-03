@@ -3,6 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <RootNamespace>CScape.Dev.Runtime.PlayerSpammer</RootNamespace>
+    <AssemblyName>CScape.Dev.Runtime.PlayerSpammer</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

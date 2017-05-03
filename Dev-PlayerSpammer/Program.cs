@@ -9,7 +9,7 @@ using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.OpenSsl;
 
-namespace Dev_PlayerSpammer
+namespace CScape.Dev.Runtime.PlayerSpammer
 {
     class Program
     {
