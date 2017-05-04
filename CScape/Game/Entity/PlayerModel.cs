@@ -12,8 +12,8 @@ namespace CScape.Game.Entity
         [NotNull] public string Username { get; set; }
         [NotNull] public string PasswordHash { get; set; }
 
-        public ushort X { get; set; } = 3220;
-        public ushort Y { get; set; } = 3218;
+        public int X { get; set; } = 3220;
+        public int Y { get; set; } = 3218;
         public byte Z { get; set; } = 0;
 
         public int Head { get; set; } = 0;
@@ -44,7 +44,7 @@ namespace CScape.Game.Entity
             PasswordHash = password;
         }
 
-        public void SetPosition(Transform pos)
+        public void SetPosition(ITransform pos)
         {
             X = pos.X;
             Y = pos.Y;

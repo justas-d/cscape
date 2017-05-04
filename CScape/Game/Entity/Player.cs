@@ -42,7 +42,7 @@ namespace CScape.Game.Entity
 
         [NotNull] public RegionSyncMachine RegionSync { get; }
 
-        public int Pid { get; }
+        public short Pid { get; }
 
         [Flags]
         public enum UpdateFlags
@@ -121,7 +121,7 @@ namespace CScape.Game.Entity
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
         public IObservatory Observatory => _observatory;
-        private PlayerObservatory _observatory;
+        private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly PlayerModel _model;
         private int _otherPlayerViewRange = MaxViewRange;
@@ -152,22 +152,21 @@ namespace CScape.Game.Entity
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
-        public Player([NotNull] NormalPlayerLogin login) 
-            : base(login.Server, 
-                  login.Server.EntityIdPool)
+        public Player([NotNull] NormalPlayerLogin login) : base(login.Server,  login.Server.EntityIdPool)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
 
             _model = login.Model;
-            Pid = Convert.ToInt32(login.Server.PlayerIdPool.NextId() + 1);
+            Pid = Convert.ToInt16(login.Server.PlayerIdPool.NextId() + 1);
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
 
             _observatory = new PlayerObservatory(this);
-            Position.SetPosition(login.Model.X, login.Model.Y, login.Model.Z);
+
+            Transform = ObserverTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
             Appearance = new PlayerAppearance(_model);
             Movement = new MovementController(this);
 
-            RegionSync = new RegionSyncMachine(Server, Position);
+            RegionSync = new RegionSyncMachine(Server, this);
             Connection.SyncMachines.Add(RegionSync);
             Connection.SortSyncMachines();
 
@@ -179,12 +178,6 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Report);
         }
 
-        public override void SwitchPoE([NotNull] PlaneOfExistance newPoe)
-        {
-            base.SwitchPoE(newPoe);
-            Observatory.ReevaluateSightOverride = true;
-        }
-
         public void OnMoved()
         {
             FacingCoordinate = null;
@@ -193,7 +186,7 @@ namespace CScape.Game.Entity
         public override void Update(MainLoop loop)
         {
             // sync db model
-            _model.SetPosition(Position);
+            _model.SetPosition(Transform);
 
             // reset sync vars
             Flags = 0;
@@ -255,19 +248,19 @@ namespace CScape.Game.Entity
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="z"></param>
-        public void ForceTeleport(ushort x, ushort y, byte z)
+        public void ForceTeleport(int x, int y, byte z)
         {
-            if (Position.X == x && Position.Y == y && Position.Z == z)
+            if (Transform.X == x && Transform.Y == y && Transform.Z == z)
                 return;
 
-            Position.SetPosition(x,y,z);
+            Transform.Teleport(x,y,z);
             NeedsPositionInit = true;
 
             Movement.DisposeDirections();
         }
 
-        public void ForceTeleport(ushort x, ushort y)
-            => ForceTeleport(x, y, Position.Z);
+        public void ForceTeleport(int x, int y)
+            => ForceTeleport(x, y, Transform.Z);
 
         protected override void InternalDestroy()
             => Server.UnregisterPlayer(this);
@@ -277,17 +270,17 @@ namespace CScape.Game.Entity
             if (obs.IsDestroyed)
                 return false;
 
-            if (obs.Position.Z != Position.Z)
+            if (obs.Transform.Z != Transform.Z)
                 return false;
 
-            if (!PoE.ContainsEntity(obs))
+            if (!Transform.PoE.ContainsEntity(obs))
                 return false;
 
             var range = MaxViewRange;
             if (obs is Player)
                 range = OtherPlayerMaxViewRange;
 
-            return obs.Position.MaxDistanceTo(Position) <= range;
+            return obs.Transform.MaxDistanceTo(Transform) <= range;
         }
 
         /// <summary>

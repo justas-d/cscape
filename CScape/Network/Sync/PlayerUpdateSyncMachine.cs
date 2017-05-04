@@ -159,16 +159,18 @@ namespace CScape.Network.Sync
            *      7 bits - local x
            */
             // 3
+
             if (_local.Player.NeedsPositionInit)
             {
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 3); // type
 
-                stream.WriteBits(2, _local.Player.Position.Z); // plane
+                stream.WriteBits(2, _local.Player.Transform.Z); // plane
                 stream.WriteBits(1, 1); // todo :  setpos flag
-                stream.WriteBits(1, _local.Player.Flags != 0 ? 1 : 0); // add to needs updating list
-                stream.WriteBits(7, _local.Player.Position.LocalY); // local y
-                stream.WriteBits(7, _local.Player.Position.LocalX); // local x
+                stream.WriteBits(1, _local.GetCombinedFlags() != 0 ? 1 : 0); // add to needs updating list
+
+                stream.WriteBits(7, _local.Player.Transform.Local.y); // local y
+                stream.WriteBits(7, _local.Player.Transform.Local.x); // local x
             }
             // 1
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
@@ -177,7 +179,7 @@ namespace CScape.Network.Sync
                 stream.WriteBits(2, 1); // type
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
-                stream.WriteBits(1, _local.Player.Flags != 0 ? 1 : 0); // add to needs updating list
+                stream.WriteBits(1, _local.GetCombinedFlags() != 0 ? 1 : 0); // add to needs updating list
             }
             // 2
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
@@ -187,10 +189,10 @@ namespace CScape.Network.Sync
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir2);
-                stream.WriteBits(1, _local.Player.Flags != 0 ? 1 : 0); // add to needs updating list
+                stream.WriteBits(1, _local.GetCombinedFlags() != 0 ? 1 : 0); // add to needs updating list
             }
             // 0
-            else if (_local.Player.Flags != 0)
+            else if (_local.GetCombinedFlags() != 0)
             {
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 0); // type
@@ -228,6 +230,7 @@ namespace CScape.Network.Sync
 
                     _initQueue.Enqueue(ent);
                 }
+
                 // run
                 else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
                 {
@@ -235,7 +238,7 @@ namespace CScape.Network.Sync
                     stream.WriteBits(2, 2); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir2);
-                    stream.WriteBits(1, ent.Player.Flags != 0 ? 1 : 0); // needs update?
+                    stream.WriteBits(1, ent.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
                 }
                 // walk
                 else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
@@ -243,10 +246,10 @@ namespace CScape.Network.Sync
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 1); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
-                    stream.WriteBits(1, ent.Player.Flags != 0 ? 1 : 0); // needs update?
+                    stream.WriteBits(1, ent.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
                 }
                 // no pos update, just needs a flag update
-                else if (ent.Player.Flags != 0)
+                else if (ent.GetCombinedFlags() != 0)
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 0); // type
@@ -308,8 +311,8 @@ namespace CScape.Network.Sync
 
                 stream.WriteBits(1, upd.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
                 stream.WriteBits(1, 1); // todo :  setpos flag
-                stream.WriteBits(5, upd.Player.Position.Y - _local.Player.Position.Y); // ydelta
-                stream.WriteBits(5, upd.Player.Position.X - _local.Player.Position.X); // xdelta
+                stream.WriteBits(5, upd.Player.Transform.Y - _local.Player.Transform.Y); // ydelta
+                stream.WriteBits(5, upd.Player.Transform.X - _local.Player.Transform.X); // xdelta
             }
 
             stream.WriteBits(11, 2047);
@@ -375,9 +378,9 @@ namespace CScape.Network.Sync
                 else
                 {
                     stream.Write16((short)
-                        (((upd.Player.LastMovedDirection.x + upd.Player.Position.X) * 2) + 1));
+                        (((upd.Player.LastMovedDirection.x + upd.Player.Transform.X) * 2) + 1));
                     stream.Write16((short)
-                        (((upd.Player.LastMovedDirection.y + upd.Player.Position.Y) * 2) + 1));
+                        (((upd.Player.LastMovedDirection.y + upd.Player.Transform.Y) * 2) + 1));
                 }
             }
 

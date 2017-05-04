@@ -11,9 +11,8 @@ namespace CScape.Game.Entity
     public abstract class WorldEntity : IWorldEntity
     {
         public uint UniqueEntityId { get; }
-        public Transform Position { get; }
+        public ITransform Transform { get; protected set; }
 
-        public PlaneOfExistance PoE { get; private set; }
         public GameServer Server { get; }
 
         [NotNull] private readonly IdPool _idPool;
@@ -22,22 +21,17 @@ namespace CScape.Game.Entity
         public bool IsDestroyed { get; private set; }
 
         /// <summary>
-        /// Lightweight transform constructor.
-        /// Transform position must be initialized.
+        /// Transform must be set initialized.
         /// </summary>
         // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
         protected WorldEntity(
             [NotNull] GameServer server,
-            [NotNull] IdPool idPool,
-            PlaneOfExistance poe = null)
+            [NotNull] IdPool idPool)
         {
             _idPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
             Server = server ?? throw new ArgumentNullException(nameof(server));
 
             UniqueEntityId = _idPool.NextId();
-
-            InitPoE(poe, Server.Overworld);
-            Position = new Transform(this);
         }
 
         ~WorldEntity()
@@ -47,31 +41,6 @@ namespace CScape.Game.Entity
                 _idPool.FreeId(UniqueEntityId);
                 Server.Log.Debug(this, $"Destroyed unfreed entity id {UniqueEntityId}");
             }
-        }
-
-        private void InitPoE(PlaneOfExistance fromCtor, [NotNull] PlaneOfExistance overworld)
-        {
-            if (overworld == null) throw new ArgumentNullException(nameof(overworld));
-            var poe = fromCtor ?? overworld;
-
-            PoE = poe;
-            PoE.AddEntity(this);
-        }
-
-        /// <summary>
-        /// Cleanly switches the PoE of the entity.
-        /// </summary>
-        public virtual void SwitchPoE([NotNull] PlaneOfExistance newPoe)
-        {
-            if (newPoe == null) throw new ArgumentNullException(nameof(newPoe));
-            if (newPoe == PoE)
-                return;
-
-            PoE.RemoveEntity(this);
-            PoE = newPoe;
-            PoE.AddEntity(this);
-
-            Position.UpdateRegion();
         }
 
         public abstract bool CanSee(IWorldEntity ent);
@@ -84,7 +53,7 @@ namespace CScape.Game.Entity
                 return;
             }
 
-            PoE.RemoveEntity(this);
+            Transform.PoE.RemoveEntity(Transform);
 
             foreach (var cnt in _containers)
             {

@@ -23,7 +23,7 @@ namespace CScape.Game.Entity
         /// <summary>
         /// The entities position in the game world.
         /// </summary>
-        [NotNull] Transform Position { get; }
+        [NotNull] ITransform Transform { get; }
 
         /// <summary>
         /// Called when this entity must be synced to another observable.
@@ -32,11 +32,6 @@ namespace CScape.Game.Entity
         /// <param name="isNew">Whether this is the first time the other entity is seeing this entity.</param>
         void SyncTo(ObservableSyncMachine sync, Blob stream, bool isNew);
         // todo : abstract the SyncTo proceedure so that observers that don't need a sync machine or Blob stream can be synced to.
-
-        /// <summary>
-        /// The entities current PoE
-        /// </summary>
-        [NotNull] PlaneOfExistance PoE { get; }
 
         /// <summary>
         /// Figures out whether this entity can see the given other world entity.

@@ -11,7 +11,7 @@ namespace CScape.Network.Packet
         public IMovingEntity Us { get; }
 
         public IMovingEntity Target { get; }
-        private Transform TargPos => Target.Position;
+        private ITransform TargPos => Target.Transform;
 
         public FollowDirectionProvider([NotNull] IMovingEntity us, [NotNull] IMovingEntity target)
         {
@@ -27,16 +27,16 @@ namespace CScape.Network.Packet
             var offset = DirectionHelper.Invert(Target.LastMovedDirection);
             var target = (TargPos.X + offset.x, TargPos.Y + offset.y);
 
-            if (Math.Abs(target.Item1 - Us.Position.LocalX) + Math.Abs(target.Item2 - Us.Position.LocalY) == 1)
+            if (Math.Abs(target.Item1 - Us.Transform.Local.x) + Math.Abs(target.Item2 - Us.Transform.Local.y) == 1)
                 return DirectionHelper.NoopDelta;
 
             // todo : collision checking in FollowDirectionProvider
 
-            var diffX = Us.Position.X < target.Item1 ? (sbyte) 1 : (sbyte) -1;
-            var diffY = Us.Position.Y < target.Item2 ? (sbyte) 1 : (sbyte) -1;
+            var diffX = Us.Transform.X < target.Item1 ? (sbyte) 1 : (sbyte) -1;
+            var diffY = Us.Transform.Y < target.Item2 ? (sbyte) 1 : (sbyte) -1;
 
-            return (Us.Position.X != target.Item1 ? diffX : (sbyte) 0,
-                Us.Position.Y != target.Item2 ? diffY : (sbyte) 0);
+            return (Us.Transform.X != target.Item1 ? diffX : (sbyte) 0,
+                Us.Transform.Y != target.Item2 ? diffY : (sbyte) 0);
         }
 
         public bool IsDone()

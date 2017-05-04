@@ -10,7 +10,7 @@ namespace CScape.Game.Commands
         [CommandMethod("poe now")]
         public void PrintPoe(CommandContext ctx)
         {
-            ctx.Callee.SendSystemChatMessage(ctx.Callee.PoE.ToString());
+            ctx.Callee.SendSystemChatMessage(ctx.Callee.Transform.PoE.ToString());
         }
 
         [CommandMethod("poe test")]
@@ -19,13 +19,13 @@ namespace CScape.Game.Commands
             if (_diffPoe == null)
                 _diffPoe = new PlaneOfExistance("test_poe", ctx.Callee.Server);
 
-            ctx.Callee.SwitchPoE(_diffPoe);
+            ctx.Callee.Transform.SwitchPoE(_diffPoe);
         }
 
         [CommandMethod("ow")]
         public void PoeOverworld(CommandContext ctx)
         {
-            ctx.Callee.SwitchPoE(ctx.Callee.Server.Overworld);
+            ctx.Callee.Transform.SwitchPoE(ctx.Callee.Server.Overworld);
         }
 
         [CommandMethod("tickrate")]
@@ -80,9 +80,9 @@ namespace CScape.Game.Commands
         public void GetPos(CommandContext ctx)
         {
             var player = ctx.Callee;
-            player.SendSystemChatMessage($"X: {player.Position.X} Y: {player.Position.Y} Z: {player.Position.Z}");
-            player.SendSystemChatMessage($"LX: {player.Position.LocalX} LY: {player.Position.LocalY}");
-            player.SendSystemChatMessage($"RX: {player.Position.ClientRegionX} + 6 RY: {player.Position.ClientRegionY} + 6");
+            player.SendSystemChatMessage($"X: {player.Transform.X} Y: {player.Transform.Y} Z: {player.Transform.Z}");
+            player.SendSystemChatMessage($"LX: {player.Transform.Local.x} LY: {player.Transform.Local.y}");
+            player.SendSystemChatMessage($"CRX: {player.Transform.ClientRegion.x} + 6 CRY: {player.Transform.ClientRegion.y} + 6");
         }
 
         [CommandMethod("pos set")]
@@ -90,7 +90,7 @@ namespace CScape.Game.Commands
         {
             ushort x = 0;
             ushort y = 0;
-            var z = ctx.Callee.Position.Z;
+            var z = ctx.Callee.Transform.Z;
 
             if (!ctx.Read(p =>
             {

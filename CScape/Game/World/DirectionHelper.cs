@@ -73,7 +73,7 @@ namespace CScape.Game.World
 
         /// <summary>
         /// Translates deltas into directions.
-        /// Domain [-1; 1]
+        /// Domain [-1; 1] (for x y)
         /// </summary>
         public static Direction GetDirection((sbyte x, sbyte y) d)
         {
@@ -110,7 +110,7 @@ namespace CScape.Game.World
                     return Direction.None;
             }
 
-            throw new ArgumentOutOfRangeException($"{nameof(d)} got undefined args: ({d.x} {d.y})");
+            throw new ArgumentOutOfRangeException(nameof(d), $"got undefined args: ({ d.x } { d.y})");
         }
     }
 }
