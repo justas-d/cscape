@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using JetBrains.Annotations;
 
@@ -10,7 +11,7 @@ namespace CScape.Game.Entity
     {
         public IObserver Observer { get; }
 
-        private readonly HashSet<IWorldEntity> _seeableEntities = new HashSet<IWorldEntity>();
+        private ImmutableHashSet<IWorldEntity> _seeableEntities = ImmutableHashSet<IWorldEntity>.Empty;
         private readonly HashSet<uint> _newEntityIds = new HashSet<uint>();
 
         public ObservableSyncMachine Sync { get; }
@@ -30,14 +31,14 @@ namespace CScape.Game.Entity
             foreach (var ent in _seeableEntities.OfType<IObserver>().Where(e => !e.Equals(Observer)))
                 ent.Observatory.Remove(Observer);
 
-            _seeableEntities.Clear();
+            _seeableEntities = ImmutableHashSet<IWorldEntity>.Empty;
             _newEntityIds.Clear();
             Sync.Clear();
         }
 
         public void Remove(IWorldEntity ent)
         {
-            _seeableEntities.Remove(ent);
+            _seeableEntities = _seeableEntities.Remove(ent);
             _newEntityIds.Remove(ent.UniqueEntityId);
         }
 
@@ -46,17 +47,30 @@ namespace CScape.Game.Entity
         /// </summary>
         public IEnumerator<IWorldEntity> GetEnumerator()
         {
+            var evaluated = new HashSet<uint>();
+
+            void EvalSight(IWorldEntity ent)
+            {
+                if((ReevaluateSightOverride || ent.NeedsSightEvaluation)
+                    && !evaluated.Contains(ent.UniqueEntityId))
+                {
+                    DoubleEndedPushObservable(ent);
+                    evaluated.Add(ent.UniqueEntityId);
+                }
+            }
+
             // re evaluate the sightlines for all entities in our region that require it.
             foreach (var ent in Observer.Position.Region.GetNearbyInclusive().SelectMany(e => e.WorldEntities))
-            {
-                if (ReevaluateSightOverride || ent.NeedsSightEvaluation)
-                    DoubleEndedPushObservable(ent);
-            }
+                EvalSight(ent);
 
             ReevaluateSightOverride = false;
 
-            // return the entities that we can see.
-            return _seeableEntities.GetEnumerator();
+            // return the entities that we can see and that aren't destroyed.
+            foreach (var ent in _seeableEntities)
+            {
+                EvalSight(ent);
+                yield return ent;
+            }
         }
 
         public void PushObservable(IWorldEntity ent)
@@ -72,7 +86,7 @@ namespace CScape.Game.Entity
                     return;
 
                 // add
-                _seeableEntities.Add(ent);
+                _seeableEntities = _seeableEntities.Add(ent);
                 _newEntityIds.Add(ent.UniqueEntityId);
             }
             // can't see : remove

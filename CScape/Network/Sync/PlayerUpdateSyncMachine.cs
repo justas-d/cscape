@@ -110,6 +110,9 @@ namespace CScape.Network.Sync
 
         public void PushPlayer(Player player)
         {
+            if (player.IsDestroyed)
+                return;
+
             if (player.Equals(_local.Player))
                 return;
 

@@ -7,18 +7,21 @@ namespace CScape.Game.World
 {
     public class Region
     {
-        [NotNull] public PlaneOfExistance Poe { get; }
-        public ushort X { get; }
-        public ushort Y { get; }
+        [NotNull]public PlaneOfExistance Poe { get; }
+
+        public int X { get; }
+        public int Y { get; }
 
         public const int Size = 16;
         public const int Shift = 4;
 
-        [NotNull] public RegisteredHashSet<Player> Players { get; } = new RegisteredHashSet<Player>();
-        [NotNull] public RegisteredHashSet<IObserver> Observers { get; } = new RegisteredHashSet<IObserver>();
-        [NotNull] public RegisteredHashSet<IWorldEntity> WorldEntities { get; } = new RegisteredHashSet<IWorldEntity>();
+        [NotNull]public RegisteredHashSet<Player> Players { get; } = new RegisteredHashSet<Player>();
+        [NotNull]public RegisteredHashSet<IObserver> Observers { get; } = new RegisteredHashSet<IObserver>();
+        [NotNull]public RegisteredHashSet<IWorldEntity> WorldEntities { get; } = new RegisteredHashSet<IWorldEntity>();
 
-        public Region([NotNull] PlaneOfExistance poe, ushort x, ushort y)
+        private IEnumerable<Region> _nearbyRegions;
+
+        public Region([NotNull] PlaneOfExistance poe, int x, int y)
         {
             Poe = poe ?? throw new ArgumentNullException(nameof(poe));
             X = x;
@@ -70,17 +73,20 @@ namespace CScape.Game.World
         /// </summary>
         public IEnumerable<Region> GetNearbyInclusive()
         {
-            yield return Poe.GetRegion(X + 1, Y);
-            yield return Poe.GetRegion(X + 1, Y + 1);
-            yield return Poe.GetRegion(X + 1, Y - 1);
+            return _nearbyRegions ?? (_nearbyRegions = new[]
+            {
+                Poe.GetRegion(X + 1, Y),
+                Poe.GetRegion(X + 1, Y + 1),
+                Poe.GetRegion(X + 1, Y - 1),
 
-            yield return Poe.GetRegion(X - 1, Y);
-            yield return Poe.GetRegion(X - 1, Y + 1);
-            yield return Poe.GetRegion(X - 1, Y - 1);
+                Poe.GetRegion(X - 1, Y),
+                Poe.GetRegion(X - 1, Y + 1),
+                Poe.GetRegion(X - 1, Y - 1),
 
-            yield return this;
-            yield return Poe.GetRegion(X, Y + 1);
-            yield return Poe.GetRegion(X, Y - 1);
+                this,
+                Poe.GetRegion(X, Y + 1),
+                Poe.GetRegion(X, Y - 1)
+            });
         }
     }
 }

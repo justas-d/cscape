@@ -61,7 +61,7 @@ namespace CScape.Game.Entity
         /// <summary>
         /// Cleanly switches the PoE of the entity.
         /// </summary>
-        public void SwitchPoE([NotNull] PlaneOfExistance newPoe)
+        public virtual void SwitchPoE([NotNull] PlaneOfExistance newPoe)
         {
             if (newPoe == null) throw new ArgumentNullException(nameof(newPoe));
             if (newPoe == PoE)
@@ -70,6 +70,7 @@ namespace CScape.Game.Entity
             PoE.RemoveEntity(this);
             PoE = newPoe;
             PoE.AddEntity(this);
+
             Position.UpdateRegion();
         }
 

@@ -179,6 +179,12 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Report);
         }
 
+        public override void SwitchPoE([NotNull] PlaneOfExistance newPoe)
+        {
+            base.SwitchPoE(newPoe);
+            Observatory.ReevaluateSightOverride = true;
+        }
+
         public void OnMoved()
         {
             FacingCoordinate = null;

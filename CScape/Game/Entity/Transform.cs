@@ -127,8 +127,11 @@ namespace CScape.Game.Entity
                 Region.AddEntity(Entity);
             }
 
-            foreach (var o in Region.GetNearbyInclusive().SelectMany(e => e.Observers))
-                o.Observatory.DoubleEndedPushObservable(Entity);
+            // todo : do we really need this in UpdateRegion?
+        //    foreach (var o in Region.GetNearbyInclusive().SelectMany(e => e.Observers))
+        //        o.Observatory.DoubleEndedPushObservable(Entity);
+
+            Entity.NeedsSightEvaluation = true;
         }
 
         private void Update()
@@ -166,6 +169,8 @@ namespace CScape.Game.Entity
 
             X = (ushort) (BaseX + LocalX);
             Y = (ushort) (BaseY + LocalY);
+
+            Entity.NeedsSightEvaluation = true;
 
             // update region
             UpdateRegion();

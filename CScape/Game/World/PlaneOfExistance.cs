@@ -18,8 +18,8 @@ namespace CScape.Game.World
         private readonly EntityPool<IWorldEntity> _entityPool;
         private bool _isFreed;
 
-        private readonly Dictionary<(ushort, ushort), Region> _regions = 
-            new Dictionary<(ushort, ushort), Region>();
+        private readonly Dictionary<int, Dictionary<int, Region>> _Xregions
+            = new Dictionary<int, Dictionary<int, Region>>();
 
         public PlaneOfExistance(string name, [NotNull] GameServer server)
         {
@@ -46,11 +46,15 @@ namespace CScape.Game.World
         [NotNull]
         public Region GetRegion(int rx, int ry)
         {
-            var key = ((ushort)rx, (ushort)ry);
-            if (!_regions.ContainsKey(key))
-                _regions.Add(key, new Region(this, (ushort)rx, (ushort)ry));
+            if(!_Xregions.ContainsKey(rx))
+                _Xregions.Add(rx, new Dictionary<int, Region>());
 
-            return _regions[key];
+            var yReg = _Xregions[rx];
+
+            if(!yReg.ContainsKey(ry))
+                yReg.Add(ry, new Region(this, rx, ry));
+
+            return yReg[ry];
         }
 
         public void Free()
