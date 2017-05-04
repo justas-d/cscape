@@ -53,6 +53,7 @@ namespace CScape.Game.Entity
                 return;
             }
 
+            NeedsSightEvaluation = true;
             Transform.PoE.RemoveEntity(Transform);
 
             foreach (var cnt in _containers)
