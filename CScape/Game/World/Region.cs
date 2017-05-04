@@ -28,18 +28,21 @@ namespace CScape.Game.World
             Y = y;
         }
 
-        public void AddEntity([NotNull] IWorldEntity ent)
+        public void AddEntity([NotNull] ITransform owningTransform)
         {
-            if (ent == null) throw new ArgumentNullException(nameof(ent));
+            if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
+
+            var ent = owningTransform.Entity;
             if (ent.IsDestroyed)
             {
                 ent.Server.Log.Warning(this, $"Tried to add destroyed entity {ent} to region at {X} {Y}");
                 return;
             }
 
+
             // verify regions
             // entity region must be set to this before AddEntity
-            if (ent.Position.Region != this)
+            if (owningTransform.Region != this)
                 throw new InvalidOperationException("ent.Position.Region must be set to the AddEntity region.");
 
             WorldEntities.Add(ent);

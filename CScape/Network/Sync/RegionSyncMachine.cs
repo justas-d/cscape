@@ -6,6 +6,7 @@ namespace CScape.Network.Sync
 {
     public class RegionSyncMachine : SyncMachine
     {
+        private readonly Player _player;
         public override int Order => Constant.SyncMachineOrder.Region;
 
         /// <summary>
@@ -13,16 +14,16 @@ namespace CScape.Network.Sync
         /// </summary>
         public bool ForceUpdate { private get; set; }
 
-        private readonly Transform _pos;
+        private ITransform Pos => _player.Transform;
 
         private int _oldX;
         private int _oldY;
 
         public const int Packet = 73;
 
-        public RegionSyncMachine(GameServer server, Transform pos) : base(server)
+        public RegionSyncMachine(GameServer server, Player player) : base(server)
         {
-            _pos = pos;
+            _player = player;
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="stream"/> is <see langword="null"/></exception>
@@ -31,15 +32,17 @@ namespace CScape.Network.Sync
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             // send region init if regions changed
-            if ((_oldX == _pos.ClientRegionX && _oldY == _pos.ClientRegionY) || ForceUpdate) return;
+            if ((_oldX == Pos.ClientRegion.x && _oldY == Pos.ClientRegion.y) || ForceUpdate) return;
+
+            _player.DebugMsg($"Sync region: {Pos.ClientRegion.x} + 6 {Pos.ClientRegion.y} + 6", ref _player.DebugRegion);
 
             stream.BeginPacket(Packet);
-            stream.Write16((short)(_pos.ClientRegionX + 6));
-            stream.Write16((short)(_pos.ClientRegionY + 6));
+            stream.Write16((short)(Pos.ClientRegion.x + 6));
+            stream.Write16((short)(Pos.ClientRegion.y + 6));
             stream.EndPacket();
 
-            _oldX = _pos.ClientRegionX;
-            _oldY = _pos.ClientRegionY;
+            _oldX = Pos.ClientRegion.x;
+            _oldY = Pos.ClientRegion.y;
             ForceUpdate = false;
         }
     }

@@ -14,10 +14,10 @@ namespace CScape.Game.Entity
         private bool _isFirst = true;
 
         [NotNull]
-        public Transform Pos { get; }
+        public ITransform Pos { get; }
 
         public ByReferenceWithDeltaWaypointsDirectionsProvider(
-            [NotNull] Transform pos,
+            [NotNull] ITransform pos,
             (int, int) reference,
             (sbyte, sbyte)[] deltaWaypoints)
         {
@@ -25,7 +25,8 @@ namespace CScape.Game.Entity
             _target = reference;
             _deltaWaypoints = deltaWaypoints;
             Pos = pos;
-            _local = (Pos.LocalX, Pos.LocalY);
+
+            _local = Pos.Local;
 
             // create ienumerable
             _nextProvider = NextProvider();

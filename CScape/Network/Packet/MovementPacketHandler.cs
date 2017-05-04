@@ -29,8 +29,8 @@ namespace CScape.Network.Packet
 
             if (player.TeleportToDestWhenWalking)
             {
-                var expX = player.Position.BaseX + reference.x;
-                var expY = player.Position.BaseY + reference.y;
+                var expX = player.Transform.Base.x + reference.x;
+                var expY = player.Transform.Base.y + reference.y;
 
                 if (deltaWaypoints.Length > 1)
                 {
@@ -38,13 +38,14 @@ namespace CScape.Network.Packet
                     expY += deltaWaypoints.LastOrDefault().y;
                 }
 
-                player.ForceTeleport((ushort) expX, (ushort) expY);
+                player.ForceTeleport(expX, expY);
                 return;
             }
 
+            // todo don't overwrite player.Movement.IsRunning = isRunning;
             player.Movement.IsRunning = isRunning;
             player.Movement.Directions = new ByReferenceWithDeltaWaypointsDirectionsProvider(
-                player.Position, reference, deltaWaypoints);
+                player.Transform, reference, deltaWaypoints);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace CScape.Game.Entity
             }
 
             // re evaluate the sightlines for all entities in our region that require it.
-            foreach (var ent in Observer.Position.Region.GetNearbyInclusive().SelectMany(e => e.WorldEntities))
+            foreach (var ent in Observer.Transform.Region.GetNearbyInclusive().SelectMany(e => e.WorldEntities))
                 EvalSight(ent);
 
             ReevaluateSightOverride = false;

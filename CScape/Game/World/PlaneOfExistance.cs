@@ -68,13 +68,15 @@ namespace CScape.Game.World
         }
 
         /// <summary>
-        /// !!Should only be called by AbstractEntity.
+        /// !!Should only be called by ITransform.
         /// </summary>
-        internal void RemoveEntity([NotNull] IWorldEntity ent)
+        internal void RemoveEntity([NotNull] ITransform owningTransform)
         {
-            if (ent == null) throw new ArgumentNullException(nameof(ent));
+            if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
-            if(!ContainsEntity(ent))
+            var ent = owningTransform.Entity;
+
+            if (!ContainsEntity(ent))
                 return;
 
             _entityPool.Remove(ent);
@@ -82,18 +84,20 @@ namespace CScape.Game.World
         }
 
         /// <summary>
-        /// !!Should only be called by AbstractEntity.
+        /// !!Should only be called by ITransform.
         /// </summary>
-        internal void AddEntity([NotNull] IWorldEntity ent)
+        internal void AddEntity([NotNull] ITransform owningTransform)
         {
-            if (ent == null) throw new ArgumentNullException(nameof(ent));
+            if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
             // an entity can only belong to one poe at a time.
-            if (ent.PoE != this)
+            if (owningTransform.PoE != this)
             {
                 Debug.Fail("PoE tried to AddEntity on a entity that is in a different PoE.");
                 throw new InvalidOperationException("PoE tried to AddEntity on a entity that is in a different PoE.");
             }
+
+            var ent = owningTransform.Entity;
 
             if (ContainsEntity(ent))
                 return;
