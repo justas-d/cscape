@@ -221,7 +221,6 @@ namespace CScape.Game.Entity
                 if (LogoutMethod != LogoutType.None)
                 {
                     Connection.Dispose(); // shut down the connection
-                    Server.SavePlayers();
 
                     // queue the player for removal from playing list, since they cleanly logged out.
                     if (LogoutMethod == LogoutType.Clean)
@@ -263,7 +262,10 @@ namespace CScape.Game.Entity
             => ForceTeleport(x, y, Transform.Z);
 
         protected override void InternalDestroy()
-            => Server.UnregisterPlayer(this);
+        {
+            Server.UnregisterPlayer(this);
+            Server.SavePlayers();
+        }
 
         public override bool CanSee(IWorldEntity obs)
         {
