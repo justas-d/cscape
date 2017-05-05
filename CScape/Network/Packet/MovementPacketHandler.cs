@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using CScape.Data;
 using CScape.Game.Entity;
 
@@ -24,7 +23,7 @@ namespace CScape.Network.Packet
             for (var i = 0; i < deltaWaypoints.Length; i++)
                 deltaWaypoints[i] = ((sbyte) packet.ReadByte(), (sbyte) packet.ReadByte());
 
-            var isRunning = packet.ReadByte() == 1;
+            packet.ReadByte();
             var reference = deltaWaypoints[0];
 
             if (player.TeleportToDestWhenWalking)
@@ -42,8 +41,6 @@ namespace CScape.Network.Packet
                 return;
             }
 
-            // todo don't overwrite player.Movement.IsRunning = isRunning;
-            player.Movement.IsRunning = isRunning;
             player.Movement.Directions = new ByReferenceWithDeltaWaypointsDirectionsProvider(
                 player.Transform, reference, deltaWaypoints);
         }

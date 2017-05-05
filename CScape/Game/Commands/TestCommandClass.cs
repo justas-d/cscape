@@ -67,7 +67,7 @@ namespace CScape.Game.Commands
         [CommandMethod]
         public void Run(CommandContext ctx)
         {
-            ctx.Callee.Movement.IsRunning = true;
+            ctx.Callee.Movement.IsRunning = !ctx.Callee.Movement.IsRunning;
         }
 
         [CommandMethod("data")]
