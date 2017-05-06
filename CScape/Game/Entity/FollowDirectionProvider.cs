@@ -1,9 +1,8 @@
 using System;
-using CScape.Game.Entity;
 using CScape.Game.World;
 using JetBrains.Annotations;
 
-namespace CScape.Network.Packet
+namespace CScape.Game.Entity
 {
     public sealed class FollowDirectionProvider : IDirectionsProvider
     {

@@ -1,4 +1,4 @@
-namespace CScape.Network.Packet
+namespace CScape.Network
 {
     public interface IPacketLengthLookup
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using CScape.Network.Packet;
+using CScape.Network;
 using Newtonsoft.Json;
 
 namespace CScape.Dev.Providers

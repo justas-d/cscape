@@ -3,7 +3,7 @@ using CScape.Data;
 using CScape.Game.Commands;
 using CScape.Game.Entity;
 
-namespace CScape.Network.Packet
+namespace CScape.Network.Handlers
 {
     public sealed class CommandPacketHandler : IPacketHandler
     {

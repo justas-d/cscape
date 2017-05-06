@@ -1,4 +1,6 @@
 using CScape.Game.World;
+using CScape.Network.Packet;
+using JetBrains.Annotations;
 
 namespace CScape.Game.Commands
 {
@@ -6,6 +8,23 @@ namespace CScape.Game.Commands
     public sealed class TestCommandClass
     {
         private PlaneOfExistance _diffPoe;
+
+        [CommandMethod("test soi")]
+        public void TestShowItemOnInterfacePacket(CommandContext ctx)
+        {
+            int iid = 0;
+            int zoom = 0;
+            int itemId = 0;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("interface id", ref iid);
+                b.ReadNumber("zoom", ref zoom);
+                b.ReadNumber("item id", ref itemId);
+            })) return;
+
+            ctx.Callee.Connection.SendMessage(new ShowItemOnInterfacePacket(iid, zoom, itemId));
+        }
 
         [CommandMethod("poe now")]
         public void PrintPoe(CommandContext ctx)

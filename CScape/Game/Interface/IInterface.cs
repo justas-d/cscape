@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using CScape.Network;
 using CScape.Network.Sync;
+using JetBrains.Annotations;
 
 namespace CScape.Game.Interface
 {
@@ -9,7 +11,7 @@ namespace CScape.Game.Interface
     public interface IInterface
     {
         int InterfaceId { get; }
-        IEnumerable<IPacket> GetUpdates { get; }
+        [NotNull] IEnumerable<IPacket> GetUpdates { get; }
 
         /// <summary>
         /// Called after the interface has been closed.
@@ -17,5 +19,16 @@ namespace CScape.Game.Interface
         /// todo : Call interface dispose
         /// </summary>
         void Dispose();
+    }
+
+    /// <summary>
+    /// Defines an interface to which we can push updates.
+    /// </summary>
+    public interface IUpdatePushableInterface : IInterface
+    {
+        /// <summary>
+        /// Pushes an update packet to this interface.
+        /// </summary>
+        void PushUpdate([NotNull] IPacket update);
     }
 }

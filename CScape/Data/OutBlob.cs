@@ -1,5 +1,5 @@
 using System;
-using CScape.Network.Packet;
+using CScape.Network;
 
 namespace CScape.Data
 {

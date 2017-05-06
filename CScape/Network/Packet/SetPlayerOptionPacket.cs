@@ -1,6 +1,6 @@
 ﻿using CScape.Data;
 
-namespace CScape.Network.Sync
+namespace CScape.Network.Packet
 {
     public sealed class SetPlayerOptionPacket : IPacket
     {

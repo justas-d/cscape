@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using CScape.Data;
-using CScape.Game.Entity;
 using CScape.Game.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

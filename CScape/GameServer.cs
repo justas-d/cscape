@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading.Tasks;
+using CScape.Data;
 using CScape.Game.Entity;
 using CScape.Game.World;
 using CScape.Network;
@@ -21,10 +22,13 @@ namespace CScape
 
         internal MainLoop Loop { get; }
         public PlaneOfExistance Overworld { get; }
+
         public IdPool EntityIdPool { get; } = new IdPool();
         public IdPool PlayerIdPool { get; }
         public AggregateEntityPool<IWorldEntity> Entities { get; } 
             = new AggregateEntityPool<IWorldEntity>();
+
+        internal ObjectPool<PooledBlob> BlobPool { get; } = PooledBlob.CreatePool();
 
         public ImmutableDictionary<int, Player> Players { get; private set; } = ImmutableDictionary<int, Player>.Empty;
 

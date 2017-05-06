@@ -1,7 +1,7 @@
 using CScape.Data;
 using JetBrains.Annotations;
 
-namespace CScape.Network.Packet
+namespace CScape.Network.Handlers
 {
     public interface IPacketHandler
     {

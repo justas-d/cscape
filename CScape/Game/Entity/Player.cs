@@ -4,6 +4,7 @@ using CScape.Data;
 using CScape.Game.Model;
 using CScape.Game.World;
 using CScape.Network;
+using CScape.Network.Packet;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
@@ -160,8 +161,6 @@ namespace CScape.Game.Entity
         public Player([NotNull] NormalPlayerLogin login) : base(login.Server,  login.Server.EntityIdPool)
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
-
-            var a = new ItemStack[5];
 
             _model = login.Model;
             Pid = Convert.ToInt16(login.Server.PlayerIdPool.NextId() + 1);

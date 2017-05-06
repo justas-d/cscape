@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using CScape.Game.Entity;
 using CScape.Network;
-using CScape.Network.Packet;
 using JetBrains.Annotations;
 
 namespace CScape
