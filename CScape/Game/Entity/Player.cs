@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Data;
 using CScape.Game.World;
@@ -8,6 +9,66 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
+    public interface IItemDefinition : IEquatable<IItemDefinition>
+    {
+        int ItemId { get; }
+        int MaxAmount { get; } // todo : max amount must be (0, int.MaxValue]
+    }
+
+    public interface IItemProvider
+    {
+        (int id, int amount)[] Items { get; }
+    }
+
+    /// <summary>
+    /// Provides items from the player model.
+    /// </summary>
+    public class ModelItemProvider : IItemProvider, IPlayerForeignModel
+    {
+        public int Id { get; private set; }
+        string IForeignModelObject<string, PlayerModel>.ForeignKey { get; set; }
+        PlayerModel IForeignModelObject<string, PlayerModel>.Model { get; set; }
+
+        public (int id, int amount)[] Items { get; }
+
+        private ModelItemProvider()
+        {
+            
+        }
+
+        public ModelItemProvider(int size)
+        {
+            Items = new (int, int)[size];
+        }
+    }
+
+    public class ItemStack
+    {
+        public const int MaxAmount = int.MaxValue;
+
+        public int DefinitionId { get; }
+        public int Amount { get; set;  }
+
+        public bool IsEmpty => DefinitionId == 0 || Amount <= 0;
+
+        public ItemStack(int defId, int amnt)
+        {
+            DefinitionId = defId;
+            Amount = amnt;
+        }
+    }
+
+    public interface IInterface
+    {
+        int InterfaceId { get; }
+    }
+
+    public interface IInterfaceSync
+    {
+        int Id { get; }
+        IEnumerable<IPacket> GetUpdates { get; }
+    }
+
     //todo: change username feature
     //todo: change password feature
 
@@ -61,7 +122,6 @@ namespace CScape.Game.Entity
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
-        [NotNull] private PlayerAppearance _appearance;
 
         [CanBeNull] public ChatMessage LastChatMessage
         {
@@ -83,13 +143,13 @@ namespace CScape.Game.Entity
         }
         [NotNull] public PlayerAppearance Appearance
         {
-            get => _appearance;
+            get => _model.Appearance;
             set
             {
                 // ReSharper disable once ConstantNullCoalescingCondition
                 var val = value ?? PlayerAppearance.Default;
-                _appearance = val;
-                _model.SetAppearance(val);
+                _model.Appearance = val;
+
                 SetFlag(UpdateFlags.Appearance);
                 IsAppearanceDirty = true;
             }
@@ -109,6 +169,10 @@ namespace CScape.Game.Entity
 
         public const int MaxAppearanceUpdateSize = 64;
         public Blob AppearanceUpdateCache { get; set; }= new Blob(MaxAppearanceUpdateSize);
+
+        /// <summary>
+        /// If set, will invalidate appearance update caches.
+        /// </summary>
         public bool IsAppearanceDirty { get; set; }
 
         #endregion
@@ -156,6 +220,8 @@ namespace CScape.Game.Entity
         {
             if (login == null) throw new ArgumentNullException(nameof(login));
 
+            var a = new ItemStack[5];
+
             _model = login.Model;
             Pid = Convert.ToInt16(login.Server.PlayerIdPool.NextId() + 1);
             Connection = new SocketContext(this, login.Server, login.Connection, login.SignlinkUid);
@@ -163,7 +229,6 @@ namespace CScape.Game.Entity
             _observatory = new PlayerObservatory(this);
 
             Transform = ObserverTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
-            Appearance = new PlayerAppearance(_model);
             Movement = new MovementController(this);
 
             RegionSync = new RegionSyncMachine(Server, this);
@@ -176,6 +241,9 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Follow);
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
+
+            SetFlag(UpdateFlags.Appearance);
+            IsAppearanceDirty = true;
         }
 
         public void OnMoved()

@@ -1,13 +1,15 @@
 using System;
 using System.Threading.Tasks;
+using CScape.Data;
 using CScape.Game.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CScape.Dev.Providers
 {
     public class PlayerDb : DbContext, IPlayerDatabase
     {
-        public DbSet<PlayerModel> SaveData { get; set; }
+        public DbSet<PlayerModel> PlayerModels { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -16,6 +18,15 @@ namespace CScape.Dev.Providers
 
         protected override void OnModelCreating(ModelBuilder model)
         {
+            base.OnModelCreating(model);
+
+            void SetupForeign<T>(ReferenceNavigationBuilder<PlayerModel, T> b) where T : class, IForeignModelObject<string, PlayerModel>
+            {
+                b.WithOne(c => c.Model)
+                    .HasForeignKey<T>(p => p.ForeignKey)
+                    .IsRequired();
+            }
+
             model.Entity<PlayerModel>(b =>
             {
                 b.HasKey(c => c.Username);
@@ -24,12 +35,15 @@ namespace CScape.Dev.Providers
                 b.Property(s => s.X).IsRequired();
                 b.Property(s => s.Y).IsRequired();
                 b.Property(s => s.Z).IsRequired();
+                
+                SetupForeign(b.HasOne(p => p.BackpackItems));
+                SetupForeign(b.HasOne(p => p.Appearance));
             });
         }
 
         public Task<PlayerModel> GetPlayer(string username)
         {
-            return SaveData.FindAsync(username.ToLowerInvariant());
+            return PlayerModels.FindAsync(username.ToLowerInvariant());
         }
 
         public async Task<PlayerModel> GetPlayer(string username, string password)
@@ -56,7 +70,7 @@ namespace CScape.Dev.Providers
                 return null;
 
             var model = new PlayerModel(username, password);
-            SaveData.Add(model);
+            PlayerModels.Add(model);
             await Save();
             return model;
         }

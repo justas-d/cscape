@@ -1,18 +1,12 @@
+using CScape.Data;
+
 namespace CScape.Game.Entity
 {
-    public class PlayerAppearance : IPlayerAppearance
+    public class PlayerAppearance : IPlayerAppearance, IPlayerForeignModel
     {
-        public enum OverheadType : byte
-        {
-            None = 0
-            // todo : overheads
-        }
-
-        public enum GenderType : byte
-        {
-            Male,
-            Female
-        }
+        public int Id { get; private set; }
+        string IForeignModelObject<string, PlayerModel>.ForeignKey { get; set; }
+        PlayerModel IForeignModelObject<string, PlayerModel>.Model { get; set; }
 
         public int Head { get; }
         public int Chest { get; }
@@ -29,6 +23,7 @@ namespace CScape.Game.Entity
         public byte LegColor { get; }
         public byte FeetColor { get; }
 
+        #region indexer
         public const int ChestIndex = 4;
         public const int ArmIndex = 6;
         public const int LegIndex = 7;
@@ -64,6 +59,7 @@ namespace CScape.Game.Entity
                 }
             }
         }
+#endregion
 
         public static PlayerAppearance Default { get; } = new PlayerAppearance();
 
@@ -95,24 +91,6 @@ namespace CScape.Game.Entity
             TorsoColor = torsoColor;
             LegColor = legColor;
             FeetColor = feetColor;
-        }
-
-        public PlayerAppearance(IPlayerAppearance cpy)
-        {
-            Head = cpy.Head;
-            Chest = cpy.Chest;
-            Arms = cpy.Arms;
-            Hands = cpy.Hands;
-            Legs = cpy.Legs;
-            Feet = cpy.Feet;
-            Beard = cpy.Beard;
-            Gender = cpy.Gender;
-            Overhead = cpy.Overhead;
-            SkinColor = cpy.SkinColor;
-            HairColor = cpy.HairColor;
-            TorsoColor = cpy.TorsoColor;
-            LegColor = cpy.LegColor;
-            FeetColor = cpy.FeetColor;
         }
     }
 }
