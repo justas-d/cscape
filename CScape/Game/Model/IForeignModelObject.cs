@@ -1,6 +1,4 @@
-using CScape.Game.Entity;
-
-namespace CScape.Data
+namespace CScape.Game.Model
 {
     public interface IPlayerForeignModel : IForeignModelObject<string, PlayerModel> { }
 

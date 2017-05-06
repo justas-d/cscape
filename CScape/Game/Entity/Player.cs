@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Data;
+using CScape.Game.Model;
 using CScape.Game.World;
 using CScape.Network;
 using CScape.Network.Sync;
@@ -9,66 +9,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-    public interface IItemDefinition : IEquatable<IItemDefinition>
-    {
-        int ItemId { get; }
-        int MaxAmount { get; } // todo : max amount must be (0, int.MaxValue]
-    }
-
-    public interface IItemProvider
-    {
-        (int id, int amount)[] Items { get; }
-    }
-
-    /// <summary>
-    /// Provides items from the player model.
-    /// </summary>
-    public class ModelItemProvider : IItemProvider, IPlayerForeignModel
-    {
-        public int Id { get; private set; }
-        string IForeignModelObject<string, PlayerModel>.ForeignKey { get; set; }
-        PlayerModel IForeignModelObject<string, PlayerModel>.Model { get; set; }
-
-        public (int id, int amount)[] Items { get; }
-
-        private ModelItemProvider()
-        {
-            
-        }
-
-        public ModelItemProvider(int size)
-        {
-            Items = new (int, int)[size];
-        }
-    }
-
-    public class ItemStack
-    {
-        public const int MaxAmount = int.MaxValue;
-
-        public int DefinitionId { get; }
-        public int Amount { get; set;  }
-
-        public bool IsEmpty => DefinitionId == 0 || Amount <= 0;
-
-        public ItemStack(int defId, int amnt)
-        {
-            DefinitionId = defId;
-            Amount = amnt;
-        }
-    }
-
-    public interface IInterface
-    {
-        int InterfaceId { get; }
-    }
-
-    public interface IInterfaceSync
-    {
-        int Id { get; }
-        IEnumerable<IPacket> GetUpdates { get; }
-    }
-
+   
     //todo: change username feature
     //todo: change password feature
 

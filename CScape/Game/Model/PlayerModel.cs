@@ -1,6 +1,7 @@
+using CScape.Game.Entity;
 using JetBrains.Annotations;
 
-namespace CScape.Game.Entity
+namespace CScape.Game.Model
 {
     public sealed class PlayerModel
     {
