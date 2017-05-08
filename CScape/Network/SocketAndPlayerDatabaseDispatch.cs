@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using CScape.Data;
 using CScape.Game.Entity;
-using CScape.Game.Model;
+using CScape.Model;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;

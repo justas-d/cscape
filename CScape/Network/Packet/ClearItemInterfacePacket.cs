@@ -2,12 +2,12 @@
 
 namespace CScape.Network.Packet
 {
-    public sealed class ClearItemInterface : IPacket
+    public sealed class ClearItemInterfacePacket : IPacket
     {
         private readonly int _containerId;
         public const int Id = 72;
 
-        public ClearItemInterface(int containerId)
+        public ClearItemInterfacePacket(int containerId)
         {
             _containerId = containerId;
         }

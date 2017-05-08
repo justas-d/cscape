@@ -1,4 +1,4 @@
-namespace CScape.Game.Model
+namespace CScape.Model
 {
     public interface IPlayerForeignModel : IForeignModelObject<string, PlayerModel> { }
 

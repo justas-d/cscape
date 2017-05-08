@@ -3,13 +3,13 @@ using JetBrains.Annotations;
 
 namespace CScape.Data
 {
-    public class PlaceholderHandle
+    public struct PlaceholderHandle
     {
         public Blob OriginalBlob { get; }
         public int StartIndex { get; }
         public int Size { get; }
 
-        private int origWritePos;
+        private int _origWritePos;
 
         public PlaceholderHandle([NotNull] Blob blob, int size) : this(blob, blob.WriteCaret, size)
         {
@@ -18,6 +18,7 @@ namespace CScape.Data
 
         public PlaceholderHandle([NotNull] Blob origBlob, int startIndex, int size)
         {
+            _origWritePos = -1;
             OriginalBlob = origBlob;
             StartIndex = startIndex;
             Size = size;
@@ -35,7 +36,7 @@ namespace CScape.Data
         /// </summary>
         private void Reverse()
         {
-            origWritePos = OriginalBlob.WriteCaret;
+            _origWritePos = OriginalBlob.WriteCaret;
             OriginalBlob.WriteCaret = StartIndex;
         }
 
@@ -44,7 +45,7 @@ namespace CScape.Data
         /// </summary>
         private void Forward()
         {
-            OriginalBlob.WriteCaret = origWritePos;
+            OriginalBlob.WriteCaret = _origWritePos;
         }
 
         public void DoWrite(Action<Blob> expr)

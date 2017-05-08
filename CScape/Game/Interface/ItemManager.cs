@@ -1,43 +1,21 @@
 using System;
 using System.Linq;
-using CScape.Network.Packet;
+using CScape.Game.Item;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Interface
 {
-    public class SyncedInterfaceItemManager : InterfaceItemManager
+    public class ItemManager : IItemManager
     {
-        [NotNull] private readonly IUpdatePushableInterface _interf;
-
-        public SyncedInterfaceItemManager([NotNull] GameServer server, [NotNull] IItemProvider provider, int containerInterfaceId,
-            [NotNull] IUpdatePushableInterface interf) : base(server, provider, containerInterfaceId)
-        {
-            _interf = interf ?? throw new ArgumentNullException(nameof(interf));
-
-            // push clear interface update.
-            // todo : push initial sync update
-            interf.PushUpdate(new ClearItemInterface(containerInterfaceId));
-        }
-
-        protected override void InternalExecuteChangeInfo(ref ItemProviderChangeInfo info)
-        {
-        }
-    }
-
-    public abstract class InterfaceItemManager : IInterfaceItemManager
-    {
-        [NotNull] private readonly GameServer _server;
-        private IItemDatabase Db => _server.Database.Item;
+        private IItemDatabase Db => Server.Database.Item;
 
         public int Size => Provider.Items.Length;
-        public int ContainerInterfaceId { get; }
-        public int Count { get; private set; }
+        public GameServer Server { get; }
         public IItemProvider Provider { get; }
 
-        public InterfaceItemManager([NotNull] GameServer server, [NotNull] IItemProvider provider, int containerInterfaceId)
+        public ItemManager([NotNull] GameServer server, [NotNull] IItemProvider provider)
         {
-            ContainerInterfaceId = containerInterfaceId;
-            _server = server ?? throw new ArgumentNullException(nameof(server));
+            Server = server ?? throw new ArgumentNullException(nameof(server));
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
         
@@ -51,7 +29,7 @@ namespace CScape.Game.Interface
 
             if (def == null)
             {
-                _server.Log.Warning(this, $"Attempted to calc change info for undefined item id {id}");
+                Server.Log.Warning(this, $"Attempted to calc change info for undefined item id {id}");
                 return ItemProviderChangeInfo.Invalid;
             }
 
@@ -131,43 +109,31 @@ namespace CScape.Game.Interface
                     return new ItemProviderChangeInfo(oth.idx, Convert.ToInt32(delta - overflow), overflow, id);
                 else // uhh
                 {
-                    _server.Log.Warning(this,
+                    Server.Log.Warning(this,
                         $"Existing item id item info operation resolve resulted in dropping through delta == 0 delta > 0 delta < 0. Delta: {delta}, id: {id}, amount: {amount}, existing amount: {oth.copy.amnt}");
                     return ItemProviderChangeInfo.Invalid;
                 }
             }
         }
         
-        public void ExecuteChangeInfo(ItemProviderChangeInfo info)
+        public virtual void ExecuteChangeInfo(ItemProviderChangeInfo info)
         {
             if (info.IsValid)
                 return;
 
             if (info.Index < 0 || info.Index >= Provider.Items.Length)
             {
-                _server.Log.Debug(this, $"Out of range index in change info: {info.Index}");
+                Server.Log.Debug(this, $"Out of range index in change info: {info.Index}");
                 return;
             }
-
-            // increment counter if we're adding a new item to a slot that is empty and the item that we're adding is not empty.
-            if(ItemHelper.IsEmpty(Provider.Items[info.Index]) && !ItemHelper.IsEmpty((info.ItemDefId, info.AmountDelta)))
-                Count++;
 
             // execute
             Provider.Items[info.Index].id = info.ItemDefId;
             Provider.Items[info.Index].amount += info.AmountDelta;
 
-            // check if slot after execution is empty, if it is, decrement our item count.
             if (ItemHelper.IsEmpty(Provider.Items[info.Index]))
-            {
                 Provider.Items[info.Index] = ItemHelper.EmptyItem;
-                Count--;
-            }
-
-            InternalExecuteChangeInfo(ref info);
         }
-
-        protected abstract void InternalExecuteChangeInfo(ref ItemProviderChangeInfo info);
 
         public int Contains(int id) 
             => Provider.Items.Where(i => i.id == id).Select(i => i.amount).Sum();

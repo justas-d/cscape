@@ -5,22 +5,15 @@ namespace CScape.Game.Interface
     /// <summary>
     /// Safely manages item adding, removing and look up on the items of an underlying item provider.
     /// </summary>
-    public interface IInterfaceItemManager
+    public interface IItemManager
     {
-        /// <summary>
-        /// The interface id of the item container on the client.
-        /// </summary>
-        int ContainerInterfaceId { get; }
-
-        /// <summary>
-        /// The amount of items that aren't empty.
-        /// </summary>
-        int Count { get; }
+        [NotNull] GameServer Server { get; }
 
         /// <summary>
         /// The underlying item provider.
         /// </summary>
         [NotNull] IItemProvider Provider { get; }
+
         /// <summary>
         /// The maximum capacity.
         /// </summary>
@@ -43,5 +36,13 @@ namespace CScape.Game.Interface
         /// Returns a sum of the amount of items that share the given id.
         /// </summary>
         int Contains(int id);
+    }
+
+    public interface IInterfacedItemManager : IItemManager
+    {
+        /// <summary>
+        /// The interface id of the item container on the client.
+        /// </summary>
+        int ContainerInterfaceId { get; }
     }
 }

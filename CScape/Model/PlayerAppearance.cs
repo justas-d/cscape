@@ -1,7 +1,6 @@
-using CScape.Data;
 using CScape.Game.Entity;
 
-namespace CScape.Game.Model
+namespace CScape.Model
 {
     public class PlayerAppearance : IPlayerAppearance, IPlayerForeignModel
     {

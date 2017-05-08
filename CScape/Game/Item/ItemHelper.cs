@@ -1,4 +1,4 @@
-namespace CScape.Game.Interface
+namespace CScape.Game.Item
 {
     public static class ItemHelper
     {

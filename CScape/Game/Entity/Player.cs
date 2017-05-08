@@ -1,8 +1,9 @@
 using System;
 using System.Diagnostics;
 using CScape.Data;
-using CScape.Game.Model;
+using CScape.Game.Interface;
 using CScape.Game.World;
+using CScape.Model;
 using CScape.Network;
 using CScape.Network.Packet;
 using CScape.Network.Sync;
@@ -10,7 +11,6 @@ using JetBrains.Annotations;
 
 namespace CScape.Game.Entity
 {
-   
     //todo: change username feature
     //todo: change password feature
 
@@ -126,6 +126,7 @@ namespace CScape.Game.Entity
 
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
+        [NotNull] public IInterfaceController Interfaces { get; }
         public IObservatory Observatory => _observatory;
         private readonly PlayerObservatory _observatory;
 
@@ -170,6 +171,7 @@ namespace CScape.Game.Entity
 
             Transform = ObserverTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
             Movement = new MovementController(this);
+            Interfaces = new PlayerInterfaceController(this);
 
             RegionSync = new RegionSyncMachine(Server, this);
             Connection.SyncMachines.Add(RegionSync);

@@ -1,7 +1,6 @@
-using CScape.Data;
 using CScape.Game.Interface;
 
-namespace CScape.Game.Model
+namespace CScape.Model
 {
     /// <summary>
     /// Provides items from the player model.
@@ -21,7 +20,7 @@ namespace CScape.Game.Model
 
         public ModelItemProvider(int size)
         {
-            Items = new(int, int)[size];
+            Items= new (int id, int amount)[size];
         }
     }
 }

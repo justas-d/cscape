@@ -5,6 +5,6 @@ namespace CScape.Game.Interface
     /// </summary>
     public interface IItemInterface : IInterface
     {
-        IInterfaceItemManager Items { get; }
+        IItemManager Items { get; }
     }
 }

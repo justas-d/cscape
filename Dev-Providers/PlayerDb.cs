@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using CScape.Game.Model;
+using CScape.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

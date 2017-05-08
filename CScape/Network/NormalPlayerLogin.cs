@@ -1,7 +1,7 @@
 using System;
 using System.Net.Sockets;
 using CScape.Game.Entity;
-using CScape.Game.Model;
+using CScape.Model;
 using JetBrains.Annotations;
 
 namespace CScape.Network
