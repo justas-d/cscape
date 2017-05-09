@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using CScape.Game.Entity;
+using CScape.Network;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Interface
@@ -10,13 +11,23 @@ namespace CScape.Game.Interface
     {
         public Player Player { get; }
 
-        private IInterface _main;
-        private IInterface _input;
-        private ImmutableDictionary<int, IInterface> _sidebar = ImmutableDictionary<int, IInterface>.Empty;
+        private readonly Dictionary<int, IManagedInterface> _openInterfaces = new Dictionary<int, IManagedInterface>();
+        private int _mainIdx;
+        private int _inputIdx;
 
-        public IInterface Main => _main;
-        public IReadOnlyDictionary<int, IInterface> Sidebar => _sidebar;
-        public IInterface Input => _input;
+        public IInterfaceApi Main => _openInterfaces.ge
+
+        /*
+        private IManagedInterface _main;
+        private IManagedInterface _input;
+        private ImmutableDictionary<int, IInterfaceApi> _sidebar = ImmutableDictionary<int, IInterfaceApi>.Empty;
+
+        public IInterfaceApi Main => _main;
+        public IReadOnlyDictionary<int, IInterfaceApi> Sidebar => _sidebar;
+        public IInterfaceApi Input => _input;
+        */
+
+        private ImmutableList<IPacket> _packetBacklog = ImmutableList<IPacket>.Empty;
 
         public PlayerInterfaceController([NotNull] Player player)
         {
@@ -25,7 +36,7 @@ namespace CScape.Game.Interface
 
         public bool TryShow(IManagedInterface interf)
         {
-            bool TryShowProceedure(ref IInterface setField)
+            bool TryShowProceedure(ref IManagedInterface setField)
             {
                 if (setField != null)
                     return false;
@@ -58,6 +69,19 @@ namespace CScape.Game.Interface
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public IEnumerable<IPacket> GetUpdates()
+        {
+            var ret = _packetBacklog;
+            _packetBacklog = ImmutableList<IPacket>.Empty;
+
+            ret.AddRange()
+        }
+
+        public void HandleButton(int interfaceId, int buttonId)
+        {
+            throw new NotImplementedException();
         }
 
         void IInterfaceLifetimeManager.Close(IManagedInterface interf)

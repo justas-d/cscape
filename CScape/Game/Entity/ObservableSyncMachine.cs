@@ -10,7 +10,7 @@ namespace CScape.Game.Entity
     /// </summary>
     public sealed class ObservableSyncMachine : SyncMachine
     {
-        public override int Order => Constant.SyncMachineOrder.Observer;
+        public override int Order => SyncMachineConstants.Observer;
 
         public Player LocalPlayer { get; }
 

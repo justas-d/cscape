@@ -14,6 +14,9 @@ namespace CScape.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
+    /// <summary>
+    /// Defines a player entity that exists in the world.
+    /// </summary>
     public sealed class Player : WorldEntity, IMovingEntity, IObserver
     {
         #region debug vars
@@ -43,10 +46,6 @@ namespace CScape.Game.Entity
 
         #region sync vars
 
-        [NotNull] public RegionSyncMachine RegionSync { get; }
-
-        public short Pid { get; }
-
         [Flags]
         public enum UpdateFlags
         {
@@ -64,7 +63,6 @@ namespace CScape.Game.Entity
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
-
         [CanBeNull] public ChatMessage LastChatMessage
         {
             get => _lastChatMessage;
@@ -74,15 +72,17 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Chat);
             }
         }
-        public IWorldEntity InteractingEntity
+        [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
         {
-            get => _interactingEntity;
+            get => _facingCoordinate;
             set
             {
-                _interactingEntity = value;
-                SetFlag(UpdateFlags.InteractEnt);
+                _facingCoordinate = value;
+                if (value != null)
+                    SetFlag(UpdateFlags.FacingCoordinate);
             }
         }
+
         [NotNull] public PlayerAppearance Appearance
         {
             get => _model.Appearance;
@@ -96,16 +96,15 @@ namespace CScape.Game.Entity
                 IsAppearanceDirty = true;
             }
         }
-        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
 
-        [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
+        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
+        public IWorldEntity InteractingEntity
         {
-            get => _facingCoordinate;
+            get => _interactingEntity;
             set
             {
-                _facingCoordinate = value;
-                if(value != null)
-                    SetFlag(UpdateFlags.FacingCoordinate);
+                _interactingEntity = value;
+                SetFlag(UpdateFlags.InteractEnt);
             }
         }
 
@@ -117,24 +116,28 @@ namespace CScape.Game.Entity
         /// </summary>
         public bool IsAppearanceDirty { get; set; }
 
+        [NotNull] public RegionSyncMachine RegionSync { get; }
+
+        public bool NeedsPositionInit { get; private set; } = true;
+        public short Pid { get; }
+
         #endregion
 
-        public bool IsMember => _model.IsMember;
         [NotNull] public string Username => _model.Username;
         [NotNull] public string Password => _model.PasswordHash;
         public byte TitleIcon => _model.TitleIcon;
+        public bool IsMember => _model.IsMember;
 
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
-        [NotNull] public IInterfaceController Interfaces { get; }
         public IObservatory Observatory => _observatory;
         private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly PlayerModel _model;
         private int _otherPlayerViewRange = MaxViewRange;
+
         public MovementController Movement { get; }
 
-        public bool NeedsPositionInit { get; private set; } = true;
         public bool TeleportToDestWhenWalking { get; set; }
 
         /// <summary>
@@ -158,6 +161,9 @@ namespace CScape.Game.Entity
             }
         }
 
+        [NotNull] public ISyncedItemManager Inventory { get; }
+        [NotNull] public IInterfaceController Interfaces { get; }
+
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) : base(login.Server,  login.Server.EntityIdPool)
         {
@@ -175,6 +181,8 @@ namespace CScape.Game.Entity
 
             RegionSync = new RegionSyncMachine(Server, this);
             Connection.SyncMachines.Add(RegionSync);
+            Connection.SyncMachines.Add(new InterfaceSyncMachine(this));
+
             Connection.SortSyncMachines();
 
             Server.RegisterNewPlayer(this);
@@ -183,6 +191,8 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Follow);
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
+
+            Inventory = new SyncedItemManager(Server, InterfaceConstants.PlayerBackpackContainerId, _model.BackpackItems);
 
             SetFlag(UpdateFlags.Appearance);
             IsAppearanceDirty = true;

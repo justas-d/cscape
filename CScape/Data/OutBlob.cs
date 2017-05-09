@@ -67,5 +67,19 @@ namespace CScape.Data
             _isWritingPacket = false;
             _payloadLengthIndex = -1;
         }
+
+        /// <summary>
+        /// Writes a byte, if value is under 255. If value is equal to, or over, 255, writes it as an 255 padding and then the value as int32.
+        /// </summary>
+        public void WriteByteInt32Smart(int value)
+        {
+            if (value >= 255)
+            {
+                Write(255);
+                Write32(value);
+            }
+            else
+                Write((byte)value);
+        }
     }
 }

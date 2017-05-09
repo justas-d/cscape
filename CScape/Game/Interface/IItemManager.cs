@@ -37,12 +37,4 @@ namespace CScape.Game.Interface
         /// </summary>
         int Contains(int id);
     }
-
-    public interface IInterfacedItemManager : IItemManager
-    {
-        /// <summary>
-        /// The interface id of the item container on the client.
-        /// </summary>
-        int ContainerInterfaceId { get; }
-    }
 }

@@ -15,7 +15,7 @@ namespace CScape.Network.Sync
         {
         }
 
-        public override int Order => Constant.SyncMachineOrder.DebugStat;
+        public override int Order => SyncMachineConstants.DebugStat;
 
         public override void Synchronize(OutBlob stream)
         {

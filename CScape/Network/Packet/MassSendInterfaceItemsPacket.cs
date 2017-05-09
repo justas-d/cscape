@@ -4,13 +4,13 @@ using CScape.Game.Item;
 
 namespace CScape.Network.Packet
 {
-    public class MassSendInterfaceItems : IPacket
+    public sealed class MassSendInterfaceItemsPacket : IPacket
     {
-        private readonly IInterfacedItemManager _itemManager;
+        private readonly SyncedItemManager _itemManager;
 
         public const int Id = 53;
 
-        public MassSendInterfaceItems(IInterfacedItemManager itemManager)
+        public MassSendInterfaceItemsPacket(SyncedItemManager itemManager)
         {
             _itemManager = itemManager;
         }
@@ -19,7 +19,7 @@ namespace CScape.Network.Packet
         {
             stream.BeginPacket(53);
 
-            stream.Write16((short)_itemManager.ContainerInterfaceId); // inteface id
+            stream.Write16((short)_itemManager.InterfaceId);
 
             var sizePh = new PlaceholderHandle(stream, sizeof(short));
 
@@ -36,10 +36,7 @@ namespace CScape.Network.Packet
                 }
 
                 // write amount. If amount is > 255, write it as an int32
-                if (cur.amount > 255)
-                    stream.Write32(cur.amount);
-                else
-                    stream.Write((byte)cur.amount);
+                stream.WriteByteInt32Smart(cur.amount);
 
                 // write id
                 stream.Write16((short)cur.id);
