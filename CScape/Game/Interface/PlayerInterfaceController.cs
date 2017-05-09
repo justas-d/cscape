@@ -1,105 +1,154 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using CScape.Game.Entity;
 using CScape.Network;
 using JetBrains.Annotations;
 
 namespace CScape.Game.Interface
 {
-    public class PlayerInterfaceController : IInterfaceController, IInterfaceLifetimeManager
+    public class PlayerInterfaceController : IInterfaceManager
     {
         public Player Player { get; }
+        private Logger Log => Player.Log;
 
-        private readonly Dictionary<int, IManagedInterface> _openInterfaces = new Dictionary<int, IManagedInterface>();
-        private int _mainIdx;
-        private int _inputIdx;
+        private class Backend : IInterfaceManagerApiBackend
+        {
+            private readonly PlayerInterfaceController _frontEnd;
 
-        public IInterfaceApi Main => _openInterfaces.ge
+            public const int MaxSidebarInterfaces = 15;
 
-        /*
-        private IManagedInterface _main;
-        private IManagedInterface _input;
-        private ImmutableDictionary<int, IInterfaceApi> _sidebar = ImmutableDictionary<int, IInterfaceApi>.Empty;
+            private readonly List<IShowableInterface> _sidebar = new List<IShowableInterface>(MaxSidebarInterfaces);
+            private readonly Dictionary<int, IBaseInterface> _all = new Dictionary<int, IBaseInterface>();
 
-        public IInterfaceApi Main => _main;
-        public IReadOnlyDictionary<int, IInterfaceApi> Sidebar => _sidebar;
-        public IInterfaceApi Input => _input;
-        */
+            public IShowableInterface Main { get; set; }
+            public IShowableInterface Chat { get; set; }
+            public IShowableInterface Input { get; set; }
 
-        private ImmutableList<IPacket> _packetBacklog = ImmutableList<IPacket>.Empty;
+            public IReadOnlyList<IShowableInterface> PublicSidebar => _sidebar;
+            public IList<IShowableInterface> Sidebar => _sidebar;
+
+            public IReadOnlyDictionary<int, IBaseInterface> PublicAll => _all;
+            public IDictionary<int, IBaseInterface> All => _all;
+            public IInterfaceManager Frontend => _frontEnd;
+
+            public Backend(PlayerInterfaceController frontEnd)
+            {
+                _frontEnd = frontEnd;
+                _sidebar.AddRange(Enumerable.Repeat(default(IShowableInterface), MaxSidebarInterfaces));
+            }
+
+            public ImmutableList<IEnumerable<IPacket>> UpdBacklog { get; set; } =
+                ImmutableList<IEnumerable<IPacket>>.Empty;
+
+            public void NotifyOfClose(IApiInterface interf)
+            {
+                // dump updates
+                UpdBacklog.Add(interf.GetUpdates());
+
+                // unregister
+                _frontEnd.TryUnregister(interf.Id);
+            }
+        }
+
+        public IShowableInterface Main => _backend.Main;
+        public IShowableInterface Chat => _backend.Chat;
+        public IShowableInterface Input => _backend.Input;
+
+        public IReadOnlyList<IShowableInterface> Sidebar => _backend.PublicSidebar;
+        public IReadOnlyDictionary<int, IBaseInterface> All => _backend.PublicAll;
+
+        private readonly Backend _backend;
 
         public PlayerInterfaceController([NotNull] Player player)
         {
             Player = player ?? throw new ArgumentNullException(nameof(player));
+            _backend = new Backend(this);
         }
 
-        public bool TryShow(IManagedInterface interf)
+        public bool TryShow<T>(T interf) where T : IApiInterface, IShowableInterface
         {
-            bool TryShowProceedure(ref IManagedInterface setField)
+            if (!TryRegister(interf))
+                return false;
+
+            interf.Show();
+            return true;
+        }
+
+        public bool TryRegister(IApiInterface interf)
+        {
+            if (interf.IsRegistered)
             {
-                if (setField != null)
-                    return false;
-
-                if (!interf.TryShow(this))
-                    return false;
-
-                setField = interf;
-                return true;
+                Log.Warning(this, $"Tried to register already registered interface ({interf.Id})");
+                return false;
             }
 
-            switch (interf.Info.Type)
+            return interf.TryRegisterApi(_backend);
+        }
+
+        public bool TryUnregister(int id)
+        {
+            if (!All.ContainsKey(id))
+                return false;
+
+            var apiInterface = All[id] as IApiInterface;
+            apiInterface?.UnregisterApi();
+            return true;
+        }
+
+        public bool CanShow(InterfaceType type, int? sidebarSlotIndex)
+        {
+            switch (type)
             {
-                case InterfaceInfo.InterfaceType.Main:
-                    return TryShowProceedure(ref _main);
+                case InterfaceType.Main: return Main == null;
+                case InterfaceType.Sidebar:
 
-                case InterfaceInfo.InterfaceType.Input:
-                    return TryShowProceedure(ref _input);
-
-                case InterfaceInfo.InterfaceType.Sidebar:
-                    if (Sidebar.ContainsKey(interf.Info.SidebarIndex))
+                    if (sidebarSlotIndex == null)
+                    {
+                        Log.Warning(this, "Passed null sidebar idx to PlayerInterfaceController.CanShow");
                         return false;
+                    }
 
-                    if (!interf.TryShow(this))
+                    var idx = sidebarSlotIndex.Value;
+                    if (0 > idx || idx >= Backend.MaxSidebarInterfaces)
+                    {
+                        Log.Warning(this,
+                            $"Sidebar idx ({idx}) passed to PlayerInterfaceController.CanShow is out of range 0 < idx < {Backend.MaxSidebarInterfaces}");
                         return false;
+                    }
 
-                    _sidebar = _sidebar.Add(interf.Info.SidebarIndex, interf);
-                    return true;
+                    return Sidebar[idx] == null;
 
+                case InterfaceType.Chat: return Chat == null;
+                case InterfaceType.Input: return Input == null;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-        }
-
-        public IEnumerable<IPacket> GetUpdates()
-        {
-            var ret = _packetBacklog;
-            _packetBacklog = ImmutableList<IPacket>.Empty;
-
-            ret.AddRange()
         }
 
         public void HandleButton(int interfaceId, int buttonId)
         {
-            throw new NotImplementedException();
+            if (!All.ContainsKey(interfaceId))
+            {
+                Log.Warning(this, $"Pressed button ({buttonId}) on unregistered interface ({interfaceId})");
+                return;
+            }
+
+            // todo : combat button spamming (one button per tick)
+            var interf = All[interfaceId] as IShowableInterface;
+            interf?.ButtonHandler?.OnButtonPressed(buttonId);
         }
 
-        void IInterfaceLifetimeManager.Close(IManagedInterface interf)
+        public void OnActionOccurred()
         {
-            switch (interf.Info.Type)
-            {
-                case InterfaceInfo.InterfaceType.Main:
-                    _main = null;
-                    break;
-                case InterfaceInfo.InterfaceType.Input:
-                    _input = null;
-                    break;
-                case InterfaceInfo.InterfaceType.Sidebar:
-                    _sidebar = _sidebar.Remove(interf.Info.SidebarIndex);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            Input?.TryClose();
+        }
+
+        public IEnumerable<IPacket> GetUpdates()
+        {
+            return All.Values.SelectMany(i => i.GetUpdates()) // active
+                .Concat(_backend.UpdBacklog.SelectMany(i => i)); // + backlog
         }
     }
 }

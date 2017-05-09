@@ -161,8 +161,8 @@ namespace CScape.Game.Entity
             }
         }
 
-        [NotNull] public ISyncedItemManager Inventory { get; }
-        [NotNull] public IInterfaceController Interfaces { get; }
+        [NotNull] public InterfacedItemManager Inventory { get; }
+        [NotNull] public IInterfaceManager Interfaces { get; }
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) : base(login.Server,  login.Server.EntityIdPool)
@@ -192,7 +192,8 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
 
-            Inventory = new SyncedItemManager(Server, InterfaceConstants.PlayerBackpackContainerId, _model.BackpackItems);
+            Inventory = new InterfacedItemManager(InterfaceConstants.PlayerBackpackContainerId, Server,
+                _model.BackpackItems);
 
             SetFlag(UpdateFlags.Appearance);
             IsAppearanceDirty = true;

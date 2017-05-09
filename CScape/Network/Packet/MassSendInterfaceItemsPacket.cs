@@ -6,11 +6,11 @@ namespace CScape.Network.Packet
 {
     public sealed class MassSendInterfaceItemsPacket : IPacket
     {
-        private readonly SyncedItemManager _itemManager;
+        private readonly IContainerInterface _itemManager;
 
         public const int Id = 53;
 
-        public MassSendInterfaceItemsPacket(SyncedItemManager itemManager)
+        public MassSendInterfaceItemsPacket(IContainerInterface itemManager)
         {
             _itemManager = itemManager;
         }
@@ -19,15 +19,15 @@ namespace CScape.Network.Packet
         {
             stream.BeginPacket(53);
 
-            stream.Write16((short)_itemManager.InterfaceId);
+            stream.Write16((short)_itemManager.Id);
 
             var sizePh = new PlaceholderHandle(stream, sizeof(short));
 
             // payload
             var nonEmptyUpperBound = 0; // the idx of the item that was not empty.
-            for (var i = 0; i < _itemManager.Provider.Items.Length; i++)
+            for (var i = 0; i < _itemManager.Items.Provider.Items.Length; i++)
             {
-                var cur = _itemManager.Provider.Items[i];
+                var cur = _itemManager.Items.Provider.Items[i];
                 if (ItemHelper.IsEmpty(cur))
                 {
                     // write 0 size, 0 id.
