@@ -22,7 +22,7 @@ namespace CScape.Model
         public bool IsMember { get; set; } = true;
 
         public PlayerAppearance Appearance { get; set; } = PlayerAppearance.Default;
-        public ModelItemProvider BackpackItems { get; set; }  = new ModelItemProvider(BackpackSize);
+        public ItemProviderModel BackpackItems { get; set; }  = new ItemProviderModel(BackpackSize);
 
         private PlayerModel()
         {

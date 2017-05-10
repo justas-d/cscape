@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace CScape.Game.Interface
 {
     /// <summary>
@@ -5,6 +7,9 @@ namespace CScape.Game.Interface
     /// </summary>
     public interface IItemProvider
     {
-        (int id, int amount)[] Items { get; }
+        int Size { get; }
+        int[] Ids { get; }
+        int[] Amounts { get; }
+        (int id, int amount) this[int i] { get; set; }
     }
 }

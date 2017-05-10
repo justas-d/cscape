@@ -26,6 +26,19 @@ namespace CScape.Dev.Providers
                     .IsRequired();
             }
 
+            model.Entity<PlayerAppearance>(b =>
+            {
+                b.HasKey(p => p.ForeignKey);
+            });
+
+            model.Entity<ItemProviderModel>(b =>
+            {
+                b.HasKey(m => m.ForeignKey);
+                b.Property(m => m.Ids).IsRequired();
+                b.Property(m => m.Amounts).IsRequired();
+                b.Property(m => m.Size).IsRequired();
+            });
+
             model.Entity<PlayerModel>(b =>
             {
                 b.HasKey(c => c.Username);

@@ -31,8 +31,6 @@ namespace CScape.Network.Packet
 
             foreach (var i in _indicies)
             {
-                var item = _itemManager.Items.Provider.Items[i];
-
                 // write index
                 if (i < 128)
                     stream.Write((byte)i);
@@ -40,10 +38,10 @@ namespace CScape.Network.Packet
                     stream.Write16((short)i);
 
                 // write id
-                stream.Write16((short)item.id);
+                stream.Write16((short)_itemManager.Items.Provider.Ids[i]);
 
                 // write size as byte-int32 smart
-                stream.WriteByteInt32Smart(item.amount);
+                stream.WriteByteInt32Smart(_itemManager.Items.Provider.Amounts[i]);
             }
 
             stream.EndPacket();

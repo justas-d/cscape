@@ -7,6 +7,7 @@ namespace CScape.Network.Packet
     public sealed class MassSendInterfaceItemsPacket : IPacket
     {
         private readonly IContainerInterface _itemManager;
+        private IItemProvider Provider => _itemManager.Items.Provider;
 
         public const int Id = 53;
 
@@ -25,10 +26,9 @@ namespace CScape.Network.Packet
 
             // payload
             var nonEmptyUpperBound = 0; // the idx of the item that was not empty.
-            for (var i = 0; i < _itemManager.Items.Provider.Items.Length; i++)
+            for (var i = 0; i < _itemManager.Items.Provider.Size; i++)
             {
-                var cur = _itemManager.Items.Provider.Items[i];
-                if (ItemHelper.IsEmpty(cur))
+                if (ItemHelper.IsEmptyAtIndex(Provider, i))
                 {
                     // write 0 size, 0 id.
                     stream.Write16(0);
@@ -36,10 +36,10 @@ namespace CScape.Network.Packet
                 }
 
                 // write amount. If amount is > 255, write it as an int32
-                stream.WriteByteInt32Smart(cur.amount);
+                stream.WriteByteInt32Smart(Provider.Amounts[i]);
 
                 // write id
-                stream.Write16((short)cur.id);
+                stream.Write16((short) Provider.Ids[i]);
 
                 nonEmptyUpperBound = i;
             }

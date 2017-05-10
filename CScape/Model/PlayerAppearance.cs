@@ -4,8 +4,7 @@ namespace CScape.Model
 {
     public class PlayerAppearance : IPlayerAppearance, IPlayerForeignModel
     {
-        public int Id { get; private set; }
-        string IForeignModelObject<string, PlayerModel>.ForeignKey { get; set; }
+        public string ForeignKey { get; set; }
         PlayerModel IForeignModelObject<string, PlayerModel>.Model { get; set; }
 
         public int Head { get; }

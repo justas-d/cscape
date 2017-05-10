@@ -30,7 +30,7 @@ namespace CScape.Game.Interface
         public override void ExecuteChangeInfo(ItemProviderChangeInfo info)
         {
             base.ExecuteChangeInfo(info);
-            _dirtyItems.Add(info.Index);
+            _dirtyItems = _dirtyItems.Add(info.Index);
         }
 
         public bool TryRegisterApi(IInterfaceManagerApiBackend api)

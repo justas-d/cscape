@@ -9,6 +9,22 @@ namespace CScape.Game.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("item")]
+        public void GiveItem(CommandContext ctx)
+        {
+            int id = 0;
+            int amount = 1;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("id", ref id);
+                b.ReadNumber("amount", ref amount, true);
+            })) return;
+
+            var change = ctx.Callee.Inventory.Items.CalcChangeInfo(id, amount);
+            ctx.Callee.Inventory.Items.ExecuteChangeInfo(change);
+        }
+
         [CommandMethod("test soi")]
         public void TestShowItemOnInterfacePacket(CommandContext ctx)
         {

@@ -42,6 +42,11 @@ namespace CScape.Game.Interface
             public ImmutableList<IEnumerable<IPacket>> UpdBacklog { get; set; } =
                 ImmutableList<IEnumerable<IPacket>>.Empty;
 
+            public void NotifyOfRegiser(IApiInterface interf)
+            {
+                All[interf.Id] = interf;
+            }
+
             public void NotifyOfClose(IApiInterface interf)
             {
                 // dump updates

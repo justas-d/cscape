@@ -192,8 +192,11 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
 
-            Inventory = new InterfacedItemManager(InterfaceConstants.PlayerBackpackContainerId, Server,
+            Inventory = new InterfacedItemManager(InterfaceConstants.PlayerBackpackInventoryId, Server,
                 _model.BackpackItems);
+
+            Interfaces.TryRegister(Inventory);
+            Interfaces.TryShow(new ItemSidebarInterface(InterfaceConstants.PlayerBackpackInterfaceId, 3, Inventory,null));
 
             SetFlag(UpdateFlags.Appearance);
             IsAppearanceDirty = true;

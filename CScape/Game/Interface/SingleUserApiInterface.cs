@@ -28,6 +28,7 @@ namespace CScape.Game.Interface
                 return false;
 
             Api = api;
+            Api.NotifyOfRegiser(this);
 
             return true;
         }

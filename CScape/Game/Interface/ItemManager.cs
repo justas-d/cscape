@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using CScape.Game.Item;
 using JetBrains.Annotations;
 
@@ -9,7 +8,7 @@ namespace CScape.Game.Interface
     {
         private IItemDatabase Db => Server.Database.Item;
 
-        public int Size => Provider.Items.Length;
+        public int Size => Provider.Size;
         public GameServer Server { get; }
         public IItemProvider Provider { get; }
 
@@ -36,14 +35,12 @@ namespace CScape.Game.Interface
             // figure out whether an item of the same id exists in provider.
             // if we find an empty slot during this, store it just in case we don't find an existing item.
             int? emptySlotIdx = null;
-            (int idx, (int id, int amnt) copy)? existingitemCopy = null;
+            int? existingIdx = null;
 
             for (var i = 0; i < Size; i++)
             {
-                var cur = Provider.Items[i];
-
                 // handle empty items, store the first index we find just in case.
-                if (ItemHelper.IsEmpty(cur))
+                if (Provider.IsEmptyAtIndex(i))
                 {
                     if (emptySlotIdx == null)
                         emptySlotIdx = i;
@@ -51,10 +48,10 @@ namespace CScape.Game.Interface
                 }
 
                 // compare id's
-                if (cur.id == id)
+                if (Provider.Ids[i] == id)
                 {
                     // we found an existing item, set the existing item index and gtfo out of the loop.
-                    existingitemCopy = (i, cur);
+                    existingIdx = i;
                     break;
                 }
             }
@@ -68,7 +65,7 @@ namespace CScape.Game.Interface
             // we've either found an existing item idx OR have an empty slot id OR have neither of those.
 
             // no existing item found, must operation will result in an new item.
-            if (existingitemCopy == null)
+            if (existingIdx == null)
             {
                 // because we need to add a new item, inputs that result in a remove operation cannot proceed.
                 // filter out remove operations
@@ -76,7 +73,7 @@ namespace CScape.Game.Interface
                     return ItemProviderChangeInfo.Invalid;
 
                 // check if we found an empty slot during our iteration.
-                if (emptySlotIdx == null)
+                if (emptySlotIdx != null)
                 {
                     // we did, generate a new 
                     var overflow = CalcOverflow(amount);
@@ -91,26 +88,27 @@ namespace CScape.Game.Interface
             {
                 // attempt to add the given amount of the item to this slot.
 
-                var oth = existingitemCopy.Value;
+                var oth = existingIdx.Value;
+                var amnt = Provider.Amounts[oth];
 
-                var delta = oth.copy.amnt + amount;
+                var delta = amnt + amount;
                 long overflow = 0;
 
                 // no carry remove item op
                 if (delta == 0)
-                    return new ItemProviderChangeInfo(id, oth.copy.amnt, 0, id);
+                    return new ItemProviderChangeInfo(id, amnt, 0, id);
 
                 // remove with carry
                 else if (delta < 0)
-                    return new ItemProviderChangeInfo(id, oth.copy.amnt, delta, id);
+                    return new ItemProviderChangeInfo(id, amnt, delta, id);
 
                 // add with carry
                 else if (delta > 0)
-                    return new ItemProviderChangeInfo(oth.idx, Convert.ToInt32(delta - overflow), overflow, id);
+                    return new ItemProviderChangeInfo(Provider.Ids[oth], Convert.ToInt32(delta - overflow), overflow, id);
                 else // uhh
                 {
                     Server.Log.Warning(this,
-                        $"Existing item id item info operation resolve resulted in dropping through delta == 0 delta > 0 delta < 0. Delta: {delta}, id: {id}, amount: {amount}, existing amount: {oth.copy.amnt}");
+                        $"Existing item id item info operation resolve resulted in dropping through delta == 0 delta > 0 delta < 0. Delta: {delta}, id: {id}, amount: {amount}, existing amount: {amnt}");
                     return ItemProviderChangeInfo.Invalid;
                 }
             }
@@ -118,24 +116,34 @@ namespace CScape.Game.Interface
         
         public virtual void ExecuteChangeInfo(ItemProviderChangeInfo info)
         {
-            if (info.IsValid)
+            if (!info.IsValid)
                 return;
 
-            if (info.Index < 0 || info.Index >= Provider.Items.Length)
+            if (info.Index < 0 || info.Index >= Provider.Size)
             {
                 Server.Log.Debug(this, $"Out of range index in change info: {info.Index}");
                 return;
             }
 
             // execute
-            Provider.Items[info.Index].id = info.ItemDefId;
-            Provider.Items[info.Index].amount += info.AmountDelta;
+            Provider.Ids[info.Index] = info.ItemDefId;
+            Provider.Amounts[info.Index] += info.AmountDelta;
 
-            if (ItemHelper.IsEmpty(Provider.Items[info.Index]))
-                Provider.Items[info.Index] = ItemHelper.EmptyItem;
+            if (Provider.IsEmptyAtIndex(info.Index))
+            {
+                Provider.Ids[info.Index] = ItemHelper.EmptyId;
+                Provider.Amounts[info.Index] = ItemHelper.EmptyAmount;
+            }
         }
 
-        public int Contains(int id) 
-            => Provider.Items.Where(i => i.id == id).Select(i => i.amount).Sum();
+        public int Contains(int id)
+        {
+            var ret = 0;
+
+            for (var i = 0; i < Provider.Size; i++)
+                if (Provider.Ids[i] == id) ret += Provider.Amounts[i];
+
+            return ret;
+        }
     }
 }
