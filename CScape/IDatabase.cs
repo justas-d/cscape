@@ -1,10 +1,13 @@
-using CScape.Network.Packet;
+using System;
+using CScape.Network;
+using JetBrains.Annotations;
 
 namespace CScape
 {
-    public interface IDatabase
+    public interface IDatabase : IDisposable
     {
-        IPacketLengthLookup Packet { get; }
-        IPlayerDatabase Player { get; }
+        [NotNull] IPacketLengthLookup Packet { get; }
+        [NotNull] IPlayerDatabase Player { get; }
+        [NotNull] IItemDatabase Item { get; }
     }
 }

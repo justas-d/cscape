@@ -86,7 +86,7 @@ namespace CScape.Network.Sync
             }
         }
 
-        public override int Order => Constant.SyncMachineOrder.PlayerUpdate;
+        public override int Order => SyncMachineConstants.PlayerUpdate;
 
         [NotNull] private readonly HashSet<uint> _syncPlayerIds = new HashSet<uint>();
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;

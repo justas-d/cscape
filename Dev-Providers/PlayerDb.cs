@@ -1,13 +1,14 @@
 using System;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-using CScape.Game.Entity;
+using CScape.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CScape.Dev.Providers
 {
     public class PlayerDb : DbContext, IPlayerDatabase
     {
-        public DbSet<PlayerModel> SaveData { get; set; }
+        public DbSet<PlayerModel> PlayerModels { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -16,20 +17,49 @@ namespace CScape.Dev.Providers
 
         protected override void OnModelCreating(ModelBuilder model)
         {
+            void RegisterPlayerLeaf<T>(Expression<Func<PlayerModel, T>> modelToLeaf) where T : class, IDbPlayerLeaf
+            {
+                model.Entity<PlayerModel>()
+                    .HasOne(modelToLeaf)
+                    .WithOne(m => m.Player)
+                    .HasForeignKey<T>(m => m.PlayerId);
+                model.Entity<T>().Property(m => m.Id).ValueGeneratedOnAdd();
+            }
+
+            RegisterPlayerLeaf(m => m.BackpackItems);
+            RegisterPlayerLeaf(m => m.Appearance);
+
             model.Entity<PlayerModel>(b =>
             {
-                b.HasKey(c => c.Username);
-                b.Property(s => s.Username).IsRequired();
-                b.Property(s => s.PasswordHash).IsRequired();
-                b.Property(s => s.X).IsRequired();
-                b.Property(s => s.Y).IsRequired();
-                b.Property(s => s.Z).IsRequired();
+                b.Property(m => m.TitleIcon).IsRequired();
+                b.Property(m => m.PasswordHash).IsRequired();
+                b.Property(m => m.IsMember).IsRequired();
+
+                b.Property(m => m.X).IsRequired();
+                b.Property(m => m.Y).IsRequired();
+                b.Property(m => m.Z).IsRequired();
+            });
+
+            model.Entity<ItemProviderModel>(b =>
+            {
+                b.Property(m => m.Size).IsRequired();
+
+                b.Ignore(m => m.Ids);
+                b.Ignore(m => m.Amounts);
+
+                b.Property(m => m.DbIds).IsRequired();
+                b.Property(m => m.DbAmounts).IsRequired();
             });
         }
 
         public Task<PlayerModel> GetPlayer(string username)
         {
-            return SaveData.FindAsync(username.ToLowerInvariant());
+            username = username.ToLowerInvariant();
+            return PlayerModels
+                // todo : merge RegisterPlayerLeaf and .Include calls in GetPlayer
+                .Include(m => m.BackpackItems)
+                .Include(m => m.Appearance)
+                .FirstOrDefaultAsync(f => f.Id == username);
         }
 
         public async Task<PlayerModel> GetPlayer(string username, string password)
@@ -45,10 +75,7 @@ namespace CScape.Dev.Providers
             return player;
         }
 
-        public async Task Save()
-        {
-            await SaveChangesAsync();
-        }
+        public async Task Save() => await SaveChangesAsync();
 
         public async Task<PlayerModel> CreatePlayer(string username, string password)
         {
@@ -56,8 +83,7 @@ namespace CScape.Dev.Providers
                 return null;
 
             var model = new PlayerModel(username, password);
-            SaveData.Add(model);
-            await Save();
+            PlayerModels.Add(model);
             return model;
         }
 

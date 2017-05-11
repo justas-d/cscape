@@ -7,7 +7,7 @@ namespace CScape.Network.Sync
     public class RegionSyncMachine : SyncMachine
     {
         private readonly Player _player;
-        public override int Order => Constant.SyncMachineOrder.Region;
+        public override int Order => SyncMachineConstants.Region;
 
         /// <summary>
         /// Schedules a forced region update during the next sync round.

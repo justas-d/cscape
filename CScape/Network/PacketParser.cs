@@ -4,7 +4,7 @@ using CScape.Data;
 using CScape.Game.Entity;
 using JetBrains.Annotations;
 
-namespace CScape.Network.Packet
+namespace CScape.Network
 {
     public static class PacketParser
     {

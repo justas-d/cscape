@@ -2,7 +2,7 @@
 using CScape.Game.Entity;
 using JetBrains.Annotations;
 
-namespace CScape.Network.Sync
+namespace CScape.Network.Packet
 {
     public sealed class InitializePlayerPacket : IPacket
     {

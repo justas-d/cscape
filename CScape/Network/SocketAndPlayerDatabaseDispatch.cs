@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using CScape.Data;
 using CScape.Game.Entity;
+using CScape.Model;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -58,22 +60,10 @@ namespace CScape.Network
 
         private readonly IAsymmetricBlockCipher _crypto;
 
-        private readonly object _saveLock = new object();
-        private bool _saveFlag;
-
-        public bool SaveFlag
-        {
-            get
-            {
-                lock (_saveLock) return _saveFlag;
-            }
-            set
-            {
-                lock (_saveLock) _saveFlag = value;
-            }
-        }
-
-
+        private CancellationTokenSource _saveToken = new CancellationTokenSource();
+        private bool _continueListening = true;
+        public void SignalSave() => _saveToken.Cancel();
+   
         public SocketAndPlayerDatabaseDispatch(GameServer server, [NotNull] ConcurrentQueue<IPlayerLogin> loginQueue)
         {
             _loginQueue = loginQueue ?? throw new ArgumentNullException(nameof(loginQueue));
@@ -95,6 +85,16 @@ namespace CScape.Network
             _crypto.Init(false, keys.Private);
         }
 
+        private static async Task<Task> UntilCompletionOrCancellation(Task asyncOp, CancellationToken ct)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            using (ct.Register(() => tcs.TrySetResult(true)))
+                await Task.WhenAny(asyncOp, tcs.Task);
+
+            return asyncOp;
+        }
+
         public async Task StartListening()
         {
             _socket.Bind(Endpoint);
@@ -102,20 +102,31 @@ namespace CScape.Network
 
             Server.Log.Debug(this, "Entry point listening.");
 
-            while (true)
+            while (_continueListening)
             {
-                if (SaveFlag)
+                try
                 {
-                    await Server.Database.Player.Save();
-                    Server.Log.Debug(this, $"Saving db");
-                    SaveFlag = false;
+                    var task = await UntilCompletionOrCancellation(_socket.AcceptAsync(), _saveToken.Token);
+                    if (task is Task<Socket> socketTask 
+                        && socketTask.Status == TaskStatus.RanToCompletion)
+                    {
+                        var socket = socketTask.Result;
+                        if (socket == null || !socket.Connected)
+                            continue;
+
+                        await InitConnection(socket);
+                    }
+                    else
+                    {
+                        Server.Log.Debug(this, $"Saving db");
+                        await Server.Database.Player.Save();
+                        _saveToken = new CancellationTokenSource();
+                    }
                 }
-
-                var socket = await _socket.AcceptAsync();
-                if (socket == null || !socket.Connected)
-                    continue;
-
-                await InitConnection(socket);
+                catch (TaskCanceledException)
+                {
+                    // expected
+                }
             }
         }
 
@@ -361,6 +372,7 @@ namespace CScape.Network
         public void Dispose()
         {
             _socket?.Dispose();
+            _continueListening = false;
         }
     }
 }

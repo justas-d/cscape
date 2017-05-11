@@ -1,11 +1,11 @@
 using CScape.Data;
 using CScape.Game.Entity;
 
-namespace CScape.Network.Packet
+namespace CScape.Network.Handlers
 {
     public sealed class FollowPacketHandler : IPacketHandler
     {
-        public int[] Handles { get; } = {128};
+        public int[] Handles { get; } = { 128, 139 };
 
         public void Handle(Player player, int opcode, Blob packet)
         {

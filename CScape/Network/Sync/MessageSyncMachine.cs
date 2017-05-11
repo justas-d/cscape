@@ -5,7 +5,7 @@ namespace CScape.Network.Sync
 {
     public sealed class MessageSyncMachine : SyncMachine
     {
-        public override int Order => Constant.SyncMachineOrder.Message;
+        public override int Order => SyncMachineConstants.Message;
 
         public MessageSyncMachine(GameServer server) : base(server)
         {

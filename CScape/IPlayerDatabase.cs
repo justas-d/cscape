@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using CScape.Game.Entity;
+using CScape.Model;
 using JetBrains.Annotations;
 
 namespace CScape

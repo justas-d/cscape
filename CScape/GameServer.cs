@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading.Tasks;
+using CScape.Data;
 using CScape.Game.Entity;
 using CScape.Game.World;
 using CScape.Network;
@@ -9,7 +10,7 @@ using JetBrains.Annotations;
 
 namespace CScape
 {
-    public class GameServer
+    public class GameServer : IDisposable
     {
         private readonly SocketAndPlayerDatabaseDispatch _entry;
         public Logger Log { get; }
@@ -21,14 +22,18 @@ namespace CScape
 
         internal MainLoop Loop { get; }
         public PlaneOfExistance Overworld { get; }
+
         public IdPool EntityIdPool { get; } = new IdPool();
         public IdPool PlayerIdPool { get; }
         public AggregateEntityPool<IWorldEntity> Entities { get; } 
             = new AggregateEntityPool<IWorldEntity>();
 
+        internal ObjectPool<PooledBlob> BlobPool { get; } = PooledBlob.CreatePool();
+
         public ImmutableDictionary<int, Player> Players { get; private set; } = ImmutableDictionary<int, Player>.Empty;
 
         public bool IsLoginEnbled { get; set; } = true;
+        public bool IsDisposed { get; private set; }
 
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
@@ -96,7 +101,7 @@ namespace CScape
         }
 
         public void SavePlayers()
-            => _entry.SaveFlag = true;
+            => _entry.SignalSave();
 
         [CanBeNull]
         public Player GetPlayerByPid(int pid)
@@ -134,6 +139,25 @@ namespace CScape
             }
 
             Players = Players.Remove(player.Pid);
+        }
+
+        public void Dispose()
+        {
+            if (!IsDisposed)
+            {
+                // block as we're saving.
+                Database.Player.Save().GetAwaiter().GetResult();
+
+                _entry?.Dispose();
+                Loop.Dispose();
+
+                Database.Dispose();
+
+                foreach (var p in Players.Values)
+                    p.Connection.Dispose();
+
+                IsDisposed = true;
+            }
         }
     }
 }

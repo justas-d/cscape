@@ -1,4 +1,6 @@
 using CScape.Game.World;
+using CScape.Network.Packet;
+using JetBrains.Annotations;
 
 namespace CScape.Game.Commands
 {
@@ -6,6 +8,65 @@ namespace CScape.Game.Commands
     public sealed class TestCommandClass
     {
         private PlaneOfExistance _diffPoe;
+
+        [CommandMethod("close")]
+        public void CloseServer(CommandContext ctx)
+        {
+            ctx.Callee.Server.Dispose();
+        }
+
+        [CommandMethod("item")]
+        public void GiveItem(CommandContext ctx)
+        {
+            int id = 0;
+            int amount = 1;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("id", ref id);
+                b.ReadNumber("amount", ref amount, true);
+            })) return;
+
+            var change = ctx.Callee.Inventory.Items.CalcChangeInfo(id, amount);
+            ctx.Callee.Inventory.Items.ExecuteChangeInfo(change);
+
+            ctx.Callee.SendSystemChatMessage($"Giving {amount} with overflow {change.OverflowAmount}");
+        }
+
+        [CommandMethod("setitem")]
+        public void SetItem(CommandContext ctx)
+        {
+            var idx = 0;
+            var id = 0;
+            var amount = 1;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("index", ref idx);
+                b.ReadNumber("id", ref id);
+                b.ReadNumber("amount", ref amount, true);
+            })) return;
+
+            ctx.Callee.Inventory.Items.Provider.Ids[idx] = id;
+            ctx.Callee.Inventory.Items.Provider.Amounts[idx] = amount;
+        }
+
+        [CommandMethod("test soi")]
+        public void TestShowItemOnInterfacePacket(CommandContext ctx)
+        {
+            int iid = 0;
+            int zoom = 0;
+            int itemId = 0;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("interface id", ref iid);
+                b.ReadNumber("zoom", ref zoom);
+                b.ReadNumber("item id", ref itemId);
+            })) return;
+
+            ctx.Callee.Connection.SendMessage(new ShowItemOnInterfacePacket(iid, zoom, itemId));
+        }
 
         [CommandMethod("poe now")]
         public void PrintPoe(CommandContext ctx)

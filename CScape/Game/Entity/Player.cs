@@ -1,8 +1,11 @@
 using System;
 using System.Diagnostics;
 using CScape.Data;
+using CScape.Game.Interface;
 using CScape.Game.World;
+using CScape.Model;
 using CScape.Network;
+using CScape.Network.Packet;
 using CScape.Network.Sync;
 using JetBrains.Annotations;
 
@@ -11,6 +14,9 @@ namespace CScape.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
+    /// <summary>
+    /// Defines a player entity that exists in the world.
+    /// </summary>
     public sealed class Player : WorldEntity, IMovingEntity, IObserver
     {
         #region debug vars
@@ -40,10 +46,6 @@ namespace CScape.Game.Entity
 
         #region sync vars
 
-        [NotNull] public RegionSyncMachine RegionSync { get; }
-
-        public short Pid { get; }
-
         [Flags]
         public enum UpdateFlags
         {
@@ -61,8 +63,6 @@ namespace CScape.Game.Entity
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
-        [NotNull] private PlayerAppearance _appearance;
-
         [CanBeNull] public ChatMessage LastChatMessage
         {
             get => _lastChatMessage;
@@ -72,6 +72,32 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.Chat);
             }
         }
+        [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
+        {
+            get => _facingCoordinate;
+            set
+            {
+                _facingCoordinate = value;
+                if (value != null)
+                    SetFlag(UpdateFlags.FacingCoordinate);
+            }
+        }
+
+        [NotNull] public PlayerAppearance Appearance
+        {
+            get => _model.Appearance;
+            set
+            {
+                // ReSharper disable once ConstantNullCoalescingCondition
+                var val = value ?? new PlayerAppearance();
+                _model.Appearance = val;
+
+                SetFlag(UpdateFlags.Appearance);
+                IsAppearanceDirty = true;
+            }
+        }
+
+        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
         public IWorldEntity InteractingEntity
         {
             get => _interactingEntity;
@@ -81,42 +107,26 @@ namespace CScape.Game.Entity
                 SetFlag(UpdateFlags.InteractEnt);
             }
         }
-        [NotNull] public PlayerAppearance Appearance
-        {
-            get => _appearance;
-            set
-            {
-                // ReSharper disable once ConstantNullCoalescingCondition
-                var val = value ?? PlayerAppearance.Default;
-                _appearance = val;
-                _model.SetAppearance(val);
-                SetFlag(UpdateFlags.Appearance);
-                IsAppearanceDirty = true;
-            }
-        }
-        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
-
-        [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
-        {
-            get => _facingCoordinate;
-            set
-            {
-                _facingCoordinate = value;
-                if(value != null)
-                    SetFlag(UpdateFlags.FacingCoordinate);
-            }
-        }
 
         public const int MaxAppearanceUpdateSize = 64;
         public Blob AppearanceUpdateCache { get; set; }= new Blob(MaxAppearanceUpdateSize);
+
+        /// <summary>
+        /// If set, will invalidate appearance update caches.
+        /// </summary>
         public bool IsAppearanceDirty { get; set; }
+
+        [NotNull] public RegionSyncMachine RegionSync { get; }
+
+        public bool NeedsPositionInit { get; private set; } = true;
+        public short Pid { get; }
 
         #endregion
 
-        public bool IsMember => _model.IsMember;
-        [NotNull] public string Username => _model.Username;
+        [NotNull] public string Username => _model.Id;
         [NotNull] public string Password => _model.PasswordHash;
         public byte TitleIcon => _model.TitleIcon;
+        public bool IsMember => _model.IsMember;
 
         [NotNull] public SocketContext Connection { get; }
         [NotNull] public Logger Log => Server.Log;
@@ -125,9 +135,9 @@ namespace CScape.Game.Entity
 
         [NotNull] private readonly PlayerModel _model;
         private int _otherPlayerViewRange = MaxViewRange;
+
         public MovementController Movement { get; }
 
-        public bool NeedsPositionInit { get; private set; } = true;
         public bool TeleportToDestWhenWalking { get; set; }
 
         /// <summary>
@@ -151,6 +161,9 @@ namespace CScape.Game.Entity
             }
         }
 
+        [NotNull] public InterfacedItemManager Inventory { get; }
+        [NotNull] public IInterfaceManager Interfaces { get; }
+
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
         public Player([NotNull] NormalPlayerLogin login) : base(login.Server,  login.Server.EntityIdPool)
         {
@@ -163,11 +176,13 @@ namespace CScape.Game.Entity
             _observatory = new PlayerObservatory(this);
 
             Transform = ObserverTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
-            Appearance = new PlayerAppearance(_model);
             Movement = new MovementController(this);
+            Interfaces = new PlayerInterfaceController(this);
 
             RegionSync = new RegionSyncMachine(Server, this);
             Connection.SyncMachines.Add(RegionSync);
+            Connection.SyncMachines.Add(new InterfaceSyncMachine(this));
+
             Connection.SortSyncMachines();
 
             Server.RegisterNewPlayer(this);
@@ -176,6 +191,15 @@ namespace CScape.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Follow);
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
+
+            Inventory = new InterfacedItemManager(InterfaceConstants.PlayerBackpackInventoryId, Server,
+                _model.BackpackItems);
+
+            Interfaces.TryRegister(Inventory);
+            Interfaces.TryShow(new ItemSidebarInterface(InterfaceConstants.PlayerBackpackInterfaceId, 3, Inventory,null));
+
+            SetFlag(UpdateFlags.Appearance);
+            IsAppearanceDirty = true;
         }
 
         public void OnMoved()

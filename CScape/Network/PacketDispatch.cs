@@ -4,9 +4,10 @@ using System.Linq;
 using System.Reflection;
 using CScape.Data;
 using CScape.Game.Entity;
+using CScape.Network.Handlers;
 using JetBrains.Annotations;
 
-namespace CScape.Network.Packet
+namespace CScape.Network
 {
     public class PacketDispatch
     {

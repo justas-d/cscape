@@ -7,13 +7,13 @@
         int Chest { get; }
         int Feet { get; }
         byte FeetColor { get; }
-        PlayerAppearance.GenderType Gender { get; }
+        GenderType Gender { get; }
         byte HairColor { get; }
         int Hands { get; }
         int Head { get; }
         byte LegColor { get; }
         int Legs { get; }
-        PlayerAppearance.OverheadType Overhead { get; }
+        OverheadType Overhead { get; }
         byte SkinColor { get; }
         byte TorsoColor { get; }
     }
