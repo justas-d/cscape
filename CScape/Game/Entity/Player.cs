@@ -205,6 +205,7 @@ namespace CScape.Game.Entity
         public void OnMoved()
         {
             FacingCoordinate = null;
+            Interfaces.OnActionOccurred();
         }
 
         public override void Update(MainLoop loop)
