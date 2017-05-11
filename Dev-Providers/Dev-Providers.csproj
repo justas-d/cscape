@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CScape\CScape.csproj" />
+    <ProjectReference Include="..\CScape.Core\CScape.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

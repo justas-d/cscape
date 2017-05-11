@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using CScape.Dev.Providers;
+using CScape.Basic;
 using Nito.AsyncEx;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;

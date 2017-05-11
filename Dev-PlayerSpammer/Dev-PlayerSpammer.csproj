@@ -12,14 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CScape\CScape.csproj" />
-    <ProjectReference Include="..\Dev-Providers\Dev-Providers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="cryptokey-private.pem">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\CScape.Basic\CScape.Basic.csproj" />
+    <ProjectReference Include="..\CScape.Core\CScape.Core.csproj" />
   </ItemGroup>
 
 </Project>

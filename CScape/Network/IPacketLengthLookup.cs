@@ -1,9 +1,0 @@
-namespace CScape.Network
-{
-    public interface IPacketLengthLookup
-    {
-        void Reload();
-        PacketLength GetIncoming(byte id);
-        PacketLength GetOutgoing(byte id);
-    }
-}
