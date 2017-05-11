@@ -29,6 +29,26 @@ namespace CScape.Game.Commands
 
             var change = ctx.Callee.Inventory.Items.CalcChangeInfo(id, amount);
             ctx.Callee.Inventory.Items.ExecuteChangeInfo(change);
+
+            ctx.Callee.SendSystemChatMessage($"Giving {amount} with overflow {change.OverflowAmount}");
+        }
+
+        [CommandMethod("setitem")]
+        public void SetItem(CommandContext ctx)
+        {
+            var idx = 0;
+            var id = 0;
+            var amount = 1;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("index", ref idx);
+                b.ReadNumber("id", ref id);
+                b.ReadNumber("amount", ref amount, true);
+            })) return;
+
+            ctx.Callee.Inventory.Items.Provider.Ids[idx] = id;
+            ctx.Callee.Inventory.Items.Provider.Amounts[idx] = amount;
         }
 
         [CommandMethod("test soi")]

@@ -56,6 +56,7 @@ namespace CScape.Dev.Providers
         {
             username = username.ToLowerInvariant();
             return PlayerModels
+                // todo : merge RegisterPlayerLeaf and .Include calls in GetPlayer
                 .Include(m => m.BackpackItems)
                 .Include(m => m.Appearance)
                 .FirstOrDefaultAsync(f => f.Id == username);

@@ -1,4 +1,5 @@
 ﻿# TODO
+	* Move the command system out to a different project.
 	* Different implementations of protocols (377)
 	* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
   		

@@ -18,9 +18,9 @@ namespace CScape.Game.Interface
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
         
-        public ItemProviderChangeInfo CalcChangeInfo(int id, int amount)
+        public ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
         {
-            if(amount == 0)
+            if(deltaAmount == 0)
                 return ItemProviderChangeInfo.Invalid;
 
             // get definition
@@ -35,7 +35,7 @@ namespace CScape.Game.Interface
             // figure out whether an item of the same id exists in provider.
             // if we find an empty slot during this, store it just in case we don't find an existing item.
             int? emptySlotIdx = null;
-            int? existingIdx = null;
+            int? nullExistingIdx = null;
 
             for (var i = 0; i < Size; i++)
             {
@@ -51,7 +51,7 @@ namespace CScape.Game.Interface
                 if (Provider.Ids[i] == id)
                 {
                     // we found an existing item, set the existing item index and gtfo out of the loop.
-                    existingIdx = i;
+                    nullExistingIdx = i;
                     break;
                 }
             }
@@ -65,19 +65,19 @@ namespace CScape.Game.Interface
             // we've either found an existing item idx OR have an empty slot id OR have neither of those.
 
             // no existing item found, must operation will result in an new item.
-            if (existingIdx == null)
+            if (nullExistingIdx == null)
             {
                 // because we need to add a new item, inputs that result in a remove operation cannot proceed.
                 // filter out remove operations
-                if (amount < 0)
+                if (deltaAmount < 0)
                     return ItemProviderChangeInfo.Invalid;
 
                 // check if we found an empty slot during our iteration.
                 if (emptySlotIdx != null)
                 {
-                    // we did, generate a new 
-                    var overflow = CalcOverflow(amount);
-                    return new ItemProviderChangeInfo(emptySlotIdx.Value, Convert.ToInt32(amount - overflow), overflow, id);
+                    // we did, generate a new item
+                    var overflow = CalcOverflow(deltaAmount);
+                    return new ItemProviderChangeInfo(emptySlotIdx.Value, Convert.ToInt32(deltaAmount - overflow), overflow, id);
                 }
                 else // we found no empty slots. in this case, it means that the container is full.
                 {
@@ -88,27 +88,28 @@ namespace CScape.Game.Interface
             {
                 // attempt to add the given amount of the item to this slot.
 
-                var oth = existingIdx.Value;
-                var amnt = Provider.Amounts[oth];
+                var existingIdx = nullExistingIdx.Value;
+                var existingAmount = Provider.Amounts[existingIdx];
 
-                var delta = amnt + amount;
-                long overflow = 0;
+                // todo : ItemProviderChangeInfo delta is hard to work with. Replace with a "NewAmount" var
+                var finalNewAmount = existingAmount + deltaAmount;
+                var overflow = CalcOverflow(finalNewAmount);
 
                 // no carry remove item op
-                if (delta == 0)
-                    return new ItemProviderChangeInfo(id, amnt, 0, id);
+                if (finalNewAmount == 0)
+                    return new ItemProviderChangeInfo(existingIdx, finalNewAmount, 0, id);
 
                 // remove with carry
-                else if (delta < 0)
-                    return new ItemProviderChangeInfo(id, amnt, delta, id);
+                else if (finalNewAmount < 0)
+                    return new ItemProviderChangeInfo(existingIdx, finalNewAmount, overflow, id);
 
                 // add with carry
-                else if (delta > 0)
-                    return new ItemProviderChangeInfo(Provider.Ids[oth], Convert.ToInt32(delta - overflow), overflow, id);
+                else if (finalNewAmount > 0)
+                    return new ItemProviderChangeInfo(existingIdx, Convert.ToInt32(finalNewAmount - overflow), overflow, id);
                 else // uhh
                 {
                     Server.Log.Warning(this,
-                        $"Existing item id item info operation resolve resulted in dropping through delta == 0 delta > 0 delta < 0. Delta: {delta}, id: {id}, amount: {amount}, existing amount: {amnt}");
+                        $"Existing item id item info operation resolve resulted in dropping through delta == 0 delta > 0 delta < 0. Delta: {finalNewAmount}, id: {id}, amount: {deltaAmount}, existing amount: {existingAmount}");
                     return ItemProviderChangeInfo.Invalid;
                 }
             }
@@ -126,8 +127,8 @@ namespace CScape.Game.Interface
             }
 
             // execute
-            Provider.Ids[info.Index] = info.ItemDefId;
-            Provider.Amounts[info.Index] += info.AmountDelta;
+            Provider.Ids[info.Index] = info.NewItemDefId;
+            Provider.Amounts[info.Index] = info.NewAmount;
 
             if (Provider.IsEmptyAtIndex(info.Index))
             {
