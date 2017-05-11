@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 
 namespace CScape
 {
-    public class GameServer
+    public class GameServer : IDisposable
     {
         private readonly SocketAndPlayerDatabaseDispatch _entry;
         public Logger Log { get; }
@@ -33,6 +33,7 @@ namespace CScape
         public ImmutableDictionary<int, Player> Players { get; private set; } = ImmutableDictionary<int, Player>.Empty;
 
         public bool IsLoginEnbled { get; set; } = true;
+        public bool IsDisposed { get; private set; }
 
         /// <exception cref="ArgumentNullException"><paramref name="config.ListenEndPoint"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="config.PrivateLoginKeyDir"/> is <see langword="null"/></exception>
@@ -100,7 +101,7 @@ namespace CScape
         }
 
         public void SavePlayers()
-            => _entry.SaveFlag = true;
+            => _entry.SignalSave();
 
         [CanBeNull]
         public Player GetPlayerByPid(int pid)
@@ -138,6 +139,25 @@ namespace CScape
             }
 
             Players = Players.Remove(player.Pid);
+        }
+
+        public void Dispose()
+        {
+            if (!IsDisposed)
+            {
+                // block as we're saving.
+                Database.Player.Save().GetAwaiter().GetResult();
+
+                _entry?.Dispose();
+                Loop.Dispose();
+
+                Database.Dispose();
+
+                foreach (var p in Players.Values)
+                    p.Connection.Dispose();
+
+                IsDisposed = true;
+            }
         }
     }
 }

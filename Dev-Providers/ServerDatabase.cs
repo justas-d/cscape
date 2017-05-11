@@ -5,7 +5,7 @@ using CScape.Network;
 
 namespace CScape.Dev.Providers
 {
-    public class ServerDatabase : IDatabase, IDisposable
+    public class ServerDatabase : IDatabase
     {
         public IPacketLengthLookup Packet { get; }
         public IPlayerDatabase Player => _playerDb;

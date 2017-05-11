@@ -9,6 +9,12 @@ namespace CScape.Game.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("close")]
+        public void CloseServer(CommandContext ctx)
+        {
+            ctx.Callee.Server.Dispose();
+        }
+
         [CommandMethod("item")]
         public void GiveItem(CommandContext ctx)
         {

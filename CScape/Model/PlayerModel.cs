@@ -3,36 +3,44 @@ using JetBrains.Annotations;
 
 namespace CScape.Model
 {
-    public sealed class PlayerModel
+    public class PlayerModel
     {
         public const int BackpackSize = 28;
 
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 128;
 
-        public byte TitleIcon { get; set; } = 0;
+        public byte TitleIcon { get; set; }
 
-        [NotNull] public string Username { get; set; }
+        [NotNull] public string Id { get; set; }
         [NotNull] public string PasswordHash { get; set; }
 
-        public int X { get; set; } = 3220;
-        public int Y { get; set; } = 3218;
-        public byte Z { get; set; } = 0;
+        public int X { get; set; }
+        public int Y { get; set; }
+        public byte Z { get; set; }
 
-        public bool IsMember { get; set; } = true;
+        public bool IsMember { get; set; }
 
-        public PlayerAppearance Appearance { get; set; } = PlayerAppearance.Default;
-        public ItemProviderModel BackpackItems { get; set; }  = new ItemProviderModel(BackpackSize);
 
-        private PlayerModel()
+        public ItemProviderModel BackpackItems { get; set; }
+        public PlayerAppearance Appearance { get; set; }
+
+        public PlayerModel()
         {
-
         }
 
-        public PlayerModel(string username, string password)
+        public PlayerModel(string id, string password)
         {
-            Username = username;
+            Id = id;
+            TitleIcon = 0;
+            X = 3220;
+            Y = 3218;
+            Z = 0;
+            IsMember = true;
             PasswordHash = password;
+
+            Appearance = new PlayerAppearance();
+            BackpackItems = new ItemProviderModel(BackpackSize);
         }
 
         public void SetPosition(ITransform pos)

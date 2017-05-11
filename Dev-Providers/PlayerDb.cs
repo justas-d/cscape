@@ -1,8 +1,8 @@
 using System;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CScape.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CScape.Dev.Providers
 {
@@ -17,45 +17,48 @@ namespace CScape.Dev.Providers
 
         protected override void OnModelCreating(ModelBuilder model)
         {
-            base.OnModelCreating(model);
-
-            void SetupForeign<T>(ReferenceNavigationBuilder<PlayerModel, T> b) where T : class, IForeignModelObject<string, PlayerModel>
+            void RegisterPlayerLeaf<T>(Expression<Func<PlayerModel, T>> modelToLeaf) where T : class, IDbPlayerLeaf
             {
-                b.WithOne(c => c.Model)
-                    .HasForeignKey<T>(p => p.ForeignKey)
-                    .IsRequired();
+                model.Entity<PlayerModel>()
+                    .HasOne(modelToLeaf)
+                    .WithOne(m => m.Player)
+                    .HasForeignKey<T>(m => m.PlayerId);
+                model.Entity<T>().Property(m => m.Id).ValueGeneratedOnAdd();
             }
 
-            model.Entity<PlayerAppearance>(b =>
+            RegisterPlayerLeaf(m => m.BackpackItems);
+            RegisterPlayerLeaf(m => m.Appearance);
+
+            model.Entity<PlayerModel>(b =>
             {
-                b.HasKey(p => p.ForeignKey);
+                b.Property(m => m.TitleIcon).IsRequired();
+                b.Property(m => m.PasswordHash).IsRequired();
+                b.Property(m => m.IsMember).IsRequired();
+
+                b.Property(m => m.X).IsRequired();
+                b.Property(m => m.Y).IsRequired();
+                b.Property(m => m.Z).IsRequired();
             });
 
             model.Entity<ItemProviderModel>(b =>
             {
-                b.HasKey(m => m.ForeignKey);
-                b.Property(m => m.Ids).IsRequired();
-                b.Property(m => m.Amounts).IsRequired();
                 b.Property(m => m.Size).IsRequired();
-            });
 
-            model.Entity<PlayerModel>(b =>
-            {
-                b.HasKey(c => c.Username);
-                b.Property(s => s.Username).IsRequired();
-                b.Property(s => s.PasswordHash).IsRequired();
-                b.Property(s => s.X).IsRequired();
-                b.Property(s => s.Y).IsRequired();
-                b.Property(s => s.Z).IsRequired();
-                
-                SetupForeign(b.HasOne(p => p.BackpackItems));
-                SetupForeign(b.HasOne(p => p.Appearance));
+                b.Ignore(m => m.Ids);
+                b.Ignore(m => m.Amounts);
+
+                b.Property(m => m.DbIds).IsRequired();
+                b.Property(m => m.DbAmounts).IsRequired();
             });
         }
 
         public Task<PlayerModel> GetPlayer(string username)
         {
-            return PlayerModels.FindAsync(username.ToLowerInvariant());
+            username = username.ToLowerInvariant();
+            return PlayerModels
+                .Include(m => m.BackpackItems)
+                .Include(m => m.Appearance)
+                .FirstOrDefaultAsync(f => f.Id == username);
         }
 
         public async Task<PlayerModel> GetPlayer(string username, string password)
@@ -71,10 +74,7 @@ namespace CScape.Dev.Providers
             return player;
         }
 
-        public async Task Save()
-        {
-            await SaveChangesAsync();
-        }
+        public async Task Save() => await SaveChangesAsync();
 
         public async Task<PlayerModel> CreatePlayer(string username, string password)
         {
@@ -83,7 +83,6 @@ namespace CScape.Dev.Providers
 
             var model = new PlayerModel(username, password);
             PlayerModels.Add(model);
-            await Save();
             return model;
         }
 

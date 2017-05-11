@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 
 namespace CScape
 {
-    public sealed class MainLoop
+    public sealed class MainLoop : IDisposable
     {
         /// <summary>
         /// Defines a queue for entities that need to be updated.
@@ -66,6 +66,8 @@ namespace CScape
         public long TickProcessTime { get; private set; }
         public int TickRate { get; set; }
 
+        private bool _continueMainLoop = true;
+
         public MainLoop([NotNull] GameServer server, int tickRate)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
@@ -75,12 +77,11 @@ namespace CScape
 
         public async Task Run()
         {
-            //TODO: bool to terminate main loop
             // todo : exception handle all over the main loop
 
             Log.Normal(this, "Starting main loop...");
 
-            while (true)
+            while (_continueMainLoop)
             {
                 _tickWatch.Restart();
 
@@ -140,6 +141,11 @@ namespace CScape
 
                 DeltaTime = waitTime + TickProcessTime;
             }
+        }
+
+        public void Dispose()
+        {
+            _continueMainLoop = false;
         }
     }
 }

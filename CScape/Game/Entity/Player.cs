@@ -89,7 +89,7 @@ namespace CScape.Game.Entity
             set
             {
                 // ReSharper disable once ConstantNullCoalescingCondition
-                var val = value ?? PlayerAppearance.Default;
+                var val = value ?? new PlayerAppearance();
                 _model.Appearance = val;
 
                 SetFlag(UpdateFlags.Appearance);
@@ -123,7 +123,7 @@ namespace CScape.Game.Entity
 
         #endregion
 
-        [NotNull] public string Username => _model.Username;
+        [NotNull] public string Username => _model.Id;
         [NotNull] public string Password => _model.PasswordHash;
         public byte TitleIcon => _model.TitleIcon;
         public bool IsMember => _model.IsMember;

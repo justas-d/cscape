@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -36,7 +37,8 @@ namespace CScape.Dev.Runtime
 
             // config
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(File.ReadAllText("config.json"));
-            Server = new GameServer(cfg, new ServerDatabase("packet-lengths.json"));
+            var db = new ServerDatabase("packet-lengths.json");
+            Server = new GameServer(cfg, db);
 
             Server.Log.LogReceived += (s, l) => _logQueue.Add(l);
 

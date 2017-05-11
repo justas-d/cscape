@@ -1,3 +1,4 @@
+using System.Linq;
 using CScape.Game.Interface;
 using CScape.Game.Item;
 
@@ -6,17 +7,30 @@ namespace CScape.Model
     /// <summary>
     /// Provides items from the player model.
     /// </summary>
-    public class ItemProviderModel : IItemProvider, IPlayerForeignModel
+    public class ItemProviderModel : PlayerModelLeaf, IItemProvider
     {
-        public string ForeignKey { get; set; }
-        PlayerModel IForeignModelObject<string, PlayerModel>.Model { get; set; }
-
         public int Size { get; set; }
-        public int[] Ids { get; set; }
-        public int[] Amounts { get; set; }
 
-        public int[] Ids { get; set; }
-        public int[] Amounts { get; set; }
+        public int[] Ids { get; private set; }
+        public int[] Amounts { get; private set; }
+
+        // todo : ItemProviderModel employs a hack in order to let EF Core properly map it's primitive array types that store id and amounts.
+        public string DbIds
+        {
+            get => string.Join(",", Ids);
+            set => Ids = value.Split(',').Select(int.Parse).ToArray();
+        }
+
+        public string DbAmounts
+        {
+            get => string.Join(",", Amounts);
+            set => Amounts = value.Split(',').Select(int.Parse).ToArray();
+        }
+
+        private ItemProviderModel()
+        {
+
+        }
 
         public (int id, int amount) this[int i]
         {
@@ -35,11 +49,6 @@ namespace CScape.Model
                 Ids[i] = value.id;
                 Amounts[i] = value.amount;
             }
-        }
-
-        private ItemProviderModel()
-        {
-
         }
 
         public ItemProviderModel(int size)
