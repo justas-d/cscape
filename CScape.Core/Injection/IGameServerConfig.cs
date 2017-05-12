@@ -16,7 +16,8 @@ namespace CScape.Core.Injection
         int SocketSendTimeout { get; }
         int SocketReceiveTimeout { get; }
 
-        int TickTime { get; }
+        int TickRate { get; }
+        int AutoSaveIntervalMs { get; }
 
         [NotNull]
         string PrivateLoginKeyDir { get; }

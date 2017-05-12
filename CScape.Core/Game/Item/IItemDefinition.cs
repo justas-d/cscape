@@ -23,7 +23,6 @@ namespace CScape.Core.Game.Item
         /// The maximum stack amount of the item. Domain: (0, int.MaxValue]
         /// </summary>
         int MaxAmount { get; }
-        // todo : ensure max amount domain: (0, int.MaxValue]
 
         /// <summary>
         /// Whether the item is tradable or not.

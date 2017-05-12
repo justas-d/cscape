@@ -34,7 +34,6 @@ namespace CScape.Dev.Runtime
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            // todo : don't cd into build dir
             var dirBuild = Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
 
             // make sure we get notified of unobserved task exceptions

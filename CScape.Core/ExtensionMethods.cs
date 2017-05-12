@@ -11,7 +11,7 @@ namespace CScape.Core
         [DebuggerStepThrough]
         [DebuggerHidden]
         public static T ThrowOrGet<T>(this IServiceProvider provider) where T : class
-            => provider.GetService<T>() ?? throw new NullReferenceException(nameof(T));
+            => provider.GetService<T>() ?? throw new NullReferenceException(typeof(T).Name);
 
         internal static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {
@@ -20,7 +20,7 @@ namespace CScape.Core
         }
 
         /// <summary>
-        /// Returns the item definition for the given item id from the server db, asserting that returned item def id == given id.
+        /// Returns the item definition for the given item id from the server db, asserting that returned item def id == given id and that the max amount value is in (0; int.MaxValue]
         /// </summary>
         internal static IItemDefinition GetAsserted(this IItemDefinitionDatabase db, int id)
         {
@@ -30,9 +30,13 @@ namespace CScape.Core
 
 #if RELEASE
             if(id != item.ItemId) throw new InvalidOperationException("id != item.ItemId");
+            if(0 >= item.MaxAmount && item.MaxAmount > int.MaxValue);throw new InvalidOperationException("0 >= item.MaxAmount && item.MaxAmount > int.MaxValue");
+ 
 #else
             Debug.Assert(id == item.ItemId);
+            Debug.Assert(0 < item.MaxAmount && item.MaxAmount <= int.MaxValue);
 #endif
+
             return item;
         }
     }

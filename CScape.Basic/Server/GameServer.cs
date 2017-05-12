@@ -29,28 +29,16 @@ namespace CScape.Basic.Server
 
         public GameServer([NotNull] IServiceCollection services)
         {
-            // todo : setup internal services
-            // todo : assert paramater services
-
             // register internal dependencies
             services.AddSingleton<IGameServer>(_ => this);
 
             // build service provider
             Services = services?.BuildServiceProvider() ?? throw new ArgumentNullException(nameof(services));
 
+            // init
             Loop = Services.ThrowOrGet<IMainLoop>();
             Log = Services.ThrowOrGet<ILogger>();
 
-            /*
-            Services.ThrowOrGet<IGameServerConfig>();
-            Services.ThrowOrGet<IPlayerIdPool>();
-            Services.ThrowOrGet<IPacketDatabase>();
-            Services.ThrowOrGet<IEntityIdPool>();
-            Services.ThrowOrGet<ILoginService>();
-            Services.ThrowOrGet<IPacketParser>();
-            */
-
-            // init
             Overworld = new PlaneOfExistance(this, "Overworld");
         }
 
@@ -117,16 +105,15 @@ namespace CScape.Basic.Server
         {
             if (!IsDisposed)
             {
+                IsDisposed = true;
+
                 // block as we're saving.
                 Services.GetService<IPlayerDatabase>().Save().GetAwaiter().GetResult();
 
                 foreach (var p in Players.Values)
                     p.Connection.Dispose();
 
-                // todo : make sure we actually dispose Services.
                 (Services as IDisposable)?.Dispose();
-
-                IsDisposed = true;
             }
         }
     }

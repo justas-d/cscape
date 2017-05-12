@@ -51,6 +51,8 @@ namespace CScape.Basic.Server
         private readonly IPacketParser _parser;
         private readonly ILoginService _login;
         private readonly ILogger _log ;
+        private readonly IGameServerConfig _config;
+        private readonly IPlayerDatabase _db;
 
         public long ElapsedMilliseconds => _tickWatch.ElapsedMilliseconds;
 
@@ -64,13 +66,17 @@ namespace CScape.Basic.Server
             _login = services.ThrowOrGet<ILoginService>();
             _dispatch = services.ThrowOrGet<IPacketDispatch>();
             _parser = services.ThrowOrGet<IPacketParser>();
-            TickRate = services.ThrowOrGet<IGameServerConfig>().TickTime;
+            _config = services.ThrowOrGet<IGameServerConfig>();
+            _db = services.ThrowOrGet<IPlayerDatabase>();
+
+            TickRate = _config.TickRate;
         }
 
         public bool IsRunning { get; private set; } = true;
 
         public async Task Run()
         {
+            var timeSinceLastSave = 0L;
             _log.Normal(this, "Starting main loop...");
 
             // todo : exception handle all over the main loop
@@ -78,6 +84,14 @@ namespace CScape.Basic.Server
             {
                 while (IsRunning)
                 {
+                    /* Try autosave */
+                    if ((timeSinceLastSave += DeltaTime) >= _config.AutoSaveIntervalMs)
+                    {
+                        _log.Debug(this, "Autosaving...");
+                        await _db.Save();
+                        timeSinceLastSave = 0;
+                    }
+
                     _tickWatch.Restart();
 
                     //================================================

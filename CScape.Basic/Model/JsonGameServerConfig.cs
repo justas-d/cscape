@@ -30,7 +30,8 @@ namespace CScape.Basic.Model
         public string Version { get; }
         public int Revision { get; }
         public int SocketReceiveTimeout { get; }
-        public int TickTime { get; }
+        public int TickRate { get; }
+        public int AutoSaveIntervalMs { get; }
         public string PrivateLoginKeyDir { get; }
         public string Greeting { get; }
         public int MaxPlayers { get; }
@@ -42,14 +43,16 @@ namespace CScape.Basic.Model
         [JsonConstructor]
         private JsonGameServerConfig([NotNull] string version, int revision,
             [NotNull] string privateLoginKeyDir, int maxPlayers,
-            [NotNull] EndPoint listenEndPoint, int backlog, string greeting, int tickTime, int socketReceiveTimeout, int socketSendTimeout)
+            [NotNull] EndPoint listenEndPoint, int backlog, string greeting, int tickRate, 
+            int socketReceiveTimeout, int socketSendTimeout, int autoSaveIntervalMs)
         {
             if (backlog <= 0) throw new ArgumentOutOfRangeException(nameof(backlog));
             if (maxPlayers <= 0) throw new ArgumentOutOfRangeException(nameof(maxPlayers));
             if (revision <= 0) throw new ArgumentOutOfRangeException(nameof(revision));
-            if (tickTime <= 0) throw new ArgumentOutOfRangeException(nameof(tickTime));
+            if (tickRate <= 0) throw new ArgumentOutOfRangeException(nameof(tickRate));
             if (socketSendTimeout < 0) throw new ArgumentOutOfRangeException(nameof(socketSendTimeout));
             if (socketReceiveTimeout < 0) throw new ArgumentOutOfRangeException(nameof(socketReceiveTimeout));
+            if (autoSaveIntervalMs <= 0) throw new ArgumentOutOfRangeException(nameof(autoSaveIntervalMs));
             Version = version ?? throw new ArgumentNullException(nameof(version));
             Revision = revision;
             PrivateLoginKeyDir = privateLoginKeyDir ?? throw new ArgumentNullException(nameof(privateLoginKeyDir));
@@ -57,9 +60,10 @@ namespace CScape.Basic.Model
             ListenEndPoint = listenEndPoint ?? throw new ArgumentNullException(nameof(listenEndPoint));
             Backlog = backlog;
             Greeting = greeting;
-            TickTime = tickTime;
+            TickRate = tickRate;
             SocketReceiveTimeout = socketReceiveTimeout;
             SocketSendTimeout = socketSendTimeout;
+            AutoSaveIntervalMs = autoSaveIntervalMs;
         }
     }
 }

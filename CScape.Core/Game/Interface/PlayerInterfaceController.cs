@@ -141,7 +141,8 @@ namespace CScape.Core.Game.Interface
                 return;
             }
 
-            // todo : combat button spamming (one button per tick)
+            // todo : button handling
+            // todo : fix button spamming (one button per tick)
             var interf = All[interfaceId] as IShowableInterface;
             interf?.ButtonHandler?.OnButtonPressed(buttonId);
         }

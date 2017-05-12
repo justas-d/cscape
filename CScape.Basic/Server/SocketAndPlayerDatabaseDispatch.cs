@@ -61,9 +61,7 @@ namespace CScape.Basic.Server
         [NotNull] private readonly ILogger _log;
         [NotNull] private readonly Queue<IPlayerLogin> _loginQueue = new Queue<IPlayerLogin>();
 
-        [NotNull] private CancellationTokenSource _saveToken = new CancellationTokenSource();
         private bool _continueListening = true;
-
         public bool IsEnabled { get; set; } = true;
 
         public SocketAndPlayerDatabaseDispatch([NotNull] IServiceProvider services)
@@ -103,41 +101,21 @@ namespace CScape.Basic.Server
         public IPlayerLogin TryGetNext()
             => _loginQueue.Count > 0 ? _loginQueue.Dequeue() : null;
 
-        public void SignalSave() => _saveToken.Cancel();
-
         public async Task StartListening()
         {
             _socket.Bind(_config.ListenEndPoint);
             _socket.Listen(_config.Backlog);
 
-            // todo : start timer for db save
             _log.Debug(this, "Entry point listening.");
 
             while (_continueListening)
             {
-                try
-                {
-                    var task = await UntilCompletionOrCancellation(_socket.AcceptAsync(), _saveToken.Token);
-                    if (task is Task<Socket> socketTask 
-                        && socketTask.Status == TaskStatus.RanToCompletion)
-                    {
-                        var socket = socketTask.Result;
-                        if (socket == null || !socket.Connected)
-                            continue;
+                var socket = await _socket.AcceptAsync();
 
-                        await InitConnection(socket);
-                    }
-                    else
-                    {
-                        _log.Debug(this, $"Saving db");
-                        await _db.Save();
-                        _saveToken = new CancellationTokenSource();
-                    }
-                }
-                catch (TaskCanceledException)
-                {
-                    // expected
-                }
+                if (socket == null || !socket.Connected)
+                    continue;
+
+                await InitConnection(socket);
             }
         }
 
@@ -201,6 +179,7 @@ namespace CScape.Basic.Server
                 // receive login block
                 // header
                 await SocketReceive(socket, blob, blob.Buffer.Length);
+
                 // todo : catch crypto exceptions
                 var decrypted = _crypto.ProcessBlock(blob.Buffer, 0, blob.Buffer.Length);
                 blob.Overwrite(decrypted, 0, 0);

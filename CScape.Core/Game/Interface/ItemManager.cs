@@ -93,7 +93,6 @@ namespace CScape.Core.Game.Interface
                 var existingIdx = nullExistingIdx.Value;
                 var existingAmount = Provider.Amounts[existingIdx];
 
-                // todo : ItemProviderChangeInfo delta is hard to work with. Replace with a "NewAmount" var
                 var finalNewAmount = existingAmount + deltaAmount;
                 var overflow = CalcOverflow(finalNewAmount);
 

@@ -139,9 +139,7 @@ namespace CScape.Core.Game.Entity
         public MovementController Movement { get; }
 
         public bool TeleportToDestWhenWalking { get; set; }
-
-
-
+        
         /// <summary>
         /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
@@ -199,7 +197,8 @@ namespace CScape.Core.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Follow);
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
-
+    
+            // set up the rest of the sidebar interfaces
             Inventory = new InterfacedItemManager(login.Service, _model.BackpackItems,
                 InterfaceConstants.PlayerBackpackInventoryId);
 
