@@ -56,8 +56,9 @@ namespace CScape.Basic.Database
         public async Task<IPlayerModel> GetPlayer(string username)
         {
             username = username.ToLowerInvariant();
+            
+            // todo : merge RegisterPlayerLeaf and .Include calls in GetPlayer
             return await PlayerModels
-                // todo : merge RegisterPlayerLeaf and .Include calls in GetPlayer
                 .Include(m => m.BackpackItems)
                 .Include(m => m.Appearance)
                 .FirstOrDefaultAsync(f => f.Id == username);
@@ -85,6 +86,8 @@ namespace CScape.Basic.Database
 
             var model = new PlayerModel(username, password);
             PlayerModels.Add(model);
+
+            await Save();
             return model;
         }
 

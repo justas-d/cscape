@@ -145,11 +145,7 @@ namespace CScape.Core.Network
             return true;
         }
 
-        public void UpdateLastPacketReceivedTime()
-        {
-            ThrowIfDisposed();
-            _msSinceNoPacket = 0;
-        }
+        public void UpdateLastPacketReceivedTime() => _msSinceNoPacket = 0;
 
         public void SendOutStream()
         {

@@ -21,6 +21,7 @@ namespace CScape.Core.Game.Entity
     {
         #region debug vars
 
+        public bool DebugItems = true;
         public bool DebugCommands = false;
         public bool DebugPackets = false;
         public bool DebugRegion = true;

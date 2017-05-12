@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using CScape.Core.Data;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,11 @@ namespace CScape.Core
 {
     public static class ExtensionMethods
     {
+        [DebuggerStepThrough]
+        [DebuggerHidden]
+        public static DisposableBlobPlaceholder Placeholder(this Blob blob, int size)
+            => new DisposableBlobPlaceholder(blob, blob.WriteCaret, size);
+
         [DebuggerStepThrough]
         [DebuggerHidden]
         public static T ThrowOrGet<T>(this IServiceProvider provider) where T : class
