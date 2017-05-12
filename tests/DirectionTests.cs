@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.Net;
-using CScape;
-using CScape.Game.World;
+using CScape.Core.Game.World;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace tests
+namespace CScape.Dev.Tests
 {
     [TestClass]
     public class DirectionTests

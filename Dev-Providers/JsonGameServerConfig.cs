@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using CScape.Injection;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

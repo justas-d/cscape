@@ -5,7 +5,7 @@
         public static void Main()
         {
             var ctx = new ServerContext();
-            ctx.Start();
+            ctx.RunBlocking();
         }
     }
 }

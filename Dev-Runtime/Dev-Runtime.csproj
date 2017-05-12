@@ -12,13 +12,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CScape\CScape.csproj" />
-    <ProjectReference Include="..\Dev-Providers\Dev-Providers.csproj" />
+    <ProjectReference Include="..\CScape.Basic\CScape.Basic.csproj" />
+    <ProjectReference Include="..\CScape.Core\CScape.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="cryptokey-private.pem">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

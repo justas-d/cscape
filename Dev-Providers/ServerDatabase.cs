@@ -1,6 +1,7 @@
 using System;
 using CScape.Game.Entity;
 using CScape.Game.Item;
+using CScape.Injection;
 using CScape.Network;
 
 namespace CScape.Dev.Providers
@@ -9,7 +10,7 @@ namespace CScape.Dev.Providers
     {
         public IPacketLengthLookup Packet { get; }
         public IPlayerDatabase Player => _playerDb;
-        public IItemDatabase Item { get; }
+        public IItemDefinitionDatabase ItemDefinition { get; }
 
         private PlayerDb _playerDb; 
 
@@ -18,7 +19,7 @@ namespace CScape.Dev.Providers
             Packet = new PacketLookup(packetJsonDir);
             _playerDb = new PlayerDb();
             _playerDb.Database.EnsureCreated();
-            Item = new ItemDatabase();
+            ItemDefinition = new ItemDefinitionDatabase();
         }
 
         public void Dispose()
@@ -62,7 +63,7 @@ namespace CScape.Dev.Providers
         }
     }
 
-    public sealed class ItemDatabase : IItemDatabase
+    public sealed class ItemDefinitionDatabase : IItemDefinitionDatabase
     {
         public IItemDefinition Get(int id)
         {

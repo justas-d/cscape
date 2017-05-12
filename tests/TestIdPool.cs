@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Game.Entity;
+using CScape.Basic.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace tests
+namespace CScape.Dev.Tests
 {
     [TestClass]
     public class TestIdPool

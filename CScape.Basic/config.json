@@ -1,0 +1,17 @@
+{
+  "Version": "0.0.1",
+  "Revision": 317,
+
+  "Packet": "packet-lengths.json",
+  "PrivateLoginKeyDir": "cryptokey-private.pem",
+
+  "Backlog": 64,
+  "MaxPlayers": 2000,
+  "ListenEndPoint": "127.0.0.1:43594",
+  "TickRate": 600,
+  "AutoSaveIntervalMs": 300000,
+  "SocketReceiveTimeout": 5000,
+  "SocketSendTimeout": 5000,
+
+  "Greeting": "Welcome to CScape."
+}
