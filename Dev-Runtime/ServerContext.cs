@@ -53,7 +53,14 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IMainLoop>(s => new MainLoop(s));
             services.AddSingleton<ILoginService>(s => new SocketAndPlayerDatabaseDispatch(s.ThrowOrGet<IGameServer>().Services));
             services.AddSingleton<IPacketParser>(s => new PacketParser(s.ThrowOrGet<IGameServer>().Services));
-            services.AddSingleton<IPlayerDatabase>(s => new PlayerDatabase());
+
+            services.AddSingleton<IPlayerDatabase>(s =>
+            {
+                var db = new PlayerDatabase();
+                db.Database.EnsureCreated();
+                return db;
+            });
+
             services.AddSingleton<IItemDefinitionDatabase>(s => new ItemDefinitionDatabase());
             services.AddSingleton<IPacketDispatch>(s => new PacketDispatch(s));
             services.AddSingleton<IPacketParser>(s => new PacketParser(s));

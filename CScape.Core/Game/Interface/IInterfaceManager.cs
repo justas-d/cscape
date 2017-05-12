@@ -16,6 +16,8 @@ namespace CScape.Core.Game.Interface
 
         [NotNull] IReadOnlyDictionary<int, IBaseInterface> All { get; }
 
+        [CanBeNull] IBaseInterface TryGetById(int id);
+
         /// <summary>
         /// Attempts to show a showable api interface.
         /// </summary>

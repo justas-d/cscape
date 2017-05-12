@@ -18,20 +18,28 @@ namespace CScape.Core.Network.Packet
 
         public void Send(OutBlob stream)
         {
-            stream.BeginPacket(53);
+            stream.BeginPacket(Id);
 
-            stream.Write16((short)_itemManager.Id);
+            stream.Write16((short) _itemManager.Id);
 
-            var sizePh = new PlaceholderHandle(stream, sizeof(short));
-
-            // payload
-            var nonEmptyUpperBound = 0; // the idx of the item that was not empty.
-            for (var i = 0; i < _itemManager.Items.Provider.Size; i++)
+            // find upper bound in inventory
+            var upperBoundIdx = 0;
+            for (var i = 0; i < Provider.Size; i++)
             {
-                if (ItemHelper.IsEmptyAtIndex(Provider, i))
+                if(Provider.IsEmptyAtIndex(i)) continue;
+                upperBoundIdx = i;
+            }
+
+            // write payload
+            upperBoundIdx += 1;
+            stream.Write16((short)upperBoundIdx);
+
+            for (var i = 0; i < upperBoundIdx; i++)
+            {
+                if (Provider.IsEmptyAtIndex(i))
                 {
-                    // write 0 size, 0 id.
-                    stream.Write16(0);
+                    stream.Write(0); // amnt
+                    stream.Write16(0); // idz
                     continue;
                 }
 
@@ -39,12 +47,8 @@ namespace CScape.Core.Network.Packet
                 stream.WriteByteInt32Smart(Provider.Amounts[i]);
 
                 // write id
-                stream.Write16((short) Provider.Ids[i]);
-
-                nonEmptyUpperBound = i;
+                stream.Write16((short)Provider.Ids[i]);
             }
-
-            sizePh.DoWrite(b => b.Write16((short)(nonEmptyUpperBound + 1))); // amount of items in the payload
 
             stream.EndPacket();
         }

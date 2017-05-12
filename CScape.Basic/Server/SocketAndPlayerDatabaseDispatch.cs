@@ -61,6 +61,7 @@ namespace CScape.Basic.Server
         [NotNull] private readonly ILogger _log;
         [NotNull] private readonly Queue<IPlayerLogin> _loginQueue = new Queue<IPlayerLogin>();
 
+        public bool IsDisposed { get; private set; }
         private bool _continueListening = true;
         public bool IsEnabled { get; set; } = true;
 
@@ -107,10 +108,25 @@ namespace CScape.Basic.Server
             _socket.Listen(_config.Backlog);
 
             _log.Debug(this, "Entry point listening.");
-
             while (_continueListening)
             {
-                var socket = await _socket.AcceptAsync();
+                Socket socket;
+                try
+                {
+                    socket = await _socket.AcceptAsync();
+                }
+                catch (SocketException ex)
+                {
+                    _log.Exception(this, "Socket exception on main socket accept async.", ex);
+                    continue;
+                }
+                catch (ObjectDisposedException ex)
+                {
+                    _log.Exception(this, "SocketDispatch threw disposed ex.", ex);
+                    _continueListening = false;
+                    IsDisposed = true;
+                    break;
+                }
 
                 if (socket == null || !socket.Connected)
                     continue;
@@ -363,8 +379,12 @@ namespace CScape.Basic.Server
 
         public void Dispose()
         {
-            _socket?.Dispose();
-            _continueListening = false;
+            if (!IsDisposed)
+            {
+                IsDisposed = true;
+                _socket?.Dispose();
+                _continueListening = false;
+            }
         }
 
         private static async Task<Task> UntilCompletionOrCancellation(Task asyncOp, CancellationToken ct)

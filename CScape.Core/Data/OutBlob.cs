@@ -48,25 +48,30 @@ namespace CScape.Core.Data
 
         }
 
-        public void EndPacket()
+        /// <summary>
+        /// Ends writing the current packet but writes the given <see cref="sizeOverload"/> in place of the packet payload size.
+        /// </summary>
+        public void EndPacket(int sizeOverload)
         {
             if (!_isWritingPacket) return;
-
-            // figure out how big the payload is in bytes.
-            var written = WriteCaret - _payloadLengthIndex - (_isShortLength ? 2 : 1);
 
             // write it in place of the placeholder 0's
             if (_isShortLength)
             {
-                Buffer[_payloadLengthIndex] = (byte)(written >> 8);
-                Buffer[_payloadLengthIndex + 1] = (byte)written;
+                Buffer[_payloadLengthIndex] = (byte)(sizeOverload >> 8);
+                Buffer[_payloadLengthIndex + 1] = (byte)sizeOverload;
             }
             else
-                Buffer[_payloadLengthIndex] = (byte)written;
+                Buffer[_payloadLengthIndex] = (byte)sizeOverload;
 
             _isWritingPacket = false;
             _payloadLengthIndex = -1;
+
         }
+
+        public void EndPacket()
+            // figure out how big the payload is in bytes.
+            => EndPacket(WriteCaret - _payloadLengthIndex - (_isShortLength ? 2 : 1));
 
         /// <summary>
         /// Writes a byte, if value is under 255. If value is equal to, or over, 255, writes it as an 255 padding and then the value as int32.

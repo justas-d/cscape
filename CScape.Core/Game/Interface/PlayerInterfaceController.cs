@@ -73,6 +73,8 @@ namespace CScape.Core.Game.Interface
             _backend = new Backend(this);
         }
 
+        public IBaseInterface TryGetById(int id) => !All.ContainsKey(id) ? null : All[id];
+
         public bool TryShow<T>(T interf) where T : IApiInterface, IShowableInterface
         {
             if (!TryRegister(interf))

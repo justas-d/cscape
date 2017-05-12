@@ -338,7 +338,7 @@ namespace CScape.Core.Network.Sync
                 return;
             }
 
-            var headerPh = new PlaceholderHandle(stream, 2);
+            var headerPh = stream.Placeholder(2);
 
             // write flags
             if (flags.HasFlag(Player.UpdateFlags.Chat))
@@ -388,7 +388,7 @@ namespace CScape.Core.Network.Sync
             // THEY NEED TO FOLLOW A STRICT ORDER
 
             // write the header
-            headerPh.DoWrite(b =>
+            headerPh.Write(b =>
             {
                 stream.Write((byte)flags);
                 stream.Write((byte)((short)flags >> 8));
@@ -417,7 +417,7 @@ namespace CScape.Core.Network.Sync
                 const int plrObjMagic = 0x100;
                 const int itemMagic = 0x200;
 
-                var sizePh = new PlaceholderHandle(cache, 1);
+                var sizePh = cache.Placeholder(1);
 
                 cache.Write((byte) upd.Player.Appearance.Gender);
                 cache.Write((byte) upd.Player.Appearance.Overhead);
@@ -461,7 +461,7 @@ namespace CScape.Core.Network.Sync
                 // todo : proper calculation of cmb lvl
             }
 
-            // cache is either ok, or we rewrote it. Eitherway, flush it into the stream.
+            // cache is ok or we rewrote it. Eitherway, flush it into the stream.
             cache.FlushInto(stream);
         }
 

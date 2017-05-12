@@ -13,13 +13,30 @@ namespace CScape.Core.Game.Interface
         public int Size => Provider.Size;
         public IItemProvider Provider { get; }
 
-        public ItemManager(IServiceProvider service,[NotNull] IItemProvider provider)
+        protected ItemManager(IServiceProvider service,[NotNull] IItemProvider provider)
         {
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
             _log = service.ThrowOrGet<ILogger>();
             _db = service.ThrowOrGet<IItemDefinitionDatabase>();
         }
-        
+
+        public bool Swap(int idx1, int idx2)
+        {
+            // check if in range
+            bool IsNotInRange(int val) => 0 > val || val >= Size;
+            if (IsNotInRange(idx1)) return false;
+            if (IsNotInRange(idx2)) return false;
+
+            // execute swap
+            var i1 = Provider[idx1];
+            var i2 = Provider[idx2];
+
+            ExecuteChangeInfo(new ItemProviderChangeInfo(idx1, i2.amount, 0, i2.id));
+            ExecuteChangeInfo(new ItemProviderChangeInfo(idx2, i1.amount, 0, i1.id));
+
+            return true;
+        }
+
         public ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
         {
             if(deltaAmount == 0)
