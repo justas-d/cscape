@@ -54,6 +54,7 @@ namespace CScape.Basic.Server
         private readonly IGameServerConfig _config;
         private readonly IPlayerDatabase _db;
 
+        private int _waitTimeCarry;
         public long ElapsedMilliseconds => _tickWatch.ElapsedMilliseconds;
 
         public long DeltaTime { get; private set; }
@@ -146,16 +147,32 @@ namespace CScape.Basic.Server
 
                     // handle tick delays
                     TickProcessTime = _tickWatch.ElapsedMilliseconds;
-                    var waitTime = Math.Abs(TickRate - Convert.ToInt32(TickProcessTime));
-                    await Task.Delay(waitTime);
+                    var waitTime = TickRate - Convert.ToInt32(TickProcessTime) + _waitTimeCarry;
+                    
+                    // tick process time took more then tickrate
+                    if (0 > waitTime)
+                    {
+                        _waitTimeCarry = waitTime;
+                        _log.Warning(this, $"Cannot keep up! Tick rate is {TickRate}ms but wait time is {waitTime}ms which makes us carry {_waitTimeCarry}ms to next tick");
+                    }
+                    else // valid waitTime, wait it out
+                    {
+                        _waitTimeCarry = 0;
+                        await Task.Delay(waitTime);
+                    }
 
                     DeltaTime = waitTime + TickProcessTime;
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.Fail($"Main loop crash {ex}");
             }
             finally
             {
                 IsRunning = false;
             }
+
         }
 
         public void Dispose()

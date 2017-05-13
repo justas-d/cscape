@@ -171,7 +171,7 @@ namespace CScape.Basic.Commands
             ctx.Callee.Logout(out _);
         }
 
-        [CommandMethod("logout force")]
+        [CommandMethod("flogout")]
         public void ForcedLogout(CommandContext ctx)
         {
             ctx.Callee.ForcedLogout();

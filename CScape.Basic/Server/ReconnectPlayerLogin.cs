@@ -28,7 +28,7 @@ namespace CScape.Basic.Server
             Existing.Observatory.ReevaluateSightOverride = true;
             Existing.Observatory.Clear();
 
-            Existing.Log.Debug(this, $"Reconnected client iid {Existing.UniqueEntityId}");
+            Existing.Log.Debug(this, $"Reconnected client iid {Existing.UniqueEntityId} Disposed? {Existing.Connection.IsDisposed}");
         }
     }
 }
