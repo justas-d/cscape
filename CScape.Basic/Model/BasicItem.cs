@@ -1,18 +1,12 @@
 using System;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
 
 namespace CScape.Basic.Model
 {
     public class BasicItem : IItemDefinition
     {
-        public bool Equals(IItemDefinition other)
-        {
-            if (other == null) return false;
-            if (Object.ReferenceEquals(this, other)) return true;
-            return ItemId == other.ItemId;
-        }
-
         public int ItemId { get; }
         public string Name { get; }
         public int MaxAmount { get; }
@@ -32,9 +26,21 @@ namespace CScape.Basic.Model
             NoteSwitchId = noteSwitchId;
         }
 
-        public void UseWith(Player user, IItemDefinition other)
+        public void UseWith(Player player, IItemManager manager, int ourIdx, IItemDefinition otherItem, int otherIndex)
         {
-            throw new NotImplementedException();
+            player.DebugMsg($"Use [i:{ItemId}x{manager.Provider.Amounts[ourIdx]}] with [i:{otherItem}x{manager.Provider.Amounts[ourIdx]}]", ref player.DebugItems);
+        }
+
+        public void OnAction(Player player, IItemManager manager, int index, ItemActionType type)
+        {
+            player.DebugMsg($"Action {type} on [i:{ItemId}x{manager.Provider.Amounts[index]}] ", ref player.DebugItems);
+        }
+
+        public bool Equals(IItemDefinition other)
+        {
+            if (other == null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ItemId == other.ItemId;
         }
     }
 }

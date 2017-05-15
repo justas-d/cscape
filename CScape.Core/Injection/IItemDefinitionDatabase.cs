@@ -9,7 +9,6 @@ namespace CScape.Core.Injection
         /// Returns the item definition of the provided id.
         /// Implementation must guarantee that returned IItemDefinition.Id == id
         /// </summary>
-        /// <returns></returns>
         [CanBeNull] IItemDefinition Get(int id);
     }
 }
