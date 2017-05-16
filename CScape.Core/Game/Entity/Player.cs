@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using CScape.Core.Data;
 using CScape.Core.Game.Interface;
+using CScape.Core.Game.Interface.Showable;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using CScape.Core.Network;
@@ -214,8 +215,34 @@ namespace CScape.Core.Game.Entity
             Interfaces.TryRegister(Equipment);
 
             // sidebar interfaces
-            Interfaces.TryShow(new ItemSidebarInterface(ids.BackpackInterface, ids.BackpackSidebarIdx, Inventory,null));
-            Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentInterface, ids.EquipmentSidebarIdx, Equipment, null));
+            void Interface(int id, int idx, IButtonHandler handler = null)
+            {
+                var result = Interfaces.TryShow(new BasicSidebarInterface(id, idx, handler));
+                Debug.Assert(result, $"Interfaces.TryShow id {id} idx {idx} ret false");
+            }
+
+            Interface(ids.SkillSidebarInterface, ids.SkillSidebarIdx);
+            Interface(ids.QuestSidebarInterface, ids.QuestSidebarIdx);
+            Interface(ids.PrayerSidebarInterface, ids.PrayerSidebarIdx);
+            // todo : send different spell book interfaces depending on the player's active spellbook
+            // todo : keep track of player spellbook state
+            Interface(ids.StandardSpellbookSidebarInterface, ids.SpellbookSidebarIdx);
+            Interface(ids.FriendsListSidebarInterface, ids.FriendsSidebarIdx);
+            Interface(ids.IgnoreListSidebarInterface, ids.IgnoresSidebarIdx);
+            Interface(ids.LogoutSidebarInterface, ids.LogoutSidebarIdx);
+
+            if(login.IsHighDetail)
+                Interface(ids.OptionsHighDetailSidebarInterface, ids.OptionsSidebarIdx);
+            else
+                Interface(ids.OptionsLowDetailSidebarInterface, ids.OptionsSidebarIdx);
+
+            Interface(ids.ControlsSidebarInterface, ids.ControlsSidebarIdx);
+
+            // container interfaces
+            var res = Interfaces.TryShow(new ItemSidebarInterface(ids.BackpackSidebarInterface, ids.BackpackSidebarIdx, Inventory,null));
+            Debug.Assert(res, "Cannot show container interface in player ctor ");
+            res = Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentSidebarInterface, ids.EquipmentSidebarIdx, Equipment, null));
+            Debug.Assert(res, "Cannot show container interface in player ctor ");
 
             SetFlag(UpdateFlags.Appearance);
             IsAppearanceDirty = true;

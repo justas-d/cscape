@@ -1,6 +1,6 @@
 ﻿namespace CScape.Core.Network.Sync
 {
-    public class SyncMachineConstants
+    public static class SyncMachineConstants
     {
         public const int Region = 0;
         public const int Observer = 1;

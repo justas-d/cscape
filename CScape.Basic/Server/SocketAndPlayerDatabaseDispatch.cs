@@ -224,8 +224,7 @@ namespace CScape.Basic.Server
                     return;
                 }
 
-                blob.ReadByte(); // low mem
-                //var isLowMem = blob.ReadByte() == 1;
+                var isLowMem = blob.ReadByte() == 1;
 
                 // read crcs
                 var crcs = new int[crcCount];
@@ -331,7 +330,7 @@ namespace CScape.Basic.Server
                     blob.Write((byte)InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
                     blob.Write(model.TitleIcon);
-                    _loginQueue.Enqueue(new NormalPlayerLogin(_services, model, socket, signlinkUid));
+                    _loginQueue.Enqueue(new NormalPlayerLogin(_services, model, socket, signlinkUid, !isLowMem));
                 }
 
                 await SocketSend(socket, blob);

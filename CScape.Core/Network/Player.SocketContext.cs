@@ -11,7 +11,6 @@ namespace CScape.Core.Network
 {
     public class SocketContext : IDisposable
     {
-        [NotNull] private readonly IServiceProvider _services;
         public const int OutStreamSize = 5000;
         public const int InBufferStreamSize = 1024;
         public const int InStreamSize = InBufferStreamSize * 2;
@@ -42,7 +41,7 @@ namespace CScape.Core.Network
         public CircularBlob InCircularStream { get; private set; }
 
         private readonly byte[] _inBufferStream; // for buffering writes to InCircularStream
-        private ILogger _log;
+        private readonly ILogger _log;
 
         [NotNull]
         public Player Player { get; }
@@ -58,9 +57,7 @@ namespace CScape.Core.Network
         public SocketContext([NotNull] IServiceProvider services, [NotNull] Player player, 
             [NotNull] Socket socket, int signLink)
         {
-            _services = services ?? throw new ArgumentNullException(nameof(services));
-
-            _log = _services.ThrowOrGet<ILogger>();
+            _log = services.ThrowOrGet<ILogger>();
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             Player = player ?? throw new ArgumentNullException(nameof(player));
 

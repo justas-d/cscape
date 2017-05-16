@@ -13,14 +13,16 @@ namespace CScape.Core
         public Socket Connection { get; }
         public IServiceProvider Service { get; }
         public int SignlinkUid { get; }
+        public bool IsHighDetail { get; }
 
         public NormalPlayerLogin(IServiceProvider service, [NotNull] IPlayerModel model,
-            [NotNull] Socket connection, int signlinkUid)
+            [NotNull] Socket connection, int signlinkUid, bool isHighDetail)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
             Service = service;
             SignlinkUid = signlinkUid;
+            IsHighDetail = isHighDetail;
         }
 
         public void Transfer(IMainLoop loop)

@@ -1,10 +1,32 @@
 ﻿{
-  "BackpackInterface": 3213,
-  "BackpackInventory": 3214,
+  "BackpackSidebarInterface": 3213,
+  "EquipmentSidebarInterface": 1644,
 
-  "EquipmentInterface": 1644,
+  "SkillSidebarInterface": 3917,
+  "QuestSidebarInterface": 638,
+  "PrayerSidebarInterface": 5608,
+  "StandardSpellbookSidebarInterface": 1151,
+  "FriendsListSidebarInterface": 5065,
+  "IgnoreListSidebarInterface": 5715,
+  "LogoutSidebarInterface": 2449,
+  "OptionsLowDetailSidebarInterface": 4445,
+  "OptionsHighDetailSidebarInterface": 904,
+  "ControlsSidebarInterface": 147,
+
+  "BackpackInventory": 3214,
   "EquipmentInventory": 1688,
 
+  "CombatStyleSidebarIdx": 0,
+  "SkillSidebarIdx": 1,
+  "QuestSidebarIdx": 2,
   "BackpackSidebarIdx": 3,
-  "EquipmentSidebarIdx":  4 
+  "EquipmentSidebarIdx": 4,
+  "PrayerSidebarIdx": 5,
+  "SpellbookSidebarIdx": 6,
+  "FriendsSidebarIdx": 8,
+  "IgnoresSidebarIdx": 9,
+  "LogoutSidebarIdx": 10,
+  "OptionsSidebarIdx": 11,
+  "ControlsSidebarIdx": 12
+
 }

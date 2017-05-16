@@ -1,6 +1,5 @@
 ﻿# TODO
 	* 145 unequip
-	* Implement an interface & container id provider instead of using constants
 	* Rework the syncmachine system to support sync skipping and be more friendly with order in the sync process.
 	* Different implementations of protocols (377)
 	* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
