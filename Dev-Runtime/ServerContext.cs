@@ -49,7 +49,6 @@ namespace CScape.Dev.Runtime
             var services = new ServiceCollection();
 
             services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
-
             services.AddSingleton<IMainLoop>(s => new MainLoop(s));
             services.AddSingleton<ILoginService>(s => new SocketAndPlayerDatabaseDispatch(s.ThrowOrGet<IGameServer>().Services));
             services.AddSingleton<IPacketParser>(s => new PacketParser(s.ThrowOrGet<IGameServer>().Services));
@@ -66,8 +65,12 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IPacketParser>(s => new PacketParser(s));
             services.AddSingleton<IPlayerIdPool>(s => new PlayerIdPool());
             services.AddSingleton<IEntityIdPool>(s => new EntityIdPool());
-
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
+
+            services.AddSingleton<IInterfaceIdDatabase>(s =>
+                    JsonConvert.DeserializeObject<InterfaceDb>(
+                        File.ReadAllText(
+                            Path.Combine(dirBuild, "interface-ids.json"))));
 
             services.AddSingleton<IGameServerConfig>(s => 
                 JsonConvert.DeserializeObject<JsonGameServerConfig>(

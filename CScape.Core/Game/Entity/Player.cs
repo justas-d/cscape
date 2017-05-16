@@ -202,10 +202,11 @@ namespace CScape.Core.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.Report);
     
             // set up the sidebar containers
-            Inventory = new BasicItemManager(InterfaceConstants.PlayerBackpackInventoryId,
+            var ids = login.Service.ThrowOrGet<IInterfaceIdDatabase>();
+            Inventory = new BasicItemManager(ids.BackpackInventory,
                 login.Service, _model.BackpackItems);
 
-            Equipment = new EquipmentManager(InterfaceConstants.PlayerEquipmentInventoryId,
+            Equipment = new EquipmentManager(ids.EquipmentInventory,
                 this, login.Service, _model.Equipment);
 
 
@@ -213,8 +214,8 @@ namespace CScape.Core.Game.Entity
             Interfaces.TryRegister(Equipment);
 
             // sidebar interfaces
-            Interfaces.TryShow(new ItemSidebarInterface(InterfaceConstants.PlayerBackpackInterfaceId, 3, Inventory,null));
-            Interfaces.TryShow(new ItemSidebarInterface(InterfaceConstants.PlayerEquipmentInterfaceId, 4, Equipment, null));
+            Interfaces.TryShow(new ItemSidebarInterface(ids.BackpackInterface, ids.BackpackSidebarIdx, Inventory,null));
+            Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentInterface, ids.EquipmentSidebarIdx, Equipment, null));
 
             SetFlag(UpdateFlags.Appearance);
             IsAppearanceDirty = true;

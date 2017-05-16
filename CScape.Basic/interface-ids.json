@@ -1,0 +1,10 @@
+﻿{
+  "BackpackInterface": 3213,
+  "BackpackInventory": 3214,
+
+  "EquipmentInterface": 1644,
+  "EquipmentInventory": 1688,
+
+  "BackpackSidebarIdx": 3,
+  "EquipmentSidebarIdx":  4 
+}
