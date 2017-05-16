@@ -27,7 +27,7 @@ namespace CScape.Basic.Database
                 model.Entity<T>().Property(m => m.Id).ValueGeneratedOnAdd();
             }
 
-            RegisterPlayerLeaf(m => m.BackpackItems);
+            RegisterPlayerLeaf(m => m.Items);
             RegisterPlayerLeaf(m => m.Appearance);
 
             model.Entity<PlayerModel>(b =>
@@ -59,7 +59,7 @@ namespace CScape.Basic.Database
             
             // todo : merge RegisterPlayerLeaf and .Include calls in GetPlayer
             return await PlayerModels
-                .Include(m => m.BackpackItems)
+                .Include(m => m.Items)
                 .Include(m => m.Appearance)
                 .FirstOrDefaultAsync(f => f.Id == username);
         }

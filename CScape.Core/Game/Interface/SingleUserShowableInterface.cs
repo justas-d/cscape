@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
 {
-    public abstract class SingleUserApiInterface : IApiInterface
+    public abstract class SingleUserShowableInterface : IApiInterface, IShowableInterface
     {
         public int Id { get; }
         public bool IsRegistered => Api != null;
@@ -14,9 +14,10 @@ namespace CScape.Core.Game.Interface
         [CanBeNull] protected IInterfaceManagerApiBackend Api { get; private set; }
         private ImmutableList<IPacket> _upds = ImmutableList<IPacket>.Empty;
 
-        protected SingleUserApiInterface(int id)
+        protected SingleUserShowableInterface(int id, [CanBeNull] IButtonHandler buttonHandler = null)
         {
             Id = id;
+            ButtonHandler = buttonHandler;
         }
 
         public bool TryRegisterApi(IInterfaceManagerApiBackend api)
@@ -35,6 +36,17 @@ namespace CScape.Core.Game.Interface
 
         protected abstract bool InternalRegister(IInterfaceManagerApiBackend api);
         protected abstract void InternalUnregister();
+
+        /// <summary>
+        /// Handles figuring out whether we can close.
+        /// </summary>
+        protected abstract bool CanCloseRigtNow();
+
+        /// <summary>
+        /// Handles the interface specific close logic.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract void InternalClose();
 
         public void UnregisterApi()
         {
@@ -70,5 +82,21 @@ namespace CScape.Core.Game.Interface
             return Equals((IBaseInterface)obj);
         }
 
+        public bool TryClose()
+        {
+            if (Api == null)
+                return false;
+
+            if (!CanCloseRigtNow())
+                return false;
+
+            InternalClose();
+            Api.NotifyOfClose(this);
+            return true;
+        }
+
+        public abstract  void Show();
+
+        public IButtonHandler ButtonHandler { get; }
     }
 }

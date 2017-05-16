@@ -2,16 +2,38 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Basic.Model
+namespace CScape.Basic.Model 
 {
     public class PlayerModel : IPlayerModel
     {
         public const int BackpackSize = 28;
+        public const int EquipmentMaxSize = EquipmentManager.EquipmentMaxSize;
 
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 128;
 
         public byte TitleIcon { get; set; }
+
+        IPlayerAppearance IPlayerModel.Appearance
+        {
+            get => Appearance;
+            set => Appearance = (PlayerAppearance)value;
+        }
+
+        private ItemProviderSegment _backpack;
+        private ItemProviderSegment _equipment;
+
+        IItemProvider IPlayerModel.BackpackItems
+        {
+            get => _backpack;
+            set => _backpack = (ItemProviderSegment) value;
+        }
+
+        IItemProvider IPlayerModel.Equipment
+        {
+            get => _equipment;
+            set => _equipment = (ItemProviderSegment) value;
+        }
 
         public string Id { get; set; }
         public string PasswordHash { get; set; }
@@ -22,11 +44,21 @@ namespace CScape.Basic.Model
 
         public bool IsMember { get; set; }
 
-        public ItemProviderModel BackpackItems { get; private set; }
-        public PlayerAppearance Appearance { get; private set; }
 
-        IPlayerAppearance IPlayerModel.Appearance { get => Appearance; set => Appearance = (PlayerAppearance) value; }
-        IItemProvider IPlayerModel.BackpackItems { get => BackpackItems; set => BackpackItems = (ItemProviderModel) value; }
+        private ItemProviderModel _items;
+
+        public ItemProviderModel Items
+        {
+            get => _items;
+            set
+            {
+                // create segments
+                _items = value;
+                _backpack = new ItemProviderSegment(_items, 0, BackpackSize);
+                _equipment = new ItemProviderSegment(_items, BackpackSize, BackpackSize + EquipmentMaxSize);
+            }
+        }
+        public PlayerAppearance Appearance { get; private set; }
 
         public PlayerModel()
         {
@@ -43,7 +75,7 @@ namespace CScape.Basic.Model
             PasswordHash = password;
 
             Appearance = new PlayerAppearance();
-            BackpackItems = new ItemProviderModel(BackpackSize);
+            Items = new ItemProviderModel(BackpackSize + EquipmentMaxSize);
         }
 
         public void UpdatePosition(ITransform pos)

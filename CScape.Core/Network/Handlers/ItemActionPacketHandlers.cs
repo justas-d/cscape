@@ -13,8 +13,8 @@ namespace CScape.Core.Network.Handlers
     {
         private readonly Dictionary<int, ItemActionType> _opToActionMap = new Dictionary<int, ItemActionType>()
         {
-            {122, ItemActionType.Generic1},
-            {41, ItemActionType.Generic2},
+            {41, ItemActionType.Generic1},
+            {122, ItemActionType.Generic2},
             {16, ItemActionType.Generic3},
             {87, ItemActionType.Drop},
         };
@@ -52,7 +52,7 @@ namespace CScape.Core.Network.Handlers
             }
 
             // verify itemId == item pointed at by idx
-            var serverSideId = container.Items.Provider.Ids[idx];
+            var serverSideId = container.Items.Provider.GetId(idx);
             if (itemId != serverSideId)
             {
                 player.Log.Warning(this, $"Item action item id did not match the one in the given iid {interf} at given idx {idx} (client {itemId} != server {serverSideId})");

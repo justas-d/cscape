@@ -162,7 +162,9 @@ namespace CScape.Core.Game.Entity
             }
         }
 
-        [NotNull] public InterfacedItemManager Inventory { get; }
+        [NotNull] public BasicItemManager Inventory { get; }
+        [NotNull] public EquipmentManager Equipment { get; }
+
         [NotNull] public IInterfaceManager Interfaces { get; }
 
         private readonly IPlayerIdPool _playerIdPool;
@@ -199,12 +201,20 @@ namespace CScape.Core.Game.Entity
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
             Connection.SendMessage(SetPlayerOptionPacket.Report);
     
-            // set up the rest of the sidebar interfaces
-            Inventory = new InterfacedItemManager(login.Service, _model.BackpackItems,
-                InterfaceConstants.PlayerBackpackInventoryId);
+            // set up the sidebar containers
+            Inventory = new BasicItemManager(InterfaceConstants.PlayerBackpackInventoryId,
+                login.Service, _model.BackpackItems);
+
+            Equipment = new EquipmentManager(InterfaceConstants.PlayerEquipmentInventoryId,
+                this, login.Service, _model.Equipment);
+
 
             Interfaces.TryRegister(Inventory);
+            Interfaces.TryRegister(Equipment);
+
+            // sidebar interfaces
             Interfaces.TryShow(new ItemSidebarInterface(InterfaceConstants.PlayerBackpackInterfaceId, 3, Inventory,null));
+            Interfaces.TryShow(new ItemSidebarInterface(InterfaceConstants.PlayerEquipmentInterfaceId, 4, Equipment, null));
 
             SetFlag(UpdateFlags.Appearance);
             IsAppearanceDirty = true;

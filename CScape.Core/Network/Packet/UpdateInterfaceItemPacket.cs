@@ -38,10 +38,10 @@ namespace CScape.Core.Network.Packet
                     stream.Write16((short)i);
 
                 // write id
-                stream.Write16((short)_itemManager.Items.Provider.Ids[i]);
+                stream.Write16((short)_itemManager.Items.Provider.GetId(i));
 
                 // write size as byte-int32 smart
-                stream.WriteByteInt32Smart(_itemManager.Items.Provider.Amounts[i]);
+                stream.WriteByteInt32Smart(_itemManager.Items.Provider.GetAmount(i));
             }
 
             stream.EndPacket();

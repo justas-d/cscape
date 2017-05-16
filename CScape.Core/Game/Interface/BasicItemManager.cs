@@ -1,21 +1,18 @@
 using System;
+using System.Linq;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
 {
-    public class ItemManager : IItemManager
+    public class BasicItemManager : AbstractSyncedItemManager, ISwappableItemManager
     {
         private readonly ILogger _log;
         private readonly IItemDefinitionDatabase _db;
 
-        public int Size => Provider.Size;
-        public IItemProvider Provider { get; }
-
-        protected ItemManager(IServiceProvider service,[NotNull] IItemProvider provider)
+        public BasicItemManager(int interfaceId, IServiceProvider service,[NotNull] IItemProvider provider) : base(interfaceId, provider)
         {
-            Provider = provider ?? throw new ArgumentNullException(nameof(provider));
             _log = service.ThrowOrGet<ILogger>();
             _db = service.ThrowOrGet<IItemDefinitionDatabase>();
         }
@@ -37,7 +34,7 @@ namespace CScape.Core.Game.Interface
             return true;
         }
 
-        public ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
+        public override ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
         {
             if(deltaAmount == 0)
                 return ItemProviderChangeInfo.Invalid;
@@ -67,18 +64,12 @@ namespace CScape.Core.Game.Interface
                 }
 
                 // compare id's
-                if (Provider.Ids[i] == id)
+                if (Provider.GetId(i)== id)
                 {
                     // we found an existing item, set the existing item index and gtfo out of the loop.
                     nullExistingIdx = i;
                     break;
                 }
-            }
-
-            // calculates overflow
-            long CalcOverflow(int amnt)
-            {
-                return amnt > def.MaxAmount ? amnt - def.MaxAmount : 0;
             }
 
             // we've either found an existing item idx OR have an empty slot id OR have neither of those.
@@ -95,7 +86,7 @@ namespace CScape.Core.Game.Interface
                 if (emptySlotIdx != null)
                 {
                     // we did, generate a new item
-                    var overflow = CalcOverflow(deltaAmount);
+                    var overflow = ItemHelper.CalculateOverflow(def, deltaAmount);
                     return new ItemProviderChangeInfo(emptySlotIdx.Value, Convert.ToInt32(deltaAmount - overflow), overflow, id);
                 }
                 else // we found no empty slots. in this case, it means that the container is full.
@@ -108,10 +99,10 @@ namespace CScape.Core.Game.Interface
                 // attempt to add the given amount of the item to this slot.
 
                 var existingIdx = nullExistingIdx.Value;
-                var existingAmount = Provider.Amounts[existingIdx];
+                var existingAmount = Provider.GetAmount(existingIdx);
 
                 var finalNewAmount = existingAmount + deltaAmount;
-                var overflow = CalcOverflow(finalNewAmount);
+                var overflow = ItemHelper.CalculateOverflow(def, finalNewAmount);
 
                 // no carry remove item op
                 if (finalNewAmount == 0)
@@ -133,36 +124,9 @@ namespace CScape.Core.Game.Interface
             }
         }
         
-        public virtual void ExecuteChangeInfo(ItemProviderChangeInfo info)
-        {
-            if (!info.IsValid)
-                return;
+        protected override bool InternalExecuteChangeInfo(ItemProviderChangeInfo info)
+            => ItemHelper.ExecuteChangeInfo(this, info);
 
-            if (info.Index < 0 || info.Index >= Provider.Size)
-            {
-                _log.Debug(this, $"Out of range index in change info: {info.Index}");
-                return;
-            }
-
-            // execute
-            Provider.Ids[info.Index] = info.NewItemDefId;
-            Provider.Amounts[info.Index] = info.NewAmount;
-
-            if (Provider.IsEmptyAtIndex(info.Index))
-            {
-                Provider.Ids[info.Index] = ItemHelper.EmptyId;
-                Provider.Amounts[info.Index] = ItemHelper.EmptyAmount;
-            }
-        }
-
-        public int Contains(int id)
-        {
-            var ret = 0;
-
-            for (var i = 0; i < Provider.Size; i++)
-                if (Provider.Ids[i] == id) ret += Provider.Amounts[i];
-
-            return ret;
-        }
+        public override int Contains(int id) => Provider.Where(item => item.id == id).Sum(item => item.amount);
     }
 }

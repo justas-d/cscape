@@ -48,8 +48,8 @@ namespace CScape.Basic.Commands
                 b.ReadNumber("amount", ref amount, true);
             })) return;
 
-            ctx.Callee.Inventory.Items.Provider.Ids[idx] = id;
-            ctx.Callee.Inventory.Items.Provider.Amounts[idx] = amount;
+            ctx.Callee.Inventory.Items.Provider.SetId(idx, id);
+            ctx.Callee.Inventory.Items.Provider.SetAmount(idx, amount);
         }
 
         [CommandMethod("test soi")]

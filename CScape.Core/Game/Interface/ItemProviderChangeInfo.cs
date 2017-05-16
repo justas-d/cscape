@@ -1,3 +1,5 @@
+using CScape.Core.Game.Item;
+
 namespace CScape.Core.Game.Interface
 {
     /// <summary>
@@ -41,6 +43,21 @@ namespace CScape.Core.Game.Interface
             OverflowAmount = 0;
         }
 
+        /// <summary>
+        /// Mangaged remove item ctor
+        /// </summary>
+        public ItemProviderChangeInfo(int index)
+        {
+            Index = index;
+            NewItemDefId = ItemHelper.EmptyId;
+            NewAmount = ItemHelper.EmptyAmount;
+            OverflowAmount = 0;
+            IsValid = true;
+        }
+
+        /// <summary>
+        /// Change item state ctor  
+        /// </summary>
         public ItemProviderChangeInfo(int index, int newAmount, long overflowAmount, int newItemDefId)
         {
             IsValid = true;

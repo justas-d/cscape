@@ -8,6 +8,7 @@ namespace CScape.Core.Injection
     {
         [NotNull]  IPlayerAppearance Appearance { get; set; }
         [NotNull] IItemProvider BackpackItems { get; set; }
+        [NotNull] IItemProvider Equipment { get; set; }
 
         [NotNull] string Id { get; set; }
         bool IsMember { get; set; }

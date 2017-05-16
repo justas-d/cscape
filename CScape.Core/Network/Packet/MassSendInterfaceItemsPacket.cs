@@ -24,7 +24,7 @@ namespace CScape.Core.Network.Packet
 
             // find upper bound in inventory
             var upperBoundIdx = 0;
-            for (var i = 0; i < Provider.Size; i++)
+            for (var i = 0; i < Provider.Count; i++)
             {
                 if(Provider.IsEmptyAtIndex(i)) continue;
                 upperBoundIdx = i;
@@ -44,10 +44,10 @@ namespace CScape.Core.Network.Packet
                 }
 
                 // write amount. If amount is > 255, write it as an int32
-                stream.WriteByteInt32Smart(Provider.Amounts[i]);
+                stream.WriteByteInt32Smart(Provider.GetAmount(i));
 
                 // write id
-                stream.Write16((short)Provider.Ids[i]);
+                stream.Write16((short)Provider.GetId(i));
             }
 
             stream.EndPacket();

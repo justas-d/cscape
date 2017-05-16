@@ -29,6 +29,13 @@ namespace CScape.Core.Network.Handlers
                 return;
             }
 
+            var swappable = container.Items as ISwappableItemManager;
+            if (swappable == null)
+            {
+                player.Log.Warning(this, $"Attempted to switch in unswappable interface: {interfaceIdx}");
+                return;
+            }
+
             // check if idx are in range
             bool IsNotInRange(int val)
             {
@@ -41,7 +48,7 @@ namespace CScape.Core.Network.Handlers
             if (IsNotInRange(toIdx)) return;
 
             // execute managed swap
-            container.Items.Swap(fromIdx, toIdx);
+            swappable.Swap(fromIdx, toIdx);
         }
     }
 }
