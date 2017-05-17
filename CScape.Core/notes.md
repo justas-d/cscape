@@ -1,5 +1,4 @@
 ﻿# TODO
-	* 145 unequip
 	* Rework the syncmachine system to support sync skipping and be more friendly with order in the sync process.
 	* Different implementations of protocols (377)
 	* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
@@ -24,11 +23,9 @@
 		* 155 (npc action 1)
 		* 129 (bank all)
 		* 135 (bank n of item)
-		* 53 (item on item)
 		* 117 (bank 5)
 		* 73 (trade request)
 		* 79 (light item) (ground? inv?)
-		* 145 (unequip? alt item action?)
 		* 17 (npc action 2)
 		* 21 (npc action 3)
 		* 131 (magic on npc)
