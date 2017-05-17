@@ -8,9 +8,9 @@ namespace CScape.Core.Game.Entity
     /// <summary>
     /// Handles the syncing of all observables.
     /// </summary>
-    public sealed class ObservableSyncMachine : SyncMachine
+    public sealed class ObservableSyncMachine : ISyncMachine
     {
-        public override int Order => SyncMachineConstants.Observer;
+        public int Order => SyncMachineConstants.Observer;
 
         public Player LocalPlayer { get; }
 
@@ -39,7 +39,7 @@ namespace CScape.Core.Game.Entity
 
         // todo : public void PushToNpcSyncMachine(Npc npc)
 
-        public override void Synchronize(OutBlob stream)
+        public void Synchronize(OutBlob stream)
         {
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)

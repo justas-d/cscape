@@ -5,17 +5,17 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Sync
 {
-    public sealed class InterfaceSyncMachine : SyncMachine
+    public sealed class InterfaceSyncMachine : ISyncMachine
     {
         public Player Player { get; }
-        public override int Order => SyncMachineConstants.Interface;
+        public int Order => SyncMachineConstants.Interface;
 
         public InterfaceSyncMachine([NotNull] Player player)
         {
             Player = player ?? throw new ArgumentNullException(nameof(player));
         }
 
-        public override void Synchronize(OutBlob stream)
+        public void Synchronize(OutBlob stream)
         {
             foreach (var p in Player.Interfaces.GetUpdates())
                 p.Send(stream);

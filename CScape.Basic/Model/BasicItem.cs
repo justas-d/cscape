@@ -1,6 +1,8 @@
+using CScape.Core;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
+using CScape.Core.Injection;
 
 namespace CScape.Basic.Model
 {
@@ -39,12 +41,11 @@ namespace CScape.Basic.Model
             {
                 player.DebugMsg($"Equipping {ItemId}", ref player.DebugItems);
 
-                var info = player.Equipment.CalcChangeInfo(ItemId, manager.Provider.GetAmount(index));
-
-                if (player.Equipment.ExecuteChangeInfo(info))
+                if (ItemHelper.InterManagerSwapPreserveIndex(manager, index, player.Equipment, (int) Slot,
+                    player.Server.Services.ThrowOrGet<IItemDefinitionDatabase>()))
                 {
                     player.DebugMsg($"Success", ref player.DebugItems);
-                    manager.ExecuteChangeInfo(new ItemProviderChangeInfo(index));
+
                 }
                 else
                     player.DebugMsg($"Fail", ref player.DebugItems);

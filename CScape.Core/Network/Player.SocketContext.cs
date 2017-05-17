@@ -49,7 +49,7 @@ namespace CScape.Core.Network
 
         public bool IsDisposed { get; private set; }
 
-        [NotNull] public List<SyncMachine> SyncMachines { get; } = new List<SyncMachine>();
+        [NotNull] public List<ISyncMachine> SyncMachines { get; } = new List<ISyncMachine>();
 
         private readonly MessageSyncMachine _msgSync;
 

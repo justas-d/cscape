@@ -4,7 +4,7 @@ using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Sync
 {
-    public sealed class DebugStatSyncMachine : SyncMachine
+    public sealed class DebugStatSyncMachine : ISyncMachine
     {
         private readonly IMainLoop _loop;
         private bool _prevEnabled;
@@ -17,9 +17,9 @@ namespace CScape.Core.Network.Sync
             _loop = services.ThrowOrGet<IMainLoop>();
         }
 
-        public override int Order => SyncMachineConstants.DebugStat;
+        public int Order => SyncMachineConstants.DebugStat;
 
-        public override void Synchronize(OutBlob stream)
+        public void Synchronize(OutBlob stream)
         {
             if (IsEnabled || _prevEnabled)
             {

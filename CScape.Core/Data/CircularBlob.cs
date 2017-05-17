@@ -39,10 +39,10 @@ namespace CScape.Core.Data
 
         public void Write(byte val)
         {
-            var head = WriteCaret++ % Buffer.Length;
+            WriteCaret %= Buffer.Length;
 
-            var maskIndex = head / 8;
-            var bitIndex = head % 8;
+            var maskIndex = WriteCaret / 8;
+            var bitIndex = WriteCaret % 8;
 
             // check if readable flag is set
             if (CanReadCircular(maskIndex, bitIndex))
@@ -52,7 +52,9 @@ namespace CScape.Core.Data
             // set readable flag
             _queuedForReadMask[maskIndex] |= (byte) (1 << bitIndex);
 
-            Buffer[head] = val;
+            Buffer[WriteCaret] = val;
+
+            ++WriteCaret;
         }
 
         public void ReadBlock(byte[] dest, int destOffset, int count)
@@ -63,9 +65,9 @@ namespace CScape.Core.Data
 
         public byte Peek(int lookahead = 0)
         {
-            var head = ReadCaret + lookahead;
+            ReadCaret %= Buffer.Length;
 
-            head %= Buffer.Length; // wraparound
+            var head = ReadCaret + lookahead;
 
             var maskIndex = head / 8;
             var bitIndex = head % 8;

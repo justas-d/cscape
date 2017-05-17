@@ -43,10 +43,12 @@ namespace CScape.Core.Game.Interface
             OverflowAmount = 0;
         }
 
+        public static ItemProviderChangeInfo Remove(int index) => new ItemProviderChangeInfo(index);
+
         /// <summary>
         /// Mangaged remove item ctor
         /// </summary>
-        public ItemProviderChangeInfo(int index)
+        private ItemProviderChangeInfo(int index)
         {
             Index = index;
             NewItemDefId = ItemHelper.EmptyId;

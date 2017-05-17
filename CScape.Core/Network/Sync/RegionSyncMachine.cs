@@ -4,10 +4,10 @@ using CScape.Core.Game.Entity;
 
 namespace CScape.Core.Network.Sync
 {
-    public class RegionSyncMachine : SyncMachine
+    public class RegionSyncMachine : ISyncMachine
     {
         private readonly Player _player;
-        public override int Order => SyncMachineConstants.Region;
+        public int Order => SyncMachineConstants.Region;
 
         /// <summary>
         /// Schedules a forced region update during the next sync round.
@@ -27,7 +27,7 @@ namespace CScape.Core.Network.Sync
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="stream"/> is <see langword="null"/></exception>
-        public override void Synchronize(OutBlob stream)
+        public void Synchronize(OutBlob stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 

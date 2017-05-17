@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Sync
 {
-    public sealed class PlayerUpdateSyncMachine : SyncMachine
+    public sealed class PlayerUpdateSyncMachine : ISyncMachine
     {
         private sealed class PlayerUpdateState : IEquatable<PlayerUpdateState>
         {
@@ -86,7 +86,7 @@ namespace CScape.Core.Network.Sync
             }
         }
 
-        public override int Order => SyncMachineConstants.PlayerUpdate;
+        public int Order => SyncMachineConstants.PlayerUpdate;
 
         [NotNull] private readonly HashSet<uint> _syncPlayerIds = new HashSet<uint>();
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;
@@ -129,7 +129,7 @@ namespace CScape.Core.Network.Sync
         }
 
         // player should not be modified when updating.
-        public override void Synchronize(OutBlob stream)
+        public void Synchronize(OutBlob stream)
         {
             stream.BeginPacket(Packet);
 

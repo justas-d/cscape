@@ -3,6 +3,7 @@ using System.Diagnostics;
 using CScape.Core.Data;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Core
@@ -28,6 +29,7 @@ namespace CScape.Core
         /// <summary>
         /// Returns the item definition for the given item id from the server db, asserting that returned item def id == given id and that the max amount value is in (0; int.MaxValue]
         /// </summary>
+        [CanBeNull]
         internal static IItemDefinition GetAsserted(this IItemDefinitionDatabase db, int id)
         {
             var item = db.Get(id);

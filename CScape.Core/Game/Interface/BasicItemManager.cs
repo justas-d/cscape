@@ -66,6 +66,7 @@ namespace CScape.Core.Game.Interface
                 // compare id's
                 if (Provider.GetId(i)== id)
                 {
+                    // todo : should we skip items that are fully stacked when looking for items with the same id in BasicItemManager?
                     // we found an existing item, set the existing item index and gtfo out of the loop.
                     nullExistingIdx = i;
                     break;
