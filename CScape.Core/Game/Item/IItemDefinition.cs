@@ -61,13 +61,4 @@ namespace CScape.Core.Game.Item
         /// <param name="type">The type of action used on this item.</param>
         void OnAction(Player player, IItemManager manager, int index, ItemActionType type);
     }
-
-    public enum ItemActionType
-    {
-        Generic1,
-        Generic2,
-        Generic3,
-        Drop
-    }
-    
 }

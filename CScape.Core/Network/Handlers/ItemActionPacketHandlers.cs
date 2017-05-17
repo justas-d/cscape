@@ -17,9 +17,10 @@ namespace CScape.Core.Network.Handlers
             {122, ItemActionType.Generic2},
             {16, ItemActionType.Generic3},
             {87, ItemActionType.Drop},
+            {145, ItemActionType.Remove }
         };
 
-        public int[] Handles { get; } = {122, 41, 16, 87};
+        public int[] Handles { get; } = {122, 41, 16, 87, 145};
 
         private IItemDefinitionDatabase _db;
 
@@ -81,12 +82,6 @@ namespace CScape.Core.Network.Handlers
             // determine action type by opcode
             var action = _opToActionMap[opcode];
             
-            // do drop if action is a drop
-            if (action == ItemActionType.Drop)
-            {
-                // todo : handle dropping upon receiving an itemactiontype drop 
-            }
-
             // execute action
             def.OnAction(player, container.Items, idx, action);
         }

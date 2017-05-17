@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using CScape.Core;
+using CScape.Core.Game.Interface;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
@@ -9,6 +12,39 @@ namespace CScape.Basic.Commands
     public sealed class TestCommandClass
     {
         private PlaneOfExistance _diffPoe;
+
+        [CommandMethod("clearinv")]
+        public void ClearInv(CommandContext ctx)
+        {
+            for (var i = 0; i < ctx.Callee.Inventory.Size; i++)
+                ctx.Callee.Inventory.ExecuteChangeInfo(ItemProviderChangeInfo.Remove(i));
+        }
+
+        [CommandMethod("rngitem")]
+        public void RandomItems(CommandContext ctx)
+        {
+            const int max = 5000;
+            var count = 0;
+            var rng = new Random();
+            var used = new HashSet<int>();
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("count", ref count);
+            })) return;
+
+            for (var i = 0; i < count; i++)
+            {
+                int id;
+                do
+                {
+                    id = rng.Next(0, max);
+                } while (used.Contains(id));
+                used.Add(id);
+
+                ctx.Callee.Inventory.Items.ExecuteChangeInfo(ctx.Callee.Inventory.Items.CalcChangeInfo(id, rng.Next(1, int.MaxValue)));
+            }
+        }
 
         [CommandMethod("close")]
         public void CloseServer(CommandContext ctx)

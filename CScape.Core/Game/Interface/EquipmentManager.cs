@@ -29,6 +29,9 @@ namespace CScape.Core.Game.Interface
 
         public override ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
         {
+            if(deltaAmount == 0)
+                return ItemProviderChangeInfo.Invalid;
+
             // get def
             var def = _db.GetAsserted(id) as IEquippableItem;
 

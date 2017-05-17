@@ -50,28 +50,7 @@ namespace CScape.Core.Game.Interface
 
             // figure out whether an item of the same id exists in provider.
             // if we find an empty slot during this, store it just in case we don't find an existing item.
-            int? emptySlotIdx = null;
-            int? nullExistingIdx = null;
-
-            for (var i = 0; i < Size; i++)
-            {
-                // handle empty items, store the first index we find just in case.
-                if (Provider.IsEmptyAtIndex(i))
-                {
-                    if (emptySlotIdx == null)
-                        emptySlotIdx = i;
-                    continue;
-                }
-
-                // compare id's
-                if (Provider.GetId(i)== id)
-                {
-                    // todo : should we skip items that are fully stacked when looking for items with the same id in BasicItemManager?
-                    // we found an existing item, set the existing item index and gtfo out of the loop.
-                    nullExistingIdx = i;
-                    break;
-                }
-            }
+            var (nullExistingIdx, emptySlotIdx) = ItemHelper.GetExistingOrEmptyIdx(this, id);
 
             // we've either found an existing item idx OR have an empty slot id OR have neither of those.
 

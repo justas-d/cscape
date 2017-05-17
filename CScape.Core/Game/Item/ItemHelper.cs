@@ -24,6 +24,59 @@ namespace CScape.Core.Game.Item
             return uncheckedAmount > def.MaxAmount ? uncheckedAmount - def.MaxAmount : 0;
         }
 
+        public static (int? existingIdx, int? emptyIdx) GetExistingOrEmptyIdx(IItemManager manager, int id)
+        {
+            int? emptyIdx = null;
+            int? existingIdx = null;
+
+            for (var i = 0; i < manager.Size; i++)
+            {
+                // handle empty items, store the first index we find just in case.
+                if (manager.Provider.IsEmptyAtIndex(i))
+                {
+                    if (emptyIdx == null)
+                        emptyIdx = i;
+                    continue;
+                }
+
+                // compare id's
+                if (manager.Provider.GetId(i) == id)
+                {
+                    // todo : should we skip items that are fully stacked when looking for items with the same id in BasicItemManager?
+                    // we found an existing item, set the existing item index and gtfo out of the loop.
+                    existingIdx = i;
+                    break;
+                }
+            }
+
+            return (existingIdx, emptyIdx);
+        }
+
+
+        public static bool RemoveFromA_AddToB(
+            IItemManager containerA, int idxA,
+            IItemManager containerB)
+        {
+            // verify idxA
+            if (IsNotInRange(idxA, containerA.Size)) return false;
+            var id = containerA.Provider.GetId(idxA);
+
+            // calc changes
+            var remFromA = ItemProviderChangeInfo.Remove(idxA);
+            var addToB = containerB.CalcChangeInfo(id,
+                containerA.Provider.GetAmount(idxA));
+
+            // verify add to b
+            if (!addToB.IsValid && addToB.OverflowAmount != 0) return false;
+
+            // execute
+            if (!SafeDoubleInfoExecute(
+                containerA, remFromA,
+                containerB, addToB)) return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Swaps items between two containers without preserving the item indicies.
         /// </summary>
@@ -32,8 +85,7 @@ namespace CScape.Core.Game.Item
             IItemManager containerA, int idxA, 
             IItemManager containerB, int idxB)
         {
-            bool IsNotInRange(int val, int max) 
-                => 0 > val || val >= max;
+            // if idxB is null, find either an item idx with the same id or an empty slot.
 
             // validate indicies
             if (IsNotInRange(idxA, containerA.Size)) return false;
@@ -96,6 +148,9 @@ namespace CScape.Core.Game.Item
             return true;
         }
 
+        private static bool IsNotInRange(int val, int max)
+            => 0 > val || val >= max;
+
         /// <summary>
         /// Swaps items between two containers and preserves the item indicies.
         /// </summary>
@@ -105,9 +160,6 @@ namespace CScape.Core.Game.Item
             IItemManager containerB, int idxB,
             IItemDefinitionDatabase db)
         {
-            bool IsNotInRange(int val, int max)
-                => 0 > val || val >= max;
-
             // validate indicies
             if (IsNotInRange(idxA, containerA.Size)) return false;
             if (IsNotInRange(idxB, containerB.Size)) return false;

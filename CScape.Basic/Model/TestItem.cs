@@ -1,3 +1,4 @@
+using System;
 using CScape.Core;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
@@ -7,7 +8,7 @@ using CScape.Core.Injection;
 namespace CScape.Basic.Model
 {
     // todo : proper item model
-    public class BasicItem : IEquippableItem
+    public class TestItem : IEquippableItem
     {
         public int ItemId { get; }
         public string Name { get; }
@@ -17,7 +18,7 @@ namespace CScape.Basic.Model
         public bool IsNoted { get; }
         public int NoteSwitchId { get; }
 
-        public BasicItem(int itemId, string name, int maxAmount, bool isTradable, float weight, bool isNoted, int noteSwitchId)
+        public TestItem(int itemId, string name, int maxAmount, bool isTradable, float weight, bool isNoted, int noteSwitchId)
         {
             ItemId = itemId;
             Name = name;
@@ -37,18 +38,38 @@ namespace CScape.Basic.Model
         {
             player.DebugMsg($"Action {type} on [i:{ItemId}x{manager.Provider.GetAmount(index)}] ", ref player.DebugItems);
 
-            if (type == ItemActionType.Generic1)
+            switch (type)
             {
-                player.DebugMsg($"Equipping {ItemId}", ref player.DebugItems);
+                case ItemActionType.Generic1:
+                    player.DebugMsg($"Equipping {ItemId}", ref player.DebugItems);
 
-                if (ItemHelper.InterManagerSwapPreserveIndex(manager, index, player.Equipment, (int) Slot,
-                    player.Server.Services.ThrowOrGet<IItemDefinitionDatabase>()))
-                {
-                    player.DebugMsg($"Success", ref player.DebugItems);
+                    if (ItemHelper.InterManagerSwapPreserveIndex(manager, index, player.Equipment, (int)Slot,
+                        player.Server.Services.ThrowOrGet<IItemDefinitionDatabase>()))
+                    {
+                        player.DebugMsg($"Success", ref player.DebugItems);
 
-                }
-                else
-                    player.DebugMsg($"Fail", ref player.DebugItems);
+                    }
+                    else
+                        player.DebugMsg($"Fail", ref player.DebugItems);
+                    break;
+                case ItemActionType.Generic2:
+                    break;
+                case ItemActionType.Generic3:
+                    break;
+                case ItemActionType.Drop:
+                    break;
+                case ItemActionType.Remove:
+                    player.DebugMsg($"Removing {ItemId}", ref player.DebugItems);
+                    if(ItemHelper.RemoveFromA_AddToB(manager, index, player.Inventory))
+                    {
+                        player.DebugMsg($"Success", ref player.DebugItems);
+                    }
+                    else
+                        player.DebugMsg($"Fail", ref player.DebugItems);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 

@@ -8,7 +8,7 @@ namespace CScape.Basic.Database
     {
         public IItemDefinition Get(int id)
         {
-            return new BasicItem(id, "Dummy", int.MaxValue, true, 1, false, -1);
+            return new TestItem(id, "Dummy", int.MaxValue, true, 1, false, -1);
         }
     }
 }
