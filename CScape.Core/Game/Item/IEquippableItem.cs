@@ -30,6 +30,6 @@ namespace CScape.Core.Game.Item
         /// <summary>
         /// Called whenever the given player equips an item of this definition.
         /// </summary>
-        void OnEquip([NotNull] Player player, IItemManager manager, int idx);
+        void OnEquip([NotNull] Player player, IContainerInterface container, int idx);
     }
 }

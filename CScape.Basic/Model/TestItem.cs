@@ -29,13 +29,17 @@ namespace CScape.Basic.Model
             NoteSwitchId = noteSwitchId;
         }
 
-        public void UseWith(Player player, IItemManager manager, int ourIdx, IItemDefinition otherItem, int otherIndex)
+        public void UseWith(Player player, IContainerInterface ourContainer, int ourIdx, IContainerInterface otherContainer,
+            int otherIdx)
         {
-            player.DebugMsg($"Use [i:{ItemId}x{manager.Provider.GetAmount(ourIdx)} with [i:{otherItem}x{manager.Provider.GetAmount(ourIdx)}]", ref player.DebugItems);
+            // :thinking:
+            player.DebugMsg($"Use [i:{ItemId}x{ourContainer.Items.Provider.GetAmount(ourIdx)} with [i:{otherContainer.Items.Provider.GetId(otherIdx)}x{otherContainer.Items.Provider.GetAmount(otherIdx)}]", ref player.DebugItems);
         }
 
-        public void OnAction(Player player, IItemManager manager, int index, ItemActionType type)
+        public void OnAction(Player player, IContainerInterface container, int index, ItemActionType type)
         {
+            var manager = container.Items;
+
             player.DebugMsg($"Action {type} on [i:{ItemId}x{manager.Provider.GetAmount(index)}] ", ref player.DebugItems);
 
             switch (type)
@@ -91,7 +95,7 @@ namespace CScape.Basic.Model
 
         public bool CanEquip(Player player) => true;
 
-        public void OnEquip(Player player, IItemManager manager, int idx)
+        public void OnEquip(Player player, IContainerInterface container, int idx)
         {
         }
     }

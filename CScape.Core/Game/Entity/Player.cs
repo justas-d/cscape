@@ -162,7 +162,8 @@ namespace CScape.Core.Game.Entity
                 _otherPlayerViewRange = newRange;
             }
         }
-
+    
+        // todo : only register container interfaces if the player can see them
         [NotNull] public BasicItemManager Inventory { get; }
         [NotNull] public EquipmentManager Equipment { get; }
 

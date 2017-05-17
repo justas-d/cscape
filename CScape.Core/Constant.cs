@@ -10,5 +10,7 @@
         };
 
         public const byte StringNullTerminator = 10;
+
+        public const string NothingInterestingHappens = "Nothing interesting happens.";
     }
 }

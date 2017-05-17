@@ -43,22 +43,20 @@ namespace CScape.Core.Game.Item
         /// If item is noted: the id of the real item ; If item isn't noted: if item is notable, the id of the note, else, -1.
         /// </summary>
         int NoteSwitchId { get; }
-
+        
         /// <summary>
         /// Called whenever this type of item is used with another item.
         /// </summary>
-        /// <param name="manager">The container that both of the items belong to.</param>
-        /// <param name="ourIdx">The index of the item with this definition in the provider.</param>
-        /// <param name="otherItem">The definition of the item that we're trying to use with this item.</param>
-        /// <param name="otherIndex">The index of the other item in the provider.</param>
-        void UseWith(Player player, IItemManager manager, int ourIdx, IItemDefinition otherItem, int otherIndex);
+        void UseWith(Player player, 
+            IContainerInterface ourContainer, int ourIdx, 
+            IContainerInterface otherContainer, int otherIdx);
 
         /// <summary>
         /// CAlled whenever an action occurs on an item with this definition.
         /// </summary>
-        /// <param name="manager">The container that this item belongs to.</param>
+        /// <param name="container">The container that this item belongs to.</param>
         /// <param name="index">The index in the container of this item.</param>
         /// <param name="type">The type of action used on this item.</param>
-        void OnAction(Player player, IItemManager manager, int index, ItemActionType type);
+        void OnAction(Player player, IContainerInterface container, int index, ItemActionType type);
     }
 }

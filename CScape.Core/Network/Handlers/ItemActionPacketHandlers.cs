@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
@@ -24,9 +25,10 @@ namespace CScape.Core.Network.Handlers
 
         private IItemDefinitionDatabase _db;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private IItemDefinitionDatabase GetDb(Player player)
-            => _db ?? (_db = player.Server.Services.GetService<IItemDefinitionDatabase>());
+        public ItemActionPacketHandlers(IServiceProvider services)
+        {
+            _db = services.ThrowOrGet<IItemDefinitionDatabase>();
+        }
         
         public void Handle(Player player, int opcode, Blob packet)
         {
@@ -61,7 +63,7 @@ namespace CScape.Core.Network.Handlers
             }
 
             // get definition
-            var def = GetDb(player).GetAsserted(serverSideId);
+            var def = _db.GetAsserted(serverSideId);
 
             if (def == null)
             {
@@ -83,7 +85,7 @@ namespace CScape.Core.Network.Handlers
             var action = _opToActionMap[opcode];
             
             // execute action
-            def.OnAction(player, container.Items, idx, action);
+            def.OnAction(player, container, idx, action);
         }
     }
 }
