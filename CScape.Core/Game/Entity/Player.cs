@@ -21,10 +21,11 @@ namespace CScape.Core.Game.Entity
     {
         #region debug vars
 
-        public bool DebugItems = true;
+        public bool DebugEntitySync = true;
+        public bool DebugItems = false;
         public bool DebugCommands = false;
         public bool DebugPackets = false;
-        public bool DebugRegion = true;
+        public bool DebugRegion = false;
         public bool DebugStats
         {
             get => _debugStatSync?.IsEnabled ?? false;
@@ -205,6 +206,7 @@ namespace CScape.Core.Game.Entity
 
             Server.RegisterPlayer(this);
 
+            // send init packets
             Connection.SendMessage(new InitializePlayerPacket(this));
             Connection.SendMessage(SetPlayerOptionPacket.Follow);
             Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
@@ -218,7 +220,7 @@ namespace CScape.Core.Game.Entity
             Equipment = new EquipmentManager(ids.EquipmentInventory,
                 this, login.Service, _model.Equipment);
 
-
+            // register sidebar containers
             Interfaces.TryRegister(Inventory);
             Interfaces.TryRegister(Equipment);
 
@@ -252,8 +254,12 @@ namespace CScape.Core.Game.Entity
             res = Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentSidebarInterface, ids.EquipmentSidebarIdx, Equipment, null));
             Debug.Assert(res, "Cannot show container interface in player ctor ");
 
+            // set update flags
             TickFlags |= UpdateFlags.Appearance;
             IsAppearanceDirty = true;
+
+            // queue for immediate update
+            login.Service.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
         }
 
         public void OnMoved()
@@ -278,6 +284,7 @@ namespace CScape.Core.Game.Entity
             // reset InteractingEntity if we can't see it anymore.
             if (InteractingEntity != null && !CanSee(InteractingEntity))
                 InteractingEntity = null;
+
 
             // reset persist InteractingEntity flag
             if (InteractingEntity == null)

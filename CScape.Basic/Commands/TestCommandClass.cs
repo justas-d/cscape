@@ -21,6 +21,7 @@ namespace CScape.Basic.Commands
             if (!ctx.Read(b => b.ReadNumber("definition id", ref defId))) return;
 
             var npc = new Npc(ctx.Callee.Server.Services, defId, ctx.Callee.Transform);
+            npc.Movement.Directions = new CircleDirectionProvider();
         }
 
         [CommandMethod("clearinv")]

@@ -53,6 +53,9 @@ namespace CScape.Core.Game.Entity
             NpcDefinitionId = npcDefId;
             UniqueNpcId = IdPool.NextNpc();
 
+            // queue for immediate update
+            service.ThrowOrGet<IMainLoop>().Npc.Enqueue(this);
+
             // todo : npc init
         }
 

@@ -3,8 +3,7 @@
 	* Separate packet metadata and writing packet data to out stream
 	* Packet handler unit tests
 	* Replace complicated abstraction hierarchies with a strategy pattern
-	* WeakReferences in observatories
-	* Only write npc 16383 and player 2047 magic if we will write updates afterward
+	* WeakReferences in observatories and sync machines
 	* Collision
 		* Multi-tile entity movement
 

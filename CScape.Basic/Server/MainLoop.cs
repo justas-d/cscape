@@ -45,6 +45,7 @@ namespace CScape.Basic.Server
         // update queues
         public IUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
         public IUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
+        public IUpdateQueue<Npc> Npc { get; } = new UniqueEntUpdateQueue<Npc>();
 
         [NotNull] private readonly Stopwatch _tickWatch = new Stopwatch();
         private readonly IPacketDispatch _dispatch;
@@ -136,12 +137,22 @@ namespace CScape.Basic.Server
                         p.Connection.SendOutStream();
                     }
 
+                    void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
+                    {
+                        size = queue.Count;
+                        for (var i = 0; i < size; ++i)
+                            queue.Dequeue().Update(this);
+                    }
+
                     //================================================
 
                     // player entity updating.
-                    size = Player.Count;
-                    for (var i = 0; i < size; ++i)
-                        Player.Dequeue().Update(this);
+                    EntityUpdate(Player);
+
+                    //================================================
+
+                    // npc entity updating.
+                    EntityUpdate(Npc);
 
                     //================================================
 

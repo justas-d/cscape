@@ -125,7 +125,7 @@ namespace CScape.Core.Network.Sync
             _initQueue.Add(new PlayerUpdateState(player, false));
             _outsideRemoveQueue.Remove(player.UniqueEntityId);
 
-            _local.Player.Log.Debug(this, $"{_local.Player.Username}: ADD (remove) {player.Username}");
+            _local.Player.DebugMsg($"(PLAYER push (remove): {player.Username}", ref _local.Player.DebugEntitySync);
         }
 
         private void RemoveState(PlayerUpdateState upd)
@@ -134,14 +134,14 @@ namespace CScape.Core.Network.Sync
             _syncPlayerIds.Remove(upd.Player.UniqueEntityId);
             _outsideRemoveQueue.Remove(upd.Player.UniqueEntityId);
 
-            _local.Player.Log.Debug(this, $"{_local.Player.Username}: remove {upd.Player.Username}");
+            _local.Player.DebugMsg($"(PLAYER) remove: {upd.Player.Username}", ref _local.Player.DebugEntitySync);
         }
 
         public void Remove(Player p)
         {
             _outsideRemoveQueue.Add(p.UniqueEntityId);
 
-            _local.Player.Log.Debug(this, $"{_local.Player.Username}: queue {p.Username}");
+            _local.Player.DebugMsg($"(PLAYER) queue: {p.Username}", ref _local.Player.DebugEntitySync);
         } 
 
         // player should not be modified when updating.

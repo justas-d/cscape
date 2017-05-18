@@ -31,7 +31,10 @@ namespace CScape.Core.Game.Entity
         }
 
         public void Clear()
-            => PlayerSync.Clear();
+        {
+            PlayerSync.Clear();
+            NpcSync.Clear();
+        }
 
         public void Synchronize(OutBlob stream)
         {

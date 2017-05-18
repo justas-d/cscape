@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
@@ -43,7 +41,11 @@ namespace CScape.Core.Network.Sync
 
             _initQueue.Add(npc);
             _newNpcIds.Add(npc.UniqueEntityId);
+
+            _local.DebugMsg($"(NPC) push: def{npc.NpcDefinitionId}", ref _local.DebugEntitySync);
         }
+
+        private bool IsEmpty() => (0 >= _initQueue.Count && 0 >= _syncNpcs.Count);
 
         public void Remove(Npc npc)
         {
@@ -52,12 +54,26 @@ namespace CScape.Core.Network.Sync
 
             _syncNpcIds.Remove(npc.UniqueEntityId);
             _newNpcIds.Remove(npc.UniqueEntityId);
+
+            _local.DebugMsg($"(NPC) remove: def{npc.NpcDefinitionId}", ref _local.DebugEntitySync);
+
+            if (IsEmpty())
+            {
+                // deleting the last npc that we sync will cause the deletion of that entity to not be synced
+                // because of IsEmpty being true and Synchronize not doing anything when it is.
+                // this works around that.
+                _local.DebugMsg($"(NPC) set ignore empty flag", ref _local.DebugEntitySync);
+                _ignoreEmpty = true;
+            }
         }
+
+        private bool _ignoreEmpty = false;
 
         public void Synchronize(OutBlob stream)
         {
             // no need to sync if we've got no npcs to sync.
-            if (0 >= _initQueue.Count && 0 >= _syncNpcs.Count) return;
+            if (!_ignoreEmpty && IsEmpty()) return;
+            _ignoreEmpty = false;
 
             var willWriteFlags = false;
             int NeedsUpdate(Npc ent)
