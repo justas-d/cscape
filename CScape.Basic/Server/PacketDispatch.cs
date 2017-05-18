@@ -6,7 +6,7 @@ using CScape.Core;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
-using CScape.Core.Network.Handlers;
+using CScape.Core.Network.Handler;
 using JetBrains.Annotations;
 
 namespace CScape.Basic.Server

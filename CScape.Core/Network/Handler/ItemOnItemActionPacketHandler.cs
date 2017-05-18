@@ -4,7 +4,7 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Network.Handlers
+namespace CScape.Core.Network.Handler
 {
     public sealed class ItemOnItemActionPacketHandler : IPacketHandler
     {

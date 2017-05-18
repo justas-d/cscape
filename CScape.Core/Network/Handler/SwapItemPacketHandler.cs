@@ -2,7 +2,7 @@
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 
-namespace CScape.Core.Network.Handlers
+namespace CScape.Core.Network.Handler
 {
     public sealed class SwapItemPacketHandler : IPacketHandler
     {

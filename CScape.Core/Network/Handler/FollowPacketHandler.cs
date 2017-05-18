@@ -1,7 +1,7 @@
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 
-namespace CScape.Core.Network.Handlers
+namespace CScape.Core.Network.Handler
 {
     public sealed class FollowPacketHandler : IPacketHandler
     {

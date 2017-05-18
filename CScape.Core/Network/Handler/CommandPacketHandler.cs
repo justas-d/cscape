@@ -4,7 +4,7 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CScape.Core.Network.Handlers
+namespace CScape.Core.Network.Handler
 {
     public sealed class CommandPacketHandler : IPacketHandler
     {

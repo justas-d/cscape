@@ -1,7 +1,7 @@
 using CScape.Core.Data;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Network.Handlers
+namespace CScape.Core.Network.Handler
 {
     public interface IPacketHandler
     {

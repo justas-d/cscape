@@ -1,5 +1,4 @@
 ﻿# TODO
-	* Move "Handlers" to "Handler" file and namespace
 	* Investigate wonky off by one follow target coords
 	* Invensitage reboot limbo
 	* Separate packet metadata and writing packet data to out stream

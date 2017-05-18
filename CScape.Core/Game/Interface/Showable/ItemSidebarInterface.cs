@@ -1,4 +1,4 @@
-﻿namespace CScape.Core.Game.Interface
+﻿namespace CScape.Core.Game.Interface.Showable
 {
     public class ItemSidebarInterface : SingleUserSidebarInterface, IContainerInterface
     {
