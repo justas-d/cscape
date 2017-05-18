@@ -45,10 +45,13 @@ namespace CScape.Core.Network.Sync
             _newNpcIds.Add(npc.UniqueEntityId);
         }
 
-        private void RemoveFromSyncList(Npc npc)
+        public void Remove(Npc npc)
         {
             _syncNpcs = _syncNpcs.Remove(npc);
+            _initQueue.Remove(npc);
+
             _syncNpcIds.Remove(npc.UniqueEntityId);
+            _newNpcIds.Remove(npc.UniqueEntityId);
         }
 
         public void Synchronize(OutBlob stream)
@@ -81,12 +84,11 @@ namespace CScape.Core.Network.Sync
             foreach (var ent in _syncNpcs)
             {
                 // check if the entity is still qualified for updates
-                // todo : do we still need to call !_local.CanSee(ent) ?
-                if (ent.IsDestroyed || !_local.CanSee(ent))
+                if (ent.IsDestroyed)
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 3); // type
-                    RemoveFromSyncList(ent);
+                    Remove(ent);
                 }
                 // tp handling
                 else if (ent.NeedsPositionInit)
@@ -160,8 +162,9 @@ namespace CScape.Core.Network.Sync
                 stream.WriteBits(12, ent.NpcDefinitionId); // def
                 stream.WriteBits(1, NeedsUpdate(ent) != 0 ? 1 : 0); // needs update?
             }
+            _initQueue.Clear();
 
-            if(willWriteFlags)
+            if (willWriteFlags)
                 stream.WriteBits(14, 16383);
 
             #endregion

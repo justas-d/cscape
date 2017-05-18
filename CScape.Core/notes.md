@@ -1,4 +1,5 @@
 ﻿# TODO
+	* Invensitage reboot limbo
 	* Separate packet metadata and writing packet data to out stream
 	* Packet handler unit tests
 	* Replace complicated abstraction hierarchies with a strategy pattern

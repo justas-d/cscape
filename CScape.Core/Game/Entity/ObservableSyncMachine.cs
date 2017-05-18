@@ -15,29 +15,23 @@ namespace CScape.Core.Game.Entity
         public Player LocalPlayer { get; }
 
         private readonly PlayerObservatory _playerObservatory;
-        private readonly PlayerUpdateSyncMachine _playerSync;
-        private readonly NpcUpdateSyncMachine _npcSync;
+        public PlayerUpdateSyncMachine PlayerSync { get; }
+        public NpcUpdateSyncMachine NpcSync { get; }
 
         public ObservableSyncMachine([NotNull] Player player, [NotNull] PlayerObservatory playerObservatory)
         {
             _playerObservatory = playerObservatory ?? throw new ArgumentNullException(nameof(playerObservatory));
             LocalPlayer = player ?? throw new ArgumentNullException(nameof(player));
 
-            _playerSync = new PlayerUpdateSyncMachine(LocalPlayer);
-            _npcSync = new NpcUpdateSyncMachine(LocalPlayer);
+            PlayerSync = new PlayerUpdateSyncMachine(LocalPlayer);
+            NpcSync = new NpcUpdateSyncMachine(LocalPlayer);
 
-            LocalPlayer.Connection.SyncMachines.Add(_playerSync);
-            LocalPlayer.Connection.SyncMachines.Add(_npcSync);
+            LocalPlayer.Connection.SyncMachines.Add(PlayerSync);
+            LocalPlayer.Connection.SyncMachines.Add(NpcSync);
         }
 
         public void Clear()
-            => _playerSync.Clear();
-
-        public void PushToPlayerSyncMachine(Player player)
-            => _playerSync.PushPlayer(player);
-
-        public void PushToNpcSyncMachine(Npc npc)
-            => _npcSync.PushNpc(npc);
+            => PlayerSync.Clear();
 
         public void Synchronize(OutBlob stream)
         {

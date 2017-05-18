@@ -323,8 +323,7 @@ namespace CScape.Core.Game.Entity
 
         public override void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew)
         {
-            if (isNew)
-                sync.PushToPlayerSyncMachine(this);
+            if (isNew) sync.PlayerSync.PushPlayer(this);
         }
 
         /// <summary>

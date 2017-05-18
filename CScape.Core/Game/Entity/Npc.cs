@@ -77,8 +77,7 @@ namespace CScape.Core.Game.Entity
 
         public override void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew)
         {
-            if(isNew)
-                sync.PushToNpcSyncMachine(this);
+            if(isNew) sync.NpcSync.PushNpc(this);
         }
 
         public override bool CanSee(IWorldEntity ent)
