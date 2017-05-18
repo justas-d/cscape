@@ -51,8 +51,7 @@ namespace CScape.Core.Game.Entity
 
             void EvalSight(IWorldEntity ent)
             {
-                if((ReevaluateSightOverride || ent.NeedsSightEvaluation)
-                    && !evaluated.Contains(ent.UniqueEntityId))
+                if((ReevaluateSightOverride || ent.NeedsSightEvaluation) && !evaluated.Contains(ent.UniqueEntityId))
                 {
                     DoubleEndedPushObservable(ent);
                     evaluated.Add(ent.UniqueEntityId);
@@ -60,8 +59,13 @@ namespace CScape.Core.Game.Entity
             }
 
             // re evaluate the sightlines for all entities in our region that require it.
-            foreach (var ent in Observer.Transform.Region.GetNearbyInclusive().SelectMany(e => e.WorldEntities))
+            foreach (var ent in Observer.Transform.Region.GetNearbyInclusive()
+                .SelectMany(e => e.WorldEntities)
+                .Where(e => !e.Equals(Observer)))
+            {
                 EvalSight(ent);
+            }
+                
 
             ReevaluateSightOverride = false;
 

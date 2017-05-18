@@ -26,7 +26,7 @@ namespace CScape.Core.Game.Entity
             var offset = DirectionHelper.Invert(Target.LastMovedDirection);
             var target = (TargPos.X + offset.x, TargPos.Y + offset.y);
 
-            if (Math.Abs(target.Item1 - Us.Transform.Local.x) + Math.Abs(target.Item2 - Us.Transform.Local.y) == 1)
+            if (Math.Abs(target.Item1 - Us.Transform.X) + Math.Abs(target.Item2 - Us.Transform.Y) == 1)
                 return DirectionHelper.NoopDelta;
 
             // todo : collision checking in FollowDirectionProvider

@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Sync
         /// </summary>
         public bool ForceUpdate { private get; set; }
 
-        private ITransform Pos => _player.Transform;
+        private IClientTransform Pos => _player.ClientTransform;
 
         private int _oldX;
         private int _oldY;

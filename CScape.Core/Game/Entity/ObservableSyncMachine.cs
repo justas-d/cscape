@@ -16,6 +16,7 @@ namespace CScape.Core.Game.Entity
 
         private readonly PlayerObservatory _playerObservatory;
         private readonly PlayerUpdateSyncMachine _playerSync;
+        private readonly NpcUpdateSyncMachine _npcSync;
 
         public ObservableSyncMachine([NotNull] Player player, [NotNull] PlayerObservatory playerObservatory)
         {
@@ -23,12 +24,10 @@ namespace CScape.Core.Game.Entity
             LocalPlayer = player ?? throw new ArgumentNullException(nameof(player));
 
             _playerSync = new PlayerUpdateSyncMachine(LocalPlayer);
-            LocalPlayer.Connection.SyncMachines.Add(_playerSync);
-        }
+            _npcSync = new NpcUpdateSyncMachine(LocalPlayer);
 
-        public bool IsLocalPlayer(Player player)
-        {
-            return LocalPlayer.Equals(player);
+            LocalPlayer.Connection.SyncMachines.Add(_playerSync);
+            LocalPlayer.Connection.SyncMachines.Add(_npcSync);
         }
 
         public void Clear()
@@ -37,7 +36,8 @@ namespace CScape.Core.Game.Entity
         public void PushToPlayerSyncMachine(Player player)
             => _playerSync.PushPlayer(player);
 
-        // todo : public void PushToNpcSyncMachine(Npc npc)
+        public void PushToNpcSyncMachine(Npc npc)
+            => _npcSync.PushNpc(npc);
 
         public void Synchronize(OutBlob stream)
         {

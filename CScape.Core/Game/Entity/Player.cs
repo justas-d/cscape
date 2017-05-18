@@ -15,7 +15,6 @@ namespace CScape.Core.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
-    /// <summary>
     /// Defines a player entity that exists in the world.
     /// </summary>
     public sealed class Player : WorldEntity, IMovingEntity, IObserver
@@ -57,10 +56,15 @@ namespace CScape.Core.Game.Entity
             FacingCoordinate = 0x2,
         }
 
-        public UpdateFlags Flags { get; private set; }
+        /// <summary>
+        /// Reset every tick
+        /// </summary>
+        public UpdateFlags TickFlags { get; private set; }
 
-        private void SetFlag(UpdateFlags flag)
-            => Flags |= flag;
+        /// <summary>
+        /// Must be explicitly reset.
+        /// </summary>
+        public UpdateFlags PersistFlags { get; private set; }
 
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
@@ -72,7 +76,7 @@ namespace CScape.Core.Game.Entity
             set
             {
                 _lastChatMessage = value;
-                SetFlag(UpdateFlags.Chat);
+                TickFlags |= UpdateFlags.Chat;
             }
         }
         [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
@@ -82,7 +86,7 @@ namespace CScape.Core.Game.Entity
             {
                 _facingCoordinate = value;
                 if (value != null)
-                    SetFlag(UpdateFlags.FacingCoordinate);
+                    TickFlags |= UpdateFlags.FacingCoordinate;
             }
         }
 
@@ -94,7 +98,7 @@ namespace CScape.Core.Game.Entity
                 var val = value ?? throw new InvalidOperationException("Player appearance cannot be null.");
                 _model.Appearance = val;
 
-                SetFlag(UpdateFlags.Appearance);
+                TickFlags |= UpdateFlags.Appearance;
                 IsAppearanceDirty = true;
             }
         }
@@ -105,7 +109,7 @@ namespace CScape.Core.Game.Entity
             set
             {
                 _interactingEntity = value;
-                SetFlag(UpdateFlags.InteractEnt);
+                PersistFlags |= UpdateFlags.InteractEnt;
             }
         }
 
@@ -133,6 +137,8 @@ namespace CScape.Core.Game.Entity
 
         [NotNull] public SocketContext Connection { get; }
         public IObservatory Observatory => _observatory;
+        [NotNull] private readonly ClientTransform _transform;
+        [NotNull] public IClientTransform ClientTransform => _transform;
         private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
@@ -147,10 +153,11 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public const int MaxViewRange = 15;
 
+        // todo : lower player ViewRange if out buffer is close to being overrun.
         /// <summary>
-        /// The player cannot see any players who are further then this many tiles away from the player.
+        /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
-        public int OtherPlayerMaxViewRange
+        public int ViewRange
         {
             get => _otherPlayerViewRange;
             set
@@ -169,7 +176,6 @@ namespace CScape.Core.Game.Entity
 
         [NotNull] public IInterfaceManager Interfaces { get; }
 
-        private readonly IPlayerIdPool _playerIdPool;
         private readonly IServiceProvider _services;
 
         /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
@@ -179,14 +185,15 @@ namespace CScape.Core.Game.Entity
 
             _services = login.Service;
             _model = login.Model;
-            _playerIdPool = login.Service.ThrowOrGet<IPlayerIdPool>();
 
-            Pid = _playerIdPool.NextId();
+            Pid = IdPool.NextPlayer();
             Connection = new SocketContext(login.Service, this, login.Connection, login.SignlinkUid);
 
             _observatory = new PlayerObservatory(this);
 
-            Transform = ObserverTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
+            _transform = Entity.ClientTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
+            Transform = _transform;
+
             Movement = new MovementController(login.Service, this);
             Interfaces = new PlayerInterfaceController(this);
 
@@ -245,7 +252,7 @@ namespace CScape.Core.Game.Entity
             res = Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentSidebarInterface, ids.EquipmentSidebarIdx, Equipment, null));
             Debug.Assert(res, "Cannot show container interface in player ctor ");
 
-            SetFlag(UpdateFlags.Appearance);
+            TickFlags |= UpdateFlags.Appearance;
             IsAppearanceDirty = true;
         }
 
@@ -263,14 +270,20 @@ namespace CScape.Core.Game.Entity
             _model.Z = Transform.Z;
 
             // reset sync vars
-            Flags = 0;
+            TickFlags = 0;
             NeedsPositionInit = false;
             NeedsSightEvaluation = false;
             Movement.MoveUpdate.Reset();
-
+            
             // reset InteractingEntity if we can't see it anymore.
             if (InteractingEntity != null && !CanSee(InteractingEntity))
                 InteractingEntity = null;
+
+            // reset persist InteractingEntity flag
+            if (InteractingEntity == null)
+            {
+                PersistFlags &= ~UpdateFlags.InteractEnt;
+            }
 
             if (IsDestroyed)
             {
@@ -337,7 +350,7 @@ namespace CScape.Core.Game.Entity
 
         protected override void InternalDestroy()
         {
-            _playerIdPool.FreeId(Pid);
+            IdPool.FreePlayer(Pid);
             Server.UnregisterPlayer(this);
         }
 
@@ -354,7 +367,7 @@ namespace CScape.Core.Game.Entity
 
             var range = MaxViewRange;
             if (obs is Player)
-                range = OtherPlayerMaxViewRange;
+                range = ViewRange;
 
             return obs.Transform.MaxDistanceTo(Transform) <= range;
         }

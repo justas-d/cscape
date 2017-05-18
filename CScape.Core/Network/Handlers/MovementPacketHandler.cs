@@ -28,8 +28,8 @@ namespace CScape.Core.Network.Handlers
 
             if (player.TeleportToDestWhenWalking)
             {
-                var expX = player.Transform.Base.x + reference.x;
-                var expY = player.Transform.Base.y + reference.y;
+                var expX = player.ClientTransform.Base.x + reference.x;
+                var expY = player.ClientTransform.Base.y + reference.y;
 
                 if (deltaWaypoints.Length > 1)
                 {
@@ -42,7 +42,7 @@ namespace CScape.Core.Network.Handlers
             }
 
             player.Movement.Directions = new ByReferenceWithDeltaWaypointsDirectionsProvider(
-                player.Transform, reference, deltaWaypoints);
+                player.ClientTransform.Local, reference, deltaWaypoints);
         }
     }
 }

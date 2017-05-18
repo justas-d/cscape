@@ -18,7 +18,7 @@ namespace CScape.Core.Game.Entity
         public bool NeedsSightEvaluation { get; set; }
         public bool IsDestroyed { get; private set; }
 
-        private readonly IEntityIdPool _idPool;
+        protected IIdPool IdPool { get; }
         public ILogger Log { get; }
 
         /// <summary>
@@ -29,18 +29,18 @@ namespace CScape.Core.Game.Entity
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            _idPool = services.ThrowOrGet<IEntityIdPool>();
+            IdPool = services.ThrowOrGet<IIdPool>();
             Server = services.ThrowOrGet<IGameServer>();
             Log = services.ThrowOrGet<ILogger>();
 
-            UniqueEntityId = _idPool.NextId();
+            UniqueEntityId = IdPool.NextEntity();
         }
 
         ~WorldEntity()
         {
             if (!IsDestroyed)
             {
-                _idPool.FreeId(UniqueEntityId);
+                IdPool.FreeEntity(UniqueEntityId);
                 Log.Debug(this, $"Destroyed unfreed entity id {UniqueEntityId}");
             }
         }
@@ -67,7 +67,7 @@ namespace CScape.Core.Game.Entity
             Debug.Assert(_containers.Count == 0);
             InternalDestroy();
 
-            _idPool.FreeId(UniqueEntityId);
+            IdPool.FreeEntity(UniqueEntityId);
             IsDestroyed = true;
         }
 

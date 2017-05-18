@@ -3,42 +3,15 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
-    public interface ITransform
+    /// <summary>
+    /// Defines a way of tracking and transforming the location of server-side world entities.
+    /// </summary>
+    public interface ITransform : IPosition
     {
         /// <summary>
         /// The parent entity.
         /// </summary>
         [NotNull] IWorldEntity Entity { get; }
-
-        /// <summary>
-        /// The global X coordinate in the world.
-        /// </summary>
-        int X { get; }
-
-        /// <summary>
-        /// The global Y coordinate in the world.
-        /// </summary>
-        int Y { get; }
-
-        /// <summary>
-        /// The global Z coordinate in the world.
-        /// </summary>
-        byte Z { get; }
-
-        /// <summary>
-        /// Returns the base coordinates of the current <see cref="ClientRegion"/>
-        /// </summary>
-        (int x, int y) Base { get; }
-
-        /// <summary>
-        /// Returns the client region coordinates of the current region.
-        /// </summary>
-        (int x, int y) ClientRegion { get; }
-
-        /// <summary>
-        /// Returns the local coordinates of the transform in the current <see cref="ClientRegion"/>
-        /// </summary>
-        (int x, int y) Local { get; }
 
         /// <summary>
         /// Returns the current PoE region this transform is stored in.
@@ -70,6 +43,11 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// Forcibly teleports the transform to the given coordinates.
         /// </summary>
+        void Teleport(IPosition pos);
+
+        /// <summary>
+        /// Forcibly teleports the transform to the given coordinates.
+        /// </summary>
         void Teleport(int x, int y);
 
         /// <summary>
@@ -78,8 +56,11 @@ namespace CScape.Core.Game.Entity
         void Teleport(int x, int y, byte z);
 
         /// <summary>
-        /// Transforms (moves) the coordinates of the transform.
+        /// Transforms (moves) the coordinates of the transform in the given direction.
+        /// TODO : Handles collision (Move)
         /// </summary>
-        void TransformLocals(int dx, int dy);
+        /// <param name="dx">Must be in rage [-1; 1]</param>
+        /// <param name="dy">Must be in rage [-1; 1]</param>
+        void Move(sbyte dx, sbyte dy);
     }
 }

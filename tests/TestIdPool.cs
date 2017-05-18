@@ -11,7 +11,7 @@ namespace CScape.Dev.Tests
         [TestMethod]
         public void TestAlloc()
         {
-            var p = new IdPool();
+            var p = new InternalIdPool();
             var used = new HashSet<uint>();
             const int iter = 1000000;
 
@@ -26,7 +26,7 @@ namespace CScape.Dev.Tests
         [TestMethod]
         public void TestAllocDealloc()
         {
-            var p = new IdPool();
+            var p = new InternalIdPool();
             var used = new HashSet<uint>();
             const int iter = 1000000;
 
@@ -53,7 +53,7 @@ namespace CScape.Dev.Tests
         public void TestAllocOutOfId()
         {
             const int lim = 2000;
-            var p = new IdPool(lim);
+            var p = new InternalIdPool(lim);
 
             for (var i = 0; i < lim + 1; i++)
             {
@@ -68,7 +68,7 @@ namespace CScape.Dev.Tests
         public void TestAllocAndDeallocOutOfId()
         {
             const int lim = 2000;
-            var p = new IdPool(lim);
+            var p = new InternalIdPool(lim);
             var expectedDealloc = new HashSet<uint>();
 
             var dealloc = 0;
