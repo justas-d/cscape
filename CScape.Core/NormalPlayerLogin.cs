@@ -32,8 +32,6 @@ namespace CScape.Core
             var greet = Service.ThrowOrGet<IGameServerConfig>().Greeting;
             if (!string.IsNullOrEmpty(greet))
                 player.SendSystemChatMessage(greet);
-
-            loop.Player.Enqueue(player);
         }
     }
 }

@@ -4,6 +4,13 @@ namespace CScape.Core.Game.World
 {
     public static class DirectionHelper
     {
+        public static void Deconstruct(this Direction dir, out sbyte x, out sbyte y)
+        {
+            var d = GetDelta(dir);
+            x = d.x;
+            y = d.y;
+        } 
+
         public static readonly (sbyte x, sbyte y) NoopDelta = (0, 0);
 
         public static (sbyte x, sbyte y) Invert((sbyte x, sbyte y) dir)

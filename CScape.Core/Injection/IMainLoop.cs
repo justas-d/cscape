@@ -8,6 +8,7 @@ namespace CScape.Core.Injection
     {
         [NotNull] IUpdateQueue<IMovingEntity> Movement { get; }
         [NotNull] IUpdateQueue<Player> Player { get; }
+        [NotNull] IUpdateQueue<Npc> Npc { get; }
 
         long ElapsedMilliseconds { get; }
         long DeltaTime { get; }

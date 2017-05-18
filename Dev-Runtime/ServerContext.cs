@@ -63,8 +63,7 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IItemDefinitionDatabase>(s => new ItemDefinitionDatabase());
             services.AddSingleton<IPacketDispatch>(s => new PacketDispatch(s));
             services.AddSingleton<IPacketParser>(s => new PacketParser(s));
-            services.AddSingleton<IPlayerIdPool>(s => new PlayerIdPool());
-            services.AddSingleton<IEntityIdPool>(s => new EntityIdPool());
+            services.AddSingleton<IIdPool>(s => new IdPool());
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
 
             services.AddSingleton<IInterfaceIdDatabase>(s =>

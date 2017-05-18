@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CScape.Core;
+using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
@@ -12,6 +13,16 @@ namespace CScape.Basic.Commands
     public sealed class TestCommandClass
     {
         private PlaneOfExistance _diffPoe;
+
+        [CommandMethod("npc")]
+        public void SpawnNpc(CommandContext ctx)
+        {
+            var defId = 0;
+            if (!ctx.Read(b => b.ReadNumber("definition id", ref defId))) return;
+
+            var npc = new Npc(ctx.Callee.Server.Services, defId, ctx.Callee.Transform);
+            npc.Movement.Directions = new CircleDirectionProvider();
+        }
 
         [CommandMethod("clearinv")]
         public void ClearInv(CommandContext ctx)
@@ -179,8 +190,8 @@ namespace CScape.Basic.Commands
         {
             var player = ctx.Callee;
             player.SendSystemChatMessage($"X: {player.Transform.X} Y: {player.Transform.Y} Z: {player.Transform.Z}");
-            player.SendSystemChatMessage($"LX: {player.Transform.Local.x} LY: {player.Transform.Local.y}");
-            player.SendSystemChatMessage($"CRX: {player.Transform.ClientRegion.x} + 6 CRY: {player.Transform.ClientRegion.y} + 6");
+            player.SendSystemChatMessage($"LX: {player.ClientTransform.Local.x} LY: {player.ClientTransform.Local.y}");
+            player.SendSystemChatMessage($"CRX: {player.ClientTransform.ClientRegion.x} + 6 CRY: {player.ClientTransform.ClientRegion.y} + 6");
         }
 
         [CommandMethod("pos set")]

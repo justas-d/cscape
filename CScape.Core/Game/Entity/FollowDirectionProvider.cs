@@ -4,6 +4,33 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
+    /// <summary>
+    /// Provides directions for walking in a circle pattern.
+    /// </summary>
+    public sealed class CircleDirectionProvider : IDirectionsProvider
+    {
+        private int _idx;
+
+        private readonly (sbyte, sbyte)[] _directions =
+        {
+            DirectionHelper.GetDelta(Direction.West),
+            DirectionHelper.GetDelta(Direction.SouthWest),
+            DirectionHelper.GetDelta(Direction.South),
+            DirectionHelper.GetDelta(Direction.SouthEast),
+            DirectionHelper.GetDelta(Direction.East),
+            DirectionHelper.GetDelta(Direction.NorthEast),
+            DirectionHelper.GetDelta(Direction.North),
+            DirectionHelper.GetDelta(Direction.NorthWest),
+        };
+
+        public (sbyte x, sbyte y) GetNextDir()
+            => _directions[_idx++ % _directions.Length];
+
+        public bool IsDone() => false;
+        public void Dispose() { } // ignored
+    }
+
+
     public sealed class FollowDirectionProvider : IDirectionsProvider
     {
         [NotNull]
@@ -26,7 +53,7 @@ namespace CScape.Core.Game.Entity
             var offset = DirectionHelper.Invert(Target.LastMovedDirection);
             var target = (TargPos.X + offset.x, TargPos.Y + offset.y);
 
-            if (Math.Abs(target.Item1 - Us.Transform.Local.x) + Math.Abs(target.Item2 - Us.Transform.Local.y) == 1)
+            if (Math.Abs(target.Item1 - Us.Transform.X) + Math.Abs(target.Item2 - Us.Transform.Y) == 1)
                 return DirectionHelper.NoopDelta;
 
             // todo : collision checking in FollowDirectionProvider

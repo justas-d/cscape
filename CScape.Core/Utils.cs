@@ -8,8 +8,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Core
 {
-    public static class ExtensionMethods
+    public static class Utils
     {
+        //smh
+        public static long StringToLong(string s)
+        {
+            var l = 0L;
+
+            foreach (var c in s)
+            {
+                l *= 37L;
+                if (c >= 'A' && c <= 'Z') l += 1 + c - 65;
+                else if (c >= 'a' && c <= 'z') l += 1 + c - 97;
+                else if (c >= '0' && c <= '9') l += 27 + c - 48;
+            }
+
+            while (l % 37L == 0L && l != 0L)
+                l /= 37L;
+
+            return l;
+        }
+
         [DebuggerStepThrough]
         [DebuggerHidden]
         public static DisposableBlobPlaceholder Placeholder(this Blob blob, int size)

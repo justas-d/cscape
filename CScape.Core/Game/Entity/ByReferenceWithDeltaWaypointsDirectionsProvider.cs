@@ -13,22 +13,17 @@ namespace CScape.Core.Game.Entity
         private readonly IEnumerator<(sbyte, sbyte)> _nextProvider;
         private bool _isFirst = true;
 
-        [NotNull]
-        public ITransform Pos { get; }
-
         public ByReferenceWithDeltaWaypointsDirectionsProvider(
-            [NotNull] ITransform pos,
+            [NotNull] (int, int) locals,
             (int, int) reference,
             (sbyte, sbyte)[] deltaWaypoints)
         {
             _reference = reference;
             _target = reference;
             _deltaWaypoints = deltaWaypoints;
-            Pos = pos;
+            _local = locals;
 
-            _local = Pos.Local;
-
-            // create ienumerable
+            // create enumerator state machine
             _nextProvider = NextProvider();
         }
 
@@ -79,9 +74,6 @@ namespace CScape.Core.Game.Entity
         /// Assumes no obstacles between the two points.
         /// todo : collision checking
         /// </summary>
-        /// <param name="local"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
         private static IEnumerable<(sbyte x, sbyte y)> Interpolate((int x, int y) local, (int x, int y) target)
         {
             var max = Math.Max(Math.Abs(local.x - target.x), Math.Abs(local.y - target.y));

@@ -38,8 +38,15 @@ namespace CScape.Core.Game.Entity
 
         public void Remove(IWorldEntity ent)
         {
+            if (!_seeableEntities.Contains(ent)) return;
+
             _seeableEntities = _seeableEntities.Remove(ent);
             _newEntityIds.Remove(ent.UniqueEntityId);
+
+            if (ent is Npc n)
+                Sync.NpcSync.Remove(n);
+            if(ent is Player p)
+                Sync.PlayerSync.Remove(p);
         }
 
         /// <summary>
@@ -51,17 +58,21 @@ namespace CScape.Core.Game.Entity
 
             void EvalSight(IWorldEntity ent)
             {
-                if((ReevaluateSightOverride || ent.NeedsSightEvaluation)
-                    && !evaluated.Contains(ent.UniqueEntityId))
-                {
+                if((ReevaluateSightOverride || ent.NeedsSightEvaluation) && !evaluated.Contains(ent.UniqueEntityId))
+                { 
                     DoubleEndedPushObservable(ent);
                     evaluated.Add(ent.UniqueEntityId);
                 }
             }
 
             // re evaluate the sightlines for all entities in our region that require it.
-            foreach (var ent in Observer.Transform.Region.GetNearbyInclusive().SelectMany(e => e.WorldEntities))
+            foreach (var ent in Observer.Transform.Region.GetNearbyInclusive()
+                .SelectMany(e => e.WorldEntities)
+                .Where(e => !e.Equals(Observer)))
+            {
                 EvalSight(ent);
+            }
+                
 
             ReevaluateSightOverride = false;
 

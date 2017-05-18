@@ -38,7 +38,8 @@ namespace CScape.Core.Network.Sync
             {
                 if (_cCombined == null)
                 {
-                    var ret = Player.Flags | _localFlags;
+                    // todo : optimization : check for Player.PersistFlags flags which sync the same state that has already been synced
+                    var ret = Player.TickFlags | _localFlags | Player.PersistFlags;
 
                     if (ret != 0)
                     {
@@ -90,7 +91,9 @@ namespace CScape.Core.Network.Sync
 
         [NotNull] private readonly HashSet<uint> _syncPlayerIds = new HashSet<uint>();
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;
-        [NotNull] private readonly Queue<PlayerUpdateState> _initQueue = new Queue<PlayerUpdateState>();
+        [NotNull] private readonly HashSet<PlayerUpdateState> _initQueue = new HashSet<PlayerUpdateState>();
+
+        private readonly HashSet<uint> _outsideRemoveQueue = new HashSet<uint>();
 
         [NotNull] private readonly PlayerUpdateState _local;
 
@@ -119,14 +122,27 @@ namespace CScape.Core.Network.Sync
             if (_syncPlayerIds.Contains(player.UniqueEntityId))
                 return;
                 
-            _initQueue.Enqueue(new PlayerUpdateState(player, false));
+            _initQueue.Add(new PlayerUpdateState(player, false));
+            _outsideRemoveQueue.Remove(player.UniqueEntityId);
+
+            _local.Player.DebugMsg($"(PLAYER push (remove): {player.Username}", ref _local.Player.DebugEntitySync);
         }
 
-        private void RemoveFromSyncList(PlayerUpdateState upd)
+        private void RemoveState(PlayerUpdateState upd)
         {
             _syncPlayers = _syncPlayers.Remove(upd);
             _syncPlayerIds.Remove(upd.Player.UniqueEntityId);
+            _outsideRemoveQueue.Remove(upd.Player.UniqueEntityId);
+
+            _local.Player.DebugMsg($"(PLAYER) remove: {upd.Player.Username}", ref _local.Player.DebugEntitySync);
         }
+
+        public void Remove(Player p)
+        {
+            _outsideRemoveQueue.Add(p.UniqueEntityId);
+
+            _local.Player.DebugMsg($"(PLAYER) queue: {p.Username}", ref _local.Player.DebugEntitySync);
+        } 
 
         // player should not be modified when updating.
         public void Synchronize(OutBlob stream)
@@ -160,6 +176,18 @@ namespace CScape.Core.Network.Sync
            */
             // 3
 
+            var willWriteUpdates = false;
+            int NeedsUpdates(PlayerUpdateState state)
+            {
+                var ret = state.GetCombinedFlags() != 0;
+                if (ret)
+                {
+                    willWriteUpdates = true;
+                    return 1;
+                }
+                return 0;
+            }
+
             if (_local.Player.NeedsPositionInit)
             {
                 stream.WriteBits(1, 1); // continue reading?
@@ -167,10 +195,10 @@ namespace CScape.Core.Network.Sync
 
                 stream.WriteBits(2, _local.Player.Transform.Z); // plane
                 stream.WriteBits(1, 1); // todo :  setpos flag
-                stream.WriteBits(1, _local.GetCombinedFlags() != 0 ? 1 : 0); // add to needs updating list
+                stream.WriteBits(1, NeedsUpdates(_local)); // add to needs updating list
 
-                stream.WriteBits(7, _local.Player.Transform.Local.y); // local y
-                stream.WriteBits(7, _local.Player.Transform.Local.x); // local x
+                stream.WriteBits(7, _local.Player.ClientTransform.Local.y); // local y
+                stream.WriteBits(7, _local.Player.ClientTransform.Local.x); // local x
             }
             // 1
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
@@ -179,7 +207,7 @@ namespace CScape.Core.Network.Sync
                 stream.WriteBits(2, 1); // type
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
-                stream.WriteBits(1, _local.GetCombinedFlags() != 0 ? 1 : 0); // add to needs updating list
+                stream.WriteBits(1, NeedsUpdates(_local)); // add to needs updating list
             }
             // 2
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
@@ -189,10 +217,10 @@ namespace CScape.Core.Network.Sync
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir2);
-                stream.WriteBits(1, _local.GetCombinedFlags() != 0 ? 1 : 0); // add to needs updating list
+                stream.WriteBits(1, NeedsUpdates(_local)); // add to needs updating list
             }
             // 0
-            else if (_local.GetCombinedFlags() != 0)
+            else if (NeedsUpdates(_local) != 0)
             {
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 0); // type
@@ -216,11 +244,11 @@ namespace CScape.Core.Network.Sync
             foreach (var ent in _syncPlayers)
             {
                 // check if the entity is still qualified for updates
-                if (ent.Player.IsDestroyed || !_local.Player.CanSee(ent.Player))
+                if (ent.Player.IsDestroyed || _outsideRemoveQueue.Contains(ent.Player.UniqueEntityId))
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 3); // type
-                    RemoveFromSyncList(ent);
+                    RemoveState(ent);
                 }
                 // tp handling
                 else if (ent.Player.NeedsPositionInit)
@@ -228,7 +256,7 @@ namespace CScape.Core.Network.Sync
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 3); // type
 
-                    _initQueue.Enqueue(ent);
+                    _initQueue.Add(ent);
                 }
 
                 // run
@@ -238,7 +266,7 @@ namespace CScape.Core.Network.Sync
                     stream.WriteBits(2, 2); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir2);
-                    stream.WriteBits(1, ent.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
+                    stream.WriteBits(1, NeedsUpdates(ent)); // needs update?
                 }
                 // walk
                 else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
@@ -246,10 +274,10 @@ namespace CScape.Core.Network.Sync
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 1); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
-                    stream.WriteBits(1, ent.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
+                    stream.WriteBits(1, NeedsUpdates(ent)); // needs update?
                 }
                 // no pos update, just needs a flag update
-                else if (ent.GetCombinedFlags() != 0)
+                else if (NeedsUpdates(ent) != 0)
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 0); // type
@@ -274,10 +302,8 @@ namespace CScape.Core.Network.Sync
 
             #region _newPlayerQueue
 
-            while (_initQueue.Count > 0)
+            foreach (var upd in _initQueue)
             {
-                var upd = _initQueue.Dequeue();
-
                 if (upd.IsNew)
                 {
                     _syncPlayers = _syncPlayers.Add(upd);
@@ -303,19 +329,21 @@ namespace CScape.Core.Network.Sync
                 {
                     upd.SetLocalFlag(Player.UpdateFlags.Appearance);
 
-                    if(!upd.IsLocal)
+                    if (!upd.IsLocal)
                         upd.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
 
                     upd.IsNew = false;
                 }
 
-                stream.WriteBits(1, upd.GetCombinedFlags() != 0 ? 1 : 0); // needs update?
+                stream.WriteBits(1, NeedsUpdates(upd) != 0 ? 1 : 0); // needs update?
                 stream.WriteBits(1, 1); // todo :  setpos flag
                 stream.WriteBits(5, upd.Player.Transform.Y - _local.Player.Transform.Y); // ydelta
-                stream.WriteBits(5, upd.Player.Transform.X - _local.Player.Transform.X); // xdelta
+                stream.WriteBits(5, upd.Player.Transform.X - _local.Player.Transform.X); // xdelta            
             }
+            _initQueue.Clear();
 
-            stream.WriteBits(11, 2047);
+            if (willWriteUpdates)
+                stream.WriteBits(11, 2047);
 
             #endregion
 
@@ -452,7 +480,7 @@ namespace CScape.Core.Network.Sync
                 cache.Write16(0x336); // turn90CCWAnimIndex
                 cache.Write16(0x338); // runAnimIndex
 
-                cache.Write64(StringToLong(upd.Player.Username));
+                cache.Write64(Utils.StringToLong(upd.Player.Username));
                 cache.Write(3); // todo : cmb
                 cache.Write16(0); // ...skill???
 
@@ -463,25 +491,6 @@ namespace CScape.Core.Network.Sync
 
             // cache is ok or we rewrote it. Eitherway, flush it into the stream.
             cache.FlushInto(stream);
-        }
-
-        //smh
-        private static long StringToLong(string s)
-        {
-            var l = 0L;
-
-            foreach (var c in s)
-            {
-                l *= 37L;
-                if (c >= 'A' && c <= 'Z') l += 1 + c - 65;
-                else if (c >= 'a' && c <= 'z') l += 1 + c - 97;
-                else if (c >= '0' && c <= '9') l += 27 + c - 48;
-            }
-
-            while (l % 37L == 0L && l != 0L)
-                l /= 37L;
-
-            return l;
         }
     }
 }
