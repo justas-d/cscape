@@ -204,7 +204,7 @@ namespace CScape.Core.Game.Entity
 
             Connection.SortSyncMachines();
 
-            Server.RegisterPlayer(this);
+            Server.Players.Register(this);
 
             // send init packets
             Connection.SendMessage(new InitializePlayerPacket(this));
@@ -280,17 +280,12 @@ namespace CScape.Core.Game.Entity
             NeedsPositionInit = false;
             NeedsSightEvaluation = false;
             Movement.MoveUpdate.Reset();
-            
-            // reset InteractingEntity if we can't see it anymore.
-            if (InteractingEntity != null && !CanSee(InteractingEntity))
-                InteractingEntity = null;
 
+            EntityHelper.TryResetInteractingEntity(this);
 
             // reset persist InteractingEntity flag
             if (InteractingEntity == null)
-            {
                 PersistFlags &= ~UpdateFlags.InteractEnt;
-            }
 
             if (IsDestroyed)
             {
@@ -357,7 +352,7 @@ namespace CScape.Core.Game.Entity
         protected override void InternalDestroy()
         {
             IdPool.FreePlayer(Pid);
-            Server.UnregisterPlayer(this);
+            Server.Players.Unregister(this);
         }
 
         public override bool CanSee(IWorldEntity obs)

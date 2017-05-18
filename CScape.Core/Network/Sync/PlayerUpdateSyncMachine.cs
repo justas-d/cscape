@@ -125,7 +125,7 @@ namespace CScape.Core.Network.Sync
             _initQueue.Add(new PlayerUpdateState(player, false));
             _outsideRemoveQueue.Remove(player.UniqueEntityId);
 
-            _local.Player.DebugMsg($"(PLAYER push (remove): {player.Username}", ref _local.Player.DebugEntitySync);
+            _local.Player.DebugMsg($"(PLAYER) push (remove): {player.Username}", ref _local.Player.DebugEntitySync);
         }
 
         private void RemoveState(PlayerUpdateState upd)
@@ -304,14 +304,6 @@ namespace CScape.Core.Network.Sync
 
             foreach (var upd in _initQueue)
             {
-                if (upd.IsNew)
-                {
-                    _syncPlayers = _syncPlayers.Add(upd);
-                    _syncPlayerIds.Add(upd.Player.UniqueEntityId);
-                }
-
-                stream.WriteBits(11, upd.Player.Pid); // id
-
                 /*
                  * 1 bit - add to upd list?
                  * todo : 1 bit - setpos flag
@@ -327,6 +319,10 @@ namespace CScape.Core.Network.Sync
                 // todo : keep track of appearance stream buffering in the client.
                 if (upd.IsNew)
                 {
+                    _syncPlayers = _syncPlayers.Add(upd);
+                    _syncPlayerIds.Add(upd.Player.UniqueEntityId);
+
+                    // first sighting flags
                     upd.SetLocalFlag(Player.UpdateFlags.Appearance);
 
                     if (!upd.IsLocal)
@@ -335,6 +331,7 @@ namespace CScape.Core.Network.Sync
                     upd.IsNew = false;
                 }
 
+                stream.WriteBits(11, upd.Player.Pid); // id
                 stream.WriteBits(1, NeedsUpdates(upd) != 0 ? 1 : 0); // needs update?
                 stream.WriteBits(1, 1); // todo :  setpos flag
                 stream.WriteBits(5, upd.Player.Transform.Y - _local.Player.Transform.Y); // ydelta
@@ -378,20 +375,7 @@ namespace CScape.Core.Network.Sync
             }
 
             if (flags.HasFlag(Player.UpdateFlags.InteractEnt))
-            {
-                if (upd.Player.InteractingEntity == null)
-                    stream.Write16(-1);
-                else
-                {
-                    var interactPlayer = upd.Player.InteractingEntity as Player;
-                    if (interactPlayer != null)
-                        stream.Write16((short) (interactPlayer.Pid | 0x8000));
-
-                    // todo : write Player.UpdateFlags.InteractEnt for npcs
-
-                }
-
-            }
+                EntityHelper.WriteInteractingEntityFlag(upd.Player, upd.Player.Pid, stream);
 
             if (flags.HasFlag(Player.UpdateFlags.Appearance))
                 WriteAppearance(upd, stream);
@@ -412,9 +396,10 @@ namespace CScape.Core.Network.Sync
                 }
             }
 
-            // todo : the rest of the updates flags.
+            // todo : the rest of the player update flags.
             // THEY NEED TO FOLLOW A STRICT ORDER
 
+            // todo : wait why are we deferring the writing of the player update flag header?
             // write the header
             headerPh.Write(b =>
             {

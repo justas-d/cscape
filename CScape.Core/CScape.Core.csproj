@@ -21,8 +21,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Game\Entity\NewFolder\" />
-  </ItemGroup>
-
 </Project>

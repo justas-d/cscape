@@ -9,7 +9,7 @@ namespace CScape.Core.Network.Handlers
 
         public void Handle(Player player, int opcode, Blob packet)
         {
-            var followTarget = player.Server.GetPlayerByPid(packet.ReadInt16());
+            var followTarget = player.Server.Players.GetById(packet.ReadInt16());
             if (followTarget == null)
                 return;
 

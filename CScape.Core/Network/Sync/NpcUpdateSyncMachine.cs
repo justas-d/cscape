@@ -195,9 +195,17 @@ namespace CScape.Core.Network.Sync
 
         private void WriteFlags(Npc ent, Blob stream)
         {
-            return;
-
             var flags = ent.TickFlags | ent.PersistFlags;
+
+            // write header
+            stream.Write((byte)flags);
+
+            if ((flags & Npc.UpdateFlags.InteractingEntity) != 0)
+                EntityHelper.WriteInteractingEntityFlag(ent, ent.UniqueNpcId, stream);
+
+            if ((flags & Npc.UpdateFlags.Text) != 0 && ent.LastSentTextMessage != null)
+                stream.WriteString(ent.LastSentTextMessage);
+
             // todo : write npc flags
         }
     }
