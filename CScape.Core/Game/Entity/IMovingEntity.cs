@@ -13,11 +13,6 @@ namespace CScape.Core.Game.Entity
         [NotNull] MovementController Movement { get; }
 
         /// <summary>
-        /// The direction in which this entity last moved in.
-        /// </summary>
-        (sbyte x, sbyte y) LastMovedDirection { get; set; }
-
-        /// <summary>
         /// The world entity with which this entity is interacting with.
         /// </summary>
         [CanBeNull] IWorldEntity InteractingEntity { get; set; }

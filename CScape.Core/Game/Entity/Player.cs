@@ -15,6 +15,7 @@ namespace CScape.Core.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
+    /// </summary>
     /// Defines a player entity that exists in the world.
     /// </summary>
     public sealed class Player : WorldEntity, IMovingEntity, IObserver
@@ -62,11 +63,6 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public UpdateFlags TickFlags { get; private set; }
 
-        /// <summary>
-        /// Must be explicitly reset.
-        /// </summary>
-        public UpdateFlags PersistFlags { get; private set; }
-
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
@@ -80,6 +76,8 @@ namespace CScape.Core.Game.Entity
                 TickFlags |= UpdateFlags.Chat;
             }
         }
+
+        // todo : maybe expose this via some interface? or move it to WorldEntity?
         [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
         {
             get => _facingCoordinate;
@@ -110,7 +108,7 @@ namespace CScape.Core.Game.Entity
             set
             {
                 _interactingEntity = value;
-                PersistFlags |= UpdateFlags.InteractEnt;
+                TickFlags |= UpdateFlags.InteractEnt;
             }
         }
 
@@ -127,7 +125,6 @@ namespace CScape.Core.Game.Entity
         public bool NeedsPositionInit { get; private set; } = true;
         public short Pid { get; }
         public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
-
 
         #endregion
 
@@ -282,10 +279,6 @@ namespace CScape.Core.Game.Entity
             Movement.MoveUpdate.Reset();
 
             EntityHelper.TryResetInteractingEntity(this);
-
-            // reset persist InteractingEntity flag
-            if (InteractingEntity == null)
-                PersistFlags &= ~UpdateFlags.InteractEnt;
 
             if (IsDestroyed)
             {

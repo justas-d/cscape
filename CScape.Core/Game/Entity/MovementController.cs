@@ -13,6 +13,11 @@ namespace CScape.Core.Game.Entity
         public IMovingEntity Entity { get; }
         public bool IsRunning { get; set; }
 
+        /// <summary>
+        /// The direction in which this entity last moved succesfully.
+        /// </summary>
+        public (sbyte x, sbyte y) LastMovedDirection { get; private set; }
+
         public MovementController(IServiceProvider services, IMovingEntity entity)
         {
             Entity = entity;
@@ -63,7 +68,7 @@ namespace CScape.Core.Game.Entity
             {
                 updateDir = (byte) DirectionHelper.GetDirection(d);
                 Entity.Transform.Move(d.Item1, d.Item2);
-                Entity.LastMovedDirection = d;
+                LastMovedDirection = d;
                 didMove = true;
             }
 

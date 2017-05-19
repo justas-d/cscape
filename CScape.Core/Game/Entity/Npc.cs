@@ -19,11 +19,10 @@ namespace CScape.Core.Game.Entity
             InteractingEntity = 0x20,
             Text = 1,
             Definition = 2,
-            FacingDirection = 4
+            FacingCoordinate = 4
         }
 
         public UpdateFlags TickFlags { get; private set; }
-        public UpdateFlags PersistFlags { get; private set; }
 
         public (sbyte x, sbyte y) LastMovedDirection { get; set; }
 
@@ -35,7 +34,21 @@ namespace CScape.Core.Game.Entity
             set
             {
                 _interactingEntity = value;
-                PersistFlags |= UpdateFlags.InteractingEntity;
+                TickFlags |= UpdateFlags.InteractingEntity;
+            }
+        }
+
+        private (ushort x, ushort y)? _facingCoordinate;
+
+        [CanBeNull]
+        public (ushort x, ushort y)? FacingCoordinate
+        {
+            get => _facingCoordinate;
+            set
+            {
+                _facingCoordinate = value;
+                if (value != null)
+                    TickFlags |= UpdateFlags.FacingCoordinate;
             }
         }
 
@@ -48,6 +61,7 @@ namespace CScape.Core.Game.Entity
         public MovementController Movement { get; }
 
         private short _definition;
+
         public short NpcDefinitionId
         {
             get => _definition;
@@ -116,10 +130,6 @@ namespace CScape.Core.Game.Entity
             LastSentTextMessage = null;
 
             EntityHelper.TryResetInteractingEntity(this);
-
-            // reset persist InteractingEntity flag
-            if (InteractingEntity == null)
-                PersistFlags &= ~UpdateFlags.InteractingEntity;
 
             // todo : destroy if 0 > health
 

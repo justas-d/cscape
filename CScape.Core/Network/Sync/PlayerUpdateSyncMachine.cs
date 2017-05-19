@@ -33,16 +33,15 @@ namespace CScape.Core.Network.Sync
                 => _localFlags |= flag;
 
             private Player.UpdateFlags? _cCombined = null;
-
             public Player.UpdateFlags GetCombinedFlags()
             {
                 if (_cCombined == null)
                 {
-                    // todo : optimization : check for Player.PersistFlags flags which sync the same state that has already been synced
-                    var ret = Player.TickFlags | _localFlags | Player.PersistFlags;
+                    var ret = Player.TickFlags | _localFlags;
 
                     if (ret != 0)
                     {
+                        // unset flags that don't need to be synced to the local player.
                         if (IsLocal)
                         {
                             if (ret.HasFlag(Player.UpdateFlags.Chat) &&
@@ -324,10 +323,13 @@ namespace CScape.Core.Network.Sync
 
                     // first sighting flags
                     upd.SetLocalFlag(Player.UpdateFlags.Appearance);
-
+                    
                     if (!upd.IsLocal)
+                    {
                         upd.SetLocalFlag(Player.UpdateFlags.FacingCoordinate);
-
+                        upd.SetLocalFlag(Player.UpdateFlags.InteractEnt);
+                    }
+                        
                     upd.IsNew = false;
                 }
 
@@ -381,20 +383,7 @@ namespace CScape.Core.Network.Sync
                 WriteAppearance(upd, stream);
 
             if (flags.HasFlag(Player.UpdateFlags.FacingCoordinate))
-            {
-                if (upd.Player.FacingCoordinate != null)
-                {
-                    stream.Write16((short) ((upd.Player.FacingCoordinate.Value.x * 2) + 1));
-                    stream.Write16((short) ((upd.Player.FacingCoordinate.Value.y * 2) + 1));
-                }
-                else
-                {
-                    stream.Write16((short)
-                        (((upd.Player.LastMovedDirection.x + upd.Player.Transform.X) * 2) + 1));
-                    stream.Write16((short)
-                        (((upd.Player.LastMovedDirection.y + upd.Player.Transform.Y) * 2) + 1));
-                }
-            }
+                EntityHelper.WriteFacingDirection(upd.Player, upd.Player.FacingCoordinate, stream);
 
             // todo : the rest of the player update flags.
             // THEY NEED TO FOLLOW A STRICT ORDER

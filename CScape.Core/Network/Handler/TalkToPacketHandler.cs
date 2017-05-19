@@ -1,6 +1,7 @@
 ﻿using System;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.World;
 
 namespace CScape.Core.Network.Handler
 {
@@ -27,9 +28,11 @@ namespace CScape.Core.Network.Handler
             // todo : WAIT for the player to be one tile next to the entity before doing any talk-to logic
 
             // for now, test npc stuff
-            npc.Say("Hello world!");
+            npc.Say("Click!");
             var rng = new Random();
-            npc.NpcDefinitionId = (short)rng.Next(0, 100);
+
+            var dir = npc.Movement.Directions as BufferedDirectionProvider;
+            dir.Add((Direction)rng.Next(0, 8));
         }
     }
 }

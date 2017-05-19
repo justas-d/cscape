@@ -26,5 +26,23 @@ namespace CScape.Core.Game.Entity
                     stream.Write16((short)categoryId);
             }
         }
+
+        public static void WriteFacingDirection(IMovingEntity ent, (ushort x, ushort y)? nullableFacingCoordinate, Blob stream)
+        {
+            if (nullableFacingCoordinate != null)
+            {
+                var facing = nullableFacingCoordinate.Value;
+
+                stream.Write16((short)((facing.x * 2) + 1));
+                stream.Write16((short)((facing.y * 2) + 1));
+            }
+            else
+            {
+                stream.Write16((short)
+                    (((ent.Movement.LastMovedDirection.x + ent.Transform.X) * 2) + 1));
+                stream.Write16((short)
+                    (((ent.Movement.LastMovedDirection.y + ent.Transform.Y) * 2) + 1));
+            }
+        }
     }
 }

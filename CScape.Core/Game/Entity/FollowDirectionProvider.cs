@@ -1,9 +1,32 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using CScape.Core.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
+    public sealed class BufferedDirectionProvider : IDirectionsProvider
+    {
+        private readonly Queue<Direction> _buffer = new Queue<Direction>();
+        private bool _isDone;
+
+        public void Add(Direction dir) => _buffer.Enqueue(dir);
+
+        public void Done() => _isDone = true;
+
+        (sbyte x, sbyte y) IDirectionsProvider.GetNextDir()
+        {
+            if (_buffer.Any())
+                return DirectionHelper.GetDelta(_buffer.Dequeue());
+
+            return DirectionHelper.NoopDelta;
+        }
+
+        bool IDirectionsProvider.IsDone() => _isDone;
+        void IDirectionsProvider.Dispose() { }
+    }
+
     /// <summary>
     /// Provides directions for walking in a circle pattern.
     /// </summary>
@@ -50,7 +73,7 @@ namespace CScape.Core.Game.Entity
         {
             // if we're 1 tile away, we are exactly where we want to be.
             // targ might move so we have to persist though.
-            var offset = DirectionHelper.Invert(Target.LastMovedDirection);
+            var offset = DirectionHelper.Invert(Target.Movement.LastMovedDirection);
             var target = (TargPos.X + offset.x, TargPos.Y + offset.y);
 
             if (Math.Abs(target.Item1 - Us.Transform.X) + Math.Abs(target.Item2 - Us.Transform.Y) == 1)
