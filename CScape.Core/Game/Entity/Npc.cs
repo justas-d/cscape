@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using CScape.Core.Data;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
@@ -18,7 +17,9 @@ namespace CScape.Core.Game.Entity
         public enum UpdateFlags : byte
         {
             InteractingEntity = 0x20,
-            Text = 1
+            Text = 1,
+            Definition = 2,
+            FacingDirection = 4
         }
 
         public UpdateFlags TickFlags { get; private set; }
@@ -46,16 +47,27 @@ namespace CScape.Core.Game.Entity
         public int ViewRange { get; set; } = 15;
         public MovementController Movement { get; }
 
-        public int NpcDefinitionId { get; }
+        private short _definition;
+        public short NpcDefinitionId
+        {
+            get => _definition;
+            set
+            {
+                if (_definition == value) return;
+
+                _definition = value;
+                TickFlags |= UpdateFlags.Definition;
+            }
+        }
         public short UniqueNpcId { get; }
 
         public Npc(IServiceProvider service,
-            int npcDefId,
+            short npcDefId,
             IPosition pos,
             PlaneOfExistance poe = null) : this(service, npcDefId, pos.X, pos.Y, pos.Z, poe) { }
 
         public Npc(IServiceProvider service,
-            int npcDefId,
+            short npcDefId,
             int x, int y, byte z,
             PlaneOfExistance poe = null) : base(service)
         {
@@ -64,7 +76,7 @@ namespace CScape.Core.Game.Entity
             Transform = new ServerTransform(this, x, y, z, poe);
             Movement = new MovementController(service, this);
 
-            NpcDefinitionId = npcDefId;
+            _definition = npcDefId;
             UniqueNpcId = IdPool.NextNpc();
 
             // queue for immediate update

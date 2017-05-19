@@ -1,4 +1,5 @@
-﻿using CScape.Core.Data;
+﻿using System;
+using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 
 namespace CScape.Core.Network.Handler
@@ -27,6 +28,8 @@ namespace CScape.Core.Network.Handler
 
             // for now, test npc stuff
             npc.Say("Hello world!");
+            var rng = new Random();
+            npc.NpcDefinitionId = (short)rng.Next(0, 100);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace CScape.Basic.Commands
         [CommandMethod("npc")]
         public void SpawnNpc(CommandContext ctx)
         {
-            var defId = 0;
+            short defId = 0;
             if (!ctx.Read(b => b.ReadNumber("definition id", ref defId))) return;
 
             var npc = new Npc(ctx.Callee.Server.Services, defId, ctx.Callee.Transform);

@@ -206,6 +206,9 @@ namespace CScape.Core.Network.Sync
             if ((flags & Npc.UpdateFlags.Text) != 0 && ent.LastSentTextMessage != null)
                 stream.WriteString(ent.LastSentTextMessage);
 
+            if ((flags & Npc.UpdateFlags.Definition) != 0)
+                stream.Write16((short)ent.NpcDefinitionId);
+
             // todo : write npc flags
         }
     }
