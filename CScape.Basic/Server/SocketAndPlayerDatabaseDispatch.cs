@@ -251,14 +251,14 @@ namespace CScape.Basic.Server
                 // try read user/pass
                 string username;
                 string password;
-                if (!blob.TryReadString(PlayerModel.MaxUsernameChars, out username))
+                if (!blob.TryReadString(out username, PlayerModel.MaxUsernameChars))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading username.");
                     return;
                 }
 
-                if (!blob.TryReadString(PlayerModel.MaxPasswordChars, out password))
+                if (!blob.TryReadString(out password, PlayerModel.MaxPasswordChars))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading password.");

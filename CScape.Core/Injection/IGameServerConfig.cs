@@ -1,4 +1,5 @@
 using System.Net;
+using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Injection
@@ -18,6 +19,9 @@ namespace CScape.Core.Injection
 
         int TickRate { get; }
         int AutoSaveIntervalMs { get; }
+
+        ChatMessage.TextEffect DefaultChatEffect { get; }
+        ChatMessage.TextColor DefaultChatColor { get; }
 
         [NotNull]
         string PrivateLoginKeyDir { get; }

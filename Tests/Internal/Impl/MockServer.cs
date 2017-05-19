@@ -29,6 +29,7 @@ namespace CScape.Dev.Tests.Internal.Impl
         {
             var services = new ServiceCollection();
 
+            services.AddSingleton<IGameServerConfig>(_ => new MockConfig());
             services.AddSingleton<IItemDefinitionDatabase>(_ => new MockItemDb());
             services.AddSingleton<IInterfaceIdDatabase>(_ => InterfaceDb.FromJson("mock-interface-ids.json"));
             services.AddSingleton<IMainLoop>(_ => new MockLoop());

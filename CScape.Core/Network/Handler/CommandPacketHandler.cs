@@ -18,7 +18,7 @@ namespace CScape.Core.Network.Handler
 
         public void Handle(Player player, int opcode, Blob packet)
         {
-            if (packet.TryReadString(255, out string cmd))
+            if (packet.TryReadString(out string cmd))
             {
                 var allFailed = true;
 

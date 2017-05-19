@@ -25,7 +25,7 @@ namespace CScape.Core.Network.Handler
                 effect = ChatMessage.TextEffect.None;
             }
 
-            if (packet.TryReadString(255, out string msg))
+            if (packet.TryReadString(out string msg))
                 player.LastChatMessage = new ChatMessage(player, msg, color, effect, false);
             else
                 player.Log.Warning(this, "Couldn't read chat message.");

@@ -96,16 +96,30 @@ namespace CScape.Core.Data
             return (ReadInt32() << 32) + ReadInt32();
         }
 
-        public bool TryReadString(int maxLength, out string rsString)
+        public const int MaxStringLength = 255;
+
+        public bool TryReadString(out string rsString, int maxLength = MaxStringLength)
         {
             var builder = new StringBuilder(maxLength);
             var retval = true;
 
             try
             {
-                byte c;
-                while ((c = ReadByte()) != Constant.StringNullTerminator)
+                var i = 0;
+                for (; i <= maxLength; i++) // <= due to terminator char
+                {
+                    var c = ReadByte();
+                    if (c == Constant.StringNullTerminator)
+                        break;
+
                     builder.Append(Convert.ToChar(c));
+                }
+                if (i > maxLength)
+                {
+                    // null terminator not found within [0; maxLength], return.
+                    rsString = null;
+                    return false;
+                }
             }
             catch (ArgumentOutOfRangeException)
             {

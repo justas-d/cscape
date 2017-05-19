@@ -13,5 +13,8 @@
   "SocketReceiveTimeout": 5000,
   "SocketSendTimeout": 5000,
 
+  "DefaultChatEffect":  0,
+  "DefaultChatColor":  0,
+
   "Greeting": "Welcome to CScape."
 }
