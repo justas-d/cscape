@@ -25,10 +25,10 @@ namespace CScape.Dev.Tests.Internal.Impl
         public bool IsDisposed { get; }
         public DateTime StartTime { get; }
 
-        public MockServer()
-        {
-            var services = new ServiceCollection();
+        public MockServer() : this(new ServiceCollection()) { }
 
+        public MockServer(IServiceCollection services)
+        {
             services.AddSingleton<IGameServerConfig>(_ => new MockConfig());
             services.AddSingleton<IItemDefinitionDatabase>(_ => new MockItemDb());
             services.AddSingleton<IInterfaceIdDatabase>(_ => InterfaceDb.FromJson("mock-interface-ids.json"));
