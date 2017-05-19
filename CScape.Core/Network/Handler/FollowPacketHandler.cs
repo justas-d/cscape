@@ -9,12 +9,17 @@ namespace CScape.Core.Network.Handler
 
         public void Handle(Player player, int opcode, Blob packet)
         {
-            var followTarget = player.Server.Players.GetById(packet.ReadInt16());
-            if (followTarget == null)
+            var id = packet.ReadInt16();
+            var target = player.Server.Players.GetById(id);
+
+            if (target == null)
                 return;
 
-            player.Movement.Directions = new FollowDirectionProvider(player, followTarget);
-            player.InteractingEntity = followTarget;
+            if (target.Equals(player))
+                return;
+
+            player.Movement.Directions = new FollowDirectionProvider(player, target);
+            player.InteractingEntity = target;
         }
     }
 }

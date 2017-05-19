@@ -13,6 +13,9 @@ namespace CScape.Dev.Tests.Internal.Impl
         public static MockServer Server(IServiceCollection c) => new MockServer(c);
         public static MockServer Server() => new MockServer();
 
+        public static Player Player(IGameServer server, IPosition pos) => Player("mock player", server, pos);
+        public static Player Player(IGameServer server) => Player("mock player", server);
+
         public static Player Player(string name, IGameServer server, IPosition pos)
         {
             var model = new PlayerModel(name, "1");
