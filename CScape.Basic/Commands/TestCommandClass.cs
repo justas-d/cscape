@@ -113,7 +113,7 @@ namespace CScape.Basic.Commands
                 b.ReadNumber("item id", ref itemId);
             })) return;
 
-            ctx.Callee.Connection.SendMessage(new ShowItemOnInterfacePacket(iid, zoom, itemId));
+            ctx.Callee.Connection.SendPacket(new ShowItemOnInterfacePacket(iid, zoom, itemId));
         }
 
         [CommandMethod("poe now")]

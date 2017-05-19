@@ -32,7 +32,7 @@ namespace CScape.Core.Network.Handler
             var rng = new Random();
 
             var dir = npc.Movement.Directions as BufferedDirectionProvider;
-            dir.Add((Direction)rng.Next(0, 8));
+            dir?.Add((Direction)rng.Next(0, 8));
         }
     }
 }

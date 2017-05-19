@@ -282,7 +282,7 @@ namespace CScape.Basic.Server
                     }
 
                     // check if we can reconnect
-                    if (!loggedInPlayer.Connection.CanReconnect(signlinkUid))
+                    if (!loggedInPlayer.Connection.CanReinitialize(signlinkUid))
 
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,

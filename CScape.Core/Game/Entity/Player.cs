@@ -36,7 +36,6 @@ namespace CScape.Core.Game.Entity
                 {
                     _debugStatSync = new DebugStatSyncMachine(_services);
                     Connection.SyncMachines.Add(_debugStatSync);
-                    Connection.SortSyncMachines();
                 }
 
                 _debugStatSync.IsEnabled = value;
@@ -120,8 +119,6 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public bool IsAppearanceDirty { get; set; }
 
-        [NotNull] public RegionSyncMachine RegionSync { get; }
-
         public bool NeedsPositionInit { get; private set; } = true;
         public short Pid { get; }
         public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
@@ -133,7 +130,7 @@ namespace CScape.Core.Game.Entity
         public byte TitleIcon => _model.TitleIcon;
         public bool IsMember => _model.IsMember;
 
-        [NotNull] public SocketContext Connection { get; }
+        [NotNull] public ISocketContext Connection { get; }
         public IObservatory Observatory => _observatory;
         [NotNull] private readonly ClientTransform _transform;
         [NotNull] public IClientTransform ClientTransform => _transform;
@@ -176,46 +173,41 @@ namespace CScape.Core.Game.Entity
 
         private readonly IServiceProvider _services;
 
-        /// <exception cref="ArgumentNullException"><paramref name="login"/> is <see langword="null"/></exception>
-        public Player([NotNull] NormalPlayerLogin login) : base(login.Service)
+        public Player([NotNull] IPlayerModel model, ISocketContext socket,
+            [NotNull] IServiceProvider services, bool isHighDetail) : base(services)
         {
-            if (login == null) throw new ArgumentNullException(nameof(login));
-
-            _services = login.Service;
-            _model = login.Model;
+            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _model = model ?? throw new ArgumentNullException(nameof(model));
 
             Pid = IdPool.NextPlayer();
-            Connection = new SocketContext(login.Service, this, login.Connection, login.SignlinkUid);
+            Connection = socket;
 
             _observatory = new PlayerObservatory(this);
 
-            _transform = Entity.ClientTransform.Factory.Create(this, login.Model.X, login.Model.Y, login.Model.Z);
+            _transform = Entity.ClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
             Transform = _transform;
 
-            Movement = new MovementController(login.Service, this);
+            Movement = new MovementController(services, this);
             Interfaces = new PlayerInterfaceController(this);
 
-            RegionSync = new RegionSyncMachine(this);
-            Connection.SyncMachines.Add(RegionSync);
+            Connection.SyncMachines.Add(new RegionSyncMachine(this));
             Connection.SyncMachines.Add(new InterfaceSyncMachine(this));
-
-            Connection.SortSyncMachines();
 
             Server.Players.Register(this);
 
             // send init packets
-            Connection.SendMessage(new InitializePlayerPacket(this));
-            Connection.SendMessage(SetPlayerOptionPacket.Follow);
-            Connection.SendMessage(SetPlayerOptionPacket.TradeWith);
-            Connection.SendMessage(SetPlayerOptionPacket.Report);
+            Connection.SendPacket(new InitializePlayerPacket(this));
+            Connection.SendPacket(SetPlayerOptionPacket.Follow);
+            Connection.SendPacket(SetPlayerOptionPacket.TradeWith);
+            Connection.SendPacket(SetPlayerOptionPacket.Report);
     
             // set up the sidebar containers
-            var ids = login.Service.ThrowOrGet<IInterfaceIdDatabase>();
+            var ids = _services.ThrowOrGet<IInterfaceIdDatabase>();
             Inventory = new BasicItemManager(ids.BackpackInventory,
-                login.Service, _model.BackpackItems);
+                _services, _model.BackpackItems);
 
             Equipment = new EquipmentManager(ids.EquipmentInventory,
-                this, login.Service, _model.Equipment);
+                this, _services, _model.Equipment);
 
             // register sidebar containers
             Interfaces.TryRegister(Inventory);
@@ -238,7 +230,7 @@ namespace CScape.Core.Game.Entity
             Interface(ids.IgnoreListSidebarInterface, ids.IgnoresSidebarIdx);
             Interface(ids.LogoutSidebarInterface, ids.LogoutSidebarIdx);
 
-            if(login.IsHighDetail)
+            if(isHighDetail)
                 Interface(ids.OptionsHighDetailSidebarInterface, ids.OptionsSidebarIdx);
             else
                 Interface(ids.OptionsLowDetailSidebarInterface, ids.OptionsSidebarIdx);
@@ -256,7 +248,7 @@ namespace CScape.Core.Game.Entity
             IsAppearanceDirty = true;
 
             // queue for immediate update
-            login.Service.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
+            _services.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
         }
 
         public void OnMoved()
@@ -264,6 +256,12 @@ namespace CScape.Core.Game.Entity
             FacingCoordinate = null;
             Interfaces.OnActionOccurred();
         }
+
+        /// <summary>
+        /// In milliseconds, the delay between a socket dying and it's player being removed
+        /// from the world. todo Default: 60 seconds.
+        /// </summary>
+        public long ReapTimeMs { get; set; } = 1000 * 60;
 
         public override void Update(IMainLoop loop)
         {
@@ -288,9 +286,7 @@ namespace CScape.Core.Game.Entity
             }
 
             // check for hard disconnects
-            // returning true would mean that we need to reap the player out of the world.
-            // false indicates that the connection is still good, or the connection has been reaped and we need to keep the player alive until the method says otherwise.
-            if (Connection.ManageHardDisconnect(loop.DeltaTime + loop.ElapsedMilliseconds))
+            if(Connection.DeadForMs >= ReapTimeMs)
             {
                 Log.Debug(this, $"Reaping {Username}");
                 Destroy();
@@ -369,13 +365,12 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// Sends a system chat message to this player.
         /// </summary>
-        public void SendSystemChatMessage(string msg)
-            => Connection.SendMessage(new SystemChatMessagePacket(msg));
+        public void SendSystemChatMessage(string msg) 
+            => Connection.SendPacket(new SystemChatMessagePacket(msg));
 
         public void DebugMsg(string msg, ref bool toggle)
         {
-            if(toggle)
-                SendSystemChatMessage(msg);
+            if(toggle) SendSystemChatMessage(msg);
         }
 
         /// <summary>

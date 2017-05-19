@@ -19,5 +19,10 @@ namespace CScape.Core.Injection
         int X { get; set; }
         int Y { get; set; }
         byte Z { get; set; }
+
+        /// <summary>
+        /// Sets the X Y and Z values to the X Y Z values found in the given <see cref="IPosition"/>
+        /// </summary>
+        void SyncPosition(IPosition pos);
     }
 }

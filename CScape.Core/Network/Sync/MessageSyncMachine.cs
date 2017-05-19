@@ -6,6 +6,7 @@ namespace CScape.Core.Network.Sync
     public sealed class MessageSyncMachine : ISyncMachine
     {
         public int Order => SyncMachineConstants.Message;
+        public bool RemoveAfterInitialize { get; } = false;
 
         private readonly Queue<IPacket> _msgs = new Queue<IPacket>();
 
@@ -16,6 +17,10 @@ namespace CScape.Core.Network.Sync
         {
             while (_msgs.Count > 0)
                 _msgs.Dequeue().Send(stream);
+        }
+
+        public void OnReinitialize()
+        {
         }
     }
 }

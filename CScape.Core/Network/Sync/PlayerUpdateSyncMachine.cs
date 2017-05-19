@@ -87,6 +87,7 @@ namespace CScape.Core.Network.Sync
         }
 
         public int Order => SyncMachineConstants.PlayerUpdate;
+        public bool RemoveAfterInitialize { get; } = false;
 
         [NotNull] private readonly HashSet<uint> _syncPlayerIds = new HashSet<uint>();
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;
@@ -354,6 +355,9 @@ namespace CScape.Core.Network.Sync
 
             stream.EndPacket();
         }
+
+        // todo : maybe Clear NPC and player sync machines on OnReinitialize()?
+        public void OnReinitialize() {  }
 
         private void WriteFlags(PlayerUpdateState upd, Blob stream)
         {

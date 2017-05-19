@@ -42,6 +42,13 @@ namespace CScape.Basic.Model
         public int Y { get; set; }
         public byte Z { get; set; }
 
+        public void SyncPosition(IPosition pos)
+        {
+            X = pos.X;
+            Y = pos.Y;
+            Z = pos.Z;
+        }
+
         public bool IsMember { get; set; }
 
 
@@ -76,13 +83,6 @@ namespace CScape.Basic.Model
 
             Appearance = new PlayerAppearance();
             Items = new ItemProviderModel(BackpackSize + EquipmentMaxSize);
-        }
-
-        public void UpdatePosition(ITransform pos)
-        {
-            X = pos.X;
-            Y = pos.Y;
-            Z = pos.Z;
         }
     }
 }

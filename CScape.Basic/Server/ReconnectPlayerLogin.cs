@@ -22,11 +22,8 @@ namespace CScape.Basic.Server
 
         public void Transfer(IMainLoop ignored)
         {
-            Existing.Connection.Reconnect(NewConnection, SignlinkUid);
-
-            Existing.RegionSync.ForceUpdate = true;
-            Existing.Observatory.ReevaluateSightOverride = true;
-            Existing.Observatory.Clear();
+            if (!Existing.Connection.TryReinitialize(NewConnection, SignlinkUid))
+                return; // failed to reinitialize socket
 
             Existing.Log.Debug(this, $"Reconnected client iid {Existing.UniqueEntityId} Disposed? {Existing.Connection.IsDisposed}");
         }

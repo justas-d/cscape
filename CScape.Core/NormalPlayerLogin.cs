@@ -27,7 +27,8 @@ namespace CScape.Core
 
         public void Transfer(IMainLoop loop)
         {
-            var player = new Player(this);
+            var socket = new SocketContext(Service, Connection, SignlinkUid);
+            var player = new Player(Model, socket, Service, IsHighDetail);
 
             var greet = Service.ThrowOrGet<IGameServerConfig>().Greeting;
             if (!string.IsNullOrEmpty(greet))

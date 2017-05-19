@@ -1,4 +1,6 @@
-﻿using CScape.Core.Injection;
+﻿using System.IO;
+using CScape.Core.Injection;
+using Newtonsoft.Json;
 
 namespace CScape.Basic.Database
 {
@@ -67,5 +69,8 @@ namespace CScape.Basic.Database
             OptionsSidebarIdx = optionsSidebarIdx;
             ControlsSidebarIdx = controlsSidebarIdx;
         }
+
+        public static InterfaceDb FromJson(string dir)
+            => JsonConvert.DeserializeObject<InterfaceDb>(File.ReadAllText(dir));
     }
 }

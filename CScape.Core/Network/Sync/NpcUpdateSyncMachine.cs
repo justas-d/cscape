@@ -37,6 +37,7 @@ namespace CScape.Core.Network.Sync
 
         public const int Packet = 65;
         public int Order => SyncMachineConstants.NpcUpdate;
+        public bool RemoveAfterInitialize { get; } = false;
 
         public NpcUpdateSyncMachine([NotNull] Player local)
         {
@@ -219,6 +220,10 @@ namespace CScape.Core.Network.Sync
                 WriteFlags(state, stream);
 
             stream.EndPacket();
+        }
+
+        public void OnReinitialize()
+        {
         }
 
         private void WriteFlags(NpcUpdateState state, Blob stream)

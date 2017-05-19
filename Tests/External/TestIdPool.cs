@@ -3,7 +3,7 @@ using System.Linq;
 using CScape.Basic.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests
+namespace CScape.Dev.Tests.External
 {
     [TestClass]
     public class TestIdPool

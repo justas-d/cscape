@@ -108,8 +108,9 @@ namespace CScape.Basic.Server
                     // get & parse their data
                     foreach (var p in Player)
                     {
-                        // get 
-                        p.Connection.FlushInput();
+                        // update connections
+                        if (!p.Connection.Update(DeltaTime + ElapsedMilliseconds))
+                            continue; // failed to update, skip this player.
 
                         // parse
                         foreach (var pack in _parser.Parse(p))
@@ -134,7 +135,7 @@ namespace CScape.Basic.Server
                             sync.Synchronize(p.Connection.OutStream);
 
                         // send our data
-                        p.Connection.SendOutStream();
+                        p.Connection.FlushOutputStream();
                     }
 
                     void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity

@@ -8,6 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Core
 {
+    public sealed class ServiceNotProvidedException : Exception
+    {
+        public Type ServiceType { get; }
+
+        public ServiceNotProvidedException(Type serviceType) => ServiceType = serviceType;
+        public override string ToString() => $"Service not provided: {ServiceType.Name}";
+    }
+
     public static class Utils
     {
         //smh
@@ -37,7 +45,7 @@ namespace CScape.Core
         [DebuggerStepThrough]
         [DebuggerHidden]
         public static T ThrowOrGet<T>(this IServiceProvider provider) where T : class
-            => provider.GetService<T>() ?? throw new NullReferenceException(typeof(T).Name);
+            => provider.GetService<T>() ?? throw new ServiceNotProvidedException(typeof(T));
 
         internal static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {

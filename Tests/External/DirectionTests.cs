@@ -2,7 +2,7 @@
 using CScape.Core.Game.World;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests
+namespace CScape.Dev.Tests.External
 {
     [TestClass]
     public class DirectionTests

@@ -8,7 +8,11 @@ namespace CScape.Core.Network.Sync
     {
         private readonly IMainLoop _loop;
         private bool _prevEnabled;
+
         public bool IsEnabled { get; set; }
+
+        public int Order => SyncMachineConstants.DebugStat;
+        public bool RemoveAfterInitialize { get; } = false;
 
         public const byte Packet = 2;
 
@@ -16,8 +20,6 @@ namespace CScape.Core.Network.Sync
         {
             _loop = services.ThrowOrGet<IMainLoop>();
         }
-
-        public int Order => SyncMachineConstants.DebugStat;
 
         public void Synchronize(OutBlob stream)
         {
@@ -33,5 +35,7 @@ namespace CScape.Core.Network.Sync
                 _prevEnabled = IsEnabled;
             }
         }
+
+        public void OnReinitialize() {}
     }
 }

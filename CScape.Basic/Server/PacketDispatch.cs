@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using CScape.Core;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
@@ -27,24 +28,11 @@ namespace CScape.Basic.Server
 
         public void Handle(Player player, int opcode, Blob packet)
         {
-            if (packet == null) throw new ArgumentNullException(nameof(packet));
-
-            player.Connection.UpdateLastPacketReceivedTime();
-
-            if (_handlers.ContainsKey(opcode))
-            {
-                if (player.DebugPackets)
-                    player.SendSystemChatMessage($"{opcode:000} {_handlers[opcode].GetType().Name}");
-
-                _handlers[opcode].Handle(player, opcode, packet);
-                return;
-            }
-
-            if (player.DebugPackets)
-                player.SendSystemChatMessage(opcode.ToString());
-
-            _log.Debug(this, $"Unhandled packet opcode: {opcode}.");
+            player.DebugMsg($"{opcode:000} {_handlers[opcode].GetType().Name}", ref player.DebugPackets);
+            _handlers[opcode].Handle(player, opcode, packet);
         }
+
+        public bool CanHandle(int opcode) => _handlers.ContainsKey(opcode);
 
         public void RegisterAssembly([NotNull] Assembly asm)
         {

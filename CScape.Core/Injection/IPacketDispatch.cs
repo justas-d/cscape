@@ -7,5 +7,7 @@ namespace CScape.Core.Injection
     public interface IPacketDispatch
     {
         void Handle([NotNull] Player player, int opcode, [NotNull] Blob packet);
+
+        bool CanHandle(int opcode);
     }
 }

@@ -66,10 +66,8 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IIdPool>(s => new IdPool());
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
 
-            services.AddSingleton<IInterfaceIdDatabase>(s =>
-                    JsonConvert.DeserializeObject<InterfaceDb>(
-                        File.ReadAllText(
-                            Path.Combine(dirBuild, "interface-ids.json"))));
+            services.AddSingleton<IInterfaceIdDatabase>(
+                s => InterfaceDb.FromJson(Path.Combine(dirBuild, "interface-ids.json")));
 
             services.AddSingleton<IGameServerConfig>(s => 
                 JsonConvert.DeserializeObject<JsonGameServerConfig>(

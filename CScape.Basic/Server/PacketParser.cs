@@ -13,11 +13,13 @@ namespace CScape.Basic.Server
     {
         private readonly IPacketDatabase _db;
         private readonly ILogger _log;
+        private readonly IPacketDispatch _dispatch;
 
         public PacketParser(IServiceProvider service)
         {
             _db = service.ThrowOrGet<IPacketDatabase>();
             _log = service.ThrowOrGet<ILogger>();
+            _dispatch = service.ThrowOrGet<IPacketDispatch>();
         }
 
         public IEnumerable<(int Opcode, Blob Packet)> Parse(Player player)
@@ -33,7 +35,7 @@ namespace CScape.Basic.Server
 #endif
             }
 
-            var packetStream = player.Connection.InCircularStream;
+            var packetStream = player.Connection.InStream;
 
             while (packetStream.CanRead())
             {
@@ -99,7 +101,17 @@ namespace CScape.Basic.Server
                 var payload = new byte[lenPayload];
                 packetStream.ReadBlock(payload, 0, lenPayload);
 
-                yield return (opcode, new Blob(payload));
+                //  dont bother creating a new Blob() if we're not going to be dispatched to a handler.
+                if (_dispatch.CanHandle(opcode))
+                    yield return (opcode, new Blob(payload));
+                else
+                {
+                    if (player.DebugPackets)
+                    {
+                        player.SendSystemChatMessage($"{opcode:000}");
+                        _log.Debug(this, $"Unhandled packet opcode: {opcode}.");
+                    }
+                }
             }
         }
     }

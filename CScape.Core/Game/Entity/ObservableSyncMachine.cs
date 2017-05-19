@@ -11,6 +11,7 @@ namespace CScape.Core.Game.Entity
     public sealed class ObservableSyncMachine : ISyncMachine
     {
         public int Order => SyncMachineConstants.Observer;
+        public bool RemoveAfterInitialize { get; } = false;
 
         public Player LocalPlayer { get; }
 
@@ -41,6 +42,12 @@ namespace CScape.Core.Game.Entity
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)
                 obs.SyncTo(this, stream, _playerObservatory.PopIsNew(obs));
+        }
+
+        public void OnReinitialize()
+        {
+            _playerObservatory.ReevaluateSightOverride = true;
+            _playerObservatory.Clear();
         }
     }
 }

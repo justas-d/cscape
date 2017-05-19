@@ -9,6 +9,7 @@ namespace CScape.Core.Network.Sync
     {
         public Player Player { get; }
         public int Order => SyncMachineConstants.Interface;
+        public bool RemoveAfterInitialize { get; } = false;
 
         public InterfaceSyncMachine([NotNull] Player player)
         {
@@ -19,6 +20,10 @@ namespace CScape.Core.Network.Sync
         {
             foreach (var p in Player.Interfaces.GetUpdates())
                 p.Send(stream);
+        }
+
+        public void OnReinitialize()
+        {
         }
     }
 }

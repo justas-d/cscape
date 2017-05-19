@@ -1,4 +1,7 @@
 ﻿# TODO
+	* Segregate the Player class into smaller interfaces (maybe)
+		* Replace usages of Player with usages of these smaller interfaces.
+
 	* Investigate wonky off by one follow target coords
 	* Invensitage reboot limbo
 	* Separate packet metadata and writing packet data to out stream
