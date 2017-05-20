@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using CScape.Basic.Database;
 using CScape.Basic.Model;
 using CScape.Core.Data;
@@ -12,8 +14,7 @@ namespace CScape.Dev.Tests.Internal.Impl
 {
     internal static class Mock
     {
-        private static readonly JsonPacketDatabase PacketDb = 
-            new JsonPacketDatabase(@"C:\Users\no\Documents\Visual Studio 2017\Projects\cscape-netcore\CScape.Basic\packet-lengths.json");
+        private static JsonPacketDatabase PacketDb { get; set; }
 
         public static void SpamTrash(this IPacketHandler h)
         {
@@ -34,6 +35,12 @@ namespace CScape.Dev.Tests.Internal.Impl
 
                     h.Handle(p, op, b);
                 }
+            }
+
+            if (PacketDb == null)
+            {
+                var dirBuild = Path.GetDirectoryName(typeof(MockServer).GetTypeInfo().Assembly.Location);
+                PacketDb = new JsonPacketDatabase(Path.Combine(dirBuild, "packet-lengths.json"));
             }
 
             foreach (var op in h.Handles)

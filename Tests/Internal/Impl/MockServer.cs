@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using CScape.Basic.Database;
 using CScape.Basic.Model;
@@ -29,9 +31,11 @@ namespace CScape.Dev.Tests.Internal.Impl
 
         public MockServer(IServiceCollection services)
         {
+            var dirBuild = Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
+
             services.AddSingleton<IGameServerConfig>(_ => new MockConfig());
             services.AddSingleton<IItemDefinitionDatabase>(_ => new MockItemDb());
-            services.AddSingleton<IInterfaceIdDatabase>(_ => InterfaceDb.FromJson("mock-interface-ids.json"));
+            services.AddSingleton<IInterfaceIdDatabase>(_ => InterfaceDb.FromJson(Path.Combine(dirBuild, "interface-ids.json")));
             services.AddSingleton<IMainLoop>(_ => new MockLoop());
             services.AddSingleton<IIdPool>(_ => new IdPool());
             services.AddSingleton<ILogger>(_ => new TestLogger());
