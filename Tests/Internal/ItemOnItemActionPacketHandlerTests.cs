@@ -37,7 +37,7 @@ namespace CScape.Dev.Tests.Internal
             b.Write16((short)(itemIdA-1));
             b.Write16((short)interfIdB);
 
-            h.Handle(p, h.Handles[0], b);
+            h.HandleAll(p, b);
         }
 
         private MockMainContainerInterface MainContainerInterf(MockServer s, Player p, int id)

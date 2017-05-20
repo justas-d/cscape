@@ -21,7 +21,7 @@ namespace CScape.Dev.Tests.Internal
         {
             var b = new Blob(16);
             b.Write16(target);
-            h.Handle(p, h.Handles[0], b);
+            h.HandleAll(p,b);
         }
 
         private void Validate(Player us, IWorldEntity target)

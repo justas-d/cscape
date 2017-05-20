@@ -8,7 +8,7 @@ namespace CScape.Core.Network.Handler
 {
     public sealed class ItemOnItemActionPacketHandler : IPacketHandler
     {
-        public int[] Handles { get; } = {53};
+        public byte[] Handles { get; } = {53};
 
         private readonly IItemDefinitionDatabase _db;
 

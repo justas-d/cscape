@@ -20,7 +20,7 @@ namespace CScape.Core.Network.Handler
             {145, ItemActionType.Remove }
         };
 
-        public int[] Handles { get; } = {122, 41, 16, 87, 145};
+        public byte[] Handles { get; } = {122, 41, 16, 87, 145};
 
         private readonly IItemDefinitionDatabase _db;
 

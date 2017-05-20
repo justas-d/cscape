@@ -12,41 +12,41 @@ namespace CScape.Dev.Tests.Internal
         public void ValidNpc()
         {
             var server = Mock.Server();
-            var player = Mock.Player("xd", server);
+            var p = Mock.Player("xd", server);
             var npc = Mock.Npc(server, 5);
 
-            var handler = new TalkToPacketHandler();
-            var data = new Blob(sizeof(short));
-            data.Write16(npc.UniqueNpcId);
+            var h = new TalkToPacketHandler();
+            var b = new Blob(sizeof(short));
+            b.Write16(npc.UniqueNpcId);
 
-            handler.Handle(player, handler.Handles[0], data);
+            h.HandleAll(p, b);
         }
 
         [TestMethod]
         public void NoNpc()
         {
             var server = Mock.Server();
-            var player = Mock.Player("xd", server);
+            var p = Mock.Player("xd", server);
 
-            var handler = new TalkToPacketHandler();
-            var data = new Blob(sizeof(short));
-            data.Write16(5);
+            var h = new TalkToPacketHandler();
+            var b = new Blob(sizeof(short));
+            b.Write16(5);
 
-            handler.Handle(player, handler.Handles[0], data);
+            h.HandleAll(p, b);
         }
 
         [TestMethod]
         public void WrongNpc()
         {
             var server = Mock.Server();
-            var player = Mock.Player("xd", server);
+            var p = Mock.Player("xd", server);
             var npc = Mock.Npc(server, 5);
 
-            var handler = new TalkToPacketHandler();
-            var data = new Blob(sizeof(short));
-            data.Write16(1234);
+            var h = new TalkToPacketHandler();
+            var b = new Blob(sizeof(short));
+            b.Write16(1234);
 
-            handler.Handle(player, handler.Handles[0], data);
+            h.HandleAll(p, b);
         }
     }
 }

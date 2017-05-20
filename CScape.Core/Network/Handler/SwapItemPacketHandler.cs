@@ -6,7 +6,7 @@ namespace CScape.Core.Network.Handler
 {
     public sealed class SwapItemPacketHandler : IPacketHandler
     {
-            public int[] Handles { get; } = { 214 };
+            public byte[] Handles { get; } = { 214 };
 
         public void Handle(Player player, int opcode, Blob packet)
         {

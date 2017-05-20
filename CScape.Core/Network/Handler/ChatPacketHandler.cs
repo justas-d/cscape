@@ -6,10 +6,15 @@ namespace CScape.Core.Network.Handler
 {
     public sealed class ChatPacketHandler : IPacketHandler
     {
-        public int[] Handles { get; } = {4};
+        public byte[] Handles { get; } = {4};
+
+        public int MinimumSize { get; } = 2;
 
         public void Handle(Player player, int opcode, Blob packet)
         {
+            // min size is 2
+            if (MinimumSize > packet.Buffer.Length) return;
+
             var effect = (ChatMessage.TextEffect)packet.ReadByte();
             var color = (ChatMessage.TextColor)packet.ReadByte();
 

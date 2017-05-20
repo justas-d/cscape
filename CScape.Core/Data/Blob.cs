@@ -66,6 +66,7 @@ namespace CScape.Core.Data
             ResetRead();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte Peek(int lookahead = 0)
             => Buffer[ReadCaret + lookahead];
 
@@ -108,6 +109,13 @@ namespace CScape.Core.Data
                 var i = 0;
                 for (; i <= maxLength; i++) // <= due to terminator char
                 {
+                    // don't try to read if we're eof
+                    if (ReadCaret >= Buffer.Length)
+                    {
+                        rsString = null;
+                        return false;
+                    }
+
                     var c = ReadByte();
                     if (c == Constant.StringNullTerminator)
                         break;

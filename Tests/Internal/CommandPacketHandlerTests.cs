@@ -1,4 +1,5 @@
-﻿using CScape.Core.Data;
+﻿using System.Security.Cryptography;
+using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network.Handler;
@@ -30,28 +31,55 @@ namespace CScape.Dev.Tests.Internal
             }
         }
 
-        private (Player, CommandPacketHandler) Data(MockCommandHandler ch)
+        private (Player, CommandPacketHandler, MockCommandHandler) Data(string targetStr)
         {
             var c = new ServiceCollection();
+            var ch = new MockCommandHandler(targetStr);
             c.AddSingleton<ICommandHandler>(_ => ch);
             var s = Mock.Server(c);
 
             var p = Mock.Player("a", s);
-            return (p, new CommandPacketHandler(s.Services));
+            return (p, new CommandPacketHandler(s.Services), ch);
+        }
+
+        private void TestFail(
+            CommandPacketHandler h, MockCommandHandler ch, Player p, Blob b)
+        {
+            h.HandleAll(p, b, () => Assert.IsFalse(ch.WasCalled));
+        }
+
+        private void TestSuccess(
+            CommandPacketHandler h, MockCommandHandler ch, Player p, Blob b)
+        {
+            h.HandleAll(p, b, () => Assert.IsTrue(ch.WasCalled));
         }
 
         [TestMethod]
         public void ValidCommand()
         {
             var input = "hello world     aaa asff sg45646c zxzxc";
-            var ch = new MockCommandHandler(input);
-            var (p, h) = Data(ch);
+            var (p, h, ch) = Data(input);
 
             var b = new Blob(256);
             b.WriteString(input);
 
-            h.Handle(p, h.Handles[0], b);
-            Assert.IsTrue(ch.WasCalled);
+            TestSuccess(h, ch, p, b);
+        }
+
+        [TestMethod]
+        public void EmptyBlob()
+        {
+            var (p, h, ch) = Data(null);
+            var b = new Blob(0);
+            TestFail(h, ch, p, b);
+        }
+
+        [TestMethod]
+        public void CommandNotNullTerminated()
+        {
+            var (p, h, ch) = Data(null);
+            var b = new Blob(5);
+            TestFail(h, ch, p, b);
         }
     }
 }

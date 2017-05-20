@@ -7,7 +7,7 @@ namespace CScape.Core.Network.Handler
 {
     public sealed class TalkToPacketHandler : IPacketHandler
     {
-        public int[] Handles { get; } = {155};
+        public byte[] Handles { get; } = {155};
 
         public void Handle(Player player, int opcode, Blob packet)
         {

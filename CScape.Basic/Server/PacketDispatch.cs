@@ -18,6 +18,8 @@ namespace CScape.Basic.Server
         private readonly ILogger _log;
         private readonly Dictionary<int, IPacketHandler> _handlers = new Dictionary<int, IPacketHandler>();
 
+        public IEnumerable<IPacketHandler> Handlers => _handlers.Values;
+
         public PacketDispatch(IServiceProvider services)
         {
             _services = services;
@@ -61,7 +63,7 @@ namespace CScape.Basic.Server
                     continue;
                 }
 
-                var opcodes = (int[]) handler.GetType().GetRuntimeProperty("Handles").GetValue(handler);
+                var opcodes = (byte[]) handler.GetType().GetRuntimeProperty("Handles").GetValue(handler);
 
                 foreach (var op in opcodes)
                 {

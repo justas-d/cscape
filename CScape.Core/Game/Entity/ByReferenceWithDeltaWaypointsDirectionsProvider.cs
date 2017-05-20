@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
@@ -9,12 +8,12 @@ namespace CScape.Core.Game.Entity
         private (int x, int y) _local;
         private readonly (int x, int y) _reference;
         private readonly (sbyte x, sbyte y)[] _deltaWaypoints;
-        private  (int, int) _target;
+        private (int, int) _target;
         private readonly IEnumerator<(sbyte, sbyte)> _nextProvider;
         private bool _isFirst = true;
 
         public ByReferenceWithDeltaWaypointsDirectionsProvider(
-            [NotNull] (int, int) locals,
+            (int, int) locals,
             (int, int) reference,
             (sbyte, sbyte)[] deltaWaypoints)
         {
@@ -61,7 +60,7 @@ namespace CScape.Core.Game.Entity
                 {
                     yield return d;
 
-                    // keep track of locals ourselves incase transform 
+                    // keep track of locals ourselves in case transform 
                     // update dx and dy kick in and changes locals in the transform
                     _local.x += d.x;
                     _local.y += d.y;

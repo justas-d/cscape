@@ -9,7 +9,7 @@ namespace CScape.Core.Network.Handler
     public sealed class CommandPacketHandler : IPacketHandler
     {
         private readonly IServiceProvider _services;
-        public int[] Handles { get; } = { 103 };
+        public byte[] Handles { get; } = { 103 };
 
         public CommandPacketHandler(IServiceProvider services)
         {

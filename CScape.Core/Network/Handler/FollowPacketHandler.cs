@@ -5,7 +5,7 @@ namespace CScape.Core.Network.Handler
 {
     public sealed class FollowPacketHandler : IPacketHandler
     {
-        public int[] Handles { get; } = { 128, 139 };
+        public byte[] Handles { get; } = { 128, 139 };
 
         public void Handle(Player player, int opcode, Blob packet)
         {

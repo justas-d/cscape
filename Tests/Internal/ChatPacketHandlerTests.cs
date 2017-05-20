@@ -30,7 +30,7 @@ namespace CScape.Dev.Tests.Internal
             b.Write((byte)c);
             b.WriteString(m);
 
-            h.Handle(p, h.Handles[0], b);
+            h.HandleAll(p, b);
         }
 
         private void Validate(Player p, ChatMessage.TextEffect e, ChatMessage.TextColor c, string m)
@@ -47,6 +47,58 @@ namespace CScape.Dev.Tests.Internal
             Validate(p, e,c,m);
         }
 
+        private Player TestStringLength(int len)
+        {
+            var b = new StringBuilder();
+            for (var i = 0; i < len; i++)
+                b.Append("a");
+
+            var (h, p) = Data();
+            Exec(h, p, ChatMessage.TextEffect.None, ChatMessage.TextColor.Yellow, b.ToString());
+            return p;
+        }
+
+        private void TestForFail(ChatPacketHandler h, Blob b, Player p)
+        {
+            foreach (var o in h.Handles)
+            {
+                h.Handle(p, o, b);
+                Assert.IsNull(p.LastChatMessage);
+            }
+        }
+
+        [TestMethod]
+        public void TrashSpam() => new ChatPacketHandler().SpamTrash();
+
+        [TestMethod]
+        public void DoNothingOnInvalidPacketSize()
+        {
+            var (h, p) = Data();
+
+            for (var i = 0; i < h.MinimumSize; i++)
+            {
+                var b = new Blob(i);
+                TestForFail(h, b, p);
+            }
+        }
+
+        [TestMethod]
+        public void MinimumPacketSizePlusOneUnterminatedStringIsValid()
+        {
+            var (h, p) = Data();
+            var b = new Blob(h.MinimumSize + 1);
+            TestForFail(h, b, p);
+        }
+
+        [TestMethod]
+        public void DoNothingOnMinimumPacketSize()
+        {
+            var (h, p) = Data();
+
+            var b = new Blob(h.MinimumSize);
+            TestForFail(h, b, p);
+        }
+
         [TestMethod]
         public void AllValidCombinations()
         {
@@ -58,17 +110,6 @@ namespace CScape.Dev.Tests.Internal
                 foreach (var c in Enum.GetValues(typeof(ChatMessage.TextColor)).Cast<ChatMessage.TextColor>())
                     Run(h, p, e, c, msg);
             }
-        }
-
-        private Player TestStringLength(int len)
-        {
-            var b = new StringBuilder();
-            for (var i = 0; i < len; i++)
-                b.Append("a");
-
-            var (h, p) = Data();
-            Exec(h, p, ChatMessage.TextEffect.None, ChatMessage.TextColor.Yellow, b.ToString());
-            return p;
         }
 
         [TestMethod]
