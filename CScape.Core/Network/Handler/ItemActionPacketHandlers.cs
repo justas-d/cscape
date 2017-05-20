@@ -10,7 +10,8 @@ namespace CScape.Core.Network.Handler
 {
     public sealed class ItemActionPacketHandlers : IPacketHandler
     {
-        private readonly Dictionary<int, ItemActionType> _opToActionMap = new Dictionary<int, ItemActionType>()
+        public Dictionary<int, ItemActionType> OpcodeToActionMap { get; } 
+            = new Dictionary<int, ItemActionType>
         {
             {41, ItemActionType.Generic1},
             {122, ItemActionType.Generic2},
@@ -21,7 +22,7 @@ namespace CScape.Core.Network.Handler
 
         public int[] Handles { get; } = {122, 41, 16, 87, 145};
 
-        private IItemDefinitionDatabase _db;
+        private readonly IItemDefinitionDatabase _db;
 
         public ItemActionPacketHandlers(IServiceProvider services)
         {
@@ -35,7 +36,16 @@ namespace CScape.Core.Network.Handler
             var idx = packet.ReadInt16();
             var itemId = packet.ReadInt16() + 1;
 
-            player.DebugMsg($"Action: interf: {interf} idx: {idx} id: {itemId}", ref player.DebugCommands);
+            player.DebugMsg(
+                $"Action: interf: {interf} idx: {idx} id: {itemId}", 
+                ref player.DebugCommands);
+
+            // check if we have defined the action given by the current opcode
+            if (!OpcodeToActionMap.ContainsKey(opcode))
+            {
+                player.Log.Warning(this, $"Undefined item action for action opcode: {opcode}");
+                return;
+            }
 
             // find interf
             var container = player.Interfaces.TryGetById(interf) as IContainerInterface;
@@ -69,18 +79,11 @@ namespace CScape.Core.Network.Handler
                 return;
             }
 
-            // check if we have defined the action given by the current opcode
-            if (!_opToActionMap.ContainsKey(opcode))
-            {
-                player.Log.Warning(this, $"Undefined item action for action opcode: {opcode}");
-                return;
-            }
-
             // opcode is verified, we got all the data, time to execute it.
             player.Interfaces.OnActionOccurred();
 
             // determine action type by opcode
-            var action = _opToActionMap[opcode];
+            var action = OpcodeToActionMap[opcode];
             
             // execute action
             def.OnAction(player, container, idx, action);

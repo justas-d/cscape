@@ -1,15 +1,19 @@
 using System;
+using System.Diagnostics;
 using CScape.Core.Injection;
 
 namespace CScape.Dev.Tests.Internal.Impl
 {
     public class TestLogger : ILogger
     {
-        private void Log(string msg) => System.Diagnostics.Debug.Write(msg);
+        private void LogDebug(string msg) => Trace.TraceInformation(msg);
+        private void LogWarning(string msg) => Trace.TraceWarning(msg);
+        private void LogException(string msg) => Trace.TraceError(msg);
+        private void Log(string msg) => Trace.WriteLine(msg);
 
         public void Debug(object s, string msg, string file = "unknown file", int line = -1)
         {
-            Log($"[{s}] {msg}");
+            LogDebug($"[{s}] {msg}");
         }
 
         public void Normal(object s, string msg, string file = "unknown file", int line = -1)
@@ -19,12 +23,12 @@ namespace CScape.Dev.Tests.Internal.Impl
 
         public void Warning(object s, string msg, string file = "unknown file", int line = -1)
         {
-            Log($"[{s}] {msg} at {file}({line})");
+            LogWarning($"[{s}] {msg} at {file}({line})");
         }
 
         public void Exception(object s, string msg, Exception ex, string file = "unknown file", int line = -1)
         {
-            Log($"[{s}] {msg} Exception: {ex} LOGGED at {file}({line})");
+            LogException($"[{s}] {msg} Exception: {ex} LOGGED at {file}({line})");
         }
     }
 }
