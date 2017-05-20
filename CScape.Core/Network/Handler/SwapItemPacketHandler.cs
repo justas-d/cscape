@@ -19,6 +19,9 @@ namespace CScape.Core.Network.Handler
             var fromIdx = packet.ReadInt16();
             var toIdx = packet.ReadInt16();
 
+            // swapping item A with item A is a no-op, skip.
+            if (fromIdx == toIdx) return;
+
             player.DebugMsg($"Swap {fromIdx} -> {toIdx}", ref player.DebugItems);
 
             // get and verify container interface

@@ -68,19 +68,7 @@ namespace CScape.Dev.Tests.Internal
             return interf;
         }
 
-        private (MockItem, int amount, int idx) SetItem(
-            MockServer s,
-            IContainerInterface interf,
-            int id, int amount, int idx)
-        {
-            var provider = interf.Items.Provider;
-            provider.SetId(idx, id);
-            provider.SetAmount(idx, amount);
-            return (
-                s.Services.ThrowOrGet<IItemDefinitionDatabase>().Get(id) as MockItem, 
-                amount, 
-                idx);
-        }
+        
 
         private void SetupItemForTesting(MockItemDb db, MockItem item,
             Player p,
@@ -117,10 +105,10 @@ namespace CScape.Dev.Tests.Internal
         public void SameInterface()
         {
             var (s, p, h, db) = Data();
-            var interf = Backpack(p);
+            var interf = Mock.Backpack(p);
 
-            var (itemA, _, idxA) = SetItem(s, interf, 1, 1, 1);
-            var (itemB, _, idxB) = SetItem(s, interf, 5, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, interf, 1, 1, 1);
+            var (itemB, _, idxB) = Mock.SetItem(s, interf, 5, 5, 5);
 
             // use b on a
             TestItemOnItemForSuccess(
@@ -139,10 +127,10 @@ namespace CScape.Dev.Tests.Internal
             var (s, p, h, db) = Data();
 
             var interfA = MainContainerInterf(s, p, 1);
-            var interfB = Backpack(p);
+            var interfB = Mock.Backpack(p);
 
-            var (itemA, _, idxA) = SetItem(s, interfA, 1, 1, 1);
-            var (itemB, _, idxB) = SetItem(s, interfB, 5, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, interfA, 1, 1, 1);
+            var (itemB, _, idxB) = Mock.SetItem(s, interfB, 5, 5, 5);
 
             // use b on a
             TestItemOnItemForSuccess(
@@ -161,11 +149,11 @@ namespace CScape.Dev.Tests.Internal
             var (s, p, h, db) = Data();
             var dummyInterf = MainContainerInterf(s, p, 1);
 
-            var interfA = Equipment(p);
-            var interfB = Backpack(p);
+            var interfA = Mock.Equipment(p);
+            var interfB = Mock.Backpack(p);
 
-            var (itemA, _, idxA) = SetItem(s, dummyInterf, 1, 1, 1);
-            var (itemB, _, idxB) = SetItem(s, dummyInterf, 5, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, dummyInterf, 1, 1, 1);
+            var (itemB, _, idxB) = Mock.SetItem(s, dummyInterf, 5, 5, 5);
 
             // use b on a
             TestItemOnItemForFailure(
@@ -185,11 +173,11 @@ namespace CScape.Dev.Tests.Internal
         {
             var (s, p, h, db) = Data();
 
-            var interfA = Backpack(p);
-            var interfB = GetContainer(p, 2449);//logout
+            var interfA = Mock.Backpack(p);
+            var interfB = Mock.NormalInterface(p);
 
-            var (itemA, _, idxA) = SetItem(s, interfA, 1, 1, 1);
-            var (itemB, _, idxB) = SetItem(s, interfA, 5, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, interfA, 1, 1, 1);
+            var (itemB, _, idxB) = Mock.SetItem(s, interfA, 5, 5, 5);
 
             // use b on a
             TestItemOnItemForFailure(
@@ -223,15 +211,7 @@ namespace CScape.Dev.Tests.Internal
             Execute(p, h, idxB, idxA, idB, idA, interfA, interfB);
         }
 
-        private IContainerInterface Backpack(Player p) => GetContainer(p, 3214) as IContainerInterface;
-        private IContainerInterface Equipment(Player p) => GetContainer(p, 1688) as IContainerInterface;
-
-        private IBaseInterface GetContainer(Player p, int id)
-        {
-            var ret = p.Interfaces.TryGetById(id);
-            Assert.IsNotNull(ret);
-            return ret;
-        }
+        
 
         [TestMethod]
         public void InvalidIndices()
@@ -239,10 +219,10 @@ namespace CScape.Dev.Tests.Internal
             var (s, p, h, db) = Data();
 
             var interfA = MainContainerInterf(s, p, 1);
-            var interfB = Backpack(p);
+            var interfB = Mock.Backpack(p);
 
-            var (itemA, _, idxA) = SetItem(s, interfA, 1, 1, 2);
-            var (itemB, _, idxB) = SetItem(s, interfB, 5, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, interfA, 1, 1, 2);
+            var (itemB, _, idxB) = Mock.SetItem(s, interfB, 5, 5, 5);
 
             idxA *= 2;
             idxB *= 2;
@@ -263,11 +243,11 @@ namespace CScape.Dev.Tests.Internal
         {
             var (s, p, h, db) = Data();
 
-            var interfA = Equipment(p);
-            var interfB = Backpack(p);
+            var interfA = Mock.Equipment(p);
+            var interfB = Mock.Backpack(p);
 
-            var (itemA, _, idxA) = SetItem(s, interfA, 1, 1, 1);
-            var (itemB, _, idxB) = SetItem(s, interfB, 5, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, interfA, 1, 1, 1);
+            var (itemB, _, idxB) = Mock.SetItem(s, interfB, 5, 5, 5);
 
             void TestFail(
                 int tInterfA, int tInterfB,
@@ -298,8 +278,8 @@ namespace CScape.Dev.Tests.Internal
             var (s, p, h, db) = Data();
             var interf = MainContainerInterf(s, p, 1);
 
-            var (itemA, _, idxA) = SetItem(s, interf, MockItemDb.UndefinedId, 1, 1);
-            var (itemB, _, idxB) = SetItem(s, interf, MockItemDb.UndefinedId, 5, 5);
+            var (itemA, _, idxA) = Mock.SetItem(s, interf, MockItemDb.UndefinedId, 1, 1);
+            var (itemB, _, idxB) = Mock.SetItem(s, interf, MockItemDb.UndefinedId, 5, 5);
 
             Execute(p, h, idxA, idxB, MockItemDb.UndefinedId, MockItemDb.UndefinedId, interf.Id, interf.Id);
             Execute(p, h, idxB, idxA, MockItemDb.UndefinedId, MockItemDb.UndefinedId, interf.Id, interf.Id);
@@ -310,7 +290,7 @@ namespace CScape.Dev.Tests.Internal
         {
             var (s, p, h, db) = Data();
             var interf = MainContainerInterf(s, p, 1);
-            var (itemA, _, idxA) = SetItem(s, interf, 1, 1, 1);
+            var (itemA, _, idxA) = Mock.SetItem(s, interf, 1, 1, 1);
 
             TestItemOnItemForFailure(
                 db, p, h, interf.Id, interf.Id,

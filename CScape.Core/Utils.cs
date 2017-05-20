@@ -65,7 +65,7 @@ namespace CScape.Core
 
 #if RELEASE
             if(id != item.ItemId) throw new InvalidOperationException("id != item.ItemId");
-            if(0 >= item.MaxAmount && item.MaxAmount > int.MaxValue);throw new InvalidOperationException("0 >= item.MaxAmount && item.MaxAmount > int.MaxValue");
+            if(0 >= item.MaxAmount && item.MaxAmount > int.MaxValue) throw new InvalidOperationException($"0 >= item.MaxAmount ({item.MaxAmount}) && item.MaxAmount ({item.MaxAmount}) > int.MaxValue");
  
 #else
             Debug.Assert(id == item.ItemId);

@@ -3,17 +3,45 @@ using System.IO;
 using System.Reflection;
 using CScape.Basic.Database;
 using CScape.Basic.Model;
+using CScape.Core;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 using CScape.Core.Network;
 using CScape.Core.Network.Handler;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CScape.Dev.Tests.Internal.Impl
 {
     internal static class Mock
     {
+        public static (MockItem, int amount, int idx) SetItem(
+            MockServer s,
+            IContainerInterface interf,
+            int id, int amount, int idx)
+        {
+            var provider = interf.Items.Provider;
+            provider.SetId(idx, id);
+            provider.SetAmount(idx, amount);
+            return (
+                s.Services.ThrowOrGet<IItemDefinitionDatabase>().Get(id) as MockItem,
+                amount,
+                idx);
+        }
+
+        public static IContainerInterface Backpack(Player p) => GetContainer(p, 3214) as IContainerInterface;
+        public static IContainerInterface Equipment(Player p) => GetContainer(p, 1688) as IContainerInterface;
+        public static IBaseInterface NormalInterface(Player p) => GetContainer(p, 3917); // skills
+
+        public static IBaseInterface GetContainer(Player p, int id)
+        {
+            var ret = p.Interfaces.TryGetById(id);
+            Assert.IsNotNull(ret);
+            return ret;
+        }
+
         private static JsonPacketDatabase PacketDb { get; set; }
 
         public static void SpamTrash(this IPacketHandler h)
