@@ -33,17 +33,58 @@ namespace CScape.Dev.Tests.Internal.Impl
             int ourIdx, IContainerInterface otherContainer,
             int otherIdx)
         {
-            throw new System.NotImplementedException();
+            if (_shouldTestAction)
+            {
+                _shouldTestAction = false;
+                Assert.AreEqual(player, _testUsewithPlayer);    
+                Assert.AreEqual(ourContainer, _testContainerA);
+                Assert.AreEqual(otherContainer, _testContainerB);
+                Assert.AreEqual(ourIdx, _testIdxA);
+                Assert.AreEqual(otherIdx, _testIdxB);
+            }
+
+            WasUseWithCalled = true;
         }
+
+        public void AssertWasUseWithCalled()
+        {
+            Assert.IsTrue(WasUseWithCalled);
+            WasUseWithCalled = false;
+        }
+
+        public bool WasUseWithCalled { get; private set; }
+
+        private Player _testUsewithPlayer;
+        private IContainerInterface _testContainerA;
+        private IContainerInterface _testContainerB;
+        private int _testIdxA;
+        private int _testIdxB;
+        private bool _shouldTestUseWith;
+
+        public void TestForCallToUseWith(
+            Player testPlayer, 
+            IContainerInterface testContainerA, IContainerInterface testContainerB,
+            int testIdxA, int testIdxB)
+        {
+            Assert.IsFalse(_shouldTestAction);
+
+            _shouldTestAction = true;
+            _testUsewithPlayer = testPlayer;
+            _testContainerA = testContainerA;
+            _testContainerB = testContainerB;
+            _testIdxA = testIdxA;
+            _testIdxB = testIdxB;
+        }
+
 
         public void OnAction(
             Player player, IContainerInterface container, 
             int index, ItemActionType type)
         {
-            if (_shouldTest)
+            if (_shouldTestAction)
             {
-                _shouldTest = false;
-                Assert.AreEqual(_testPlayer, player);
+                _shouldTestAction = false;
+                Assert.AreEqual(_testActionPlayer, player);
                 Assert.AreEqual(_testContainer, container);
                 Assert.AreEqual(_testIdx, index);
                 Assert.AreEqual(_testType, type);
@@ -60,8 +101,8 @@ namespace CScape.Dev.Tests.Internal.Impl
 
         public bool WasActionCalled { get; private set; }
 
-        private bool _shouldTest;
-        private Player _testPlayer;
+        private bool _shouldTestAction;
+        private Player _testActionPlayer;
         private IContainerInterface _testContainer;
         private int _testIdx;
         private ItemActionType _testType;
@@ -70,10 +111,10 @@ namespace CScape.Dev.Tests.Internal.Impl
             Player player, IContainerInterface container, 
             int index, ItemActionType type)
         {
-            Assert.IsFalse(_shouldTest);
+            Assert.IsFalse(_shouldTestAction);
 
-            _shouldTest = true;
-            _testPlayer = player;
+            _shouldTestAction = true;
+            _testActionPlayer = player;
             _testContainer = container;
             _testIdx = index;
             _testType = type;

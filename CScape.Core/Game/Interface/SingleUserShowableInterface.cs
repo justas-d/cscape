@@ -40,7 +40,7 @@ namespace CScape.Core.Game.Interface
         /// <summary>
         /// Handles figuring out whether we can close.
         /// </summary>
-        protected abstract bool CanCloseRigtNow();
+        protected abstract bool CanCloseRightNow();
 
         /// <summary>
         /// Handles the interface specific close logic.
@@ -87,7 +87,7 @@ namespace CScape.Core.Game.Interface
             if (Api == null)
                 return false;
 
-            if (!CanCloseRigtNow())
+            if (!CanCloseRightNow())
                 return false;
 
             InternalClose();

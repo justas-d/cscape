@@ -21,7 +21,7 @@ namespace CScape.Dev.Tests.Internal.Impl
             Api.Main = null;
         }
 
-        protected override bool CanCloseRigtNow() => true;
+        protected override bool CanCloseRightNow() => true;
 
         protected override void InternalClose() { }
         public override void Show() { }

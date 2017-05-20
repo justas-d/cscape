@@ -10,7 +10,7 @@ namespace CScape.Core.Network.Handler
     {
         public int[] Handles { get; } = {53};
 
-        private IItemDefinitionDatabase _db;
+        private readonly IItemDefinitionDatabase _db;
 
         public ItemOnItemActionPacketHandler(IServiceProvider services)
         {
@@ -27,6 +27,9 @@ namespace CScape.Core.Network.Handler
             var interfaceIdA = packet.ReadInt16();
             var itemIdA = packet.ReadInt16() + 1;
             var interfaceIdB = packet.ReadInt16();
+
+            // make sure we're not operating on the same item instance
+            if (idxA == idxB) return;
 
             // try getting interfaces
             IContainerInterface GetContainer(int id)

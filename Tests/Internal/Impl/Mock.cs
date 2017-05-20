@@ -1,5 +1,6 @@
 using System;
 using CScape.Basic.Model;
+using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,15 @@ namespace CScape.Dev.Tests.Internal.Impl
 {
     internal static class Mock
     {
+        private static readonly Random rng = new Random();
+
+        public static Blob RandomData(int size)
+        {
+            var b = new Blob(size);
+            rng.NextBytes(b.Buffer);
+            return b;
+        }
+
         public static readonly IPosition Invariant = new Position(3220, 3218, 0);
 
         public static MockServer Server(IServiceCollection c) => new MockServer(c);

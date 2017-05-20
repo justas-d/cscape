@@ -32,7 +32,7 @@ namespace CScape.Core.Game.Interface
             Api.Sidebar[SidebarIndex] = this;
         }
 
-        protected override bool CanCloseRigtNow() => true;
+        protected override bool CanCloseRightNow() => true;
 
         protected override void InternalClose()
             => PushUpdate(new CloseSidebarInterface(SidebarIndex));
