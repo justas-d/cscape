@@ -182,7 +182,7 @@ namespace CScape.Core.Game.Entity
             Pid = IdPool.NextPlayer();
             Connection = socket;
 
-            _observatory = new PlayerObservatory(this);
+            _observatory = new PlayerObservatory(services, this);
 
             _transform = Entity.ClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
             Transform = _transform;
@@ -310,11 +310,6 @@ namespace CScape.Core.Game.Entity
             }
 
             loop.Player.Enqueue(this);
-        }
-
-        public override void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew)
-        {
-            if (isNew) sync.PlayerSync.PushPlayer(this);
         }
 
         /// <summary>

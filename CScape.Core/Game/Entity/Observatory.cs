@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -18,10 +19,10 @@ namespace CScape.Core.Game.Entity
 
         public bool ReevaluateSightOverride { get; set; }
 
-        public PlayerObservatory([NotNull] Player observer)
+        public PlayerObservatory(IServiceProvider services, [NotNull] Player observer)
         {
             Observer = observer ?? throw new ArgumentNullException(nameof(observer));
-            Sync = new ObservableSyncMachine(observer, this);
+            Sync = new ObservableSyncMachine(services, observer, this);
             observer.Connection.SyncMachines.Add(Sync);
         }
 

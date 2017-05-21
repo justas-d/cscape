@@ -1,9 +1,10 @@
 ﻿using System;
 using CScape.Core.Data;
-using CScape.Core.Network.Sync;
+using CScape.Core.Game.Entity;
+using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Network.Sync
 {
     /// <summary>
     /// Handles the syncing of all observables.
@@ -19,9 +20,15 @@ namespace CScape.Core.Game.Entity
         public PlayerUpdateSyncMachine PlayerSync { get; }
         public NpcUpdateSyncMachine NpcSync { get; }
 
-        public ObservableSyncMachine([NotNull] Player player, [NotNull] PlayerObservatory playerObservatory)
+        private readonly ILogger _log;
+
+        public ObservableSyncMachine(
+            IServiceProvider services,
+            [NotNull] Player player, [NotNull] PlayerObservatory playerObservatory)
         {
+            _log = services.ThrowOrGet<ILogger>();
             _playerObservatory = playerObservatory ?? throw new ArgumentNullException(nameof(playerObservatory));
+
             LocalPlayer = player ?? throw new ArgumentNullException(nameof(player));
 
             PlayerSync = new PlayerUpdateSyncMachine(LocalPlayer);
@@ -39,9 +46,26 @@ namespace CScape.Core.Game.Entity
 
         public void Synchronize(OutBlob stream)
         {
+
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)
-                obs.SyncTo(this, stream, _playerObservatory.PopIsNew(obs));
+            {
+                if (_playerObservatory.PopIsNew(obs))
+                {
+                    switch (obs)
+                    {
+                        case Player p:
+                            PlayerSync.PushPlayer(p);
+                            break;
+                        case Npc n:
+                            NpcSync.PushNpc(n);
+                            break;
+                        default:
+                            _log.Warning(this, $"Unhandled entity in isNew sync: {obs}");
+                            break;
+                    }
+                }
+            }
         }
 
         public void OnReinitialize()

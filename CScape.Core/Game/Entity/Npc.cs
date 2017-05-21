@@ -2,6 +2,7 @@ using System;
 using CScape.Core.Data;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
+using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -134,12 +135,6 @@ namespace CScape.Core.Game.Entity
             // todo : destroy if 0 > health
 
             loop.Npc.Enqueue(this);
-        }
-
-
-        public override void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew)
-        {
-            if(isNew) sync.NpcSync.PushNpc(this);
         }
 
         public override bool CanSee(IWorldEntity ent)

@@ -264,7 +264,7 @@ namespace CScape.Basic.Server
                         "Overflow detected when reading password.");
                     return;
                 }
-                    
+
                 username = username.ToLowerInvariant();
 
                 // check if user is logged in
@@ -298,7 +298,7 @@ namespace CScape.Basic.Server
                     }
 
                     // all's good, queue reconnect.
-                    blob.Write((byte)InitResponseCode.ReconnectDone);
+                    blob.Write((byte) InitResponseCode.ReconnectDone);
                     _loginQueue.Enqueue(new ReconnectPlayerLogin(loggedInPlayer, socket, signlinkUid));
                 }
                 else
@@ -327,7 +327,7 @@ namespace CScape.Basic.Server
                         return;
                     }
 
-                    blob.Write((byte)InitResponseCode.LoginDone);
+                    blob.Write((byte) InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
                     blob.Write(model.TitleIcon);
                     _loginQueue.Enqueue(new NormalPlayerLogin(_services, model, socket, signlinkUid, !isLowMem));
@@ -345,6 +345,10 @@ namespace CScape.Basic.Server
             catch (ObjectDisposedException)
             {
                 _log.Debug(this, "ObjectDisposedException in Entry.");
+            }
+            catch (CryptoException cryptEx)
+            {
+                _log.Exception(this, "Crypto Exception in EntryPoint.", cryptEx);
             }
             catch (Exception ex)
             {
@@ -384,16 +388,6 @@ namespace CScape.Basic.Server
                 _socket?.Dispose();
                 _continueListening = false;
             }
-        }
-
-        private static async Task<Task> UntilCompletionOrCancellation(Task asyncOp, CancellationToken ct)
-        {
-            var tcs = new TaskCompletionSource<bool>();
-
-            using (ct.Register(() => tcs.TrySetResult(true)))
-                await Task.WhenAny(asyncOp, tcs.Task);
-
-            return asyncOp;
         }
     }
 }

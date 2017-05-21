@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using CScape.Core.Data;
 using CScape.Core.Injection;
+using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -92,7 +93,6 @@ namespace CScape.Core.Game.Entity
         protected virtual void InternalDestroy() { }
 
         public abstract void Update(IMainLoop loop);
-        public abstract void SyncTo(ObservableSyncMachine sync, Blob blob, bool isNew);
 
         #region IEquatable
 
