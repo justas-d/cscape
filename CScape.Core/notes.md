@@ -1,12 +1,11 @@
 ﻿# TODO
-	* Finish player and npc update flags
+	* Finish player update flags
 	* Segregate the Player class into smaller interfaces (maybe)
 		* Replace usages of Player with usages of these smaller interfaces.
 
 	* Investigate wonky off by one follow target coords
 	* Invensitage reboot limbo
 	* Separate packet metadata and writing packet data to out stream
-	* Packet handler unit tests
 	* Replace complicated abstraction hierarchies with a strategy pattern
 	* WeakReferences in observatories and sync machines
 	* Collision
@@ -15,7 +14,6 @@
 	* Skills
 		* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
 
-	* Rework the syncmachine system to support sync skipping and be more friendly with order in the sync process.
 	* Different implementations of protocols (377)
   		
 	* Undocumented packets:
