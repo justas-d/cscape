@@ -2,7 +2,6 @@
 	* Segregate the Player class into smaller interfaces (maybe)
 		* Replace usages of Player with usages of these smaller interfaces.
 
-	* Investigate wonky off by one follow target coords
 	* Invensitage reconnect limbo
 	* Separate packet metadata and writing packet data to out stream
 	* Replace complicated abstraction hierarchies with a strategy pattern
@@ -11,7 +10,8 @@
 		* Multi-tile entity movement
 
 	* Skills
-		* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
+		* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a 
+		  "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
 
 	* Different implementations of protocols (377)
   		
