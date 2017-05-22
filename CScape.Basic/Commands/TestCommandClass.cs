@@ -14,6 +14,35 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("npcdmg")]
+        public void TestNpcDmgFlag(CommandContext ctx)
+        {
+            var uni = 0;
+            byte dmg = 0;
+            byte type = 0;
+            byte maxHealth = 0;
+            var isSecondary = false;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("UniqueNpcId", ref uni);
+                b.ReadNumber("damage", ref dmg);
+                b.ReadNumber("type", ref type);
+                b.ReadNumber("max health", ref maxHealth);
+                b.ReadBoolean("secondary ", ref isSecondary);
+            })) return;
+
+            var npc = ctx.Callee.Server.Npcs.GetById(uni);
+            if (npc == null)
+            {
+                ctx.Callee.SendSystemChatMessage("Npc not found.");
+                return;
+            }
+
+            npc.MaxHealth = maxHealth;
+            npc.Damage(dmg, (HitType)type, isSecondary);
+        }
+
         [CommandMethod("npceffect")]
         public void SetNpcParticleEffect(CommandContext ctx)
         {

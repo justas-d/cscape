@@ -222,14 +222,11 @@ namespace CScape.Core.Network.Sync
             stream.EndPacket();
         }
 
-        public void OnReinitialize()
-        {
-        }
+        public void OnReinitialize() { }
 
         private void WriteFlags(NpcUpdateState state, Blob stream)
         {
             var flags = state.GetFlags();
-
             if (flags == 0) return;
 
             // write header
@@ -250,6 +247,9 @@ namespace CScape.Core.Network.Sync
                 }
             }
 
+            if((flags & Npc.UpdateFlags.PrimaryHit) != 0)
+                EntityHelper.WriteHitData(stream, state.Npc, false);
+
             if ((flags & Npc.UpdateFlags.ParticleEffect) != 0)
             {
                 if (state.Npc.Effect == null)
@@ -266,13 +266,14 @@ namespace CScape.Core.Network.Sync
             if ((flags & Npc.UpdateFlags.Text) != 0 && state.Npc.LastSentTextMessage != null)
                 stream.WriteString(state.Npc.LastSentTextMessage);
 
+            if ((flags & Npc.UpdateFlags.SecondaryHit) != 0)
+                EntityHelper.WriteHitData(stream, state.Npc, true);
+
             if ((flags & Npc.UpdateFlags.Definition) != 0)
                 stream.Write16(state.Npc.NpcDefinitionId);
 
             if((flags & Npc.UpdateFlags.FacingCoordinate) != 0)
                 EntityHelper.WriteFacingDirection(state.Npc, state.Npc.FacingCoordinate, stream);
-
-            // todo : write npc flags
         }
     }
 }

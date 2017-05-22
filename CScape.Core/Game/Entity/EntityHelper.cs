@@ -13,6 +13,18 @@ namespace CScape.Core.Game.Entity
                 ent.InteractingEntity = null;
         }
 
+        public static void WriteHitData(Blob stream, IDamageable ent, bool secondary)
+        {
+            var data = secondary ? ent.SecondaryHit : ent.PrimaryHit;
+            if(data == null)
+                data = HitData.Zero;
+
+            stream.Write(data.Damage);
+            stream.Write((byte)data.Type);
+            stream.Write(data.CurrentHealth);
+            stream.Write(data.MaxHealth);
+        }
+
         public static void WriteInteractingEntityFlag(IMovingEntity ent, 
             int categoryId, Blob stream)
         {

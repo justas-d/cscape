@@ -9,16 +9,18 @@ namespace CScape.Core.Game.Entity
     /// <summary>
     /// Defines an AI pawn NPC.
     /// </summary>
-    public class Npc : WorldEntity, IMovingEntity
+    public class Npc : WorldEntity, IMovingEntity, IDamageable
     {
         #region Sync
         [Flags]
         public enum UpdateFlags : byte
         {
             Animation = 0x10,
+            PrimaryHit = 8,
             ParticleEffect = 0x80,
             InteractingEntity = 0x20,
             Text = 1,
+            SecondaryHit = 0x40,
             Definition = 2,
             FacingCoordinate = 4
         }
@@ -26,6 +28,34 @@ namespace CScape.Core.Game.Entity
         public UpdateFlags TickFlags { get; private set; }
 
         public (sbyte x, sbyte y) LastMovedDirection { get; set; }
+
+        public HitData SecondaryHit { get; private set; }
+        public HitData PrimaryHit { get; private set; }
+
+        // todo : set npc max health based on their npc definition data. (by lookup)
+        // todo : hide setter of Npc.MaxHealth 
+        public byte MaxHealth { get; set; }
+        public byte CurrentHealth { get; private set; }
+
+        public bool Damage(byte dAmount, HitType type, bool secondary)
+        {
+            var newHealth = Convert.ToByte(Utils.Clamp(CurrentHealth + dAmount, 0, byte.MaxValue));
+            CurrentHealth = newHealth;
+
+            var hit = new HitData((byte)dAmount, type, CurrentHealth, MaxHealth);
+            if (secondary)
+            {
+                SecondaryHit = hit;
+                TickFlags |= UpdateFlags.SecondaryHit;
+            }
+            else
+            {
+                PrimaryHit = hit;
+                TickFlags |= UpdateFlags.PrimaryHit;
+            }
+
+            return newHealth == 0;
+        }
 
         private ParticleEffect _effect;
         public ParticleEffect Effect

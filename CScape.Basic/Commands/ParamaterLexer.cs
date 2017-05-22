@@ -42,6 +42,31 @@ namespace CScape.Basic.Commands
             return word;
         }
 
+
+        public void ReadBoolean(string name, ref bool result, bool isOptional = false)
+        {
+            if (DidFail)
+                return;
+
+            var rawData = "";
+            ReadWord(name, ref rawData, true);
+
+            if (string.IsNullOrEmpty(rawData) && !isOptional)
+            {
+                SignalFail(name);
+                return;
+            }
+
+            if (!bool.TryParse(rawData, out bool data))
+            {
+                if (isOptional)
+                    return;
+                else
+                    SignalFail(name, typeof(bool));
+            }
+
+            result = data;
+        }
         public void ReadNumber<T>(string name, ref T result, bool isOptional = false) where T : struct
         {
             if (DidFail)
