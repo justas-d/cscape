@@ -4,7 +4,7 @@ namespace CScape.Core.Game.Entity
 {
     public enum HitType
     {
-        DefenceBlue,
+        DefenseBlue,
         AttackRed,
         PoisonGreen,
         UnknownYellow1,

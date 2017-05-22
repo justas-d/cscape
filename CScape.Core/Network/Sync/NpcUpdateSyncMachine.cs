@@ -231,7 +231,7 @@ namespace CScape.Core.Network.Sync
 
             // write header
             stream.Write((byte)flags);
-
+            
             if ((flags & Npc.UpdateFlags.Animation) != 0)
             {
                 var data = state.Npc.Animation ?? Animation.Reset;

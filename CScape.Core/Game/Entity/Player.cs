@@ -52,10 +52,9 @@ namespace CScape.Core.Game.Entity
         public enum UpdateFlags
         {
             ForcedMovement = 0x400,
-            Effect = 0x100,
+            ParticleEffect = 0x100,
             Animation = 8,
             ForcedText = 4,
-            //
             Chat = 0x80,
             InteractEnt = 0x1,
             Appearance = 0x10,
@@ -72,6 +71,29 @@ namespace CScape.Core.Game.Entity
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
+
+        private  ForcedMovement _forceMovement;
+
+        public ForcedMovement ForcedMovement
+        {
+            get => _forceMovement;
+            set
+            {
+                TickFlags |= UpdateFlags.ForcedMovement;
+                ForcedMovement = value;
+            }
+        }
+
+        private ParticleEffect _effect;
+        public ParticleEffect Effect
+        {
+            get => _effect;
+            set
+            {
+                TickFlags |= UpdateFlags.ParticleEffect;
+                _effect = value;
+            }
+        }
 
         private Animation _animData;
         public Animation Animation

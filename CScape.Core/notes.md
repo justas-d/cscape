@@ -1,5 +1,4 @@
 ﻿# TODO
-	* Finish player update flags
 	* Segregate the Player class into smaller interfaces (maybe)
 		* Replace usages of Player with usages of these smaller interfaces.
 

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Sync
@@ -371,6 +372,28 @@ namespace CScape.Core.Network.Sync
             // header
             stream.Write((byte)flags);
             stream.Write((byte)((short)flags >> 8));
+
+            if ((flags & Player.UpdateFlags.ForcedMovement) != 0)
+            {
+                var data = upd.Player.ForcedMovement;
+                stream.Write(data.Start.x);
+                stream.Write(data.Start.y);
+                stream.Write(data.End.x);
+                stream.Write(data.End.y);
+                stream.Write(data.Duration.x);
+                stream.Write(data.Duration.y);
+                stream.Write((byte)data.Direction);
+            }
+
+            if ((flags & Player.UpdateFlags.ParticleEffect) != 0)
+            {
+                if (upd.Player.Effect == null)
+                    upd.Player.Effect = ParticleEffect.Stop;
+
+                stream.Write16(upd.Player.Effect.Id);
+                stream.Write16(upd.Player.Effect.Height);
+                stream.Write16(upd.Player.Effect.Delay);
+            }
 
             if ((flags & Player.UpdateFlags.Animation) != 0)
             {
