@@ -42,6 +42,8 @@ namespace CScape.Basic.Model
         public int Y { get; set; }
         public byte Z { get; set; }
 
+        public byte Health { get; set; } = 10;
+
         public void SyncPosition(IPosition pos)
         {
             X = pos.X;

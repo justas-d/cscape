@@ -369,7 +369,8 @@ namespace CScape.Core.Network.Sync
                 return;
             }
 
-            var headerPh = stream.Placeholder(2);
+            stream.Write((byte)flags);
+            stream.Write((byte)((short)flags >> 8));
 
             // write flags
             if (flags.HasFlag(Player.UpdateFlags.Chat))
@@ -389,16 +390,14 @@ namespace CScape.Core.Network.Sync
             if (flags.HasFlag(Player.UpdateFlags.FacingCoordinate))
                 EntityHelper.WriteFacingDirection(upd.Player, upd.Player.FacingCoordinate, stream);
 
+            if ((flags & Player.UpdateFlags.PrimaryHit) != 0)
+                EntityHelper.WriteHitData(stream, upd.Player, false);
+
+            if ((flags & Player.UpdateFlags.SecondaryHit) != 0)
+                EntityHelper.WriteHitData(stream, upd.Player, true);
+
             // todo : the rest of the player update flags.
             // THEY NEED TO FOLLOW A STRICT ORDER
-
-            // todo : wait why are we deferring the writing of the player update flag header?
-            // write the header
-            headerPh.Write(b =>
-            {
-                stream.Write((byte)flags);
-                stream.Write((byte)((short)flags >> 8));
-            });
 
             upd.PostUpdate();
         }

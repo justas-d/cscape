@@ -1,3 +1,5 @@
+using System;
+
 namespace CScape.Core.Game.Entity
 {
     public enum HitType
@@ -24,6 +26,12 @@ namespace CScape.Core.Game.Entity
             Type = type;
             CurrentHealth = currentHealth;
             MaxHealth = maxHealth;
+        }
+
+        public static HitData Calculate(IDamageable ent, HitType type, byte dmg)
+        {
+            var newHealth = Convert.ToByte(Utils.Clamp(ent.CurrentHealth - dmg, 0, byte.MaxValue));
+            return new HitData(dmg, type, newHealth, ent.MaxHealth);
         }
     }
 }

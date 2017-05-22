@@ -5,7 +5,6 @@ using CScape.Core.Game.Interface;
 using CScape.Core.Game.Interface.Showable;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
-using CScape.Core.Network;
 using CScape.Core.Network.Packet;
 using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
@@ -15,10 +14,11 @@ namespace CScape.Core.Game.Entity
     //todo: change username feature
     //todo: change password feature
 
-    /// </summary>
+    /// <summary>
     /// Defines a player entity that exists in the world.
     /// </summary>
-    public sealed class Player : WorldEntity, IMovingEntity, IObserver
+    public sealed class Player 
+        : WorldEntity, IMovingEntity, IObserver, IDamageable
     {
         #region debug vars
 
@@ -55,6 +55,8 @@ namespace CScape.Core.Game.Entity
             InteractEnt = 0x1,
             Appearance = 0x10,
             FacingCoordinate = 0x2,
+            PrimaryHit = 0x20,
+            SecondaryHit = 0x200,
         }
 
         /// <summary>
@@ -164,7 +166,38 @@ namespace CScape.Core.Game.Entity
                 _otherPlayerViewRange = newRange;
             }
         }
-    
+
+        public HitData SecondaryHit { get; private set; }
+        public HitData PrimaryHit { get; private set; }
+
+        // todo : hook up Player.MaxHealth to player skills
+        public byte MaxHealth { get; set; } = 10;
+        public byte CurrentHealth
+        {
+            get => _model.Health;
+            private set => _model.Health = value;
+        } 
+
+        public bool Damage(byte dAmount, HitType type, bool secondary)
+        {
+            var hit = HitData.Calculate(this, type, dAmount);
+            CurrentHealth = hit.CurrentHealth;
+
+            if (secondary)
+            {
+                SecondaryHit = hit;
+                TickFlags |= UpdateFlags.SecondaryHit;
+            }
+            else
+            {
+                PrimaryHit = hit;
+                TickFlags |= UpdateFlags.PrimaryHit;
+            }
+
+            return CurrentHealth == 0;
+            // todo : handle player death
+        }
+
         // todo : only register container interfaces if the player can see them
         [NotNull] public BasicItemManager Inventory { get; }
         [NotNull] public EquipmentManager Equipment { get; }
@@ -417,5 +450,6 @@ namespace CScape.Core.Game.Entity
         {
             return $"Player \"{Username}\" (UEI: {UniqueEntityId} PID: {Pid})";
         }
+        
     }
 }

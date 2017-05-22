@@ -4,7 +4,7 @@
 		* Replace usages of Player with usages of these smaller interfaces.
 
 	* Investigate wonky off by one follow target coords
-	* Invensitage reboot limbo
+	* Invensitage reconnect limbo
 	* Separate packet metadata and writing packet data to out stream
 	* Replace complicated abstraction hierarchies with a strategy pattern
 	* WeakReferences in observatories and sync machines

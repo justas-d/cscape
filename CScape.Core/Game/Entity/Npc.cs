@@ -33,16 +33,14 @@ namespace CScape.Core.Game.Entity
         public HitData PrimaryHit { get; private set; }
 
         // todo : set npc max health based on their npc definition data. (by lookup)
-        // todo : hide setter of Npc.MaxHealth 
-        public byte MaxHealth { get; set; }
+        public byte MaxHealth { get; }
         public byte CurrentHealth { get; private set; }
 
         public bool Damage(byte dAmount, HitType type, bool secondary)
         {
-            var newHealth = Convert.ToByte(Utils.Clamp(CurrentHealth + dAmount, 0, byte.MaxValue));
-            CurrentHealth = newHealth;
+            var hit = HitData.Calculate(this, type, dAmount);
+            CurrentHealth = hit.CurrentHealth;
 
-            var hit = new HitData((byte)dAmount, type, CurrentHealth, MaxHealth);
             if (secondary)
             {
                 SecondaryHit = hit;
@@ -54,7 +52,7 @@ namespace CScape.Core.Game.Entity
                 TickFlags |= UpdateFlags.PrimaryHit;
             }
 
-            return newHealth == 0;
+            return CurrentHealth == 0;
         }
 
         private ParticleEffect _effect;
