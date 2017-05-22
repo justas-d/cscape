@@ -235,6 +235,21 @@ namespace CScape.Core.Network.Sync
             // write header
             stream.Write((byte)flags);
 
+            if ((flags & Npc.UpdateFlags.Animation) != 0)
+            {
+                if (state.Npc.AnimationData == null)
+                {
+                    stream.Write16(-1);
+                    stream.Write(0);
+                }
+                else
+                {
+                    var val = state.Npc.AnimationData.Value;
+                    stream.Write16(val.id);
+                    stream.Write(val.delay);
+                }
+            }
+
             if ((flags & Npc.UpdateFlags.InteractingEntity) != 0)
                 EntityHelper.WriteInteractingEntityFlag(state.Npc, state.Npc.UniqueNpcId, stream);
 

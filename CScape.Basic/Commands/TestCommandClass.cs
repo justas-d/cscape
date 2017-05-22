@@ -14,6 +14,30 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("npcanim")]
+        public void SetNpcAnim(CommandContext ctx)
+        {
+            var uni = 0;
+            short animId = 0;
+            byte delay = 0;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("UniqueNpcId", ref uni);
+                b.ReadNumber("animation id", ref animId);
+                b.ReadNumber("delay", ref delay);
+            })) return;
+
+            var npc = ctx.Callee.Server.Npcs.GetById(uni);
+            if (npc == null)
+            {
+                ctx.Callee.SendSystemChatMessage("Npc not found.");
+                return;
+            }
+
+            npc.AnimationData = (animId, delay);
+        }
+
         [CommandMethod("npc")]
         public void SpawnNpc(CommandContext ctx)
         {
@@ -227,9 +251,8 @@ namespace CScape.Basic.Commands
         [CommandMethod]
         public void Id(CommandContext ctx)
         {
-
-            ctx.Callee.SendSystemChatMessage($"UEI: {ctx.Callee.UniqueEntityId}");
-            ctx.Callee.SendSystemChatMessage($"PID: {ctx.Callee.Pid}");
+            foreach (var obs in ctx.Callee.Observatory)
+                ctx.Callee.SendSystemChatMessage($"{obs}");
         }
     }
 }

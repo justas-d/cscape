@@ -16,8 +16,10 @@ namespace CScape.Core.Game.Entity
         public static void WriteInteractingEntityFlag(IMovingEntity ent, 
             int categoryId, Blob stream)
         {
+            const short reset = -1;
+
             if (ent.InteractingEntity == null)
-                stream.Write16(-1);
+                stream.Write16(reset);
             else
             {
                 if (ent.InteractingEntity is Player interactPlayer)

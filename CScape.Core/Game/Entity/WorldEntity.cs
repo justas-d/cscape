@@ -94,6 +94,8 @@ namespace CScape.Core.Game.Entity
 
         public abstract void Update(IMainLoop loop);
 
+        public override string ToString() => $"Entity (UEI: {UniqueEntityId})";
+
         #region IEquatable
 
         public bool Equals(IEntity other)
