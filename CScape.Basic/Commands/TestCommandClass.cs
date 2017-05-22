@@ -73,28 +73,28 @@ namespace CScape.Basic.Commands
             npc.Effect = new ParticleEffect(effId, effHeight, effDelay);
         }
 
-        [CommandMethod("npcanim")]
-        public void SetNpcAnim(CommandContext ctx)
+        [CommandMethod("anim")]
+        public void SetPlayerAnim(CommandContext ctx)
         {
-            var uni = 0;
+            short id = 0;
             short animId = 0;
             byte delay = 0;
 
             if (!ctx.Read(b =>
             {
-                b.ReadNumber("UniqueNpcId", ref uni);
+                b.ReadNumber("ent id", ref id);
                 b.ReadNumber("animation id", ref animId);
                 b.ReadNumber("delay", ref delay);
             })) return;
 
-            var npc = ctx.Callee.Server.Npcs.GetById(uni);
-            if (npc == null)
+            var ent = ctx.Callee.Server.Players.GetById(id);
+            if (ent == null)
             {
-                ctx.Callee.SendSystemChatMessage("Npc not found.");
+                ctx.Callee.SendSystemChatMessage("ent not found.");
                 return;
             }
 
-            npc.AnimationData = (animId, delay);
+            ent.Animation= new Animation(animId, delay);
         }
 
         [CommandMethod("npc")]

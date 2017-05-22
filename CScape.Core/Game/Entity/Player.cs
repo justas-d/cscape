@@ -72,7 +72,18 @@ namespace CScape.Core.Game.Entity
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
         [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
-        
+
+        private Animation _animData;
+        public Animation Animation
+        {
+            get => _animData;
+            set
+            {
+                TickFlags |= UpdateFlags.Animation;
+                _animData = value;
+            }
+        }
+
         [CanBeNull] public ChatMessage LastChatMessage
         {
             get => _lastChatMessage;

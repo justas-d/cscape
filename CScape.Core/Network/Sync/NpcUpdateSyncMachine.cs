@@ -234,17 +234,9 @@ namespace CScape.Core.Network.Sync
 
             if ((flags & Npc.UpdateFlags.Animation) != 0)
             {
-                if (state.Npc.AnimationData == null)
-                {
-                    stream.Write16(-1);
-                    stream.Write(0);
-                }
-                else
-                {
-                    var val = state.Npc.AnimationData.Value;
-                    stream.Write16(val.id);
-                    stream.Write(val.delay);
-                }
+                var data = state.Npc.Animation ?? Animation.Reset;
+                stream.Write16(data.Id);
+                stream.Write(data.Delay);
             }
 
             if((flags & Npc.UpdateFlags.PrimaryHit) != 0)

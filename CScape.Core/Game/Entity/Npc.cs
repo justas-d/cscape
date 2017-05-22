@@ -66,8 +66,8 @@ namespace CScape.Core.Game.Entity
             }
         }
 
-        private (short id, byte delay)? _animData;
-        public (short id, byte delay)? AnimationData
+        private Animation _animData;
+        public Animation Animation
         {
             get => _animData;
             set

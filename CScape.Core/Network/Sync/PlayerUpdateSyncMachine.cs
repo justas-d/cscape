@@ -372,6 +372,13 @@ namespace CScape.Core.Network.Sync
             stream.Write((byte)flags);
             stream.Write((byte)((short)flags >> 8));
 
+            if ((flags & Player.UpdateFlags.Animation) != 0)
+            {
+                var data = upd.Player.Animation ?? Animation.Reset;
+                stream.Write16(data.Id);
+                stream.Write(data.Delay);
+            }
+
             // write flags
             if ((flags & Player.UpdateFlags.ForcedText) != 0)
                 stream.WriteString(upd.Player.ForcedText ?? "");
