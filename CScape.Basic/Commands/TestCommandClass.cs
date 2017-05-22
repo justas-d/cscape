@@ -14,6 +14,12 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("ftext")]
+        public void ForcedText(CommandContext ctx)
+        {
+            ctx.Callee.ForcedText = ctx.Data;
+        }
+
         [CommandMethod("dmg")]
         public void TestNpcDmgFlag(CommandContext ctx)
         {

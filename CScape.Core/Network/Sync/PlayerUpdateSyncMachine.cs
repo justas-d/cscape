@@ -356,7 +356,6 @@ namespace CScape.Core.Network.Sync
             stream.EndPacket();
         }
 
-        // todo : maybe Clear NPC and player sync machines on OnReinitialize()?
         public void OnReinitialize() {  }
 
         private void WriteFlags(PlayerUpdateState upd, Blob stream)
@@ -369,10 +368,14 @@ namespace CScape.Core.Network.Sync
                 return;
             }
 
+            // header
             stream.Write((byte)flags);
             stream.Write((byte)((short)flags >> 8));
 
             // write flags
+            if ((flags & Player.UpdateFlags.ForcedText) != 0)
+                stream.WriteString(upd.Player.ForcedText ?? "");
+
             if (flags.HasFlag(Player.UpdateFlags.Chat))
             {
                 stream.Write(((byte)upd.Player.LastChatMessage.Color));
@@ -395,9 +398,6 @@ namespace CScape.Core.Network.Sync
 
             if ((flags & Player.UpdateFlags.SecondaryHit) != 0)
                 EntityHelper.WriteHitData(stream, upd.Player, true);
-
-            // todo : the rest of the player update flags.
-            // THEY NEED TO FOLLOW A STRICT ORDER
 
             upd.PostUpdate();
         }

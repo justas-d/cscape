@@ -51,6 +51,11 @@ namespace CScape.Core.Game.Entity
         [Flags]
         public enum UpdateFlags
         {
+            ForcedMovement = 0x400,
+            Effect = 0x100,
+            Animation = 8,
+            ForcedText = 4,
+            //
             Chat = 0x80,
             InteractEnt = 0x1,
             Appearance = 0x10,
@@ -110,6 +115,17 @@ namespace CScape.Core.Game.Entity
             {
                 _interactingEntity = value;
                 TickFlags |= UpdateFlags.InteractEnt;
+            }
+        }
+
+        private string _forcedText;
+        public string ForcedText
+        {
+            get => _forcedText;
+            set
+            {
+                _forcedText = value;
+                TickFlags |= UpdateFlags.ForcedText;
             }
         }
 
