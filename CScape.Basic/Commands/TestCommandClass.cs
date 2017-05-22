@@ -14,6 +14,32 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("npceffect")]
+        public void SetNpcParticleEffect(CommandContext ctx)
+        {
+            var uni = 0;
+            short effId = 0;
+            short effHeight = 0;
+            short effDelay = 0;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("UniqueNpcId", ref uni);
+                b.ReadNumber("effect id ", ref effId);
+                b.ReadNumber("effect height", ref effHeight);
+                b.ReadNumber("effect delay", ref effDelay);
+            })) return;
+
+            var npc = ctx.Callee.Server.Npcs.GetById(uni);
+            if (npc == null)
+            {
+                ctx.Callee.SendSystemChatMessage("Npc not found.");
+                return;
+            }
+
+            npc.Effect = new ParticleEffect(effId, effHeight, effDelay);
+        }
+
         [CommandMethod("npcanim")]
         public void SetNpcAnim(CommandContext ctx)
         {

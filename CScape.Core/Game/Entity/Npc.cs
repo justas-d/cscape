@@ -1,8 +1,6 @@
 using System;
-using CScape.Core.Data;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
-using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -18,6 +16,7 @@ namespace CScape.Core.Game.Entity
         public enum UpdateFlags : byte
         {
             Animation = 0x10,
+            ParticleEffect = 0x80,
             InteractingEntity = 0x20,
             Text = 1,
             Definition = 2,
@@ -27,6 +26,17 @@ namespace CScape.Core.Game.Entity
         public UpdateFlags TickFlags { get; private set; }
 
         public (sbyte x, sbyte y) LastMovedDirection { get; set; }
+
+        private ParticleEffect _effect;
+        public ParticleEffect Effect
+        {
+            get => _effect;
+            set
+            {
+                TickFlags  |= UpdateFlags.ParticleEffect;
+                _effect = value;
+            }
+        }
 
         private (short id, byte delay)? _animData;
         public (short id, byte delay)? AnimationData

@@ -250,6 +250,16 @@ namespace CScape.Core.Network.Sync
                 }
             }
 
+            if ((flags & Npc.UpdateFlags.ParticleEffect) != 0)
+            {
+                if (state.Npc.Effect == null)
+                    state.Npc.Effect = ParticleEffect.Stop;
+
+                stream.Write16(state.Npc.Effect.Id);
+                stream.Write16(state.Npc.Effect.Height);
+                stream.Write16(state.Npc.Effect.Delay);
+            }
+
             if ((flags & Npc.UpdateFlags.InteractingEntity) != 0)
                 EntityHelper.WriteInteractingEntityFlag(state.Npc, state.Npc.UniqueNpcId, stream);
 
