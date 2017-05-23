@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CScape.Core.Game.Interface;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockItemProvider : IItemProvider
     {

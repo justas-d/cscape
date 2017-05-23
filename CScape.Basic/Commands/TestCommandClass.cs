@@ -14,6 +14,33 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("drop")]
+        public void TestItemDrop(CommandContext ctx)
+        {
+            short id = 0;
+            short amnt = 0;
+            byte x = 0;
+            byte y = 0;
+            short pid = 0;
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("id", ref id);
+                b.ReadNumber("amount", ref amnt);
+                b.ReadNumber("x", ref x);
+                b.ReadNumber("y", ref y);
+                b.ReadNumber("pid", ref pid);
+            })) return;
+
+            var packet = new SpawnGroundItemPacket((id, amnt), x, y);
+            ctx.Callee.SendSystemChatMessage($"IsInvalid: {packet.IsInvalid}");
+
+            var wrapper = new EmbeddedRegionGroundObjectWrapperPacket(
+                ctx.Callee.ClientTransform.Local, packet);
+
+            ctx.Callee.Connection.SendPacket(wrapper);
+        }
+
         [CommandMethod("ftext")]
         public void ForcedText(CommandContext ctx)
         {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using CScape.Basic.Server;
 using CScape.Core.Network.Handler;
-using CScape.Dev.Tests.Internal.Impl;
+using CScape.Dev.Tests.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal
+namespace CScape.Dev.Tests.Internal.Handler
 {
     [TestClass]
     public class TestForAllPacketHandlers

@@ -4,10 +4,10 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 using CScape.Core.Network.Handler;
-using CScape.Dev.Tests.Internal.Impl;
+using CScape.Dev.Tests.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal
+namespace CScape.Dev.Tests.Internal.Handler
 {
     // todo : test with random blob data
 

@@ -4,7 +4,7 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockLoop : IMainLoop
     {

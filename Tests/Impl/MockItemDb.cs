@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Basic.Model;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockItemDb : IItemDefinitionDatabase
     {

@@ -1,10 +1,49 @@
 using System;
+using System.Collections.Generic;
 using CScape.Core.Network;
 
 namespace CScape.Core.Data
 {
+    public class PacketSizeDoesNotMatchWrittenSizeException : Exception
+    {
+        public byte Opcode { get; }
+        public PacketLength Size { get; }
+        public int WrittenSize { get; }
+
+        public PacketSizeDoesNotMatchWrittenSizeException(
+            byte opcode, PacketLength size, int writtenSize)
+        {
+            Opcode = opcode;
+            Size = size;
+            WrittenSize = writtenSize;
+        }
+
+        public override string ToString() => $"Wrote too much ({WrittenSize}) for packet size {Size} opcode {Opcode}";
+    }
+
+    public class AttemptedToWriteUndefinedPacketException : Exception
+    {
+        
+    }
+
     public class OutBlob : Blob
     {
+        private struct PacketFrame
+        {
+            public byte Opcode { get; }
+            public PacketLength Size { get; }
+            public BlobPlaceholder? Placeholder { get; }
+            public int AtWriteHead { get; }
+
+            public PacketFrame(byte opcode, PacketLength size, int writeHead, BlobPlaceholder? placeholder = null)
+            {
+                Opcode = opcode;
+                Size = size;
+                Placeholder = placeholder;
+                AtWriteHead = writeHead;
+            }
+        }
+
         private readonly IPacketDatabase _db;
 
         public OutBlob(IServiceProvider service, int size) : base(new byte[size])
@@ -12,70 +51,61 @@ namespace CScape.Core.Data
             _db = service.ThrowOrGet<IPacketDatabase>();
         }
 
-        private bool _isWritingPacket;
-        private int _payloadLengthIndex = -1;
-        private bool _isShortLength;
+        private readonly Stack<PacketFrame> _frames = new Stack<PacketFrame>();
 
-        /// <exception cref="ArgumentNullException"><paramref name="stream"/> is <see langword="null"/></exception>
-        /// <exception cref="NotSupportedException">Cannot begin writing a packet whose length is undefined or the encoded in the next two bytes.</exception>
-        /// <exception cref="InvalidOperationException">Cannot begin writing packet when already writing a packet.</exception>
         public void BeginPacket(byte id)
         {
-            if (_isWritingPacket)
-                throw new InvalidOperationException("Cannot begin writing packet when already writing a packet.");
+            var size = _db.GetOutgoing(id);
 
-            var length = _db.GetOutgoing(id);
+            if (size == PacketLength.Undefined)
+                throw new AttemptedToWriteUndefinedPacketException();
 
-            if (length == PacketLength.Undefined)
-                throw new NotSupportedException("Cannot begin writing a packet whose length is undefined.");
-
+            // write opcode now, ph must follow
             Write(id);
 
-            if (length >= 0)
-                return;
-
-            _isWritingPacket = true;
-            Write(0); // placeholder
-            _payloadLengthIndex = WriteCaret - 1;
-
-            if (length == PacketLength.NextShort)
+            // create ph and packet frame
+            switch (size)
             {
-                Write(0); // placeholder
-                _isShortLength = true;
+                case PacketLength.NextByte:
+                    _frames.Push(new PacketFrame(id, size, WriteCaret, new BlobPlaceholder(this, WriteCaret, sizeof(byte))));
+                    break;
+                case PacketLength.NextShort:
+                    _frames.Push(new PacketFrame(id, size, WriteCaret, new BlobPlaceholder(this, WriteCaret, sizeof(short))));
+                    break;
+                default:
+                    _frames.Push(new PacketFrame(id, size, WriteCaret));
+                    break;
             }
-            else
-                _isShortLength = false;
-
-        }
-
-        /// <summary>
-        /// Ends writing the current packet but writes the given <see cref="sizeOverload"/> in place of the packet payload size.
-        /// </summary>
-        public void EndPacket(int sizeOverload)
-        {
-            if (!_isWritingPacket) return;
-
-            // write it in place of the placeholder 0's
-            if (_isShortLength)
-            {
-                Buffer[_payloadLengthIndex] = (byte)(sizeOverload >> 8);
-                Buffer[_payloadLengthIndex + 1] = (byte)sizeOverload;
-            }
-            else
-                Buffer[_payloadLengthIndex] = (byte)sizeOverload;
-
-            _isWritingPacket = false;
-            _payloadLengthIndex = -1;
-
         }
 
         public void EndPacket()
-            // figure out how big the payload is in bytes.
-            => EndPacket(WriteCaret - _payloadLengthIndex - (_isShortLength ? 2 : 1));
+        {
+            var frame = _frames.Pop();
+            var written = WriteCaret - frame.AtWriteHead;
 
-        /// <summary>
-        /// Writes a byte, if value is under 255. If value is equal to, or over, 255, writes it as an 255 padding and then the value as int32.
-        /// </summary>
+            if (frame.Placeholder != null)
+            {
+                // write size in ph
+                var ph = frame.Placeholder.Value;
+                written -= ph.Size;
+
+                ph.Write(b =>
+                {
+                    if (frame.Size == PacketLength.NextByte)
+                        Write((byte)written);
+                    else if (frame.Size == PacketLength.NextShort)
+                        Write16((short)written);
+                });
+            }
+            else
+            {
+                // verify that we have written up to the size given in opcode
+                var size = (int) frame.Size;
+                if (written > size)
+                    throw new PacketSizeDoesNotMatchWrittenSizeException(frame.Opcode, frame.Size, written);
+            }
+        }
+
         public void WriteByteInt32Smart(int value)
         {
             if (value >= 255)

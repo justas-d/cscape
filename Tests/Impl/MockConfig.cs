@@ -2,7 +2,7 @@
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockConfig : IGameServerConfig
     {

@@ -11,7 +11,7 @@ using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockServer : IGameServer
     {

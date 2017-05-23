@@ -3,24 +3,24 @@ using System.Runtime.CompilerServices;
 
 namespace CScape.Core.Data
 {
-    public struct DisposableBlobPlaceholder
+    public struct BlobPlaceholder
     {
-        private readonly Blob _blob;
-        private readonly int _startPos;
-        private readonly int _size;
+        public Blob Blob { get; }
+        public int StartPosition { get; }
+        public int Size { get; }
 
         private int _origWritePos;
 
-        public DisposableBlobPlaceholder(Blob blob, int startPos, int size)
+        public BlobPlaceholder(Blob blob, int startPosition, int size)
         {
-            _blob = blob;
-            _startPos = startPos;
-            _size = size;
+            Blob = blob;
+            StartPosition = startPosition;
+            Size = size;
             _origWritePos = 0;
 
             // write placeholder 0's
             for (var i = 0; i < size; i++)
-                _blob.Write(0);
+                Blob.Write(0);
         }
 
         /// <summary>
@@ -29,14 +29,14 @@ namespace CScape.Core.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Reverse()
         {
-            _origWritePos = _blob.WriteCaret;
-            _blob.WriteCaret = _startPos;
+            _origWritePos = Blob.WriteCaret;
+            Blob.WriteCaret = StartPosition;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ThrowIfOutOfRange()
         {
-            if (_blob.WriteCaret - _startPos > _size)
+            if (Blob.WriteCaret - StartPosition > Size)
                 throw new InvalidOperationException("Placeholder went out of range.");
         }
 
@@ -44,13 +44,13 @@ namespace CScape.Core.Data
         /// Resets the write caret to its original write pos.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Forward() => _blob.WriteCaret = _origWritePos;
+        private void Forward() => Blob.WriteCaret = _origWritePos;
 
         public void Write(Action<Blob> write)
         {
             Reverse();
 
-            write(_blob);
+            write(Blob);
             ThrowIfOutOfRange();
 
             Forward();
@@ -60,16 +60,16 @@ namespace CScape.Core.Data
         {
             Reverse();
 
-            var size = _origWritePos - _startPos - _size;
+            var size = _origWritePos - StartPosition - Size;
 
             if (size <= byte.MaxValue)
-                _blob.Write((byte)size);
+                Blob.Write((byte)size);
 
             else if (size <= short.MaxValue)
-                _blob.Write16((short) size);
+                Blob.Write16((short) size);
 
             else
-                _blob.Write32(size);
+                Blob.Write32(size);
 
             ThrowIfOutOfRange();
             Forward();

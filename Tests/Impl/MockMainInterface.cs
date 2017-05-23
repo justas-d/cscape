@@ -1,7 +1,7 @@
 ﻿using CScape.Core.Game.Interface;
 using JetBrains.Annotations;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockMainInterface : SingleUserShowableInterface
     {

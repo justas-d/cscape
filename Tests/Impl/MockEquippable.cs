@@ -2,7 +2,7 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockEquippable : MockItem, IEquippableItem
     {

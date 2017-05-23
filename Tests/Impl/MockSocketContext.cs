@@ -5,7 +5,7 @@ using CScape.Core.Injection;
 using CScape.Core.Network;
 using CScape.Core.Network.Sync;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockSocketContext : ISocketContext
     {

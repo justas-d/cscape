@@ -39,8 +39,8 @@ namespace CScape.Core
 
         [DebuggerStepThrough]
         [DebuggerHidden]
-        public static DisposableBlobPlaceholder Placeholder(this Blob blob, int size)
-            => new DisposableBlobPlaceholder(blob, blob.WriteCaret, size);
+        public static BlobPlaceholder Placeholder(this Blob blob, int size)
+            => new BlobPlaceholder(blob, blob.WriteCaret, size);
 
         [DebuggerStepThrough]
         [DebuggerHidden]

@@ -3,7 +3,7 @@ using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal.Impl
+namespace CScape.Dev.Tests.Impl
 {
     public class MockItem : IItemDefinition
     {

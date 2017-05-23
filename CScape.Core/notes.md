@@ -14,8 +14,27 @@
 		  "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
 
 	* Different implementations of protocols (377)
-  		
-	* Undocumented packets:
+  	
+	* Packets
+		* 84 - ground item update amount
+		* 85 - sets updRegionPlayerLocalY and updRegionPlayerLocalX
+		* 60 - sets upd region Y/X and parses any embedded updateRegion() packets
+		* 64 - X\Y, reset ground objects and resets Class30_Sub1.anInt1294 (???????) within the given x y range 
+
+	* updateRegion()
+		* 84
+		* 105
+		* 215 OK
+		* 156
+		* 160
+		* 147
+		* 151
+		* 4
+		* 44 OK
+		* 101
+		* 117
+
+	* Undocumented incoming packets:
 		* 23
 		* 35
 		* 57
@@ -27,7 +46,7 @@
 		* 181
 		* 136 (follow prefix?)
 	
-	* Verify:
+	* Verify incoming:
 		* 192 (item -> object)
 		* 25 (item -> floor item)
 		* 236 (pickup ground item)
