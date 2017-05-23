@@ -2,6 +2,7 @@
 	* Segregate the Player class into smaller interfaces (maybe)
 		* Replace usages of Player with usages of these smaller interfaces.
 
+	* Negative numbers aren't parsed by the command interpreter
 	* Invensitage reconnect limbo
 	* Separate packet metadata and writing packet data to out stream
 	* Replace complicated abstraction hierarchies with a strategy pattern
@@ -14,25 +15,22 @@
 		  "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
 
 	* Different implementations of protocols (377)
-  	
+
 	* Packets
-		* 84 - ground item update amount
 		* 85 - sets updRegionPlayerLocalY and updRegionPlayerLocalX
-		* 60 - sets upd region Y/X and parses any embedded updateRegion() packets
-		* 64 - X\Y, reset ground objects and resets Class30_Sub1.anInt1294 (???????) within the given x y range 
 
 	* updateRegion()
-		* 84
-		* 105
-		* 215 OK
-		* 156
-		* 160
-		* 147
-		* 151
-		* 4
+		* 84 - ground item update amount
+		* 105 - play sound
+		* 215 OK 
+		* 156 - remove item id from pile
+		* 160 - possibly animates an object
+		* 147 - transforms player to object
+		* 151 - spawn or updates values in an Class30_Sub1 object at the given coords
+		* 4 - creates an Animable_Sub3 (whatever that means)
 		* 44 OK
-		* 101
-		* 117
+		* 101 - same as 151 just less payload args
+		* 117 - jesus fucking christ
 
 	* Undocumented incoming packets:
 		* 23

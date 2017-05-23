@@ -14,6 +14,39 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("dropclear")]
+        public void TestGroundClear(CommandContext ctx)
+        {
+            ctx.Callee.Connection.SendPacket(
+                new ResetGroundObjectsInRegionPacket(
+                    ctx.Callee.ClientTransform.Local));
+        }
+
+        [CommandMethod("dropspam")]
+        public void TestDropPacket(CommandContext ctx)
+        {
+            IEnumerable<BaseGroundObjectPacket> Random()
+            {
+                var rng = new Random();
+                const int max = BaseGroundObjectPacket.MaxOffset;
+                for (byte x = 0; x <= max; x++)
+                {
+                    for (byte y = 0; y <= max; y++)
+                    {
+                        var packet = new SpawnGroundItemPacket(
+                            (rng.Next(1, 4000), rng.Next(1, 4000)),
+                            x, y);
+                        yield return packet;
+                    }
+                }
+            }
+
+            var wrapper = new EmbeddedRegionGroundObjectWrapperPacket(
+                ctx.Callee.ClientTransform.Local, Random());
+
+            ctx.Callee.Connection.SendPacket(wrapper);
+        }
+
         [CommandMethod("drop")]
         public void TestItemDrop(CommandContext ctx)
         {
@@ -21,7 +54,6 @@ namespace CScape.Basic.Commands
             short amnt = 0;
             byte x = 0;
             byte y = 0;
-            short pid = 0;
 
             if (!ctx.Read(b =>
             {
@@ -29,7 +61,6 @@ namespace CScape.Basic.Commands
                 b.ReadNumber("amount", ref amnt);
                 b.ReadNumber("x", ref x);
                 b.ReadNumber("y", ref y);
-                b.ReadNumber("pid", ref pid);
             })) return;
 
             var packet = new SpawnGroundItemPacket((id, amnt), x, y);

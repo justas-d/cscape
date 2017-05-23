@@ -6,19 +6,16 @@ namespace CScape.Core.Game.Entity
 {
     public class ClientTransform : ServerTransform , IClientTransform
     {
-        public static class Factory
+        public static ClientTransform Create(
+            IWorldEntity forEntity,
+            IPosition pos,
+            [CanBeNull] PlaneOfExistance poe = null)
         {
-            public static ClientTransform Create(
-                IObserver forEntity,
-                int x, int y, byte z,
-                [CanBeNull] PlaneOfExistance poe = null)
-            {
-                var transform = new ClientTransform(forEntity);
+            var transform = new ClientTransform(forEntity);
 
-                transform.Initialize(x, y, z, poe ?? forEntity.Server.Overworld);
+            transform.Initialize(pos.X, pos.Y, pos.Z, poe ?? forEntity.Server.Overworld);
 
-                return transform;
-            }
+            return transform;
         }
 
         private (int x, int y) _local;
@@ -31,15 +28,12 @@ namespace CScape.Core.Game.Entity
         public (int x, int y) ClientRegion => _clientRegion;
         public (int x, int y) Local => _local;
 
-        private readonly IObserver _observer;
-
-        private ClientTransform(
-            [NotNull] IObserver entity) : base(entity)
+        public ClientTransform(
+            [NotNull] IWorldEntity entity) : base(entity)
         {
-            _observer = entity;
         }
 
-        private void Initialize(int x, int y, byte z, [NotNull] PlaneOfExistance poe)
+        protected void Initialize(int x, int y, byte z, [NotNull] PlaneOfExistance poe)
         {
             if (poe == null) throw new ArgumentNullException(nameof(poe));
 
@@ -55,8 +49,6 @@ namespace CScape.Core.Game.Entity
         {
             _clientRegion = ((X >> 3) - 6, (Y >> 3) - 6);
             _local = (X - (8 * ClientRegion.x), Y - (8 * ClientRegion.y));
-
-            _observer.Observatory.Clear();
 
             Recalc();
         }
@@ -101,7 +93,6 @@ namespace CScape.Core.Game.Entity
             Y = Base.y + _local.y;
 
             Entity.NeedsSightEvaluation = true;
-            _observer.Observatory.ReevaluateSightOverride = true;
 
             UpdateRegion();
         }

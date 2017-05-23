@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Data;
 
@@ -13,9 +14,18 @@ namespace CScape.Core.Network.Packet
         private readonly byte _playerLocalX;
         private readonly byte _playerLocalY;
 
-        private readonly BaseGroundObjectPacket[] _embedded;
+        private readonly IEnumerable<BaseGroundObjectPacket> _embedded;
 
         public const int Id = 60;
+
+        public EmbeddedRegionGroundObjectWrapperPacket(
+            (int x, int y) local,
+            IEnumerable<BaseGroundObjectPacket> embedded)
+        {
+            _playerLocalX = Convert.ToByte(local.x);
+            _playerLocalY = Convert.ToByte(local.y);
+            _embedded = embedded;
+        }
 
         public EmbeddedRegionGroundObjectWrapperPacket(
             (int x, int y) local,

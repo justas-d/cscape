@@ -7,7 +7,7 @@ namespace CScape.Core.Game.World
 {
     public class Region
     {
-        [NotNull]public PlaneOfExistance Poe { get; }
+        [NotNull] public PlaneOfExistance Poe { get; }
 
         public int X { get; }
         public int Y { get; }
@@ -18,6 +18,7 @@ namespace CScape.Core.Game.World
         [NotNull]public RegisteredHashSet<Player> Players { get; } = new RegisteredHashSet<Player>();
         [NotNull]public RegisteredHashSet<IObserver> Observers { get; } = new RegisteredHashSet<IObserver>();
         [NotNull]public RegisteredHashSet<IWorldEntity> WorldEntities { get; } = new RegisteredHashSet<IWorldEntity>();
+        [NotNull]public RegisteredHashSet<GroundItem> Items { get; } = new RegisteredHashSet<GroundItem>();
 
         private IEnumerable<Region> _nearbyRegions;
 
@@ -54,6 +55,8 @@ namespace CScape.Core.Game.World
             }
             if (ent is IObserver o)
                 Observers.Add(o);
+            if (ent is GroundItem item)
+                Items.Add(ent);
         }
 
         public void RemoveEntity([NotNull] IWorldEntity ent)
@@ -69,6 +72,8 @@ namespace CScape.Core.Game.World
             }
             if (ent is IObserver o)
                 Observers.Remove(o);
+            if (ent is GroundItem item)
+                Items.Remove(item);
         }
 
         /// <summary>

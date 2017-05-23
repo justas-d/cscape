@@ -187,20 +187,6 @@ namespace CScape.Core.Game.Entity
             loop.Npc.Enqueue(this);
         }
 
-        public override bool CanSee(IWorldEntity ent)
-        {
-            if (ent.IsDestroyed)
-                return false;
-
-            if (ent.Transform.Z != Transform.Z)
-                return false;
-
-            if (!Transform.PoE.ContainsEntity(ent))
-                return false;
-
-            return ent.Transform.MaxDistanceTo(Transform) <= ViewRange;
-        }
-
         public override string ToString() => $"Npc def-id {NpcDefinitionId} (UEI: {UniqueNpcId} UNI {UniqueNpcId})";
     }
 }

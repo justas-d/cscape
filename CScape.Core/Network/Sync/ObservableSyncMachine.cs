@@ -60,6 +60,7 @@ namespace CScape.Core.Network.Sync
                         case Npc n:
                             NpcSync.PushNpc(n);
                             break;
+                            // todo : handle GroundItem in ObserverSyncMachine
                         default:
                             _log.Warning(this, $"Unhandled entity in isNew sync: {obs}");
                             break;

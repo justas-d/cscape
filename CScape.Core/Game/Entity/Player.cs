@@ -266,7 +266,7 @@ namespace CScape.Core.Game.Entity
 
             _observatory = new PlayerObservatory(services, this);
 
-            _transform = Entity.ClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
+            _transform = Entity.ObserverClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
             Transform = _transform;
 
             Movement = new MovementController(services, this);

@@ -46,7 +46,20 @@ namespace CScape.Core.Game.Entity
             }
         }
 
-        public abstract bool CanSee(IWorldEntity ent);
+        public virtual bool CanSee(IWorldEntity ent)
+        {
+            const int viewRange = 15;
+            if (ent.IsDestroyed)
+                return false;
+
+            if (ent.Transform.Z != Transform.Z)
+                return false;
+
+            if (!Transform.PoE.ContainsEntity(ent))
+                return false;
+
+            return ent.Transform.MaxDistanceTo(Transform) <= viewRange;
+        }
 
         public void Destroy()
         {
