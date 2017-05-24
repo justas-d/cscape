@@ -12,15 +12,21 @@ namespace CScape.Core.Network.Packet
 
         protected AbstractBaseGroundItemPacket(
             (int id, int amount) item, int offX, int offY)
+            : this(item.id, item.amount, offX, offY)
+        {
+        }
+
+        protected AbstractBaseGroundItemPacket(
+            int id, int amount, int offX, int offY)
             : base(offX, offY)
         {
-            if (ItemHelper.IsEmpty(item))
+            if (ItemHelper.IsEmpty(id, amount))
                 IsInvalid = true;
 
             if (!IsInvalid)
             {
-                ItemId = (short) item.id;
-                Amount = (short) Utils.Clamp(item.amount, 0, ushort.MaxValue);
+                ItemId = (short) id;
+                Amount = (short) Utils.Clamp(amount, 0, ushort.MaxValue);
             }
         }
     }

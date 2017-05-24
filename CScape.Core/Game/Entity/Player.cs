@@ -337,6 +337,8 @@ namespace CScape.Core.Game.Entity
         {
             FacingCoordinate = null;
             Interfaces.OnActionOccurred();
+
+            SendSystemChatMessage($"{ClientTransform.ClientRegion.x} {ClientTransform.ClientRegion.y}");
         }
 
         /// <summary>

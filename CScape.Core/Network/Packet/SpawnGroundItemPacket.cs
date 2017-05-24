@@ -12,7 +12,15 @@ namespace CScape.Core.Network.Packet
         public SpawnGroundItemPacket(
             (int id, int amount) item,
             byte offX, byte offY)
-            : base(item, (int) offX, (int) offY)
+            : base(item, offX, offY)
+        {
+
+        }
+
+        public SpawnGroundItemPacket(
+            int id, int amount,
+            byte offX, byte offY)
+            : base(id, amount, offX, offY)
         {
 
         }
