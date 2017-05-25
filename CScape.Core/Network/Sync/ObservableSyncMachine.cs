@@ -1,7 +1,6 @@
 ﻿using System;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Sync
@@ -22,13 +21,10 @@ namespace CScape.Core.Network.Sync
         public NpcUpdateSyncMachine NpcSync { get; }
         public GroundItemSyncMachine ItemSync { get; }
 
-        private readonly ILogger _log;
-
         public ObservableSyncMachine(
             IServiceProvider services,
             [NotNull] Player player, [NotNull] PlayerObservatory playerObservatory)
         {
-            _log = services.ThrowOrGet<ILogger>();
             _playerObservatory = playerObservatory ?? throw new ArgumentNullException(nameof(playerObservatory));
 
             LocalPlayer = player ?? throw new ArgumentNullException(nameof(player));
@@ -63,9 +59,6 @@ namespace CScape.Core.Network.Sync
                             break;
                         case Npc n:
                             NpcSync.PushNpc(n);
-                            break;
-                        default:
-                            _log.Warning(this, $"Unhandled entity in isNew sync: {obs}");
                             break;
                     }
                 }

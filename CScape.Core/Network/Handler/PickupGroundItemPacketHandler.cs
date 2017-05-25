@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 
@@ -32,19 +31,7 @@ namespace CScape.Core.Network.Handler
                 return;
             }
 
-            // try to pick up the item
-            var info = player.Inventory.CalcChangeInfo(item.ItemId, item.ItemAmount);
-
-            // don't allow pickup if inv is full
-            if (!info.IsValid || info.OverflowAmount != 0)
-            {
-                player.SendSystemChatMessage("Your inventory is full.");
-                return;
-            }
-
-            // add item to inv
-            if (player.Inventory.ExecuteChangeInfo(info))
-                item.Destroy(); // destroy ground item if we've successfully added the item to inv.
+            player.Movement.MoveAction = new PickupItemAction(player, item);
         }
     }
 }

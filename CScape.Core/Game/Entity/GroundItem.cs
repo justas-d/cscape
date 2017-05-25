@@ -8,8 +8,8 @@ namespace CScape.Core.Game.Entity
     public class GroundItem : WorldEntity
     {
         // sync vars
-        public int OldAmount { get; private set; }
-        public bool NeedsAmountUpdate { get; private set; }
+        internal int OldAmount { get; private set; }
+        internal bool NeedsAmountUpdate { get; private set; }
 
         public int ItemId { get; }
         public int ItemAmount { get; private set; }

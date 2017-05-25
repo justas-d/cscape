@@ -30,31 +30,49 @@ namespace CScape.Core.Game.Entity
             set
             {
                 // if we're overwriting, we have to dispose existing provider.
-                Directions?.Dispose();
+                DisposeDirections();
 
                 _directions = value;
                 _loop.Movement.Enqueue(Entity);
             }
         }
 
+        /// <summary>
+        /// The move action to be executed when direction provider is done.
+        /// Will be reset to null after executing.
+        /// </summary>
+        [CanBeNull] public IMovementDoneAction MoveAction { get; set; }
+
         public void DisposeDirections()
         {
+            MoveAction = null;
             if (Directions != null)
             {
                 Directions.Dispose();
-                Directions = null;
+                _directions = null;
             }
         }
 
         public void Update()
         {
-            // verify whether we have an active direction provider
-            if (Directions == null || Directions.IsDone())
+            void Reset()
             {
                 MoveUpdate.Type = MoveUpdateData.MoveType.Noop;
+                DisposeDirections();
+            }
 
-                Directions?.Dispose();
-                _directions = null;
+            // verify whether we have an active direction provider
+            if (Directions != null && Directions.IsDone())
+            {
+                // assign to local to allow MoveAction to reset itself in Execute()
+                var moveAction = MoveAction;
+                Reset();
+                moveAction?.Execute();
+                return;
+            }
+            if (Directions == null)
+            {
+                Reset();
                 return;
             }
 
