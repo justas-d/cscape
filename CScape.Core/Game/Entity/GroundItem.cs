@@ -18,12 +18,12 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// How many ms need to pass after the creation of the item in order for it to become public.
         /// </summary>
-        public long BecomesPublicAfterMs { get; } = 30 * 1000; // todo: 2 minutes
+        public long BecomesPublicAfterMs { get; } = 60 * 2 * 1000; // todo: 2 minutes
 
         /// <summary>
         /// How many milliseconds need to pass for the item to despawn.
         /// </summary>
-        public long DespawnsAfterMs { get; } = 60 * 1 * 1000; // todo: 6 minutes
+        public long DespawnsAfterMs { get; } = 60 * 6 * 1000; // todo: 6 minutes
 
         /// <summary>
         /// Whether this item can be seen by everybody, not just by the player who dropped it.
