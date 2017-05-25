@@ -49,6 +49,7 @@ namespace CScape.Core.Network.Sync
             _syncNpcs = ImmutableList<NpcUpdateState>.Empty;
             _syncNpcIds.Clear();
             _initQueue.Clear();
+            _ignoreEmpty = true;
         }
 
         public void PushNpc(Npc npc)

@@ -13,6 +13,9 @@ namespace CScape.Core.Game.Entity
 
         public void Execute()
         {
+            if (!_player.CanSee(_npc))
+                return;
+
             // todo : talk-to logic
             _npc.Say("Hello world!");
         }

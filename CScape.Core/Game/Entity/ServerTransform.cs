@@ -62,6 +62,7 @@ namespace CScape.Core.Game.Entity
             PoE = newPoe;
             PoE.AddEntity(this);
 
+            InternalSwitchPoE(newPoe);
             UpdateRegion();
         }
 
@@ -108,6 +109,7 @@ namespace CScape.Core.Game.Entity
             Entity.NeedsSightEvaluation = true;
         }
 
+        protected virtual void InternalSwitchPoE(PlaneOfExistance newPoe) { }
         protected virtual void InternalSetPosition(int x, int y, byte z) { }
         protected virtual void InternalMove(sbyte dx, sbyte dy) { }
     }

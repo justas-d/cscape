@@ -13,6 +13,12 @@ namespace CScape.Core.Game.Entity
 
         public void Execute()
         {
+            if (!_player.CanSee(_item))
+                return;
+
+            if (!_player.CanSeeItem(_item))
+                return;
+
             // try to pick up the item
             var info = _player.Inventory.CalcChangeInfo(_item.ItemId, _item.ItemAmount);
 

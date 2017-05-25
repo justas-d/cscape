@@ -428,6 +428,9 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public bool CanSeeItem(GroundItem item)
         {
+            if (item.IsDestroyed)
+                return false;
+
             return item.IsPublic || item.DroppedBy.Equals(this);
         }
 

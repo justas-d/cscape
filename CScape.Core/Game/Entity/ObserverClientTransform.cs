@@ -25,9 +25,15 @@ namespace CScape.Core.Game.Entity
 
         public ObserverClientTransform(
             [NotNull] IObserver entity) 
-            : base((IWorldEntity) entity)
+            : base(entity)
         {
             _observer = entity;
+        }
+
+        protected override void InternalSwitchPoE(PlaneOfExistance newPoe)
+        {
+            base.InternalSwitchPoE(newPoe);
+            _observer.Observatory.Clear();
         }
 
         protected override void InternalSetPosition(int x, int y, byte z)
