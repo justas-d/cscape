@@ -111,20 +111,6 @@ namespace CScape.Core.Game.Entity
 
         #region IEquatable
 
-        public bool Equals(IEntity other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return UniqueEntityId == other.UniqueEntityId;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((IEntity) obj);
-        }
 
         public override int GetHashCode()
         {
@@ -132,5 +118,16 @@ namespace CScape.Core.Game.Entity
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Indicates whether this entity is equal to any other entity based on the equality of their <see cref="UniqueEntityId"/>
+        /// </summary>
+        public bool Equals(IEntity other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return UniqueEntityId == other.UniqueEntityId;
+        }
     }
 }

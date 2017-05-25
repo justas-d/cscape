@@ -21,10 +21,8 @@ namespace CScape.Core.Network.Packet
             _pid = pid;
         }
 
-        public override void Send(OutBlob stream)
+        protected override void InternalSend(OutBlob stream)
         {
-            if (IsInvalid) return;
-
             stream.BeginPacket(Id);
 
             stream.Write16(ItemId);

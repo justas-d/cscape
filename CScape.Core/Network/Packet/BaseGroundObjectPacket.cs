@@ -20,6 +20,14 @@ namespace CScape.Core.Network.Packet
                 PackedPos = (byte) (offX << 4 | offY);
         }
 
-        public abstract void Send(OutBlob stream);
+        public void Send(OutBlob stream)
+        {
+            if (IsInvalid)
+                return;
+
+            InternalSend(stream);
+        }
+
+        protected abstract void InternalSend(OutBlob stream);
     }
 }

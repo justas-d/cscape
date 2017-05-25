@@ -25,7 +25,7 @@ namespace CScape.Core.Network.Packet
 
             if (!IsInvalid)
             {
-                ItemId = (short) id;
+                ItemId = (short) (id - 1);
                 Amount = (short) Utils.Clamp(amount, 0, ushort.MaxValue);
             }
         }

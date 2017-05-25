@@ -7,9 +7,9 @@ namespace CScape.Core.Game.Entity
 {
     public class GroundItem : WorldEntity
     {
+        // sync vars
+        public int OldAmount { get; private set; }
         public bool NeedsAmountUpdate { get; private set; }
-        public bool JustWentPublic { get; private set; }
-
 
         public int ItemId { get; }
         public int ItemAmount { get; private set; }
@@ -18,12 +18,12 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// How many ms need to pass after the creation of the item in order for it to become public.
         /// </summary>
-        public long BecomesPublicAfterMs { get; } = 60 * 2 * 1000; // 2 minutes
+        public long BecomesPublicAfterMs { get; } = 30 * 1000; // todo: 2 minutes
 
         /// <summary>
         /// How many milliseconds need to pass for the item to despawn.
         /// </summary>
-        public long DespawnsAfterMs { get; } = 60 * 6 * 1000; // 6 minutes
+        public long DespawnsAfterMs { get; } = 60 * 1 * 1000; // todo: 6 minutes
 
         /// <summary>
         /// Whether this item can be seen by everybody, not just by the player who dropped it.
@@ -44,14 +44,17 @@ namespace CScape.Core.Game.Entity
             var t = new ServerTransform(this, pos, poe);
             Transform = t;
 
+            services.ThrowOrGet<IMainLoop>().Item.Enqueue(this);
         }
 
         private long _droppedForMs;
 
         public override void Update(IMainLoop loop)
         {
+            if (IsDestroyed)
+                return;
+
             // reset update flags
-            JustWentPublic = false;
             NeedsAmountUpdate = false;
 
             // accumulate alive time
@@ -61,26 +64,25 @@ namespace CScape.Core.Game.Entity
             if (!IsPublic)
             {
                 if (_droppedForMs >= BecomesPublicAfterMs)
-                {
                     IsPublic = true;
-                    JustWentPublic = true;
-                }
-                    
             }
 
             // handle despawning
-            if (DespawnsAfterMs >= _droppedForMs)
+            if (_droppedForMs >= DespawnsAfterMs)
                 // keep the item in the update loop for 1 more tick 
                 // after being destroyed so that ground item sync machines can
                 // see that this item needs to be removed.
                 Destroy(); 
 
+            loop.Item.Enqueue(this);
         }
 
         public void UpdateAmount(int newAmount)
         {
             if (ItemAmount == newAmount) return;
             if (0 >= newAmount) return;
+
+            OldAmount = ItemAmount;
 
             ItemAmount = newAmount;
             NeedsAmountUpdate = true;

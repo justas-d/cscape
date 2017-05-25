@@ -61,6 +61,16 @@ namespace CScape.Basic.Model
                 case ItemActionType.Generic3:
                     break;
                 case ItemActionType.Drop:
+
+                    var item = container.Items.Provider[index];
+
+                    // remove item
+                    if (!container.Items.ExecuteChangeInfo(ItemProviderChangeInfo.Remove(index)))
+                        return;
+
+                    // drop item
+                    new GroundItem(player.Server.Services, item, player.Transform, player, player.Transform.PoE);
+
                     break;
                 case ItemActionType.Remove:
                     player.DebugMsg($"Removing {ItemId}", ref player.DebugItems);

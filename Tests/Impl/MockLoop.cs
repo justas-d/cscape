@@ -20,6 +20,7 @@ namespace CScape.Dev.Tests.Impl
         public IUpdateQueue<IMovingEntity> Movement { get; }= new MockUpdateQueue<IMovingEntity>();
         public IUpdateQueue<Player> Player { get; } = new MockUpdateQueue<Player>();
         public IUpdateQueue<Npc> Npc { get; } = new MockUpdateQueue<Npc>();
+        public IUpdateQueue<GroundItem> Item { get; } = new MockUpdateQueue<GroundItem>();
 
         public long ElapsedMilliseconds { get; }
         public long DeltaTime { get; }

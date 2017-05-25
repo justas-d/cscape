@@ -1,4 +1,5 @@
 using CScape.Core.Data;
+using CScape.Core.Game.Entity;
 
 namespace CScape.Core.Network.Packet
 {
@@ -10,8 +11,17 @@ namespace CScape.Core.Network.Packet
         public const int Id = 44;
 
         public SpawnGroundItemPacket(
+            GroundItem item,
+            (int x, int y) off)
+            : this(item.ItemId, item.ItemAmount,
+                  off.x, off.y)
+        {
+            
+        }
+
+        public SpawnGroundItemPacket(
             (int id, int amount) item,
-            byte offX, byte offY)
+            int offX, int offY)
             : base(item, offX, offY)
         {
 
@@ -19,16 +29,14 @@ namespace CScape.Core.Network.Packet
 
         public SpawnGroundItemPacket(
             int id, int amount,
-            byte offX, byte offY)
+            int offX, int offY)
             : base(id, amount, offX, offY)
         {
 
         }
 
-        public override void Send(OutBlob stream)
+        protected override void InternalSend(OutBlob stream)
         {
-            if (IsInvalid) return;
-
             stream.BeginPacket(Id);
 
             stream.Write16(ItemId);
@@ -39,3 +47,4 @@ namespace CScape.Core.Network.Packet
         }
     }
 }
+ 

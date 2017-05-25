@@ -18,7 +18,7 @@ namespace CScape.Core.Game.Entity
     /// Defines a player entity that exists in the world.
     /// </summary>
     public sealed class Player 
-        : WorldEntity, IMovingEntity, IObserver, IDamageable
+        : WorldEntity, IMovingEntity, IObserver, IDamageable, IEquatable<Player>
     {
         #region debug vars
 
@@ -501,6 +501,15 @@ namespace CScape.Core.Game.Entity
         {
             return $"Player \"{Username}\" (UEI: {UniqueEntityId} PID: {Pid})";
         }
-        
+
+        /// <summary>
+        /// Indicates whether this player is equal to any other player based on the equality of their unique <see cref="Username"/>
+        /// </summary>
+        public bool Equals(Player other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Username.Equals(other.Username, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

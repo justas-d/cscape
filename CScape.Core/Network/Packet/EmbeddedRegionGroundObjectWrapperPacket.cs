@@ -27,6 +27,7 @@ namespace CScape.Core.Network.Packet
             _embedded = embedded;
         }
 
+
         public EmbeddedRegionGroundObjectWrapperPacket(
             (int x, int y) local,
             params BaseGroundObjectPacket[] embedded)

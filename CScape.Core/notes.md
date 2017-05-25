@@ -20,7 +20,7 @@
 		* 85 - sets updRegionPlayerLocalY and updRegionPlayerLocalX
 
 	* updateRegion()
-		* 84 - ground item update amount
+		* 84 - OK ground item update amount
 		* 105 - play sound
 		* 215 OK 
 		* 156 - remove item id from pile

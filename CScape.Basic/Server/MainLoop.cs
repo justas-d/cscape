@@ -46,6 +46,7 @@ namespace CScape.Basic.Server
         public IUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
         public IUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
         public IUpdateQueue<Npc> Npc { get; } = new UniqueEntUpdateQueue<Npc>();
+        public IUpdateQueue<GroundItem> Item { get; } = new UniqueEntUpdateQueue<GroundItem>();
 
         [NotNull] private readonly Stopwatch _tickWatch = new Stopwatch();
         private readonly IPacketDispatch _dispatch;
@@ -147,13 +148,15 @@ namespace CScape.Basic.Server
 
                     //================================================
 
-                    // player entity updating.
                     EntityUpdate(Player);
 
                     //================================================
 
-                    // npc entity updating.
                     EntityUpdate(Npc);
+
+                    //================================================
+
+                    EntityUpdate(Item);
 
                     //================================================
 
