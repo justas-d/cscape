@@ -18,7 +18,7 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// How many ms need to pass after the creation of the item in order for it to become public.
         /// </summary>
-        public long BecomesPublicAfterMs { get; } = 60 * 2 * 1000; // todo: 2 minutes
+        public long BecomesPublicAfterMs { get; } = 60 * 0 * 1000; // todo: 2 minutes
 
         /// <summary>
         /// How many milliseconds need to pass for the item to despawn.

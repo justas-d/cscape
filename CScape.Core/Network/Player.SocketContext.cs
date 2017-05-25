@@ -153,7 +153,7 @@ namespace CScape.Core.Network
 
             if (!IsConnected())
             {
-                // paranoid about an edge-case where DeadForMs does overflow due to zombie players.
+                // todo : DeadForMs += deltaTime; resulted in a massive negative dead for ms
                 unchecked { DeadForMs += deltaTime; }
                 return false;
             }

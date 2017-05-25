@@ -102,13 +102,14 @@ namespace CScape.Core.Network.Sync
                 {
                     var coords = GetCoords();
                     AddPacket(new DeleteGroundItemPacket(item, coords.offset), coords.regionGrid);
+                    _tracked.Remove(item.UniqueEntityId);
                 }
             }
             else
             {
                 // check whether our local is the one who dropped it..
                 // ..or the item is public
-                if (item.IsPublic || item.DroppedBy.Equals(_local))
+                if(_local.CanSeeItem(item))
                 {
                     // we should start tracking the item now
                     _tracked.Add(item.UniqueEntityId);

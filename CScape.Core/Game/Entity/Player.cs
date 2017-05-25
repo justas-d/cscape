@@ -423,6 +423,14 @@ namespace CScape.Core.Game.Entity
             Server.Players.Unregister(this);
         }
 
+        /// <summary>
+        /// Indicates whether this player can see the given item. Does not take into account view ranges/sight lines.
+        /// </summary>
+        public bool CanSeeItem(GroundItem item)
+        {
+            return item.IsPublic || item.DroppedBy.Equals(this);
+        }
+
         public override bool CanSee(IWorldEntity obs)
         {
             if (obs.IsDestroyed)

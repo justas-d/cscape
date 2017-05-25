@@ -97,7 +97,7 @@ namespace CScape.Core.Game.Entity
 
         protected void UpdateRegion()
         {
-            var region = PoE.GetRegion((X >> Region.Shift, Y >> Region.Shift));
+            var region = PoE.GetRegion(X, Y);
 
             if (Region == region) return;
 

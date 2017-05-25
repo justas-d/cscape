@@ -45,14 +45,23 @@ namespace CScape.Core.Game.World
         protected virtual void InternalRemoveEntity([NotNull]IWorldEntity ent) { }
         protected virtual void InternalAddEntity([NotNull] IWorldEntity ent) { }
 
+        /// <summary>
+        /// Gets the region coords by global position.
+        /// </summary>
         [NotNull]
-        public Region GetRegion((int rx, int ry) key)
+        public Region GetRegion(int x, int y)
         {
+            var key = (x >> Region.Shift, y >> Region.Shift);
+            return GetRegion(key);
+        }
 
-            if(!_regions.ContainsKey(key))
-                _regions.Add(key, new Region(this, key.rx, key.ry));
+        [NotNull]
+        public Region GetRegion((int rx, int ry) regionCoords)
+        {
+            if(!_regions.ContainsKey(regionCoords))
+                _regions.Add(regionCoords, new Region(this, regionCoords.rx, regionCoords.ry));
 
-            return _regions[key];
+            return _regions[regionCoords];
         }
 
         public void Free()
