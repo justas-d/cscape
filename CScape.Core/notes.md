@@ -72,10 +72,3 @@
 		* 215 del friend
 		*  74 del ignore
 
-* Skills:
-	* Managed API:
-		player.Skills.Farming.Experience { get; set; }
-		player.Skills.Farming.Level { get; set; }
-		player.Skills.Farming.Boost(int levels);
-		player.Skills.Farming.GainExperience(float exp);
-

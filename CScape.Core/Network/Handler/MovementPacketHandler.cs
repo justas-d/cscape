@@ -32,6 +32,8 @@ namespace CScape.Core.Network.Handler
             if (0 >= numWaypoints || numWaypoints > MaxTiles)
                 return;
 
+            player.Interfaces.OnActionOccurred();
+
             var deltaWaypoints = new (sbyte x, sbyte y)[numWaypoints];
 
             // read waypoints
