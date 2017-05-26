@@ -1,3 +1,5 @@
+using CScape.Core.Game.Entity;
+
 namespace CScape.Core.Game.Interface
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace CScape.Core.Game.Interface
     /// </summary>
     public interface IButtonHandler
     {
-        void OnButtonPressed(int id);
+        void OnButtonPressed(Player player, int id);
     }
 }

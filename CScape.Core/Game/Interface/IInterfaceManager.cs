@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CScape.Core.Game.Entity;
 using CScape.Core.Network;
 using JetBrains.Annotations;
 
@@ -44,7 +45,7 @@ namespace CScape.Core.Game.Interface
         /// </summary>
         bool CanShow(InterfaceType type, int? sidebarSlotIndex = 0);
 
-        void HandleButton(int interfaceId, int buttonId);
+        void HandleButton(Player player, int interfaceId, int buttonId);
         void OnActionOccurred();
 
         IEnumerable<IPacket> GetUpdates();

@@ -33,9 +33,9 @@ namespace CScape.Dev.Tests.Impl
             int ourIdx, IContainerInterface otherContainer,
             int otherIdx)
         {
-            if (_shouldTestAction)
+            if (_shouldTestUseWith)
             {
-                _shouldTestAction = false;
+                _shouldTestUseWith = false;
                 Assert.AreEqual(player, _testUsewithPlayer);    
                 Assert.AreEqual(ourContainer, _testContainerA);
                 Assert.AreEqual(otherContainer, _testContainerB);
@@ -66,9 +66,9 @@ namespace CScape.Dev.Tests.Impl
             IContainerInterface testContainerA, IContainerInterface testContainerB,
             int testIdxA, int testIdxB)
         {
-            Assert.IsFalse(_shouldTestAction);
+            Assert.IsFalse(_shouldTestUseWith);
 
-            _shouldTestAction = true;
+            _shouldTestUseWith = true;
             _testUsewithPlayer = testPlayer;
             _testContainerA = testContainerA;
             _testContainerB = testContainerB;

@@ -26,6 +26,7 @@ namespace CScape.Core.Game.Entity
         public bool DebugItems = false;
         public bool DebugCommands = false;
         public bool DebugPackets = false;
+        public bool DebugInterface = true;
         public bool DebugRegion = false;
         public bool DebugStats
         {

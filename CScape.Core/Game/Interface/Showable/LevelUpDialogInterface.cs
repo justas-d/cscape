@@ -1,5 +1,4 @@
 ﻿using CScape.Core.Network;
-using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface.Showable
 {
@@ -9,9 +8,8 @@ namespace CScape.Core.Game.Interface.Showable
         private readonly int _newLevel;
 
         public LevelUpDialogInterface(
-            int id, string skill, int newLevel, 
-            [CanBeNull] IButtonHandler buttonHandler = null) 
-            : base(id, buttonHandler)
+            int id, string skill, int newLevel) 
+            : base(id, null)
         {
             _skill = skill;
             _newLevel = newLevel;

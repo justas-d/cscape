@@ -142,7 +142,7 @@ namespace CScape.Core.Game.Interface
             }
         }
 
-        public void HandleButton(int interfaceId, int buttonId)
+        public void HandleButton(Player player, int interfaceId, int buttonId)
         {
             if (!All.ContainsKey(interfaceId))
             {
@@ -152,7 +152,7 @@ namespace CScape.Core.Game.Interface
 
             // todo : fix button spamming (one button per tick)
             var interf = All[interfaceId] as IShowableInterface;
-            interf?.ButtonHandler?.OnButtonPressed(buttonId);
+            interf?.ButtonHandler?.OnButtonPressed(player, buttonId);
         }
 
         public void OnActionOccurred()
