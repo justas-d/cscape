@@ -35,6 +35,12 @@ namespace CScape.Basic.Model
             set => _equipment = (ItemProviderSegment) value;
         }
 
+        ISkillProvider IPlayerModel.Skills
+        {
+            get => Skills;
+            set => Skills = (DbSkillModel) value;
+        }
+
         public string Id { get; set; }
         public string PasswordHash { get; set; }
 
@@ -67,7 +73,9 @@ namespace CScape.Basic.Model
                 _equipment = new ItemProviderSegment(_items, BackpackSize, BackpackSize + EquipmentMaxSize);
             }
         }
-        public PlayerAppearance Appearance { get; private set; }
+        public PlayerAppearance Appearance { get; set; }
+
+        public DbSkillModel Skills { get; set; }
 
         public PlayerModel()
         {
@@ -85,6 +93,7 @@ namespace CScape.Basic.Model
 
             Appearance = new PlayerAppearance();
             Items = new ItemProviderModel(BackpackSize + EquipmentMaxSize);
+            Skills = new DbSkillModel(21);
         }
     }
 }

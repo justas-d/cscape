@@ -8,7 +8,8 @@
         public const int NpcUpdate = 3;
         public const int GroundItemSync = 4;
         public const int Interface = 5;
-        public const int Message = 6;
-        public const int DebugStat = 7;
+        public const int Skills = 6;
+        public const int Message = 7;
+        public const int DebugStat = 8;
     }
 }

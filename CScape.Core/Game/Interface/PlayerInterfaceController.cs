@@ -24,7 +24,12 @@ namespace CScape.Core.Game.Interface
             private readonly Dictionary<int, IBaseInterface> _all = new Dictionary<int, IBaseInterface>();
 
             public IShowableInterface Main { get; set; }
-            public IShowableInterface Chat { get; set; }
+
+            public IShowableInterface Chat
+            {
+                get;
+                set;
+            }
             public IShowableInterface Input { get; set; }
 
             public IReadOnlyList<IShowableInterface> PublicSidebar => _sidebar;
@@ -43,15 +48,15 @@ namespace CScape.Core.Game.Interface
             public ImmutableList<IEnumerable<IPacket>> UpdBacklog { get; set; } =
                 ImmutableList<IEnumerable<IPacket>>.Empty;
 
-            public void NotifyOfRegiser(IApiInterface interf)
+            public void NotifyOfRegister(IApiInterface interf)
             {
-                All[interf.Id] = interf;
+                All.Add(interf.Id, interf);
             }
 
             public void NotifyOfClose(IApiInterface interf)
             {
                 // dump updates
-                UpdBacklog.Add(interf.GetUpdates());
+                UpdBacklog = UpdBacklog.Add(interf.GetUpdates());
 
                 // unregister
                 _frontEnd.TryUnregister(interf.Id);
@@ -101,6 +106,8 @@ namespace CScape.Core.Game.Interface
                 return false;
 
             var apiInterface = All[id] as IApiInterface;
+
+            _backend.All.Remove(id);
             apiInterface?.UnregisterApi();
             return true;
         }
@@ -143,7 +150,6 @@ namespace CScape.Core.Game.Interface
                 return;
             }
 
-            // todo : button handling
             // todo : fix button spamming (one button per tick)
             var interf = All[interfaceId] as IShowableInterface;
             interf?.ButtonHandler?.OnButtonPressed(buttonId);
@@ -152,12 +158,16 @@ namespace CScape.Core.Game.Interface
         public void OnActionOccurred()
         {
             Input?.TryClose();
+            Chat?.TryClose();
         }
 
         public IEnumerable<IPacket> GetUpdates()
         {
+            var backlog = _backend.UpdBacklog;
+            _backend.UpdBacklog = ImmutableList<IEnumerable<IPacket>>.Empty;
+
             return All.Values.SelectMany(i => i.GetUpdates()) // active
-                .Concat(_backend.UpdBacklog.SelectMany(i => i)); // + backlog
+                .Concat(backlog.SelectMany(i => i)); // + backlog
         }
     }
 }

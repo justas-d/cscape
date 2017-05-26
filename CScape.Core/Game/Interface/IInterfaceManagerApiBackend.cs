@@ -20,7 +20,7 @@ namespace CScape.Core.Game.Interface
 
         [NotNull] IInterfaceManager Frontend { get; }
 
-        void NotifyOfRegiser(IApiInterface interf);
+        void NotifyOfRegister(IApiInterface interf);
         void NotifyOfClose(IApiInterface interf);
     }
 }

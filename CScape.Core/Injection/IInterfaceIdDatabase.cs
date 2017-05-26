@@ -2,22 +2,44 @@
 {
     public interface IInterfaceIdDatabase
     {
-        int BackpackSidebarInterface { get; }
-        int EquipmentSidebarInterface { get; }
+        int AttackLevelUpDialog { get; }
+        int DefenceLevelUpDialog { get; }
+        int StrengthLevelUpDialog { get; }
+        int HitpointsLevelUpDialog { get; }
+        int RangedLevelUpDialog { get; }
+        int PrayerLevelUpDialog { get; }
+        int MagicLevelUpDialog { get; }
+        int CookingLevelUpDialog { get; }
+        int WoodcuttingLevelUpDialog { get; }
+        int FletchingLevelUpDialog { get; }
+        int FishingLevelUpDialog { get; }
+        int FiremakingLevelUpDialog { get; }
+        int CraftingLevelUpDialog { get; }
+        int SmithingLevelUpDialog { get; }
+        int MiningLevelUpDialog { get; }
+        int HerbloreLevelUpDialog { get; }
+        int AgilityLevelUpDialog { get; }
+        int ThievingLevelUpDialog { get; }
+        int SlayerLevelUpDialog { get; }
+        int FarmingLevelUpDialog { get; }
+        int RunecraftingLevelUpDialog { get; }
 
-        int SkillSidebarInterface { get; }
-        int QuestSidebarInterface { get; }
-        int PrayerSidebarInterface { get; }
-        int StandardSpellbookSidebarInterface { get; }
-        int FriendsListSidebarInterface { get; }
-        int IgnoreListSidebarInterface { get; }
-        int LogoutSidebarInterface { get; }
-        int OptionsLowDetailSidebarInterface { get; }
-        int OptionsHighDetailSidebarInterface { get; }
-        int ControlsSidebarInterface { get; }
+        int BackpackSidebar { get; }
+        int EquipmentSidebar { get; }
 
-        int BackpackInventory { get; }
-        int EquipmentInventory { get; }
+        int SkillSidebar { get; }
+        int QuestSidebar { get; }
+        int PrayerSidebar { get; }
+        int StandardSpellbookSidebar { get; }
+        int FriendsListSidebar { get; }
+        int IgnoreListSidebar { get; }
+        int LogoutSidebar { get; }
+        int OptionsLowDetailSidebar { get; }
+        int OptionsHighDetailSidebar { get; }
+        int ControlsSidebar { get; }
+
+        int BackpackContainer { get; }
+        int EquipmentContainer { get; }
 
         int CombatStyleSidebarIdx { get; }
         int SkillSidebarIdx { get; }

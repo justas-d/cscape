@@ -14,6 +14,18 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
+        [CommandMethod("gain")]
+        public void GainExp(CommandContext ctx)
+        {
+            var amount = 0;
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("exp", ref amount);
+            })) return;
+
+            ctx.Callee.Skills.Agility.GainExperience(amount);
+        }
+
         [CommandMethod("dropclear")]
         public void TestGroundClear(CommandContext ctx)
         {

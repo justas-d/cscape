@@ -10,10 +10,6 @@
 	* Collision
 		* Multi-tile entity movement
 
-	* Skills
-		* Test setting dialogID to a level up interface, and instead of setting up the config interface of the interface to print a 
-		  "Congrats you leveld up" type of deal, we just pushMessage (sendsystemchatmessage) the config message to the client.
-
 	* Different implementations of protocols (377)
 
 	* Packets
@@ -75,3 +71,11 @@
 		* 133 add ignore
 		* 215 del friend
 		*  74 del ignore
+
+* Skills:
+	* Managed API:
+		player.Skills.Farming.Experience { get; set; }
+		player.Skills.Farming.Level { get; set; }
+		player.Skills.Farming.Boost(int levels);
+		player.Skills.Farming.GainExperience(float exp);
+

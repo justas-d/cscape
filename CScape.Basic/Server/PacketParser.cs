@@ -106,11 +106,9 @@ namespace CScape.Basic.Server
                     yield return (opcode, new Blob(payload));
                 else
                 {
+                    _log.Debug(this, $"Unhandled packet opcode: {opcode}.");
                     if (player.DebugPackets)
-                    {
                         player.SendSystemChatMessage($"{opcode:000}");
-                        _log.Debug(this, $"Unhandled packet opcode: {opcode}.");
-                    }
                 }
             }
         }

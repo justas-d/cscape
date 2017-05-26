@@ -250,6 +250,7 @@ namespace CScape.Core.Game.Entity
         // todo : only register container interfaces if the player can see them
         [NotNull] public BasicItemManager Inventory { get; }
         [NotNull] public EquipmentManager Equipment { get; }
+        [NotNull] public PlayerSkills Skills { get; }
 
         [NotNull] public IInterfaceManager Interfaces { get; }
 
@@ -266,7 +267,7 @@ namespace CScape.Core.Game.Entity
 
             _observatory = new PlayerObservatory(services, this);
 
-            _transform = Entity.ObserverClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
+            _transform = ObserverClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
             Transform = _transform;
 
             Movement = new MovementController(services, this);
@@ -285,10 +286,10 @@ namespace CScape.Core.Game.Entity
     
             // set up the sidebar containers
             var ids = _services.ThrowOrGet<IInterfaceIdDatabase>();
-            Inventory = new BasicItemManager(ids.BackpackInventory,
+            Inventory = new BasicItemManager(ids.BackpackContainer,
                 _services, _model.BackpackItems);
 
-            Equipment = new EquipmentManager(ids.EquipmentInventory,
+            Equipment = new EquipmentManager(ids.EquipmentContainer,
                 this, _services, _model.Equipment);
 
             // register sidebar containers
@@ -302,28 +303,33 @@ namespace CScape.Core.Game.Entity
                 Debug.Assert(result, $"Interfaces.TryShow id {id} idx {idx} ret false");
             }
 
-            Interface(ids.SkillSidebarInterface, ids.SkillSidebarIdx);
-            Interface(ids.QuestSidebarInterface, ids.QuestSidebarIdx);
-            Interface(ids.PrayerSidebarInterface, ids.PrayerSidebarIdx);
+            Interface(ids.SkillSidebar, ids.SkillSidebarIdx);
+            Interface(ids.QuestSidebar, ids.QuestSidebarIdx);
+            Interface(ids.PrayerSidebar, ids.PrayerSidebarIdx);
             // todo : send different spell book interfaces depending on the player's active spellbook
             // todo : keep track of player spellbook state
-            Interface(ids.StandardSpellbookSidebarInterface, ids.SpellbookSidebarIdx);
-            Interface(ids.FriendsListSidebarInterface, ids.FriendsSidebarIdx);
-            Interface(ids.IgnoreListSidebarInterface, ids.IgnoresSidebarIdx);
-            Interface(ids.LogoutSidebarInterface, ids.LogoutSidebarIdx);
+            Interface(ids.StandardSpellbookSidebar, ids.SpellbookSidebarIdx);
+            Interface(ids.FriendsListSidebar, ids.FriendsSidebarIdx);
+            Interface(ids.IgnoreListSidebar, ids.IgnoresSidebarIdx);
+            Interface(ids.LogoutSidebar, ids.LogoutSidebarIdx);
 
-            if(isHighDetail)
-                Interface(ids.OptionsHighDetailSidebarInterface, ids.OptionsSidebarIdx);
-            else
-                Interface(ids.OptionsLowDetailSidebarInterface, ids.OptionsSidebarIdx);
+            Interface(isHighDetail 
+                ? ids.OptionsHighDetailSidebar 
+                : ids.OptionsLowDetailSidebar,
+                ids.OptionsSidebarIdx);
 
-            Interface(ids.ControlsSidebarInterface, ids.ControlsSidebarIdx);
+            Interface(ids.ControlsSidebar, ids.ControlsSidebarIdx);
 
             // container interfaces
-            var res = Interfaces.TryShow(new ItemSidebarInterface(ids.BackpackSidebarInterface, ids.BackpackSidebarIdx, Inventory,null));
+            var res = Interfaces.TryShow(new ItemSidebarInterface(ids.BackpackSidebar, ids.BackpackSidebarIdx, Inventory,null));
             Debug.Assert(res, "Cannot show container interface in player ctor ");
-            res = Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentSidebarInterface, ids.EquipmentSidebarIdx, Equipment, null));
+            res = Interfaces.TryShow(new ItemSidebarInterface(ids.EquipmentSidebar, ids.EquipmentSidebarIdx, Equipment, null));
             Debug.Assert(res, "Cannot show container interface in player ctor ");
+
+            // setup skills
+            var skillSync = new SkillSyncMachine(model.Skills.Experience.Length);
+            Connection.SyncMachines.Add(skillSync);
+            Skills = new PlayerSkills(services, this, model, skillSync);
 
             // set update flags
             TickFlags |= UpdateFlags.Appearance;

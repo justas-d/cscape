@@ -29,6 +29,7 @@ namespace CScape.Basic.Database
 
             RegisterPlayerLeaf(m => m.Items);
             RegisterPlayerLeaf(m => m.Appearance);
+            RegisterPlayerLeaf(m => m.Skills);
 
             model.Entity<PlayerModel>(b =>
             {
@@ -39,6 +40,12 @@ namespace CScape.Basic.Database
                 b.Property(m => m.X).IsRequired();
                 b.Property(m => m.Y).IsRequired();
                 b.Property(m => m.Z).IsRequired();
+            });
+
+            model.Entity<DbSkillModel>(b =>
+            {
+                b.Ignore(m => m.Boost);
+                b.Ignore(m => m.Experience);
             });
 
             model.Entity<ItemProviderModel>(b =>
@@ -61,6 +68,7 @@ namespace CScape.Basic.Database
             return await PlayerModels
                 .Include(m => m.Items)
                 .Include(m => m.Appearance)
+                .Include(m => m.Skills)
                 .FirstOrDefaultAsync(f => f.Id == username);
         }
 
