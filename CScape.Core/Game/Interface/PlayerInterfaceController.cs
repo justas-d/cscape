@@ -166,8 +166,8 @@ namespace CScape.Core.Game.Interface
             var backlog = _backend.UpdBacklog;
             _backend.UpdBacklog = ImmutableList<IEnumerable<IPacket>>.Empty;
 
-            return All.Values.SelectMany(i => i.GetUpdates()) // active
-                .Concat(backlog.SelectMany(i => i)); // + backlog
+            return backlog.SelectMany(i => i) // backlog
+                .Concat(All.Values.SelectMany(i => i.GetUpdates())); //+  active
         }
     }
 }

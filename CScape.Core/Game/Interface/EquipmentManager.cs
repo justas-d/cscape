@@ -14,17 +14,22 @@ namespace CScape.Core.Game.Interface
     {
         public const int EquipmentMaxSize = 14;
 
+        public EquipmentStats Stats { get; }
+
         [NotNull] private readonly Player _player;
         private readonly IItemDefinitionDatabase _db;
 
         public EquipmentManager(int interfaceId, [NotNull] Player player, [NotNull] IServiceProvider services, [NotNull] IItemProvider provider)
             : base(interfaceId, provider)
         {
+            if (Size > EquipmentMaxSize)
+                throw new ArgumentOutOfRangeException(nameof(Size));
+
             _player = player ?? throw new ArgumentNullException(nameof(player));
             _db = services.ThrowOrGet<IItemDefinitionDatabase>();
 
-            if(Size > EquipmentMaxSize)
-                throw new ArgumentOutOfRangeException(nameof(Size));
+            Stats = new EquipmentStats(services);
+            Stats.Update(this);
         }
 
         public override ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
@@ -35,7 +40,7 @@ namespace CScape.Core.Game.Interface
             // get def
             var def = _db.GetAsserted(id) as IEquippableItem;
 
-            // only add equippables
+            // only add equipables
             if (def == null)
                 return ItemProviderChangeInfo.Invalid;
 
@@ -79,6 +84,9 @@ namespace CScape.Core.Game.Interface
                 return false;
 
             var def = _db.GetAsserted(info.NewItemDefId) as IEquippableItem;
+
+            // keep stats updated
+            Stats.Update(this);
 
             // call on equip on def.
             def?.OnEquip(_player, this, info.Index);

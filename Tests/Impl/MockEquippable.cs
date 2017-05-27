@@ -7,13 +7,13 @@ namespace CScape.Dev.Tests.Impl
     public class MockEquippable : MockItem, IEquippableItem
     {
         public EquipSlotType Slot { get; }
-        public IItemBonusDefinition Attack { get; }
-        public IItemBonusDefinition Defence { get; }
+        public IEquipmentStats Attack { get; }
+        public IEquipmentStats Defence { get; }
         public int StrengthBonus { get; }
         public int MagicBonus { get; }
         public int RangedBonus { get; }
         public int PrayerBonus { get; }
-        public AttackStyle[] Styles { get; }
+        public IWeaponCombatType CombatType { get; }
 
         public bool CanEquip(Player player)
         {
@@ -25,7 +25,12 @@ namespace CScape.Dev.Tests.Impl
             throw new System.NotImplementedException();
         }
 
-        public MockEquippable(int itemId, string name, int maxAmount, bool isTradable, float weight, bool isNoted, int noteSwitchId, EquipSlotType slot, IItemBonusDefinition attack, IItemBonusDefinition defence, int strengthBonus, int magicBonus, int rangedBonus, int prayerBonus, AttackStyle[] styles) : base(itemId, name, maxAmount, isTradable, weight, isNoted, noteSwitchId)
+        public MockEquippable(int itemId, string name, int maxAmount, 
+            bool isTradable, float weight, bool isNoted, int noteSwitchId, 
+            EquipSlotType slot, IEquipmentStats attack, 
+            IEquipmentStats defence, int strengthBonus, int magicBonus,
+            int rangedBonus, int prayerBonus, IWeaponCombatType combatType) 
+            : base(itemId, name, maxAmount, isTradable, weight, isNoted, noteSwitchId)
         {
             Slot = slot;
             Attack = attack;
@@ -34,7 +39,7 @@ namespace CScape.Dev.Tests.Impl
             MagicBonus = magicBonus;
             RangedBonus = rangedBonus;
             PrayerBonus = prayerBonus;
-            Styles = styles;
+            CombatType = combatType;
         }
     }
 }

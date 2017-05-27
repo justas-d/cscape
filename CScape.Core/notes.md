@@ -72,3 +72,23 @@
 		* 215 del friend
 		*  74 del ignore
 
+		
+1674 - "defense bonus"
+1673 - "attack bonus"
+
+1675 - stab
+1676 - slash
+1677 - crush
+1678 - magic
+1679 - range
+
+1680 - stab
+1681 - slash
+1682 - crush
+1683 - magic
+1684 - range
+
+1685 - "other bonuses"
+
+1686 - str
+1687 - prayer

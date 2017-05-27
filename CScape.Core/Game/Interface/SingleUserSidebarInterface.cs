@@ -29,7 +29,7 @@ namespace CScape.Core.Game.Interface
         protected override void InternalUnregister()
         {
             if (Api == null) return;
-            Api.Sidebar[SidebarIndex] = this;
+            Api.Sidebar[SidebarIndex] = null;
         }
 
         protected override bool CanCloseRightNow() => true;

@@ -1,6 +1,6 @@
 namespace CScape.Core.Game.Item
 {
-    public interface IItemBonusDefinition
+    public interface IEquipmentStats
     {
         int Slash { get; }
         int Crush { get; }

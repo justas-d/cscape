@@ -95,13 +95,13 @@ namespace CScape.Basic.Model
         }
 
         public EquipSlotType Slot { get; } = EquipSlotType.Head;
-        public IItemBonusDefinition Attack { get; } = null;
-        public IItemBonusDefinition Defence { get; } = null;
+        public IEquipmentStats Attack { get; } = null;
+        public IEquipmentStats Defence { get; } = null;
         public int StrengthBonus { get; } = 1;
         public int MagicBonus { get; } = 2;
         public int RangedBonus { get; } = 3;
         public int PrayerBonus { get; } = 4;
-        public AttackStyle[] Styles { get; } = null;
+        public IWeaponCombatType CombatType { get; }
 
         public bool CanEquip(Player player) => true;
 

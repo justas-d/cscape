@@ -5,6 +5,7 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
+using CScape.Core.Network;
 using CScape.Core.Network.Packet;
 
 namespace CScape.Basic.Commands
@@ -13,6 +14,21 @@ namespace CScape.Basic.Commands
     public sealed class TestCommandClass
     {
         private PlaneOfExistance _diffPoe;
+
+        [CommandMethod("set")]
+        public void SetText(CommandContext ctx)
+        {
+            var id = 0;
+            var msg = "";
+
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("id", ref id);
+                msg = b.ReadRemaining();
+            })) return;
+
+            ctx.Callee.Connection.SendPacket(new SetInterfaceTextPacket(id, msg));
+        }
 
         [CommandMethod("gain")]
         public void GainExp(CommandContext ctx)
