@@ -46,6 +46,28 @@ namespace CScape.Basic.Server
         // todo : ratelimiting for login requests
     }
 
+    public static class Utils
+    {
+        public static OaepEncoding GetCrypto(IGameServerConfig cfg, bool forEncryption)
+        {
+            AsymmetricCipherKeyPair keys;
+            using (var file = File.Open(cfg.PrivateLoginKeyDir, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var stream = new StreamReader(file))
+                keys = (AsymmetricCipherKeyPair)new PemReader(stream).ReadObject();
+
+            //todo: maybe switch to SHA256?
+            var crypto = new OaepEncoding(new RsaEngine(), new Sha1Digest());
+            if (forEncryption)
+            {
+                crypto.Init(true, keys.Public);
+            }
+            else
+                crypto.Init(false, keys.Private);
+
+            return crypto;
+        }
+    }
+
     /// <summary>
     /// Handles incoming connections and sets them up for the game loop.
     /// </summary>
@@ -81,14 +103,7 @@ namespace CScape.Basic.Server
             };
             _rng = new Random();
 
-            AsymmetricCipherKeyPair keys;
-            using (var file = File.Open(_config.PrivateLoginKeyDir, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var stream = new StreamReader(file))
-                keys = (AsymmetricCipherKeyPair)new PemReader(stream).ReadObject();
-
-            //todo: maybe switch to SHA256?
-            _crypto = new OaepEncoding(new RsaEngine(), new Sha1Digest());
-            _crypto.Init(false, keys.Private);
+            _crypto = Utils.GetCrypto(_config, false);
 
             // start the service as soon as we're initialized
             Task.Run(StartListening).ContinueWith(t =>
