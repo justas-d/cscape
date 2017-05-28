@@ -9,10 +9,10 @@ namespace CScape.Core.Game.Entity
     {
         public int Order => SyncMachineConstants.Skills;
         public bool RemoveAfterInitialize => false;
+        public bool NeedsUpdate { get; private set; }
 
         // packet queue
         private readonly SetSkillDataPacket[] _packets;
-        private bool _needsUpdate;
 
         public SkillSyncMachine(int numSkills)
         {
@@ -32,15 +32,12 @@ namespace CScape.Core.Game.Entity
                 p.Exp = skill.Experience;
             }
 
-            _needsUpdate = true;
+            NeedsUpdate = true;
         }
 
         public void Synchronize(OutBlob stream)
         {
-            if (!_needsUpdate)
-                return;
-
-            _needsUpdate = false;
+            NeedsUpdate = false;
 
             foreach (var t in Enumerable.Where<SetSkillDataPacket>(_packets, p => p != null))
                 t.Send(stream);

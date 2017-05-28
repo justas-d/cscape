@@ -14,14 +14,14 @@ namespace CScape.Core.Network.Sync
         public int Order => SyncMachineConstants.GroundItemSync;
         public bool RemoveAfterInitialize => false;
 
+        public bool NeedsUpdate { get; private set; }
+
         // keeps track of what items have we sent initial update packets for
         private readonly HashSet<GroundItem> _tracked = new HashSet<GroundItem>();
 
         // holds packets sorted by region
-        private readonly Dictionary<(int x, int y), List<BaseGroundObjectPacket>> _buckets 
+        private readonly Dictionary<(int x, int y), List<BaseGroundObjectPacket>> _buckets
             = new Dictionary<(int x, int y), List<BaseGroundObjectPacket>>();
-
-        private bool _needsSync = false;
 
         private readonly ILogger _log;
 
@@ -61,7 +61,7 @@ namespace CScape.Core.Network.Sync
             _buckets[regionGrid].Add(packet);
 
             // set sync flag
-            _needsSync = true;
+            NeedsUpdate = true;
 
             // log invalid offsets
             if (packet.IsInvalid)
@@ -85,7 +85,7 @@ namespace CScape.Core.Network.Sync
                     ref _local.DebugEntitySync);
             }
 
-            
+
 
             // figure out if the item needs to be synced
             if (_tracked.Contains(item))
@@ -132,11 +132,7 @@ namespace CScape.Core.Network.Sync
 
         public void Synchronize(OutBlob stream)
         {
-            // don't sync empty buckets
-            if (!_needsSync)
-                return;
-
-            _needsSync = false;
+            NeedsUpdate = false;
 
             foreach (var kvp in _buckets)
             {
@@ -152,6 +148,8 @@ namespace CScape.Core.Network.Sync
             }
         }
 
-        public void OnReinitialize() { }
+        public void OnReinitialize()
+        {
+        }
     }
 }

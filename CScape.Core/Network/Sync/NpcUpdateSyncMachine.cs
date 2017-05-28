@@ -26,6 +26,8 @@ namespace CScape.Core.Network.Sync
         }
 
         private bool _ignoreEmpty = false;
+        public bool NeedsUpdate => true;
+
         private readonly Player _local;
 
         // to avoid pushing duplicate to _syncNpcs. Can't set _syncNpcs to a hashset due to hashsets not guaranteeing order.

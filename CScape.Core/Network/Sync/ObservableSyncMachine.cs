@@ -12,6 +12,7 @@ namespace CScape.Core.Network.Sync
     {
         public int Order => SyncMachineConstants.Observer;
         public bool RemoveAfterInitialize { get; } = false;
+        public bool NeedsUpdate => true;
 
         public Player LocalPlayer { get; }
 

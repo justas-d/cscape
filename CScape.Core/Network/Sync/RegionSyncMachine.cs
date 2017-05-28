@@ -1,4 +1,3 @@
-using System;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 
@@ -9,6 +8,11 @@ namespace CScape.Core.Network.Sync
         private readonly Player _player;
         public int Order => SyncMachineConstants.Region;
         public bool RemoveAfterInitialize { get; } = false;
+
+        // send region init if regions changed
+        public bool NeedsUpdate =>
+            (_oldX == Pos.ClientRegion.x && _oldY == Pos.ClientRegion.y)
+            || _forceUpdate;
 
         private IClientTransform Pos => _player.ClientTransform;
         private bool _forceUpdate;
@@ -23,14 +27,8 @@ namespace CScape.Core.Network.Sync
             _player = player;
         }
 
-        /// <exception cref="ArgumentNullException"><paramref name="stream"/> is <see langword="null"/></exception>
         public void Synchronize(OutBlob stream)
         {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-
-            // send region init if regions changed
-            if ((_oldX == Pos.ClientRegion.x && _oldY == Pos.ClientRegion.y) || _forceUpdate) return;
-
             _player.DebugMsg($"Sync region: {Pos.ClientRegion.x} + 6 {Pos.ClientRegion.y} + 6", ref _player.DebugRegion);
 
             stream.BeginPacket(Packet);

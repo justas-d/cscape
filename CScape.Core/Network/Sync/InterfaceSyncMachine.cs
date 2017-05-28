@@ -10,6 +10,7 @@ namespace CScape.Core.Network.Sync
         public Player Player { get; }
         public int Order => SyncMachineConstants.Interface;
         public bool RemoveAfterInitialize { get; } = false;
+        public bool NeedsUpdate => true;
 
         public InterfaceSyncMachine([NotNull] Player player)
         {

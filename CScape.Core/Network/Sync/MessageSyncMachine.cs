@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CScape.Core.Data;
 
 namespace CScape.Core.Network.Sync
@@ -7,6 +8,7 @@ namespace CScape.Core.Network.Sync
     {
         public int Order => SyncMachineConstants.Message;
         public bool RemoveAfterInitialize { get; } = false;
+        public bool NeedsUpdate => _msgs.Any();
 
         private readonly Queue<IPacket> _msgs = new Queue<IPacket>();
 

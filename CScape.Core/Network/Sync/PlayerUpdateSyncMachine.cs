@@ -89,6 +89,7 @@ namespace CScape.Core.Network.Sync
 
         public int Order => SyncMachineConstants.PlayerUpdate;
         public bool RemoveAfterInitialize { get; } = false;
+        public bool NeedsUpdate => true;
 
         [NotNull] private readonly HashSet<uint> _syncPlayerIds = new HashSet<uint>();
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;

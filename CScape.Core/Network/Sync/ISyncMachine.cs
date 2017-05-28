@@ -7,7 +7,7 @@ namespace CScape.Core.Network.Sync
     {
         int Order { get; }
         bool RemoveAfterInitialize { get; }
-        // todo: bool NeedsUpdate { get; }
+        bool NeedsUpdate { get; }
 
         void Synchronize([NotNull] OutBlob stream);
 
