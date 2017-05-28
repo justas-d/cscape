@@ -1,16 +1,13 @@
 ﻿# TODO
-	* Segregate the Player class into smaller interfaces (maybe)
-		* Replace usages of Player with usages of these smaller interfaces.
-
+	* Separate packet metadata and writing packet data to out stream
+	* Different implementations of protocols (377)
+	* ISyncMachine "does need syncing" property
 	* Negative numbers aren't parsed by the command interpreter
 	* Invensitage reconnect limbo
-	* Separate packet metadata and writing packet data to out stream
 	* Replace complicated abstraction hierarchies with a strategy pattern
 	* WeakReferences in observatories and sync machines
 	* Collision
 		* Multi-tile entity movement
-
-	* Different implementations of protocols (377)
 
 	* Packets
 		* 85 - sets updRegionPlayerLocalY and updRegionPlayerLocalX
@@ -76,12 +73,14 @@
 1674 - "defense bonus"
 1673 - "attack bonus"
 
+attack
 1675 - stab
 1676 - slash
 1677 - crush
 1678 - magic
 1679 - range
 
+defense
 1680 - stab
 1681 - slash
 1682 - crush

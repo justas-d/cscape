@@ -52,7 +52,7 @@ namespace CScape.Core.Game.Interface
             return Equals((IBaseInterface) obj);
         }
 
-        private void PushUpdate(IPacket update)
+        protected void PushUpdate(IPacket update)
             => _upds = _upds.Add(update);
 
         public bool Equals(IBaseInterface other)

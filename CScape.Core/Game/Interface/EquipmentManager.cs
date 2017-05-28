@@ -2,6 +2,7 @@ using System;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
+using CScape.Core.Network;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
@@ -19,7 +20,9 @@ namespace CScape.Core.Game.Interface
         [NotNull] private readonly Player _player;
         private readonly IItemDefinitionDatabase _db;
 
-        public EquipmentManager(int interfaceId, [NotNull] Player player, [NotNull] IServiceProvider services, [NotNull] IItemProvider provider)
+        public EquipmentManager(
+            int interfaceId, [NotNull] Player player, [NotNull] IServiceProvider services,
+            [NotNull] IItemProvider provider)
             : base(interfaceId, provider)
         {
             if (Size > EquipmentMaxSize)
@@ -30,6 +33,7 @@ namespace CScape.Core.Game.Interface
 
             Stats = new EquipmentStats(services);
             Stats.Update(this);
+            SyncStats();
         }
 
         public override ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
@@ -87,6 +91,7 @@ namespace CScape.Core.Game.Interface
 
             // keep stats updated
             Stats.Update(this);
+            SyncStats();
 
             // call on equip on def.
             def?.OnEquip(_player, this, info.Index);
@@ -101,6 +106,28 @@ namespace CScape.Core.Game.Interface
                 return (false, -1);
 
             return (true, idx);
+        }
+
+        private void SyncStats()
+        {
+            string Format(int num) => num >= 0 ? $"+{num}" : num.ToString();
+
+            // todo : abstract this into a meta packet
+            PushUpdate(new SetInterfaceTextPacket(1675, $"Stab: {Format(Stats.Attack.Stab)}"));
+            PushUpdate(new SetInterfaceTextPacket(1676, $"Slash: {Format(Stats.Attack.Slash)}"));
+            PushUpdate(new SetInterfaceTextPacket(1677, $"Crush: {Format(Stats.Attack.Crush)}"));
+            PushUpdate(new SetInterfaceTextPacket(1678, $"Magic: {Format(Stats.Attack.Magic)}"));
+            PushUpdate(new SetInterfaceTextPacket(1679, $"Range: {Format(Stats.Attack.Ranged)}"));
+
+            PushUpdate(new SetInterfaceTextPacket(1680, $"Stab: {Format(Stats.Defense.Stab)}"));
+            PushUpdate(new SetInterfaceTextPacket(1681, $"Slash: {Format(Stats.Defense.Slash)}"));
+            PushUpdate(new SetInterfaceTextPacket(1682, $"Crush: {Format(Stats.Defense.Crush)}"));
+            PushUpdate(new SetInterfaceTextPacket(1683, $"Magic: {Format(Stats.Defense.Magic)}"));
+            PushUpdate(new SetInterfaceTextPacket(1684, $"Range: {Format(Stats.Defense.Ranged)}"));
+
+            PushUpdate(new SetInterfaceTextPacket(1685, $"Strength: {Format(Stats.StrengthBonus)}     Range: {Format(Stats.RangedBonus)}"));
+            PushUpdate(new SetInterfaceTextPacket(1686, $"Magic: {Format(Stats.MagicBonus)}"));
+            PushUpdate(new SetInterfaceTextPacket(1687, $"Prayer: {Format(Stats.PrayerBonus)}"));
         }
 
         public override int Contains(int id)

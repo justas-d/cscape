@@ -25,11 +25,7 @@ namespace CScape.Core.Game.Interface
 
             public IShowableInterface Main { get; set; }
 
-            public IShowableInterface Chat
-            {
-                get;
-                set;
-            }
+            public IShowableInterface Chat { get; set; }
             public IShowableInterface Input { get; set; }
 
             public IReadOnlyList<IShowableInterface> PublicSidebar => _sidebar;

@@ -1,9 +1,9 @@
 using System;
-using CScape.Core.Game.Item;
+using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Interface
+namespace CScape.Core.Game.Item
 {
     public sealed class EquipmentStats
     {

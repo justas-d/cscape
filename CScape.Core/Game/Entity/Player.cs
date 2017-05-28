@@ -253,7 +253,7 @@ namespace CScape.Core.Game.Entity
         [NotNull] public EquipmentManager Equipment { get; }
         [NotNull] public PlayerSkills Skills { get; }
 
-        [NotNull] public IInterfaceManager Interfaces { get; }
+        [NotNull] public PlayerInterfaceController Interfaces { get; }
 
         private readonly IServiceProvider _services;
 
@@ -344,8 +344,6 @@ namespace CScape.Core.Game.Entity
         {
             FacingCoordinate = null;
             Interfaces.OnActionOccurred();
-
-            SendSystemChatMessage($"{ClientTransform.ClientRegion.x} {ClientTransform.ClientRegion.y}");
         }
 
         /// <summary>

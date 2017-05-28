@@ -61,10 +61,10 @@ namespace CScape.Core.Network
         public const int OutStreamSize = 5000;
         public const int InBufferStreamSize = 1024;
         public const int InStreamSize = InBufferStreamSize * 2;
-        //~15.40MB total mem used with 2000 concurrent players.
+        //~15.4MB total mem used with 2000 concurrent players.
 
         /// <summary>
-        /// In milliseconds, the maximum number of ms that can ellapse without receiving a packet.
+        /// In milliseconds, the maximum number of ms that can elapse without receiving a packet.
         /// If this number is exceeded (by _msSinceNoPacket), the socket is considered dead.
         /// </summary>
         public const int MaxNoDataInternal = 5 * 1000;
