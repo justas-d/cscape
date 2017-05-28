@@ -138,6 +138,8 @@ namespace CScape.Core.Game.Interface
             }
         }
 
+        public HashSet<int> PressedButtonIds { get; } = new HashSet<int>();
+
         public void HandleButton(Player player, int interfaceId, int buttonId)
         {
             if (!All.ContainsKey(interfaceId))
@@ -146,7 +148,12 @@ namespace CScape.Core.Game.Interface
                 return;
             }
 
-            // todo : fix button spamming (one button per tick)
+            // combat button spamming by keeping track what buttons we've pressed.
+            if (!PressedButtonIds.Add(buttonId))
+                return;
+
+            player.DebugMsg($"Button {buttonId} interface {interfaceId} ", ref player.DebugInterface);
+
             var interf = All[interfaceId] as IShowableInterface;
             interf?.ButtonHandler?.OnButtonPressed(player, buttonId);
         }

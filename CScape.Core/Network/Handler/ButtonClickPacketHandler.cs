@@ -11,8 +11,6 @@ namespace CScape.Core.Network.Handler
             var buttonId = packet.ReadInt16();
             var interfaceId = packet.ReadInt16();
 
-            player.DebugMsg($"Button {buttonId} interface {interfaceId} ", ref player.DebugInterface);
-
             player.Interfaces.HandleButton(player, interfaceId, buttonId);
         }
     }

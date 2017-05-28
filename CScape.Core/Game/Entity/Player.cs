@@ -364,6 +364,9 @@ namespace CScape.Core.Game.Entity
             NeedsPositionInit = false;
             NeedsSightEvaluation = false;
             Movement.MoveUpdate.Reset();
+            
+            // reset pressed buttons
+            Interfaces.PressedButtonIds.Clear();
 
             EntityHelper.TryResetInteractingEntity(this);
 
