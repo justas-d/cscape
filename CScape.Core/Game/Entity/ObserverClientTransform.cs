@@ -39,9 +39,7 @@ namespace CScape.Core.Game.Entity
         protected override void InternalSetPosition(int x, int y, byte z)
         {
             base.InternalSetPosition(x, y, z);
-
             _observer.Observatory.Clear();
-            _observer.Observatory.ReevaluateSightOverride = true;
         }
 
         protected override void InternalMove(sbyte dx, sbyte dy)

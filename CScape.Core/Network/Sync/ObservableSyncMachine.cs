@@ -71,7 +71,6 @@ namespace CScape.Core.Network.Sync
 
         public void OnReinitialize()
         {
-            _playerObservatory.ReevaluateSightOverride = true;
             _playerObservatory.Clear();
         }
     }

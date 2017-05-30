@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Game.Entity;
@@ -44,6 +45,7 @@ namespace CScape.Basic.Server
 
         // update queues
         public IUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
+
         public IUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
         public IUpdateQueue<Npc> Npc { get; } = new UniqueEntUpdateQueue<Npc>();
         public IUpdateQueue<GroundItem> Item { get; } = new UniqueEntUpdateQueue<GroundItem>();
@@ -52,7 +54,7 @@ namespace CScape.Basic.Server
         private readonly IPacketDispatch _dispatch;
         private readonly IPacketParser _parser;
         private readonly ILoginService _login;
-        private readonly ILogger _log ;
+        private readonly ILogger _log;
         private readonly IGameServerConfig _config;
         private readonly IPlayerDatabase _db;
 
@@ -83,112 +85,107 @@ namespace CScape.Basic.Server
             _log.Normal(this, "Starting main loop...");
 
             // todo : exception handle all over the main loop
-            try
+            while (IsRunning)
             {
-                while (IsRunning)
+                /* Try autosave */
+                if ((timeSinceLastSave += DeltaTime) >= _config.AutoSaveIntervalMs)
                 {
-                    /* Try autosave */
-                    if ((timeSinceLastSave += DeltaTime) >= _config.AutoSaveIntervalMs)
-                    {
-                        _log.Debug(this, "Autosaving...");
-                        await _db.Save();
-                        timeSinceLastSave = 0;
-                    }
-
-                    _tickWatch.Restart();
-
-                    //================================================
-
-                    // handle new logins
-                    IPlayerLogin next;
-                    while ((next = _login.TryGetNext()) != null)
-                        next.Transfer(this);
-
-                    //================================================
-
-                    // get & parse their data
-                    foreach (var p in Player)
-                    {
-                        // update connections
-                        if (!p.Connection.Update(DeltaTime + ElapsedMilliseconds))
-                            continue; // failed to update, skip this player.
-
-                        // parse
-                        foreach (var pack in _parser.Parse(p))
-                            _dispatch.Handle(p, pack.Opcode, pack.Packet);
-                    }
-
-                    //================================================
-
-                    // movement updates
-                    var size = Movement.Count;
-                    for (var i = 0; i < size; ++i)
-                        Movement.Dequeue().Movement.Update();
-
-                    //================================================
-
-                    // write & send
-                    // todo : offload write & send to a different thread?
-                    foreach (var p in Player)
-                    {
-                        // write our data
-                        foreach (var sync in p.Connection.SyncMachines)
-                            sync.Synchronize(p.Connection.OutStream);
-
-                        // send our data
-                        p.Connection.FlushOutputStream();
-                    }
-
-                    void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
-                    {
-                        size = queue.Count;
-                        for (var i = 0; i < size; ++i)
-                            queue.Dequeue().Update(this);
-                    }
-
-                    //================================================
-
-                    EntityUpdate(Player);
-
-                    //================================================
-
-                    EntityUpdate(Npc);
-
-                    //================================================
-
-                    EntityUpdate(Item);
-
-                    //================================================
-
-                    // handle tick delays
-                    TickProcessTime = _tickWatch.ElapsedMilliseconds;
-                    var waitTime = TickRate - Convert.ToInt32(TickProcessTime) + _waitTimeCarry;
-                    
-                    // tick process time took more then tickrate
-                    if (0 > waitTime)
-                    {
-                        _waitTimeCarry = waitTime;
-                        _log.Warning(this, $"Cannot keep up! Tick rate is {TickRate}ms but wait time is {waitTime}ms which makes us carry {_waitTimeCarry}ms to next tick");
-                    }
-                    else // valid waitTime, wait it out
-                    {
-                        _waitTimeCarry = 0;
-                        await Task.Delay(waitTime);
-                    }
-
-                    DeltaTime = waitTime + TickProcessTime;
+                    _log.Debug(this, "Autosaving...");
+                    await _db.Save();
+                    timeSinceLastSave = 0;
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.Fail($"Main loop crash {ex}");
-            }
-            finally
-            {
-                IsRunning = false;
-            }
 
+                _tickWatch.Restart();
+
+                //================================================
+
+                // handle new logins
+                IPlayerLogin next;
+                while ((next = _login.TryGetNext()) != null)
+                    next.Transfer(this);
+
+                //================================================
+
+                // get & parse their data
+                foreach (var p in Player)
+                {
+                    // update connections
+                    if (!p.Connection.Update(DeltaTime + ElapsedMilliseconds))
+                        continue; // failed to update, skip this player.
+
+                    // parse
+                    foreach (var pack in _parser.Parse(p))
+                        _dispatch.Handle(p, pack.Opcode, pack.Packet);
+                }
+
+                //================================================
+
+                // movement updates
+                var size = Movement.Count;
+                for (var i = 0; i < size; ++i)
+                    Movement.Dequeue().Movement.Update();
+
+                //================================================
+
+                // write & send
+                // todo : offload write & send to a different thread?
+                foreach (var p in Player)
+                {
+                    // don't do anything if player isn't connected
+                    if (!p.Connection.IsConnected())
+                        continue;
+
+                    // write our data
+                    foreach (var sync in p.Connection.SyncMachines)
+                        sync.Synchronize(p.Connection.OutStream);
+
+                    // send our data
+                    p.Connection.FlushOutputStream();
+                }
+
+                void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
+                {
+                    size = queue.Count;
+                    for (var i = 0; i < size; ++i)
+                        queue.Dequeue().Update(this);
+                }
+
+                //================================================
+
+                EntityUpdate(Player);
+
+                //================================================
+
+                EntityUpdate(Npc);
+
+                //================================================
+
+                EntityUpdate(Item);
+
+                //================================================
+
+                // handle tick delays
+                TickProcessTime = _tickWatch.ElapsedMilliseconds;
+                var waitTime = TickRate - Convert.ToInt32(TickProcessTime) + _waitTimeCarry;
+
+                // tick process time took more then tickrate
+                if (0 > waitTime)
+                {
+                    _waitTimeCarry = waitTime;
+                    _log.Warning(this,
+                        $"Cannot keep up! Tick rate is {TickRate}ms but wait time is {waitTime}ms which makes us carry {_waitTimeCarry}ms to next tick");
+                }
+                else // valid waitTime, wait it out
+                {
+                    _waitTimeCarry = 0;
+                    await Task.Delay(waitTime);
+                }
+
+                DeltaTime = waitTime + TickProcessTime;
+            }
+            IsRunning = false;
         }
+
 
         public void Dispose()
         {

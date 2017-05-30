@@ -1,11 +1,9 @@
 ﻿# TODO
-	* Separate packet metadata and writing packet data to out stream
-	* Different implementations of protocols (377)
-	* ISyncMachine "does need syncing" property
 	* Negative numbers aren't parsed by the command interpreter
 	* Invensitage reconnect limbo
 	* Replace complicated abstraction hierarchies with a strategy pattern
-	* WeakReferences in observatories and sync machines
+	* WeakReferences in ob1servatories and sync machines
+
 	* Collision
 		* Multi-tile entity movement
 

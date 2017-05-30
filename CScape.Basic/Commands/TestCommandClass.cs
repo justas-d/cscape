@@ -5,7 +5,6 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
-using CScape.Core.Network;
 using CScape.Core.Network.Packet;
 
 namespace CScape.Basic.Commands
@@ -15,19 +14,23 @@ namespace CScape.Basic.Commands
     {
         private PlaneOfExistance _diffPoe;
 
-        [CommandMethod("set")]
-        public void SetText(CommandContext ctx)
+        [CommandMethod("sight get")]
+        public void GetSight(CommandContext ctx)
         {
-            var id = 0;
-            var msg = "";
+            ctx.Callee.SendSystemChatMessage($"View range: {ctx.Callee.ViewRange}");
+        }
+
+        [CommandMethod("sight set")]
+        public void SetSight(CommandContext ctx)
+        {
+            var sight = 0;
 
             if (!ctx.Read(b =>
             {
-                b.ReadNumber("id", ref id);
-                msg = b.ReadRemaining();
+                b.ReadNumber("sight", ref sight);
             })) return;
 
-            ctx.Callee.Connection.SendPacket(new SetInterfaceTextPacket(id, msg));
+            ctx.Callee.ViewRange = sight;
         }
 
         [CommandMethod("gain")]

@@ -10,6 +10,7 @@ namespace CScape.Core.Network.Sync
         public bool RemoveAfterInitialize { get; } = false;
 
         // send region init if regions changed
+        // TODO : Expose this flag to the transform and let the transform set it
         public bool NeedsUpdate =>
             (_oldX == Pos.ClientRegion.x && _oldY == Pos.ClientRegion.y)
             || _forceUpdate;

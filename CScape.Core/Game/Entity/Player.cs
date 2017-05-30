@@ -189,7 +189,7 @@ namespace CScape.Core.Game.Entity
         private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
-        private int _otherPlayerViewRange = MaxViewRange;
+        private int _otherPlayerViewRange;
 
         public MovementController Movement { get; }
 
@@ -211,7 +211,10 @@ namespace CScape.Core.Game.Entity
             {
                 var newRange = value.Clamp(0, MaxViewRange);
                 if (newRange != _otherPlayerViewRange)
+                {
+                    DebugMsg($"Adjusting sight {_otherPlayerViewRange} => {newRange}", ref DebugEntitySync);
                     Observatory.ReevaluateSightOverride = true;
+                }
 
                 _otherPlayerViewRange = newRange;
             }

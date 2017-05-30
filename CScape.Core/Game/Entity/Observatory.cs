@@ -35,6 +35,7 @@ namespace CScape.Core.Game.Entity
             _seeableEntities = ImmutableHashSet<IWorldEntity>.Empty;
             _newEntityIds.Clear();
             Sync.Clear();
+            ReevaluateSightOverride = true;
         }
 
         public void Remove(IWorldEntity ent)

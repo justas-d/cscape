@@ -25,26 +25,26 @@ namespace CScape.Core.Network
 
     public class SetSkillDataPacket : IPacket
     {
-        public byte SkillIdx { get; set; }
-        public int Exp { get; set; }
-        public byte Level { get; set; }
+        private readonly byte _skillIdx;
+        private readonly int _exp;
+        private readonly byte _level;
 
         public const int Id = 134;
 
         public SetSkillDataPacket(byte skillIdx, int exp, byte level)
         {
-            SkillIdx = skillIdx;
-            Exp = exp;
-            Level = level;
+            _skillIdx = skillIdx;
+            _exp = exp;
+            _level = level;
         }
 
         public void Send(OutBlob stream)
         {
             stream.BeginPacket(Id);
 
-            stream.Write(SkillIdx);
-            stream.Write32(Exp);
-            stream.Write(Level);
+            stream.Write(_skillIdx);
+            stream.Write32(_exp);
+            stream.Write(_level);
 
             stream.EndPacket();
         }

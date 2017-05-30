@@ -15,12 +15,6 @@ using CScape.Core.Network;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Encodings;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.OpenSsl;
-using Utils = CScape.Basic.Server.Utils;
 
 namespace CScape.Dev.Runtime
 {
@@ -90,24 +84,15 @@ namespace CScape.Dev.Runtime
 
             Server = new GameServer(services);
 
-            var crypto = Utils.GetCrypto(cfg, true);
-            var idx = 0;
-
-            // dispatch a thread to run the server
-
             AsyncContext.Run(async () =>
             {
-                Task.Run(async () => await Server.Start());
-
-
-                while (true)
+                await Server.Start().ContinueWith(t =>
                 {
-                    Console.ReadLine();
-                    var p = new FakePlayer((short) cfg.Revision, cfg.ListenEndPoint, crypto, $"Fake_{idx++}", "1");
-                    Console.WriteLine($"Spawning {p.Username}");
-
-                    await p.Login();
-                }
+                    if (t.Exception != null)
+                    {
+                        HandleAggregateException(t.Exception);
+                    }
+                });
             });
         }
     }

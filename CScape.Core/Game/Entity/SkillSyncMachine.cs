@@ -23,15 +23,7 @@ namespace CScape.Core.Game.Entity
 
         public void UpdateSkill(PlayerSkills.SkillModel skill)
         {
-            if (_packets[skill.Index] == null)
-                _packets[skill.Index] = new SetSkillDataPacket(skill.Index, skill.Experience, ClampLevel(skill.Level));
-            else
-            {
-                var p = _packets[skill.Index];
-                p.Level = ClampLevel(skill.Level);
-                p.Exp = skill.Experience;
-            }
-
+            _packets[skill.Index] = new SetSkillDataPacket(skill.Index, skill.Experience, ClampLevel(skill.Level));
             NeedsUpdate = true;
         }
 
@@ -39,8 +31,14 @@ namespace CScape.Core.Game.Entity
         {
             NeedsUpdate = false;
 
-            foreach (var t in Enumerable.Where<SetSkillDataPacket>(_packets, p => p != null))
-                t.Send(stream);
+            for (var i = 0; i < _packets.Length; i++)
+            {
+                if (_packets[i] != null)
+                {
+                    _packets[i].Send(stream);
+                    _packets[i] = null;
+                }
+            }
         }
 
         public void OnReinitialize() { }
