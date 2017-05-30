@@ -51,21 +51,18 @@ namespace CScape.Core.Network.Sync
             // iterate over all IObservables in Observatory, sync them.
             foreach (var obs in LocalPlayer.Observatory)
             {
-                if (_playerObservatory.PopIsNew(obs))
+                switch (obs)
                 {
-                    switch (obs)
-                    {
-                        case Player p:
-                            PlayerSync.PushPlayer(p);
-                            break;
-                        case Npc n:
-                            NpcSync.PushNpc(n);
-                            break;
-                    }
+                    case Player p:
+                        PlayerSync.UpdatePlayer(p);
+                        break;
+                    case GroundItem i:
+                        ItemSync.UpdateItem(i);
+                        break;
+                    case Npc n:
+                        NpcSync.UpdateNpc(n);
+                        break;
                 }
-
-                if (obs is GroundItem i)
-                    ItemSync.UpdateItem(i);
             }
         }
 

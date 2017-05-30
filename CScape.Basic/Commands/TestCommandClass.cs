@@ -17,7 +17,7 @@ namespace CScape.Basic.Commands
         [CommandMethod("sight get")]
         public void GetSight(CommandContext ctx)
         {
-            ctx.Callee.SendSystemChatMessage($"View range: {ctx.Callee.ViewRange}");
+            ctx.Callee.SendSystemChatMessage($"View range: {ctx.Callee.PlayerViewRange}");
         }
 
         [CommandMethod("sight set")]
@@ -30,7 +30,7 @@ namespace CScape.Basic.Commands
                 b.ReadNumber("sight", ref sight);
             })) return;
 
-            ctx.Callee.ViewRange = sight;
+            ctx.Callee.PlayerViewRange = sight;
         }
 
         [CommandMethod("gain")]

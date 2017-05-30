@@ -13,7 +13,6 @@ namespace CScape.Core.Game.Entity
         public IObserver Observer { get; }
 
         private ImmutableHashSet<IWorldEntity> _seeableEntities = ImmutableHashSet<IWorldEntity>.Empty;
-        private readonly HashSet<uint> _newEntityIds = new HashSet<uint>();
 
         public ObservableSyncMachine Sync { get; }
 
@@ -33,7 +32,6 @@ namespace CScape.Core.Game.Entity
                 ent.Observatory.Remove(Observer);
 
             _seeableEntities = ImmutableHashSet<IWorldEntity>.Empty;
-            _newEntityIds.Clear();
             Sync.Clear();
             ReevaluateSightOverride = true;
         }
@@ -43,7 +41,6 @@ namespace CScape.Core.Game.Entity
             if (!_seeableEntities.Contains(ent)) return;
 
             _seeableEntities = _seeableEntities.Remove(ent);
-            _newEntityIds.Remove(ent.UniqueEntityId);
 
             if (ent is Npc n)
                 Sync.NpcSync.Remove(n);
@@ -100,7 +97,6 @@ namespace CScape.Core.Game.Entity
 
                 // add
                 _seeableEntities = _seeableEntities.Add(ent);
-                _newEntityIds.Add(ent.UniqueEntityId);
             }
             // can't see : remove
             else
@@ -119,18 +115,6 @@ namespace CScape.Core.Game.Entity
 
             // push new entity to observables
             PushObservable(ent);
-        }
-
-        public bool PopIsNew(IWorldEntity ent)
-        {
-            if (ent == null) return false;
-
-            if (_newEntityIds.Contains(ent.UniqueEntityId))
-            {
-                _newEntityIds.Remove(ent.UniqueEntityId);
-                return true;
-            }
-            return false;
         }
 
         /// <summary>

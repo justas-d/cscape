@@ -31,11 +31,6 @@ namespace CScape.Core.Game.Entity
         void DoubleEndedPushObservable(IWorldEntity obs);
 
         /// <summary>
-        /// Pops and returns the is new value for the entity.
-        /// </summary>
-        bool PopIsNew(IWorldEntity ent);
-
-        /// <summary>
         /// Removes the given entity from the observatory.
         /// </summary>
         void Remove(IWorldEntity ent);

@@ -54,10 +54,23 @@ namespace CScape.Core.Network.Sync
             _ignoreEmpty = true;
         }
 
-        public void PushNpc(Npc npc)
+        private const int MaxNpcs = 2;
+        private int _npcUpdateCount = 0;
+        private bool _npcOverflow;
+
+        public void UpdateNpc(Npc npc)
         {
             if (npc.IsDestroyed)
                 return;
+
+            if (_npcOverflow)
+                return;
+
+            if (_npcUpdateCount++ >= MaxNpcs)
+            {
+                _npcOverflow = true;
+                return;
+            }
 
             if (_syncNpcIds.Contains(npc.UniqueEntityId))
                 return;
@@ -223,6 +236,20 @@ namespace CScape.Core.Network.Sync
                 WriteFlags(state, stream);
 
             stream.EndPacket();
+
+            // post
+            if (_npcOverflow)
+            {
+                _local.NpcViewRange--;
+            }
+            else if (_npcUpdateCount < MaxNpcs)
+            {
+                if (_local.NpcViewRange != Player.MaxViewRange)
+                    _local.NpcViewRange++;
+            }
+
+            _npcUpdateCount = 0;
+            _npcOverflow = false;
         }
 
         public void OnReinitialize() { }

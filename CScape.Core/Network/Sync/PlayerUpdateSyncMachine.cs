@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
@@ -13,10 +12,6 @@ namespace CScape.Core.Network.Sync
     {
         private sealed class PlayerUpdateState
         {
-            /// <summary>
-            /// The view range using which we evaluated whether our local player can see this other player.
-            /// </summary>
-            public int SightEvaluatedForViewRange { get; set; }
             public bool IsLocal { get; }
             public bool IsNew { get; set; } = true;
 
@@ -27,9 +22,8 @@ namespace CScape.Core.Network.Sync
 
             private readonly uint _id;
 
-            public PlayerUpdateState([NotNull] Player player, int sightEvaluatedForViewRange, bool isLocal)
+            public PlayerUpdateState([NotNull] Player player, bool isLocal)
             {
-                SightEvaluatedForViewRange = sightEvaluatedForViewRange;
                 IsLocal = isLocal;
                 Player = player ?? throw new ArgumentNullException(nameof(player));
                 _id = player.UniqueEntityId;
@@ -76,7 +70,7 @@ namespace CScape.Core.Network.Sync
         [NotNull] private ImmutableList<PlayerUpdateState> _syncPlayers = ImmutableList<PlayerUpdateState>.Empty;
 
         private readonly  HashSet<uint> _initQueueExisting = new HashSet<uint>();
-        private readonly Queue<PlayerUpdateState> _initQueue = new Queue<PlayerUpdateState>();
+        private readonly List<PlayerUpdateState> _initQueue = new List<PlayerUpdateState>();
 
         private readonly HashSet<uint> _removeQueue = new HashSet<uint>();
 
@@ -88,7 +82,6 @@ namespace CScape.Core.Network.Sync
         {
             _local = new PlayerUpdateState(
                 localPlayer ?? throw new ArgumentNullException(nameof(localPlayer)),
-                localPlayer.ViewRange,
                 true);
         }
 
@@ -100,10 +93,23 @@ namespace CScape.Core.Network.Sync
             _initQueue.Clear();
         }
 
-        public void PushPlayer(Player player)
+        private int _playersToUpdate = 0;
+        private const int MaxPlayers = 2;
+        private bool _playerOverflow = false;
+
+        public void UpdatePlayer(Player player)
         {
+            if (_playerOverflow)
+                return;
+
             if (player.IsDestroyed)
                 return;
+
+            if (_playersToUpdate++ >= MaxPlayers)
+            {
+                _playerOverflow = true;
+                return;
+            }
 
             if (_syncPlayerIds.Contains(player.UniqueEntityId))
                 return;
@@ -114,7 +120,7 @@ namespace CScape.Core.Network.Sync
             if (!_initQueueExisting.Add(player.UniqueEntityId))
                 return;
 
-            _initQueue.Enqueue(new PlayerUpdateState(player, _local.Player.ViewRange, false));
+            _initQueue.Add(new PlayerUpdateState(player, false));
             _removeQueue.Remove(player.UniqueEntityId);
 
             _local.Player.DebugMsg($"(PLAYER) push (remove): {player.Username}", ref _local.Player.DebugEntitySync);
@@ -169,6 +175,7 @@ namespace CScape.Core.Network.Sync
             // 3
 
             var willWriteUpdates = false;
+
             int NeedsUpdates(PlayerUpdateState state)
             {
                 var ret = state.GetCombinedFlags() != 0;
@@ -221,7 +228,7 @@ namespace CScape.Core.Network.Sync
             {
                 stream.WriteBits(1, 0); // continue reading?
             }
-                
+
 
             #endregion
 
@@ -244,7 +251,7 @@ namespace CScape.Core.Network.Sync
                     stream.WriteBits(2, 3); // type
 
                     if (_initQueueExisting.Add(ent.Player.UniqueEntityId))
-                        _initQueue.Enqueue(ent);
+                        _initQueue.Add(ent);
                 }
 
                 // run
@@ -269,7 +276,7 @@ namespace CScape.Core.Network.Sync
                 {
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 0); // type
-                    
+
                 }
                 // absolutely no update
                 else
@@ -277,48 +284,13 @@ namespace CScape.Core.Network.Sync
                     stream.WriteBits(1, 0); // is not noop?
                 }
             }
+
             #endregion
 
             #region _newPlayerQueue
 
-            const int maxPlayers = 2;
-
-            var initBacklog = false;
-            while (_initQueue.Any())
+            foreach (var upd in _initQueue)
             {
-                var upd = _initQueue.Peek();
-
-                // _initQueue might contain players which are beyond our new decreased view range. 
-                // this is due to us lowering view range when we have entities in the initQueue but no more space in _syncPlayers
-                // when that happens, we decrease the view range of our local player in hopes the syncPlayers list frees up some space for the backlog of init players
-                // however, sight-lines for players added to the _initQueue is either done on teleport, or when the observer first sees them.
-                // todo : maybe try tying _syncPlayers with the observatory?
-                // if the updates sight-line view range is higher then our current view range, reevaluate sight-lines
-                if (upd.SightEvaluatedForViewRange != _local.Player.ViewRange)
-                {
-                    // update the view-range
-                    upd.SightEvaluatedForViewRange = _local.Player.ViewRange;
-
-                    if (!_local.Player.CanSee(upd.Player))
-                    {
-                        // our local player can't see the other player with the new view range, we can't sync the player.
-                        // remove other player from init queue
-                        _initQueue.Dequeue();
-                        _initQueueExisting.Remove(upd.Player.UniqueEntityId);
-                        continue;
-                    }
-                }
-
-                // check if _syncPlayers has reached it's limit
-                if (_syncPlayers.Count >= maxPlayers)
-                {
-                    initBacklog = true;
-                    break;
-                }
-
-                upd = _initQueue.Dequeue();
-                _initQueueExisting.Remove(upd.Player.UniqueEntityId);
-
                 /*
                  * 1 bit - add to upd list?
                  * todo : 1 bit - setpos flag
@@ -355,19 +327,8 @@ namespace CScape.Core.Network.Sync
                 stream.WriteBits(5, upd.Player.Transform.Y - _local.Player.Transform.Y); // ydelta
                 stream.WriteBits(5, upd.Player.Transform.X - _local.Player.Transform.X); // xdelta            
             }
-
-            // init queue is backed up due to _syncPlayers being full.
-            // try to lower the view range in hopes that the observatory will free up some space for the queued players.
-
-            if (initBacklog)
-            {
-                    _local.Player.ViewRange--;
-            }
-            else if(_syncPlayers.Count < maxPlayers)
-            {
-                if (_local.Player.ViewRange != Player.MaxViewRange)
-                    _local.Player.ViewRange++;
-            }
+            _initQueue.Clear();
+            _initQueueExisting.Clear();
 
             if (willWriteUpdates)
                 stream.WriteBits(11, 2047);
@@ -381,6 +342,23 @@ namespace CScape.Core.Network.Sync
                 WriteFlags(p, stream);
 
             stream.EndPacket();
+
+            // post update
+
+            // try to lower the view range in hopes that the observatory will free up some space.
+            if (_playerOverflow)
+            {
+                _local.Player.PlayerViewRange--;
+            }
+            else if(_playersToUpdate < MaxPlayers)
+            {
+                if (_local.Player.PlayerViewRange != Player.MaxViewRange)
+                    _local.Player.PlayerViewRange++;
+            }
+            
+
+            _playerOverflow = false;
+            _playersToUpdate = 0;
         }
 
         public void OnReinitialize() {  }

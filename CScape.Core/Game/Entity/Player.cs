@@ -189,7 +189,7 @@ namespace CScape.Core.Game.Entity
         private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
-        private int _otherPlayerViewRange;
+        private int _playerViewRange = MaxViewRange;
 
         public MovementController Movement { get; }
 
@@ -200,24 +200,39 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public const int MaxViewRange = 15;
 
-        // todo : lower player ViewRange if out buffer is close to being overrun.
         /// <summary>
         /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
-        public int ViewRange
+        public int PlayerViewRange
         {
-            get => _otherPlayerViewRange;
-            set
-            {
-                var newRange = value.Clamp(0, MaxViewRange);
-                if (newRange != _otherPlayerViewRange)
-                {
-                    DebugMsg($"Adjusting sight {_otherPlayerViewRange} => {newRange}", ref DebugEntitySync);
-                    Observatory.ReevaluateSightOverride = true;
-                }
+            get => _playerViewRange;
+            set => AdjustSight(value, ref _playerViewRange);
+        }
 
-                _otherPlayerViewRange = newRange;
+        private int _npcViewRange;
+        public int NpcViewRange
+        {
+            get => _npcViewRange;
+            set => AdjustSight(value, ref _npcViewRange);
+        }
+
+        private int _itemViewRange;
+        public int ItemViewRange
+        {
+            get => _itemViewRange;
+            set => AdjustSight(value, ref _itemViewRange);
+        }
+
+        private void AdjustSight(int value, ref int field)
+        {
+            var newRange = value.Clamp(0, MaxViewRange);
+            if (newRange != field)
+            {
+                DebugMsg($"Adjusting sight {field} => {value}", ref DebugEntitySync);
+                Observatory.ReevaluateSightOverride = true;
             }
+
+            field = value;
         }
 
         public HitData SecondaryHit { get; private set; }
@@ -351,7 +366,7 @@ namespace CScape.Core.Game.Entity
 
         /// <summary>
         /// In milliseconds, the delay between a socket dying and it's player being removed
-        /// from the world. todo Default: 60 seconds.
+        /// from the world.
         /// </summary>
         public long ReapTimeMs { get; set; } = 1000 * 60;
 
@@ -434,15 +449,12 @@ namespace CScape.Core.Game.Entity
             Server.Players.Unregister(this);
         }
 
-        /// <summary>
-        /// Indicates whether this player can see the given item. Does not take into account view ranges/sight lines.
-        /// </summary>
+        // todo  : replace CanSeeItem with CanSee
         public bool CanSeeItem(GroundItem item)
         {
-            if (item.IsDestroyed)
-                return false;
-
-            return item.IsPublic || item.DroppedBy.Equals(this);
+            return
+                (item.IsPublic || item.DroppedBy.Equals(this));
+            //&& IsInRange(ItemViewRange);
         }
 
         public override bool CanSee(IWorldEntity obs)
@@ -456,11 +468,19 @@ namespace CScape.Core.Game.Entity
             if (!Transform.PoE.ContainsEntity(obs))
                 return false;
 
-            var range = MaxViewRange;
-            if (obs is Player)
-                range = ViewRange;
+            bool IsInRange(int range)
+                => obs.Transform.MaxDistanceTo(Transform) <= range;
 
-            return obs.Transform.MaxDistanceTo(Transform) <= range;
+            if (obs is Player)
+                return IsInRange(PlayerViewRange);
+
+            else if (obs is Npc)
+                return IsInRange(NpcViewRange);
+
+            else if (obs is GroundItem)
+                return IsInRange(ItemViewRange);
+
+            return IsInRange(MaxViewRange);
         }
 
         /// <summary>

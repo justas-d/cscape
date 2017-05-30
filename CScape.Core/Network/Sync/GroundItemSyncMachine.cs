@@ -85,8 +85,6 @@ namespace CScape.Core.Network.Sync
                     ref _local.DebugEntitySync);
             }
 
-
-
             // figure out if the item needs to be synced
             if (_tracked.Contains(item))
             {
