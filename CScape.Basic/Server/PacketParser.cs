@@ -104,11 +104,9 @@ namespace CScape.Basic.Server
                 //  dont bother creating a new Blob() if we're not going to be dispatched to a handler.
                 if (_dispatch.CanHandle(opcode))
                     yield return (opcode, new Blob(payload));
-                else
+                else if (player.DebugPackets)
                 {
-                    _log.Debug(this, $"Unhandled packet opcode: {opcode}.");
-                    if (player.DebugPackets)
-                        player.SendSystemChatMessage($"{opcode:000}");
+                    player.SendSystemChatMessage($"Unhandled packet opcode: {opcode:000}");
                 }
             }
         }

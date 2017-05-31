@@ -189,7 +189,6 @@ namespace CScape.Core.Game.Entity
         private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
-        private int _playerViewRange = MaxViewRange;
 
         public MovementController Movement { get; }
 
@@ -200,35 +199,36 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public const int MaxViewRange = 15;
 
+        private int _playerViewRange;
         /// <summary>
         /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
         public int PlayerViewRange
         {
             get => _playerViewRange;
-            set => AdjustSight(value, ref _playerViewRange);
+            set => AdjustSight(value, ref _playerViewRange, "player");
         }
 
         private int _npcViewRange;
         public int NpcViewRange
         {
             get => _npcViewRange;
-            set => AdjustSight(value, ref _npcViewRange);
+            set => AdjustSight(value, ref _npcViewRange, "npc");
         }
 
         private int _itemViewRange;
         public int ItemViewRange
         {
             get => _itemViewRange;
-            set => AdjustSight(value, ref _itemViewRange);
+            set => AdjustSight(value, ref _itemViewRange, "item");
         }
 
-        private void AdjustSight(int value, ref int field)
+        private void AdjustSight(int value, ref int field, string logType)
         {
             var newRange = value.Clamp(0, MaxViewRange);
             if (newRange != field)
             {
-                DebugMsg($"Adjusting sight {field} => {value}", ref DebugEntitySync);
+                DebugMsg($"Adjusting {logType} sight {field} => {value}", ref DebugEntitySync);
                 Observatory.ReevaluateSightOverride = true;
             }
 
@@ -491,7 +491,11 @@ namespace CScape.Core.Game.Entity
 
         public void DebugMsg(string msg, ref bool toggle)
         {
-            if(toggle) SendSystemChatMessage(msg);
+            if (toggle)
+            {
+                SendSystemChatMessage(msg);
+                Log.Debug(this, msg);
+            }
         }
 
         /// <summary>
