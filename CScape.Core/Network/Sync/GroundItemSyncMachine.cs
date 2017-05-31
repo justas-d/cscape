@@ -48,7 +48,6 @@ namespace CScape.Core.Network.Sync
                 itemLocal.Item1 - offset.Item1,
                 itemLocal.Item2 - offset.Item2);
 
-            // evaluate offsets by finding the remainder left by the local snap to region grid
             return (region, offset);
         }
 
