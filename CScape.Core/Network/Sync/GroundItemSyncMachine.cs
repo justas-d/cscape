@@ -106,14 +106,9 @@ namespace CScape.Core.Network.Sync
             }
             else
             {
-                // check whether our local is the one who dropped it..
-                // ..or the item is public
-                if (_local.CanSeeItem(item))
-                {
-                    // we should start tracking the item now
-                    _tracked.Add(item);
-                    SendInitial();
-                }
+                // start tracking the item
+                _tracked.Add(item);
+                SendInitial();
             }
         }
 

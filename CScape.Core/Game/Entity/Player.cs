@@ -216,13 +216,6 @@ namespace CScape.Core.Game.Entity
             set => AdjustSight(value, ref _npcViewRange, "npc");
         }
 
-        private int _itemViewRange;
-        public int ItemViewRange
-        {
-            get => _itemViewRange;
-            set => AdjustSight(value, ref _itemViewRange, "item");
-        }
-
         private void AdjustSight(int value, ref int field, string logType)
         {
             var newRange = value.Clamp(0, MaxViewRange);
@@ -449,14 +442,6 @@ namespace CScape.Core.Game.Entity
             Server.Players.Unregister(this);
         }
 
-        // todo  : replace CanSeeItem with CanSee
-        public bool CanSeeItem(GroundItem item)
-        {
-            return
-                (item.IsPublic || item.DroppedBy.Equals(this));
-            //&& IsInRange(ItemViewRange);
-        }
-
         public override bool CanSee(IWorldEntity obs)
         {
             if (obs.IsDestroyed)
@@ -477,8 +462,10 @@ namespace CScape.Core.Game.Entity
             else if (obs is Npc)
                 return IsInRange(NpcViewRange);
 
-            else if (obs is GroundItem)
-                return IsInRange(ItemViewRange);
+            else if (obs is GroundItem item)
+            {
+                return (item.IsPublic || item.DroppedBy.Equals(this)) && IsInRange(MaxViewRange);    
+            }
 
             return IsInRange(MaxViewRange);
         }
