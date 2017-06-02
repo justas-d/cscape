@@ -8,21 +8,21 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
 {
-    public class PlaneOfExistance : IEnumerable<IWorldEntity>
+    public class PlaneOfExistence : IEnumerable<IWorldEntity>
     {
         [NotNull] public string Name { get; }
 
         [NotNull]  public IGameServer Server { get; }
-        public bool IsOverworld => Server.Overworld == this;
+        public bool IsOverworld => ReferenceEquals(Server.Overworld, this);
 
         private ILogger Log { get; }
 
         private readonly EntityPool<IWorldEntity> _entityPool;
         private bool _isFreed;
 
-        private readonly Dictionary<(int, int), Region> _regions = new Dictionary<(int, int), Region>();
+        protected Dictionary<(int, int), Region> Regions { get; } = new Dictionary<(int, int), Region>();
 
-        public PlaneOfExistance([NotNull] IGameServer server, [NotNull] string name)
+        public PlaneOfExistence([NotNull] IGameServer server, [NotNull] string name)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -32,7 +32,7 @@ namespace CScape.Core.Game.World
             Server.Entities.Add(_entityPool);
         }
 
-        ~PlaneOfExistance()
+        ~PlaneOfExistence()
         {
             if (!_isFreed && !IsOverworld)
             {
@@ -49,19 +49,19 @@ namespace CScape.Core.Game.World
         /// Gets the region coords by global position.
         /// </summary>
         [NotNull]
-        public Region GetRegion(int x, int y)
+        public virtual Region GetRegion(int x, int y)
         {
             var key = (x >> Region.Shift, y >> Region.Shift);
             return GetRegion(key);
         }
 
         [NotNull]
-        public Region GetRegion((int rx, int ry) regionCoords)
+        public virtual Region GetRegion((int rx, int ry) regionCoords)
         {
-            if(!_regions.ContainsKey(regionCoords))
-                _regions.Add(regionCoords, new Region(this, regionCoords.rx, regionCoords.ry));
+            if(!Regions.ContainsKey(regionCoords))
+                Regions.Add(regionCoords, new Region(this, regionCoords.rx, regionCoords.ry));
 
-            return _regions[regionCoords];
+            return Regions[regionCoords];
         }
 
         public void Free()

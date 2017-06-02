@@ -13,7 +13,7 @@ namespace CScape.Core.Injection
         [NotNull] IEntityRegistry<int, Npc> Npcs { get; }
 
         [NotNull] IServiceProvider Services { get; }
-        [NotNull] PlaneOfExistance Overworld { get; }
+        [NotNull] PlaneOfExistence Overworld { get; }
 
         bool IsDisposed { get; }
         DateTime StartTime { get; }

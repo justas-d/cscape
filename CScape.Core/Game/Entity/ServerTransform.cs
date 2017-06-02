@@ -15,17 +15,17 @@ namespace CScape.Core.Game.Entity
         public byte Z { get; protected set; }
 
         public Region Region { get; private set; }
-        public PlaneOfExistance PoE { get; private set; }
+        public PlaneOfExistence PoE { get; private set; }
 
         // ReSharper disable once NotNullMemberIsNotInitialized
         public ServerTransform([NotNull] IWorldEntity entity,
             IPosition pos,
-            PlaneOfExistance poe = null) : this(entity, pos.X, pos.Y, pos.Z, poe) { }
+            PlaneOfExistence poe = null) : this(entity, pos.X, pos.Y, pos.Z, poe) { }
 
         // ReSharper disable once NotNullMemberIsNotInitialized
         public ServerTransform([NotNull] IWorldEntity entity,
             int x, int y, byte z,
-            PlaneOfExistance poe = null)
+            PlaneOfExistence poe = null)
         {
             Entity = entity ?? throw new ArgumentNullException(nameof(entity));
 
@@ -53,7 +53,7 @@ namespace CScape.Core.Game.Entity
         public void Teleport(int x, int y) 
             => Teleport(x, y, Z);
 
-        public void SwitchPoE(PlaneOfExistance newPoe)
+        public void SwitchPoE(PlaneOfExistence newPoe)
         {
             if (newPoe == PoE)
                 return;
@@ -109,7 +109,7 @@ namespace CScape.Core.Game.Entity
             Entity.NeedsSightEvaluation = true;
         }
 
-        protected virtual void InternalSwitchPoE(PlaneOfExistance newPoe) { }
+        protected virtual void InternalSwitchPoE(PlaneOfExistence newPoe) { }
         protected virtual void InternalSetPosition(int x, int y, byte z) { }
         protected virtual void InternalMove(sbyte dx, sbyte dy) { }
     }

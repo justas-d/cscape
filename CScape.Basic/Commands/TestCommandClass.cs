@@ -12,7 +12,7 @@ namespace CScape.Basic.Commands
     [CommandsClass]
     public sealed class TestCommandClass
     {
-        private PlaneOfExistance _diffPoe;
+        private PlaneOfExistence _diffPoe;
 
         [CommandMethod("sight get")]
         public void GetSight(CommandContext ctx)
@@ -298,7 +298,7 @@ namespace CScape.Basic.Commands
         public void SwitchPoe(CommandContext ctx)
         {
             if (_diffPoe == null)
-                _diffPoe = new PlaneOfExistance(ctx.Callee.Server, "test_poe");
+                _diffPoe = new PlaneOfExistence(ctx.Callee.Server, "test_poe");
 
             ctx.Callee.Transform.SwitchPoE(_diffPoe);
         }

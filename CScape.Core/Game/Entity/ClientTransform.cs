@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entity
         public static ClientTransform Create(
             IWorldEntity forEntity,
             IPosition pos,
-            [CanBeNull] PlaneOfExistance poe = null)
+            [CanBeNull] PlaneOfExistence poe = null)
         {
             var transform = new ClientTransform(forEntity);
 
@@ -33,7 +33,7 @@ namespace CScape.Core.Game.Entity
         {
         }
 
-        protected void Initialize(int x, int y, byte z, [NotNull] PlaneOfExistance poe)
+        protected void Initialize(int x, int y, byte z, [NotNull] PlaneOfExistence poe)
         {
             if (poe == null) throw new ArgumentNullException(nameof(poe));
 

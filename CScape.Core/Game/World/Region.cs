@@ -7,7 +7,7 @@ namespace CScape.Core.Game.World
 {
     public class Region
     {
-        [NotNull] public PlaneOfExistance Poe { get; }
+        [NotNull] public PlaneOfExistence Poe { get; }
 
         public int X { get; }
         public int Y { get; }
@@ -22,7 +22,7 @@ namespace CScape.Core.Game.World
 
         private IEnumerable<Region> _nearbyRegions;
 
-        public Region([NotNull] PlaneOfExistance poe, int x, int y)
+        public Region([NotNull] PlaneOfExistence poe, int x, int y)
         {
             Poe = poe ?? throw new ArgumentNullException(nameof(poe));
             X = x;

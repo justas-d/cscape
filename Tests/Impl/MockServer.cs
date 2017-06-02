@@ -22,7 +22,7 @@ namespace CScape.Dev.Tests.Impl
         public void Dispose() { }
 
         public IServiceProvider Services { get; }
-        public PlaneOfExistance Overworld { get; }
+        public PlaneOfExistence Overworld { get; }
 
         public bool IsDisposed { get; }
         public DateTime StartTime { get; }
@@ -42,7 +42,7 @@ namespace CScape.Dev.Tests.Impl
             services.AddSingleton<IGameServer>(_ => this);
             Services = services.BuildServiceProvider();
 
-            Overworld = new PlaneOfExistance(this, "Mock overworld");
+            Overworld = new PlaneOfExistence(this, "Mock overworld");
 
             Players = new PlayerRegistry(Services);
             Npcs = new NpcRegistry(Services);

@@ -21,12 +21,12 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// The entities current PoE
         /// </summary>
-        [NotNull] PlaneOfExistance PoE { get; }
+        [NotNull] PlaneOfExistence PoE { get; }
 
         /// <summary>
         /// Cleanly switches the PoE of the entity.
         /// </summary>
-        void SwitchPoE([NotNull] PlaneOfExistance newPoe);
+        void SwitchPoE([NotNull] PlaneOfExistence newPoe);
 
         /// <summary>
         /// Returns the absolute distance to the given transform.

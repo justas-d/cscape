@@ -10,7 +10,7 @@ namespace CScape.Core.Game.Entity
             public static ObserverClientTransform Create(
                 IObserver forEntity,
                 int x, int y, byte z,
-                [CanBeNull] PlaneOfExistance poe = null)
+                [CanBeNull] PlaneOfExistence poe = null)
             {
                 var transform = new ObserverClientTransform(forEntity);
 
@@ -30,7 +30,7 @@ namespace CScape.Core.Game.Entity
             _observer = entity;
         }
 
-        protected override void InternalSwitchPoE(PlaneOfExistance newPoe)
+        protected override void InternalSwitchPoE(PlaneOfExistence newPoe)
         {
             base.InternalSwitchPoE(newPoe);
             _observer.Observatory.Clear();

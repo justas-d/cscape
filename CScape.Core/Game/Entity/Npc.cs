@@ -129,12 +129,12 @@ namespace CScape.Core.Game.Entity
         public Npc(IServiceProvider service,
             short npcDefId,
             IPosition pos,
-            PlaneOfExistance poe = null) : this(service, npcDefId, pos.X, pos.Y, pos.Z, poe) { }
+            PlaneOfExistence poe = null) : this(service, npcDefId, pos.X, pos.Y, pos.Z, poe) { }
 
         public Npc(IServiceProvider service,
             short npcDefId,
             int x, int y, byte z,
-            PlaneOfExistance poe = null) : base(service)
+            PlaneOfExistence poe = null) : base(service)
         {
             if (0 > npcDefId) throw new ArgumentOutOfRangeException(nameof(npcDefId));
 

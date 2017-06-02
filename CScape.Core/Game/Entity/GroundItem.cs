@@ -26,14 +26,14 @@ namespace CScape.Core.Game.Entity
         public long DespawnsAfterMs { get; } = 60 * 6 * 1000;
 
         /// <summary>
-        /// Whether this item can be seen by everybody, not just by the player who dropped it.
+        /// Whether this item can be seen by everybody, not just by the player who dropped it.      
         /// </summary>
         public bool IsPublic { get; private set; }
 
         public GroundItem(
             [NotNull] IServiceProvider services, 
             (int id, int amount) item,
-            IPosition pos, Player droppedBy, PlaneOfExistance poe = null) 
+            IPosition pos, Player droppedBy, PlaneOfExistence poe = null) 
             : base(services)
         {
             ItemId = item.id;

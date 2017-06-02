@@ -17,7 +17,7 @@ namespace CScape.Basic.Server
         public IEntityRegistry<int, Npc> Npcs { get; }
 
         public IServiceProvider Services { get; }
-        public PlaneOfExistance Overworld { get; }
+        public PlaneOfExistence Overworld { get; }
 
         public bool IsDisposed { get; private set; }
         public DateTime StartTime { get; private set; }
@@ -37,7 +37,7 @@ namespace CScape.Basic.Server
             Npcs = new NpcRegistry(Services);
             Players = new PlayerRegistry(Services);
 
-            Overworld = new PlaneOfExistance(this, "Overworld");
+            Overworld = new PlaneOfExistence(this, "Overworld");
 
             Loop = Services.ThrowOrGet<IMainLoop>();
             Log = Services.ThrowOrGet<ILogger>();
