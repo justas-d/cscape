@@ -6,7 +6,6 @@ using System.Linq;
 using CScape.Core.Data;
 using ICSharpCode.SharpZipLib.BZip2;
 using JetBrains.Annotations;
-using Org.BouncyCastle.Apache.Bzip2;
 
 namespace CScape.Basic.Cache
 {
@@ -55,38 +54,25 @@ namespace CScape.Basic.Cache
                 var folderDecompressedSize = blob.ReadInt24();
                 var folderSize = blob.ReadInt24();
 
-                byte[] Decompress(byte[] compressed, int decompressedSize)
+                byte[] Decompress(byte[] compressed, int decompressedSize, int offset)
                 {
-                    const int bufferLen = 4;
-                    var withHeader = new byte[compressed.Length + bufferLen];
-                    withHeader[0] = (byte)'B';
-                    withHeader[1] = (byte)'Z';
-                    withHeader[2] = (byte)'h';
-                    withHeader[3] = (byte)'1';
-                    Buffer.BlockCopy(compressed, 0, withHeader, bufferLen, compressed.Length);
 
-                    using(var mem = new MemoryStream(withHeader))
-                    using (var bzipInput = new CBZip2InputStream(mem))
+                    var ret = new byte[decompressedSize];
+
+                    using (var input = new MemoryStream(compressed))
                     {
-                        var ret = new byte[decompressedSize];
-                        int temp;
-                        var i = 0;
-
-                        while ((temp = bzipInput.ReadByte()) != -1)
-                        {
-                            Debug.Assert(temp >= 0 && byte.MaxValue >= temp);
-                            ret[i++] = (byte)temp;
-                        }
-
-                        return ret;
+                        input.Position = offset;
+                        using (BZip2InputStream bzip = new BZip2InputStream(input))
+                            bzip.Read(ret, 0, decompressedSize);
                     }
+                    return ret;
                 }
-                
+
                 // decompress bzip
                 var isEverythingDecompressed = false;
                 if (folderSize != folderDecompressedSize)
                 {
-                    blob = new Blob(Decompress(data, folderDecompressedSize));
+                    blob = new Blob(Decompress(data, folderDecompressedSize, blob.ReadCaret));
                     isEverythingDecompressed = true;
                 }
                     
@@ -122,7 +108,7 @@ namespace CScape.Basic.Cache
                     {
                         // decompress individual file
                         var compressedFile = ReadNextFile(fileSizes[i]);
-                        var file = Decompress(compressedFile, decompressedFileSizes[i]);
+                        var file = Decompress(compressedFile, decompressedFileSizes[i], 0);
                         _files.Add(ids[i], file);
                     }
                 }
@@ -132,6 +118,7 @@ namespace CScape.Basic.Cache
             public byte[] GetFile(string id)
             {
                 // hash id
+                id = id.ToUpperInvariant();
                 var hash = id.Aggregate(0, (current, c) => current * 61 + c - 32);
                 return GetFile(hash);
             }
@@ -201,7 +188,8 @@ namespace CScape.Basic.Cache
             return ret;
         }
 
-        public Folder GetFolder(int type, int file)
+        public Folder GetFolder(int type, int 
+            file)
         {
             ThrowIfDisposed();
             var key = (type, file);
@@ -213,8 +201,25 @@ namespace CScape.Basic.Cache
             var index = GetIndex(type);
             index.Position = IndexSize * file;
 
-            var size = Read24(index);
-            var blockIndex = Read24(index);
+            var header = new byte[BlockHeaderSize];
+            index.Read(header, 0, IndexSize);
+
+            int Read16(int off)
+            {
+                return (header[0 + off] << 8) + header[1 + off];
+            }
+
+            int Read24(int off)
+            {
+                return (header[0 + off] << 16) + (header[1 + off] << 8) + header[2 + off];
+            }
+
+            var size = (header[0] << 16) + (header[1] << 8) + header[2];
+            var blockIndex = (header[3] << 16) + (header[4] << 8) + header[5];
+
+            Debug.Assert(_data.Length > size);
+            Debug.Assert(blockIndex > 0);
+            Debug.Assert(_data.Length / BlockSize > blockIndex);
 
             var blockCount = size / BlockDataSize;
             var incompleteBlockByteCount = size % BlockDataSize;
@@ -227,13 +232,15 @@ namespace CScape.Basic.Cache
 
             for (var i = 0; i < blockCount; i++)
             {
-                _data.Position = blockIndex * BlockSize;
+                _data.Seek(blockIndex * BlockSize, SeekOrigin.Begin);
 
                 // read header
-                var nextFile = Read16(_data);
-                var currentDataIndex = Read16(_data);
-                blockIndex = Read24(_data);
-                var nextType = _data.ReadByte();
+                _data.Read(header, 0, BlockHeaderSize);
+
+                var nextFile = Read16(0);
+                var currentDataIndex = Read16(2);
+                blockIndex = Read24(4);
+                var nextType = header[7];
 
                 // match header data to current state
                 if (i != currentDataIndex)
@@ -269,25 +276,9 @@ namespace CScape.Basic.Cache
                 }
             }
 
-//            folderData = folderData.Reverse().ToArray();
-
             var folder = new Folder(folderData);
             _folderCache.Add(key, folder);
             return folder;
-        }
-
-
-        private readonly byte[] _readBuffer = new byte[4];
-        private short Read16(FileStream stream)
-        {
-            stream.Read(_readBuffer, 0, sizeof(short));
-            return (short)(_readBuffer[0] << 8 | _readBuffer[1]);
-        }
-
-        private int Read24(FileStream stream)
-        {
-            stream.Read(_readBuffer, 0, 3);
-            return (_readBuffer[0] << 16 | _readBuffer[1] << 8 | _readBuffer[2]);
         }
 
         public void Dispose()

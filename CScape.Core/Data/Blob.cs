@@ -80,7 +80,7 @@ namespace CScape.Core.Data
 
         public int ReadInt24()
         {
-            return (ReadInt16() << 8) + ReadByte();
+            return ReadByte() << 16 | ReadByte() << 8 | ReadByte();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
