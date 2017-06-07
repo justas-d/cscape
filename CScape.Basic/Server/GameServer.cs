@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using CScape.Basic.Model;
 using CScape.Core;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
@@ -37,7 +38,7 @@ namespace CScape.Basic.Server
             Npcs = new NpcRegistry(Services);
             Players = new PlayerRegistry(Services);
 
-            Overworld = new PlaneOfExistence(this, "Overworld");
+            Overworld = new PlaneOfExistence(this, new NullCollisionProvider(), "Overworld");
 
             Loop = Services.ThrowOrGet<IMainLoop>();
             Log = Services.ThrowOrGet<ILogger>();

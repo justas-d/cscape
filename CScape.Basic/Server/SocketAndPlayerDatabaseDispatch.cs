@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using CScape.Basic.Model;
 using CScape.Core;
@@ -361,7 +360,7 @@ namespace CScape.Basic.Server
             {
                 _log.Debug(this, "ObjectDisposedException in Entry.");
             }
-            catch (CryptoException cryptEx)
+            catch (Org.BouncyCastle.Crypto.CryptoException cryptEx)
             {
                 _log.Exception(this, "Crypto Exception in EntryPoint.", cryptEx);
             }

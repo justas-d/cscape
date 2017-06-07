@@ -42,7 +42,7 @@ namespace CScape.Dev.Tests.Impl
             services.AddSingleton<IGameServer>(_ => this);
             Services = services.BuildServiceProvider();
 
-            Overworld = new PlaneOfExistence(this, "Mock overworld");
+            Overworld = new PlaneOfExistence(this, new NullCollisionProvider(), "Mock overworld");
 
             Players = new PlayerRegistry(Services);
             Npcs = new NpcRegistry(Services);

@@ -10,6 +10,7 @@ namespace CScape.Core.Game.World
 {
     public class PlaneOfExistence : IEnumerable<IWorldEntity>
     {
+        [NotNull] public ICollisionProvider Collision { get; }
         [NotNull] public string Name { get; }
 
         [NotNull]  public IGameServer Server { get; }
@@ -22,8 +23,9 @@ namespace CScape.Core.Game.World
 
         protected Dictionary<(int, int), Region> Regions { get; } = new Dictionary<(int, int), Region>();
 
-        public PlaneOfExistence([NotNull] IGameServer server, [NotNull] string name)
+        public PlaneOfExistence([NotNull] IGameServer server, ICollisionProvider collision, [NotNull] string name)
         {
+            Collision = collision;
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Log = server.Services.ThrowOrGet<ILogger>();

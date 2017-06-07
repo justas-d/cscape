@@ -4,6 +4,14 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP1_1;NO_CRYPTO</DefineConstants>
+    <Optimize>False</Optimize>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="BouncyCastle.CoreClr" Version="1.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
@@ -14,7 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CScape.Core\CScape.Core.csproj" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

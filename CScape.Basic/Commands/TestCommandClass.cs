@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CScape.Basic.Model;
 using CScape.Core;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
@@ -298,7 +299,7 @@ namespace CScape.Basic.Commands
         public void SwitchPoe(CommandContext ctx)
         {
             if (_diffPoe == null)
-                _diffPoe = new PlaneOfExistence(ctx.Callee.Server, "test_poe");
+                _diffPoe = new PlaneOfExistence(ctx.Callee.Server, new NullCollisionProvider(),  "test_poe");
 
             ctx.Callee.Transform.SwitchPoE(_diffPoe);
         }

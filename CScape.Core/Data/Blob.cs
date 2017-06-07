@@ -78,6 +78,11 @@ namespace CScape.Core.Data
             return data;
         }
 
+        public int ReadInt24()
+        {
+            return (ReadInt16() << 8) + ReadByte();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool CanRead(int lookahead = 0)
             => ReadCaret + lookahead >= Buffer.Length;
