@@ -348,12 +348,12 @@ namespace CScape.Core.Network.Sync
             // try to lower the view range in hopes that the observatory will free up some space.
             if (_playerOverflow)
             {
-                _local.Player.PlayerViewRange--;
+                _local.Player.ViewRange--;
             }
             else if(_playersToUpdate < MaxPlayers)
             {
-                if (_local.Player.PlayerViewRange != Player.MaxViewRange)
-                    _local.Player.PlayerViewRange++;
+                if (_local.Player.ViewRange != Player.MaxViewRange)
+                    _local.Player.ViewRange++;
             }
             
 

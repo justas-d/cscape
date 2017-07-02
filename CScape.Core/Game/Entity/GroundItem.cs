@@ -80,6 +80,16 @@ namespace CScape.Core.Game.Entity
             loop.Item.Enqueue(this);
         }
 
+        public override bool CanBeSeenBy(IObserver ent)
+        {
+            if (!ent.IsEntityInViewRange(this)) return false;
+
+            if (ent is Player p && DroppedBy.Equals(p))
+                return true;
+
+            return IsPublic;
+        }
+
         public void UpdateAmount(int newAmount)
         {
             if (ItemAmount == newAmount) return;

@@ -100,6 +100,8 @@ namespace CScape.Core.Game.Entity
             _containers = _containers.Remove(cont);
         }
 
+        public virtual bool CanBeSeenBy(IObserver ent) => true;
+
         private ImmutableList<IRegisteredCollection> _containers 
             = ImmutableList<IRegisteredCollection>.Empty;
 

@@ -240,12 +240,12 @@ namespace CScape.Core.Network.Sync
             // post
             if (_npcOverflow)
             {
-                _local.NpcViewRange--;
+                _local.ViewRange--;
             }
             else if (_npcUpdateCount < MaxNpcs)
             {
-                if (_local.NpcViewRange != Player.MaxViewRange)
-                    _local.NpcViewRange++;
+                if (_local.ViewRange != Player.MaxViewRange)
+                    _local.ViewRange++;
             }
 
             _npcUpdateCount = 0;

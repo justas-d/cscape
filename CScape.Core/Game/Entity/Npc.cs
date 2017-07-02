@@ -173,6 +173,11 @@ namespace CScape.Core.Game.Entity
             // ignored, todo : reset npc facing coordinate?
         }
 
+        public override bool CanBeSeenBy(IObserver observer)
+        {
+            return observer.IsEntityInViewRange(this);
+        }
+
         public override void Update(IMainLoop loop)
         {
             // reset update flags

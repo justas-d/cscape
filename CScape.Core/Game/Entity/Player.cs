@@ -184,6 +184,7 @@ namespace CScape.Core.Game.Entity
 
         [NotNull] public ISocketContext Connection { get; }
         public IObservatory Observatory => _observatory;
+        
         [NotNull] private readonly ClientTransform _transform;
         [NotNull] public IClientTransform ClientTransform => _transform;
         private readonly PlayerObservatory _observatory;
@@ -199,34 +200,25 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public const int MaxViewRange = 15;
 
-        private int _playerViewRange;
         /// <summary>
         /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
-        public int PlayerViewRange
+        public int ViewRange
         {
-            get => _playerViewRange;
-            set => AdjustSight(value, ref _playerViewRange, "player");
-        }
-
-        private int _npcViewRange;
-        public int NpcViewRange
-        {
-            get => _npcViewRange;
-            set => AdjustSight(value, ref _npcViewRange, "npc");
-        }
-
-        private void AdjustSight(int value, ref int field, string logType)
-        {
-            var newRange = value.Clamp(0, MaxViewRange);
-            if (newRange != field)
+            get => _viewRange;
+            set
             {
-                DebugMsg($"Adjusting {logType} sight {field} => {value}", ref DebugEntitySync);
-                Observatory.ReevaluateSightOverride = true;
-            }
+                var newRange = value.Clamp(0, MaxViewRange);
+                if (newRange != value)
+                {
+                    DebugMsg($"View range {_viewRange} => {value}", ref DebugEntitySync);
+                    Observatory.ReevaluateSightOverride = true;
+                }
 
-            field = value;
+                _viewRange= value;
+            }
         }
+        private int _viewRange;
 
         public HitData SecondaryHit { get; private set; }
         public HitData PrimaryHit { get; private set; }
@@ -453,21 +445,17 @@ namespace CScape.Core.Game.Entity
             if (!Transform.PoE.ContainsEntity(obs))
                 return false;
 
-            bool IsInRange(int range)
-                => obs.Transform.MaxDistanceTo(Transform) <= range;
+            return obs.CanBeSeenBy(this);
+        }
 
-            if (obs is Player)
-                return IsInRange(PlayerViewRange);
+        public bool IsEntityInViewRange(IWorldEntity ent)
+        {
+            return Transform.MaxDistanceTo(ent.Transform) <= ViewRange;
+        }
 
-            else if (obs is Npc)
-                return IsInRange(NpcViewRange);
-
-            else if (obs is GroundItem item)
-            {
-                return (item.IsPublic || item.DroppedBy.Equals(this)) && IsInRange(MaxViewRange);    
-            }
-
-            return IsInRange(MaxViewRange);
+        public override bool CanBeSeenBy(IObserver observer)
+        {
+            return observer.IsEntityInViewRange(this);
         }
 
         /// <summary>

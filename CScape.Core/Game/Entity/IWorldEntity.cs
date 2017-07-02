@@ -50,5 +50,7 @@ namespace CScape.Core.Game.Entity
 
         void RegisterContainer(IRegisteredCollection cont);
         void UnregisterContainer(IRegisteredCollection cont);
+
+        bool CanBeSeenBy(IObserver ent);
     }
 }
