@@ -340,6 +340,8 @@ namespace CScape.Core.Game.Entity
             IsAppearanceDirty = true;
 
             // queue for immediate update
+            ObserverCount = 1;
+
             _services.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
         }
 

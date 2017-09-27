@@ -8,6 +8,15 @@ namespace CScape.Dev.Tests.Impl
 {
     public class MockLoop : IMainLoop
     {
+        public class MockUpdateBatch : IUpdateBatch
+        {
+            public IUpdateQueue<IMovingEntity> Movement { get; } = new MockUpdateQueue<IMovingEntity>();
+            public IUpdateQueue<Player> Player { get; } = new MockUpdateQueue<Player>();
+            public IUpdateQueue<Npc> Npc { get; } = new MockUpdateQueue<Npc>();
+            public IUpdateQueue<GroundItem> Item { get; } = new MockUpdateQueue<GroundItem>();
+
+        }
+
         public class MockUpdateQueue<T> : IUpdateQueue<T> where T : IWorldEntity
         {
             public int Count => 0;
@@ -17,10 +26,8 @@ namespace CScape.Dev.Tests.Impl
             IEnumerator IEnumerable.GetEnumerator() => null;
         }
 
-        public IUpdateQueue<IMovingEntity> Movement { get; }= new MockUpdateQueue<IMovingEntity>();
-        public IUpdateQueue<Player> Player { get; } = new MockUpdateQueue<Player>();
-        public IUpdateQueue<Npc> Npc { get; } = new MockUpdateQueue<Npc>();
-        public IUpdateQueue<GroundItem> Item { get; } = new MockUpdateQueue<GroundItem>();
+        public IUpdateBatch UpdHighFrequency { get; } = new MockUpdateBatch();
+        public IUpdateBatch UpdLowFrequency { get; } = new MockUpdateBatch();
 
         public long ElapsedMilliseconds { get; }
         public long DeltaTime { get; }

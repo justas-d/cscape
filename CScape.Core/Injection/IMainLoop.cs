@@ -4,12 +4,18 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Injection
 {
-    public interface IMainLoop
+    public interface IUpdateBatch
     {
         [NotNull] IUpdateQueue<IMovingEntity> Movement { get; }
         [NotNull] IUpdateQueue<Player> Player { get; }
         [NotNull] IUpdateQueue<Npc> Npc { get; }
         [NotNull] IUpdateQueue<GroundItem> Item { get; }
+    }
+
+    public interface IMainLoop
+    {
+        IUpdateBatch UpdHighFrequency { get; }
+        IUpdateBatch UpdLowFrequency{ get; }
 
         long ElapsedMilliseconds { get; }
         long DeltaTime { get; }

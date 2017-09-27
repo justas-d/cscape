@@ -14,41 +14,44 @@ namespace CScape.Basic.Server
 {
     public sealed class MainLoop : IMainLoop, IDisposable
     {
-        /// <summary>
-        /// Defines a queue for entities that need to be updated.
-        /// Only one of the same entity can exist in the queue.
-        /// </summary>
-        public sealed class UniqueEntUpdateQueue<T> : IUpdateQueue<T> where T : IEntity
+        private class UpdateBatch : IUpdateBatch
         {
-            private readonly HashSet<uint> _idSet = new HashSet<uint>();
-            private readonly Queue<T> _entQueue = new Queue<T>();
-            public int Count => _entQueue.Count;
-
-            public void Enqueue(T ent)
+            /// <summary>
+            /// Defines a queue for entities that need to be updated.
+            /// Only one of the same entity can exist in the queue.
+            /// </summary>
+            private sealed class UniqueEntUpdateQueue<T> : IUpdateQueue<T> where T : IEntity
             {
-                if (!_idSet.Add(ent.UniqueEntityId))
-                    return;
+                private readonly HashSet<uint> _idSet = new HashSet<uint>();
+                private readonly Queue<T> _entQueue = new Queue<T>();
+                public int Count => _entQueue.Count;
 
-                _entQueue.Enqueue(ent);
+                public void Enqueue(T ent)
+                {
+                    if (!_idSet.Add(ent.UniqueEntityId))
+                        return;
+
+                    _entQueue.Enqueue(ent);
+                }
+
+                public T Dequeue()
+                {
+                    var obj = _entQueue.Dequeue();
+                    _idSet.Remove(obj.UniqueEntityId);
+                    return obj;
+                }
+
+                public IEnumerator<T> GetEnumerator() => _entQueue.GetEnumerator();
+                IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
             }
 
-            public T Dequeue()
-            {
-                var obj = _entQueue.Dequeue();
-                _idSet.Remove(obj.UniqueEntityId);
-                return obj;
-            }
 
-            public IEnumerator<T> GetEnumerator() => _entQueue.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            // update queues
+            public IUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
+            public IUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
+            public IUpdateQueue<Npc> Npc { get; } = new UniqueEntUpdateQueue<Npc>();
+            public IUpdateQueue<GroundItem> Item { get; } = new UniqueEntUpdateQueue<GroundItem>();
         }
-
-        // update queues
-        public IUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
-
-        public IUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
-        public IUpdateQueue<Npc> Npc { get; } = new UniqueEntUpdateQueue<Npc>();
-        public IUpdateQueue<GroundItem> Item { get; } = new UniqueEntUpdateQueue<GroundItem>();
 
         [NotNull] private readonly Stopwatch _tickWatch = new Stopwatch();
         private readonly IPacketDispatch _dispatch;
@@ -59,11 +62,16 @@ namespace CScape.Basic.Server
         private readonly IPlayerDatabase _db;
 
         private int _waitTimeCarry;
+        public IUpdateBatch UpdHighFrequency { get; } = new UpdateBatch();
+        public IUpdateBatch UpdLowFrequency { get; } = new UpdateBatch();
         public long ElapsedMilliseconds => _tickWatch.ElapsedMilliseconds;
 
         public long DeltaTime { get; private set; }
         public long TickProcessTime { get; private set; }
         public int TickRate { get; set; }
+
+        private const int LowFrequencyUpdateIntervalMs = 600 * 10;
+        private long _timeSinceLowFreqTick = 0;
 
         public MainLoop(IServiceProvider services)
         {
@@ -78,6 +86,61 @@ namespace CScape.Basic.Server
         }
 
         public bool IsRunning { get; private set; } = true;
+
+        private void HandleBatch(IUpdateBatch batch)
+        {
+            //================================================
+
+            // get & parse their data
+            foreach (var p in batch.Player)
+            {
+                // update connections
+                if (!p.Connection.Update(DeltaTime + ElapsedMilliseconds))
+                    continue; // failed to update, skip this player.
+
+                // parse
+                foreach (var pack in _parser.Parse(p))
+                    _dispatch.Handle(p, pack.Opcode, pack.Packet);
+            }
+
+            //================================================
+
+            // movement updates
+            var size = batch.Movement.Count;
+            for (var i = 0; i < size; ++i)
+                batch.Movement.Dequeue().Movement.Update();
+
+            //================================================
+
+            // write & send
+            // todo : offload write & send to a different thread?
+            foreach (var p in batch.Player)
+            {
+                // don't do anything if player isn't connected
+                if (!p.Connection.IsConnected())
+                    continue;
+
+                // write our data
+                foreach (var sync in p.Connection.SyncMachines)
+                    sync.Synchronize(p.Connection.OutStream);
+
+                // send our data
+                p.Connection.FlushOutputStream();
+            }
+
+            //================================================
+
+            void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
+            {
+                size = queue.Count;
+                for (var i = 0; i < size; ++i)
+                    queue.Dequeue().Update(this);
+            }
+
+            EntityUpdate(batch.Player);
+            EntityUpdate(batch.Npc);
+            EntityUpdate(batch.Item);
+        }
 
         public async Task Run()
         {
@@ -106,61 +169,16 @@ namespace CScape.Basic.Server
 
                 //================================================
 
-                // get & parse their data
-                foreach (var p in Player)
+                var rem = _timeSinceLowFreqTick % LowFrequencyUpdateIntervalMs;
+                if(LowFrequencyUpdateIntervalMs >= _timeSinceLowFreqTick)
                 {
-                    // update connections
-                    if (!p.Connection.Update(DeltaTime + ElapsedMilliseconds))
-                        continue; // failed to update, skip this player.
-
-                    // parse
-                    foreach (var pack in _parser.Parse(p))
-                        _dispatch.Handle(p, pack.Opcode, pack.Packet);
+                    _timeSinceLowFreqTick = 0;
+                    HandleBatch(UpdLowFrequency);
                 }
-
-                //================================================
-
-                // movement updates
-                var size = Movement.Count;
-                for (var i = 0; i < size; ++i)
-                    Movement.Dequeue().Movement.Update();
-
-                //================================================
-
-                // write & send
-                // todo : offload write & send to a different thread?
-                foreach (var p in Player)
-                {
-                    // don't do anything if player isn't connected
-                    if (!p.Connection.IsConnected())
-                        continue;
-
-                    // write our data
-                    foreach (var sync in p.Connection.SyncMachines)
-                        sync.Synchronize(p.Connection.OutStream);
-
-                    // send our data
-                    p.Connection.FlushOutputStream();
-                }
-
-                void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
-                {
-                    size = queue.Count;
-                    for (var i = 0; i < size; ++i)
-                        queue.Dequeue().Update(this);
-                }
-
-                //================================================
-
-                EntityUpdate(Player);
-
-                //================================================
-
-                EntityUpdate(Npc);
-
-                //================================================
-
-                EntityUpdate(Item);
+                else
+                    _timeSinceLowFreqTick += DeltaTime;
+                
+                HandleBatch(UpdHighFrequency);
 
                 //================================================
 

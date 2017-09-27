@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using CScape.Core.Data;
 using CScape.Core.Injection;
-using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -21,6 +19,18 @@ namespace CScape.Core.Game.Entity
 
         protected IIdPool IdPool { get; }
         public ILogger Log { get; }
+        public int ObserverCount { get; set; }
+
+        protected WorldEntity(
+            uint entityId, [NotNull] IGameServer server, [NotNull] ITransform transform,
+            [NotNull] IIdPool idPool, [NotNull] ILogger log)
+        {
+            UniqueEntityId = entityId;
+            Server = server ?? throw new ArgumentNullException(nameof(server));
+            Transform = transform ?? throw new ArgumentNullException(nameof(transform));
+            IdPool = idPool ?? throw new ArgumentNullException(nameof(idPool));
+            Log = log ?? throw new ArgumentNullException(nameof(log));
+        }
 
         /// <summary>
         /// Transform must be set initialized.
@@ -28,9 +38,7 @@ namespace CScape.Core.Game.Entity
         // ReSharper disable once NotNullMemberIsNotInitialized (SetPoE sets it)
         protected WorldEntity([NotNull] IServiceProvider services)
         {
-            if (services == null) throw new ArgumentNullException(nameof(services));
-
-            IdPool = services.ThrowOrGet<IIdPool>();
+            IdPool = services?.ThrowOrGet<IIdPool>() ?? throw new ArgumentNullException(nameof(services));
             Server = services.ThrowOrGet<IGameServer>();
             Log = services.ThrowOrGet<ILogger>();
 

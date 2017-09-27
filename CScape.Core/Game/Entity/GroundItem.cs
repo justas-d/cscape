@@ -2,11 +2,19 @@ using System;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
-
 namespace CScape.Core.Game.Entity
 {
     public class GroundItem : WorldEntity
     {
+        public class Factory
+        {
+            public static GroundItem Spawn(
+                IServiceProvider context, IPosition where, (int id, int amount) item,
+                Player droppedBy, PlaneOfExistence poe = null)
+            {
+                
+            }
+        }
         // sync vars
         internal int OldAmount { get; private set; }
         internal bool NeedsAmountUpdate { get; private set; }
@@ -28,7 +36,20 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// Whether this item can be seen by everybody, not just by the player who dropped it.      
         /// </summary>
-        public bool IsPublic { get; private set; }
+        public bool IsPublic
+        {
+            get => _isPublic;
+            private set
+            {
+                NeedsSightEvaluation = true;
+                _isPublic = value;
+            }
+        }
+
+        public GroundItem(Player droppedBy, int id, int amount)
+        {
+            
+        }
 
         public GroundItem(
             [NotNull] IServiceProvider services, 
@@ -48,6 +69,7 @@ namespace CScape.Core.Game.Entity
         }
 
         private long _droppedForMs;
+        private bool _isPublic;
 
         public override void Update(IMainLoop loop)
         {
@@ -64,10 +86,7 @@ namespace CScape.Core.Game.Entity
             if (!IsPublic)
             {
                 if (_droppedForMs >= BecomesPublicAfterMs)
-                {
                     IsPublic = true;
-                    NeedsSightEvaluation = true;
-                }
             }
 
             // handle despawning

@@ -14,6 +14,11 @@ namespace CScape.Core.Game.Entity
         ILogger Log { get; }
 
         /// <summary>
+        /// How many observers can see this world entity.
+        /// </summary>
+        int ObserverCount { get; set; }
+
+        /// <summary>
         /// Signals to other entities that the other entities need to re-evaluate their sight for this entitiy.
         /// </summary>
         bool NeedsSightEvaluation { get; set; }
