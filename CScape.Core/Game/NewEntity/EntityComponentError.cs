@@ -24,6 +24,26 @@ namespace CScape.Core.Game.NewEntity
         }
     }
 
+    public class EntityPrefabInstantiationFailure : Exception
+    {
+        public EntityPrefab WhenInstantiating { get; }
+        public ComponentPrefab FailedComponentPrefab { get; }
+        public string Reason { get; }
+
+        public EntityPrefabInstantiationFailure(EntityPrefab whenInstantiating,  
+            ComponentPrefab failedComponentPrefab, string reason)
+        {
+            WhenInstantiating = whenInstantiating;
+            FailedComponentPrefab = failedComponentPrefab;
+            Reason = reason;
+        }
+
+        public override string ToString()
+        {
+            return $"Failed instantiating entity prefab \"{WhenInstantiating.Name}\": {Reason} {base.ToString()}";
+        }
+    }
+
     public class EntityComponentAlreadyExists : EntityComponentError
     {
         public EntityComponentAlreadyExists(Type type) : base(type)

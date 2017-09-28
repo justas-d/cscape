@@ -15,7 +15,7 @@ namespace CScape.Core.Game.NewEntity
         public EntityHandle Handle { get; }
 
         [NotNull]
-        public IGameServer Server => Handle.Factory.Server;
+        public IGameServer Server => Handle.System.Server;
 
         public ITransform GetTransform() => GetComponent<ITransform>();
 
@@ -57,6 +57,20 @@ namespace CScape.Core.Game.NewEntity
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             return obj is Entity && Equals((Entity) obj);
+        }
+
+        /// <summary>
+        /// Sends out an <see cref="EntityMessage"/> to each and every component
+        /// of this entity. The sender of the message will not receive the message.
+        /// </summary>
+        /// <param name="message">The message to be sent.</param>
+        public void SendMessage([NotNull] EntityMessage message)
+        {
+            foreach (var comp in _components.Values)
+            {
+                if(comp != message.Sender)
+                    comp.ReceiveMessage(message);
+            }
         }
 
         public override int GetHashCode()

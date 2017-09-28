@@ -8,5 +8,6 @@ namespace CScape.Core.Game.NewEntity
         Entity Parent { get; }
 
         void Update([NotNull]IMainLoop loop);
+        void ReceiveMessage([NotNull] EntityMessage msg);
     }
 }

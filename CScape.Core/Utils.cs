@@ -37,6 +37,13 @@ namespace CScape.Core
             return l;
         }
 
+        public static Action<TOut> ActionCast<TIn, TOut>(this Action<TIn> act)
+            where TIn: TOut
+        {
+            if (act == null) return null;
+            return t => act((TIn)t);
+        }
+
         [DebuggerStepThrough]
         [DebuggerHidden]
         public static BlobPlaceholder Placeholder(this Blob blob, int size)

@@ -5,23 +5,23 @@ namespace CScape.Core.Game.NewEntity
 {
     public sealed class EntityHandle : IEquatable<EntityHandle>
     {
-        public EntityFactory Factory { get; }
+        public EntitySystem System { get; }
         public int Generation { get; }
         public int Id { get; }
 
         private readonly int _baked; 
 
-        public EntityHandle([NotNull] EntityFactory factory, int generation, int id)
+        public EntityHandle([NotNull] EntitySystem system, int generation, int id)
         {
-            Factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            System = system ?? throw new ArgumentNullException(nameof(system));
             Generation = generation;
             Id = id;
 
-            _baked = (Id << EntityFactory.GenerationBits) | Generation;
+            _baked = (Id << EntitySystem.GenerationBits) | Generation;
         }
 
-        bool IsDead() => Factory.IsDead(this);
-        Entity Get() => Factory.Get(this);
+        public bool IsDead() => System.IsDead(this);
+        public Entity Get() => System.Get(this);
         
         public bool Equals(EntityHandle other)
         {

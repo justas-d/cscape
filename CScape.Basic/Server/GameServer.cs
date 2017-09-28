@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.NewEntity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
@@ -11,11 +12,6 @@ namespace CScape.Basic.Server
 {
     public sealed class GameServer : IGameServer
     {
-        public AggregateEntityPool<IWorldEntity> Entities { get; } = new AggregateEntityPool<IWorldEntity>();
-
-        public IEntityRegistry<short, Player> Players { get; } 
-        public IEntityRegistry<int, Npc> Npcs { get; }
-
         public IServiceProvider Services { get; }
         public PlaneOfExistence Overworld { get; }
 
@@ -33,14 +29,11 @@ namespace CScape.Basic.Server
             // build service provider
             Services = services?.BuildServiceProvider() ?? throw new ArgumentNullException(nameof(services));
 
-            // init
-            Npcs = new NpcRegistry(Services);
-            Players = new PlayerRegistry(Services);
-
             Overworld = new PlaneOfExistence(this, "Overworld");
 
             Loop = Services.ThrowOrGet<IMainLoop>();
             Log = Services.ThrowOrGet<ILogger>();
+            Services.ThrowOrGet<IEntitySystem>();
         }
 
         public ServerStateFlags GetState()
