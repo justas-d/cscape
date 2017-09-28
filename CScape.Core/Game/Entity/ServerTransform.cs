@@ -1,5 +1,6 @@
 using System;
 using CScape.Core.Game.World;
+using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -8,50 +9,22 @@ namespace CScape.Core.Game.Entity
     {
         public const int MaxZ = 4;
 
-        public IWorldEntity Entity { get; }
-
-        public int X { get; protected set; }
-        public int Y { get; protected set; }
-        public byte Z { get; protected set; }
+        public int X { get; protected set; } = 0;
+        public int Y { get; protected set; } = 0;
+        public int Z { get; protected set; } = 0;
 
         public Region Region { get; private set; }
         public PlaneOfExistence PoE { get; private set; }
 
-        // ReSharper disable once NotNullMemberIsNotInitialized
-        public ServerTransform([NotNull] IWorldEntity entity,
-            IPosition pos,
-            PlaneOfExistence poe = null) : this(entity, pos.X, pos.Y, pos.Z, poe) { }
+        public NewEntity.Entity Parent { get; }
 
-        // ReSharper disable once NotNullMemberIsNotInitialized
-        public ServerTransform([NotNull] IWorldEntity entity,
-            int x, int y, byte z,
-            PlaneOfExistence poe = null)
+        public bool NeedsSightEvaluation { get; set; } = true;
+
+        public ServerTransform([NotNull] NewEntity.Entity parent)
         {
-            Entity = entity ?? throw new ArgumentNullException(nameof(entity));
-
-            Teleport(x, y, z);
-            SwitchPoE(poe ?? entity.Server.Overworld);
+            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            SwitchPoE(parent.Server.Overworld);
         }
-
-        /// <summary>
-        /// PoE and Region are uninitialized
-        /// </summary>
-        protected ServerTransform([NotNull] IWorldEntity entity)
-        {
-            Entity = entity ?? throw new ArgumentNullException(nameof(entity));
-        }
-
-        public int AbsoluteDistanceTo(ITransform other) 
-            => Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
-
-        public int MaxDistanceTo(ITransform other) 
-            => Math.Max(Math.Abs(X - other.X), Math.Abs(Y - other.Y));
-
-        public void Teleport(IPosition pos)
-            => Teleport(pos.X, pos.Y, pos.Z);
-
-        public void Teleport(int x, int y) 
-            => Teleport(x, y, Z);
 
         public void SwitchPoE(PlaneOfExistence newPoe)
         {
@@ -66,15 +39,15 @@ namespace CScape.Core.Game.Entity
             UpdateRegion();
         }
 
-        public void Teleport(int x, int y, byte z)
+        public void Teleport(int x, int y, int z)
         {
-            if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than 4.");
+            if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than {MaxZ}.");
 
             X = x;
             Y = y;
             Z = z;
 
-            Entity.NeedsSightEvaluation = true;
+            NeedsSightEvaluation = true;
             InternalSetPosition(x, y, z);
         }
 
@@ -82,9 +55,9 @@ namespace CScape.Core.Game.Entity
         {
             // validate 
             if (dx == 0 && dy == 0) return;
-            bool IsInvalid(ref sbyte c) => -1 > c || c > 1;
-            if (IsInvalid(ref dx)) return;
-            if (IsInvalid(ref dy)) return;
+            bool IsInvalid(sbyte c) => -1 > c || c > 1;
+            if (IsInvalid(dx)) return;
+            if (IsInvalid(dy)) return;
 
             // exec
             X += dx;
@@ -102,15 +75,17 @@ namespace CScape.Core.Game.Entity
 
             if (Region == region) return;
 
-            Region?.RemoveEntity(Entity);
+            Region?.RemoveEntity(Parent);
             Region = region;
             Region.AddEntity(this);
 
-            Entity.NeedsSightEvaluation = true;
+            NeedsSightEvaluation = true;
         }
 
         protected virtual void InternalSwitchPoE(PlaneOfExistence newPoe) { }
-        protected virtual void InternalSetPosition(int x, int y, byte z) { }
+        protected virtual void InternalSetPosition(int x, int y, int z) { }
         protected virtual void InternalMove(sbyte dx, sbyte dy) { }
+
+        public void Update(IMainLoop loop);
     }
 }

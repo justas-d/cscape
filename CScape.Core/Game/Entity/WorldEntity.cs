@@ -58,7 +58,7 @@ namespace CScape.Core.Game.Entity
             if (!Transform.PoE.ContainsEntity(ent))
                 return false;
 
-            return ent.Transform.MaxDistanceTo(Transform) <= viewRange;
+            return ent.Transform.ChebyshevDistanceTo(Transform) <= viewRange;
         }
 
         public void Destroy()

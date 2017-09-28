@@ -1,4 +1,8 @@
 ﻿# TODO
+	* New entity system
+		* Component based
+		* Handle based. (We must dereference the entity in order to access it. This battles and catches cases where we keep a reference to a dead entity past the frame boundary)
+
 	* Negative numbers aren't parsed by the command interpreter
 	* Invensitage reconnect limbo
 	* Replace complicated abstraction hierarchies with a strategy pattern

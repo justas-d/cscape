@@ -1,4 +1,3 @@
-using System;
 using CScape.Core.Game.World;
 using JetBrains.Annotations;
 
@@ -6,18 +5,6 @@ namespace CScape.Core.Game.Entity
 {
     public class ClientTransform : ServerTransform , IClientTransform
     {
-        public static ClientTransform Create(
-            IWorldEntity forEntity,
-            IPosition pos,
-            [CanBeNull] PlaneOfExistence poe = null)
-        {
-            var transform = new ClientTransform(forEntity);
-
-            transform.Initialize(pos.X, pos.Y, pos.Z, poe ?? forEntity.Server.Overworld);
-
-            return transform;
-        }
-
         private (int x, int y) _local;
         private (int x, int y) _clientRegion;
         public const int MinRegionBorder = 16;
@@ -28,24 +15,12 @@ namespace CScape.Core.Game.Entity
         public (int x, int y) ClientRegion => _clientRegion;
         public (int x, int y) Local => _local;
 
-        public ClientTransform(
-            [NotNull] IWorldEntity entity) : base(entity)
+        public ClientTransform([NotNull] NewEntity.Entity parent) 
+            : base(parent)
         {
         }
 
-        protected void Initialize(int x, int y, byte z, [NotNull] PlaneOfExistence poe)
-        {
-            if (poe == null) throw new ArgumentNullException(nameof(poe));
-
-            X = x;
-            Y = y;
-            Z = z;
-
-            SwitchPoE(poe);
-            Teleport(x, y, z);
-        }
-
-        protected override void InternalSetPosition(int x, int y, byte z)
+        protected override void InternalSetPosition(int x, int y, int z)
         {
             _clientRegion = ((X >> 3) - 6, (Y >> 3) - 6);
             _local = (X - (8 * ClientRegion.x), Y - (8 * ClientRegion.y));
@@ -92,7 +67,7 @@ namespace CScape.Core.Game.Entity
             X = Base.x + _local.x;
             Y = Base.y + _local.y;
 
-            Entity.NeedsSightEvaluation = true;
+            NeedsSightEvaluation = true;
 
             UpdateRegion();
         }

@@ -18,6 +18,6 @@ namespace CScape.Core.Game.Entity
         /// <summary>
         /// The global Z coordinate in the world.
         /// </summary>
-        byte Z { get; }
+        int Z { get; }
     }
 }

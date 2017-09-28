@@ -450,7 +450,7 @@ namespace CScape.Core.Game.Entity
 
         public bool IsEntityInViewRange(IWorldEntity ent)
         {
-            return Transform.MaxDistanceTo(ent.Transform) <= ViewRange;
+            return Transform.ChebyshevDistanceTo(ent.Transform) <= ViewRange;
         }
 
         public override bool CanBeSeenBy(IObserver observer)
