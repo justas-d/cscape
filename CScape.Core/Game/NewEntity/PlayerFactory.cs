@@ -13,7 +13,9 @@ namespace CScape.Core.Game.NewEntity
         [NotNull]
         public IEntitySystem EntitySystem { get; }
 
-        private List<PlayerComponent> _players;
+        private readonly List<PlayerComponent> _players;
+
+        [NotNull]
         public IReadOnlyList<PlayerComponent> Players => _players;
 
         public PlayerFactory([NotNull] IEntitySystem entitySystem)
@@ -64,6 +66,7 @@ namespace CScape.Core.Game.NewEntity
             ent.AddComponent(new HealthComponent(ent, 10, model.Health)); 
             ent.AddComponent(new DbPlayerSyncComponent(ent));
             ent.AddComponent(new NetPlayerSyncComponent(ent, ctx));
+            ent.AddComponent(new TileMovementComponent(ent));
             ent.AddComponent(new PlayerComponent(ent, model.Id, id));
 
             ent.AssertComponentRequirementsSatisfied();

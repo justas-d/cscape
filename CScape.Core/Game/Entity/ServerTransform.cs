@@ -6,6 +6,9 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
+    // todo : Move collision checking
+    // todo : handle multi-tile entities in Move()
+
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
@@ -84,33 +87,6 @@ namespace CScape.Core.Game.Entity
                     new TeleportMessageData(oldPos, newPos)));
         }
 
-        /// <summary>
-        /// Transforms (moves) the coordinates of the transform in the given direction.
-        /// TODO : Handle collision (Move)
-        /// </summary>
-        /// <param name="dx">Must be in rage [-1; 1]</param>
-        /// <param name="dy">Must be in rage [-1; 1]</param>
-        public void Move(sbyte dx, sbyte dy)
-        {
-            // validate 
-            if (dx == 0 && dy == 0) return;
-            bool IsInvalid(sbyte c) => -1 > c || c > 1;
-            if (IsInvalid(dx)) return;
-            if (IsInvalid(dy)) return;
-
-            // exec
-            X += dx;
-            Y += dy;
-
-            // todo : Move collision checking
-            // todo : handle multi-tile entities in Move()
-
-            Parent.SendMessage(
-                new EntityMessage(
-                    this,
-                    EntityMessage.EventType.Move,
-                    (dx, dy)));
-        }
 
         private void UpdateRegion()
         {
@@ -144,7 +120,16 @@ namespace CScape.Core.Game.Entity
 
         public void ReceiveMessage(EntityMessage msg)
         {
-            throw new NotImplementedException();
+            if (msg.Event == EntityMessage.EventType.Move)
+            {
+                var delta = msg.AsMove().SumMovements();
+
+                X += delta.x;
+                Y += delta.y;
+
+                NeedsSightEvaluation = true;
+
+            }
         }
     }
 }

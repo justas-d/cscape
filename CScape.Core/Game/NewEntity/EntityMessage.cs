@@ -52,6 +52,8 @@ namespace CScape.Core.Game.NewEntity
             PoeSwitch,
             Teleport, /* Forced movement over an arbitrary size of land */
             
+            BeginMovePath, 
+            StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
         };
 
@@ -76,11 +78,14 @@ namespace CScape.Core.Game.NewEntity
         
         public int AsTookDamage() => AssertCast<int>(EventType.TookDamage);
         public bool AsJustDied() => AssertTrue(EventType.JustDied);
-        public (sbyte x, sbyte y) AsMove() => AssertCast<(sbyte, sbyte)>(EventType.Move);
+        public MovementMetadata AsMove() => AssertCast<MovementMetadata>(EventType.Move);
         public int AsHealedHealth() => AssertCast<int>(EventType.HealedHealth);
         public bool AsLogout() => AssertTrue(EventType.Logout);
         public PoeSwitchMessageData AsPoeSwitch() => AssertCast<PoeSwitchMessageData>(EventType.PoeSwitch);
         public TeleportMessageData AsTeleport() => AssertCast<TeleportMessageData>(EventType.Teleport);
+
+        public bool AsBeginMovePath() => AssertTrue(EventType.BeginMovePath);
+        public bool AsStopMovingAlongMovePath() => AssertTrue(EventType.StopMovingAlongMovePath);
         public bool AsArrivedAtDestination() => AssertTrue(EventType.ArrivedAtDestination);
     }
 }

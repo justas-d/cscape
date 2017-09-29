@@ -35,7 +35,7 @@ namespace CScape.Core.Game.Entity
                     break;
 
                 case EntityMessage.EventType.Move:
-                    UpdateOnMove(msg.AsMove());
+                    UpdateOnMove(msg.AsMove().SumMovements());
                     break;
             }
         }
@@ -50,10 +50,10 @@ namespace CScape.Core.Game.Entity
             Recalc();
         }
 
-        private void UpdateOnMove((sbyte x, sbyte y) d)
+        private void UpdateOnMove((int x, int y) delta)
         {
-            _local.x += d.x;
-            _local.y += d.y;
+            _local.x += delta.x;
+            _local.y += delta.y;
 
             Recalc();
         }

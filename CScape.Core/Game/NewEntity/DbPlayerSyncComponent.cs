@@ -24,7 +24,5 @@ namespace CScape.Core.Game.NewEntity
         {
             throw new NotImplementedException();
         }
-
-        
     }
 }

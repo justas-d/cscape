@@ -1,6 +1,6 @@
 namespace CScape.Core.Game.World
 {
-    public enum Direction
+    public enum Direction : sbyte
     {
         None = -1,
         NorthWest = 0,
