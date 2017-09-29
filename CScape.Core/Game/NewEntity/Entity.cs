@@ -1,6 +1,8 @@
 ﻿using System;
 using JetBrains.Annotations;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 
@@ -17,7 +19,7 @@ namespace CScape.Core.Game.NewEntity
         [NotNull]
         public IGameServer Server => Handle.System.Server;
 
-        public ITransform GetTransform() => GetComponent<ITransform>();
+        public ServerTransform GetTransform() => GetComponent<ServerTransform>();
 
         private readonly Dictionary<Type, IEntityComponent> _components = new Dictionary<Type, IEntityComponent>();
 
@@ -70,6 +72,29 @@ namespace CScape.Core.Game.NewEntity
             {
                 if(comp != message.Sender)
                     comp.ReceiveMessage(message);
+            }
+        }
+
+        /// <summary>
+        /// Asserts that are component dependencies are satisfied.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="EntityComponentNotSatisfied">Thrown, when a component is not satisfied.</exception>
+        public void AssertComponentRequirementsSatisfied()
+        {
+            foreach (var comp in _components.Values)
+            {
+                foreach (var attrib in
+                    comp.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
+                {
+                    // look for required attrib
+                    var match = _components.Values.FirstOrDefault(c => c.GetType() == attrib.ComponentType);
+                    if (match == null)
+                    {
+                        throw new EntityComponentNotSatisfied
+                            (comp.GetType(), $"Requires attribute of type {attrib.ComponentType.Name} to be attached to the entity but it is not.");
+                    }
+                }
             }
         }
 

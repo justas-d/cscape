@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity

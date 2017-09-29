@@ -54,7 +54,7 @@ namespace CScape.Core.Game.NewEntity
                 return true;
         }
 
-        private EntityHandle InternalCreate([NotNull] string name)
+        public EntityHandle Create([NotNull] string name)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
 
@@ -75,31 +75,19 @@ namespace CScape.Core.Game.NewEntity
             var handle = new EntityHandle(this, _generationTracker[id], id);
             var entity = new Entity(name, handle);
 
+            entity.AddComponent(new ServerTransform(entity));
+
             Debug.Assert(!_entities.ContainsKey(handle));
             _entities.Add(handle, entity);
 
             return handle;
         }
 
-        public EntityHandle Create([NotNull] string name, bool useClientTransform = false)
-        {
-            var entHandle = InternalCreate(name);
-            var ent = entHandle.Get();
-
-            ITransform transform = useClientTransform
-                ? new ClientTransform(ent)
-                : new ServerTransform(ent);
-            
-            ent.AddComponent(transform);
-            
-            return entHandle;
-        }
-
         public EntityHandle Create([NotNull] EntityPrefab prefab)
         {
             if (prefab == null) throw new ArgumentNullException(nameof(prefab));
 
-            var entHandle = InternalCreate(prefab.Name);
+            var entHandle = Create(prefab.Name);
 
             // initialize prefabs
             if (prefab.ComponentPrefabs != null)

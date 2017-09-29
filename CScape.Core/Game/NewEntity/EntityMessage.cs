@@ -1,7 +1,39 @@
+using System;
 using System.Diagnostics;
+using CScape.Core.Game.World;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity
 {
+    public sealed class PoeSwitchMessageData
+    {
+        [CanBeNull]
+        public PlaneOfExistence OldPoe { get; }
+
+        [NotNull]
+        public PlaneOfExistence NewPoe { get; }
+
+        public PoeSwitchMessageData([CanBeNull] PlaneOfExistence oldPoe, [NotNull] PlaneOfExistence newPoe)
+        {
+            OldPoe = oldPoe;
+            NewPoe = newPoe ?? throw new ArgumentNullException(nameof(newPoe));
+        }
+    }
+
+    public sealed class TeleportMessageData
+    {
+        public (int x, int y, int z) OldPos { get; }
+        public (int x, int y, int z) NewPos { get; }
+
+        public TeleportMessageData(
+            (int x, int y, int z) oldPos,
+            (int x, int y, int z) newPos)
+        {
+            OldPos = oldPos;
+            NewPos = newPos;
+        }
+    }
+
     public sealed class EntityMessage
     {
         private readonly object _data;
@@ -13,10 +45,14 @@ namespace CScape.Core.Game.NewEntity
         {
             TookDamage,
             JustDied,
-            Move,
+            Move, /* Moving by delta (ie walking or running) */
             HealedHealth,
             Logout,
-            /* etc */
+
+            PoeSwitch,
+            Teleport, /* Forced movement over an arbitrary size of land */
+            
+            ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
         };
 
         public EntityMessage(IEntityComponent sender, EventType ev, object data)
@@ -40,8 +76,11 @@ namespace CScape.Core.Game.NewEntity
         
         public int AsTookDamage() => AssertCast<int>(EventType.TookDamage);
         public bool AsJustDied() => AssertTrue(EventType.JustDied);
-        public (int, int) AsMove() => AssertCast<(int, int)>(EventType.Move);
+        public (sbyte x, sbyte y) AsMove() => AssertCast<(sbyte, sbyte)>(EventType.Move);
         public int AsHealedHealth() => AssertCast<int>(EventType.HealedHealth);
         public bool AsLogout() => AssertTrue(EventType.Logout);
+        public PoeSwitchMessageData AsPoeSwitch() => AssertCast<PoeSwitchMessageData>(EventType.PoeSwitch);
+        public TeleportMessageData AsTeleport() => AssertCast<TeleportMessageData>(EventType.Teleport);
+        public bool AsArrivedAtDestination() => AssertTrue(EventType.ArrivedAtDestination);
     }
 }

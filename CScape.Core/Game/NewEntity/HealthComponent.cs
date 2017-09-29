@@ -5,15 +5,34 @@ namespace CScape.Core.Game.NewEntity
 {
     public sealed class HealthComponent : IEntityComponent
     {
+        private int _health;
+        private int _maxHealth;
         public Entity Parent { get; }
 
-        public int Health { get; private set; }
-        public int MaxHealth { get; }
+        public int Health
+        {
+            get => _health;
+            set
+            {
+                _health = value;
+                CheckForDeath();
+            }
+        }
 
-        public HealthComponent(Entity parent, int maxHealth, int health)
+        public int MaxHealth
+        {
+            get => _maxHealth;
+            set
+            {
+                _maxHealth = value;
+                CheckForDeath();
+            }
+        }
+
+        public HealthComponent(Entity parent, int maxHealth = 1, int health = 1)
         {
             Parent = parent;
-            MaxHealth = maxHealth;
+            _maxHealth = maxHealth;
             Health = health.Clamp(0, maxHealth);
 
             CheckForDeath();

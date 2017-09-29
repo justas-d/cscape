@@ -2,6 +2,21 @@
 
 namespace CScape.Core.Game.NewEntity
 {
+    public class EntityComponentNotSatisfied : EntityComponentError
+    {
+        public string Msg { get; }
+
+        public EntityComponentNotSatisfied(Type type, string msg) : base(type)
+        {
+            Msg = msg;
+        }
+
+        public override string ToString()
+        {
+            return $"Component is not satisfied. {Msg} {base.ToString()}";
+        }
+    }
+
     public class EntityComponentError : Exception
     {
         public Type Type { get; }

@@ -10,7 +10,8 @@ namespace CScape.Core.Game.NewEntity
 
         IGameServer Server { get; }
 
-        EntityHandle Create([NotNull] string name, bool useClientTransform = false);
+        EntityHandle Create([NotNull] string name);
+
         void Destroy([NotNull] EntityHandle handle);
         Entity Get([NotNull] EntityHandle entityHandle);
         bool IsDead(EntityHandle handle);

@@ -1,20 +1,31 @@
 using System;
+using CScape.Core.Game.NewEntity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
-    public class ServerTransform : ITransform
+    /// <summary>
+    /// Defines a way of tracking and transforming the location of server-side world entities.
+    /// </summary>
+    public sealed class ServerTransform : IPosition, IEntityComponent
     {
         public const int MaxZ = 4;
 
-        public int X { get; protected set; } = 0;
-        public int Y { get; protected set; } = 0;
-        public int Z { get; protected set; } = 0;
+        public int X { get; private set; } = 0;
+        public int Y { get; private set; } = 0;
+        public int Z { get; private set; } = 0;
 
-        public Region Region { get; private set; }
-        public PlaneOfExistence PoE { get; private set; }
+        /// <summary>
+        /// Returns the current PoE region this transform is stored in.
+        /// </summary>
+        [NotNull] public Region Region { get; private set; }
+
+        /// <summary>
+        /// The entities current PoE
+        /// </summary>
+        [NotNull] public PlaneOfExistence PoE { get; private set; }
 
         public NewEntity.Entity Parent { get; }
 
@@ -26,31 +37,59 @@ namespace CScape.Core.Game.Entity
             SwitchPoE(parent.Server.Overworld);
         }
 
-        public void SwitchPoE(PlaneOfExistence newPoe)
+        /// <summary>
+        /// Cleanly switches the PoE of the entity.
+        /// </summary>
+        public void SwitchPoE([NotNull] PlaneOfExistence newPoe)
         {
+            if (newPoe == null) throw new ArgumentNullException(nameof(newPoe));
+
             if (newPoe == PoE)
                 return;
 
+            var oldPoe = PoE;
             PoE?.RemoveEntity(this);
             PoE = newPoe;
             PoE.AddEntity(this);
 
-            InternalSwitchPoE(newPoe);
+            Parent.SendMessage(
+                new EntityMessage(
+                    this, 
+                    EntityMessage.EventType.PoeSwitch, 
+                    new PoeSwitchMessageData(oldPoe, newPoe)));
+
             UpdateRegion();
         }
 
+        /// <summary>
+        /// Forcibly teleports the transform to the given coordinates.
+        /// </summary>
         public void Teleport(int x, int y, int z)
         {
             if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than {MaxZ}.");
+
+            var oldPos = (X, Y, Z);
+            var newPos = (x, y, z);
 
             X = x;
             Y = y;
             Z = z;
 
             NeedsSightEvaluation = true;
-            InternalSetPosition(x, y, z);
+
+            Parent.SendMessage(
+                new EntityMessage(
+                    this,
+                    EntityMessage.EventType.Teleport,
+                    new TeleportMessageData(oldPos, newPos)));
         }
 
+        /// <summary>
+        /// Transforms (moves) the coordinates of the transform in the given direction.
+        /// TODO : Handle collision (Move)
+        /// </summary>
+        /// <param name="dx">Must be in rage [-1; 1]</param>
+        /// <param name="dy">Must be in rage [-1; 1]</param>
         public void Move(sbyte dx, sbyte dy)
         {
             // validate 
@@ -66,10 +105,14 @@ namespace CScape.Core.Game.Entity
             // todo : Move collision checking
             // todo : handle multi-tile entities in Move()
 
-            InternalMove(dx ,dy);
+            Parent.SendMessage(
+                new EntityMessage(
+                    this,
+                    EntityMessage.EventType.Move,
+                    (dx, dy)));
         }
 
-        protected void UpdateRegion()
+        private void UpdateRegion()
         {
             var region = PoE.GetRegion(X, Y);
 
@@ -82,10 +125,26 @@ namespace CScape.Core.Game.Entity
             NeedsSightEvaluation = true;
         }
 
-        protected virtual void InternalSwitchPoE(PlaneOfExistence newPoe) { }
-        protected virtual void InternalSetPosition(int x, int y, int z) { }
-        protected virtual void InternalMove(sbyte dx, sbyte dy) { }
+        public void SyncLocalsToGlobals(ClientPositionComponent client)
+        {
+            X = client.Base.x + client.Local.x;
+            X = client.Base.y + client.Local.y;
 
-        public void Update(IMainLoop loop);
+            NeedsSightEvaluation = true;
+            UpdateRegion();
+
+            Parent.Server.Services.ThrowOrGet<ILogger>()
+                .Debug(this, "Synced client locals to globals.");
+        }
+
+        public void Update(IMainLoop loop)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReceiveMessage(EntityMessage msg)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

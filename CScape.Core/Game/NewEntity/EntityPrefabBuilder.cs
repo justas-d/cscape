@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core;
-using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity
 {
     public sealed class EntityPrefabBuilder
     {
+
         /// <typeparam name="TComponent">The type of the component which will be used to later retrieve the component.</typeparam>
         /// <typeparam name="TInstance">The type of the component which will be instantiated. This type must be derived from <see cref="TComponent"/></typeparam>
         public sealed class PrefabComponentBuilder<TComponent, TInstance>
@@ -38,10 +37,11 @@ namespace CScape.Core.Game.NewEntity
             {
                 return new ComponentPrefab(
                     typeof(TComponent), typeof(TInstance), CtorParams,
-                    Enumerable.Select(Setups, t => Utils.ActionCast<TInstance, object>(t)));
+                    Setups.Select(t => t.ActionCast<TInstance, object>()));
 
             }
         }
+
 
         private readonly List<PrefabComponentBuilder<IEntityComponent, IEntityComponent>> 
             _components 
@@ -50,19 +50,7 @@ namespace CScape.Core.Game.NewEntity
         private readonly List<Action<Entity>> _setups = new List<Action<Entity>>();
 
         private string _name = EntityPrefab.DefaultName;
-
-        public EntityPrefabBuilder(bool useClientTransform = false)
-        {
-            if (useClientTransform)
-            {
-                WithComponent<ITransform, ClientTransform>();
-            }
-            else
-            {
-                WithComponent<ITransform, ServerTransform>();
-            }
-        }
-
+        
         /// <summary>
         /// Adds a component to the prefab.
         /// </summary>
@@ -98,7 +86,7 @@ namespace CScape.Core.Game.NewEntity
 
         public EntityPrefab Build()
         {
-            var comp = Enumerable.Select(_components, builder => builder.Build());
+            var comp = _components.Select(builder => builder.Build());
             return new EntityPrefab(_setups, comp, _name);
         }
     }

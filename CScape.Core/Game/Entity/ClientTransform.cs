@@ -1,9 +1,9 @@
-using CScape.Core.Game.World;
-using JetBrains.Annotations;
+using CScape.Core.Game.NewEntity;
+using CScape.Core.Injection;
 
 namespace CScape.Core.Game.Entity
 {
-    public class ClientTransform : ServerTransform , IClientTransform
+    public sealed class ClientPositionComponent : IEntityComponent
     {
         private (int x, int y) _local;
         private (int x, int y) _clientRegion;
@@ -15,23 +15,45 @@ namespace CScape.Core.Game.Entity
         public (int x, int y) ClientRegion => _clientRegion;
         public (int x, int y) Local => _local;
 
-        public ClientTransform([NotNull] NewEntity.Entity parent) 
-            : base(parent)
+        public NewEntity.Entity Parent { get; }
+
+        public ClientPositionComponent(NewEntity.Entity parent)
+        {
+            Parent = parent;
+        }
+
+        public void Update(IMainLoop loop)
         {
         }
 
-        protected override void InternalSetPosition(int x, int y, int z)
+        public void ReceiveMessage(EntityMessage msg)
         {
-            _clientRegion = ((X >> 3) - 6, (Y >> 3) - 6);
-            _local = (X - (8 * ClientRegion.x), Y - (8 * ClientRegion.y));
+            switch (msg.Event)
+            {
+                case EntityMessage.EventType.Teleport:
+                    UpdatePosition();
+                    break;
+
+                case EntityMessage.EventType.Move:
+                    UpdateOnMove(msg.AsMove());
+                    break;
+            }
+        }
+
+        private void UpdatePosition()
+        {
+            var t = Parent.GetTransform();
+
+            _clientRegion = ((t.X >> 3) - 6, (t.Y >> 3) - 6);
+            _local = (t.X - (8 * ClientRegion.x), t.Y - (8 * ClientRegion.y));
 
             Recalc();
         }
 
-        protected override void InternalMove(sbyte dx, sbyte dy)
+        private void UpdateOnMove((sbyte x, sbyte y) d)
         {
-            _local.x += dx;
-            _local.y += dy;
+            _local.x += d.x;
+            _local.y += d.y;
 
             Recalc();
         }
@@ -63,13 +85,7 @@ namespace CScape.Core.Game.Entity
 
             Base = (_clientRegion.x * 8, _clientRegion.y * 8);
 
-            // sync locals to globals
-            X = Base.x + _local.x;
-            Y = Base.y + _local.y;
-
-            NeedsSightEvaluation = true;
-
-            UpdateRegion();
+            Parent.GetTransform().SyncLocalsToGlobals(this);
         }
     }
 }

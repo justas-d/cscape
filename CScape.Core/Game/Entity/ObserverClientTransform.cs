@@ -3,24 +3,10 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
+    // TODO : replace this class with inline calls to _client
+    // TODO : actually wait, use messages instead?
     public class ObserverClientTransform : ClientTransform
     {
-        public static class Factory
-        {
-            public static ObserverClientTransform Create(
-                IObserver forEntity,
-                int x, int y, byte z,
-                [CanBeNull] PlaneOfExistence poe = null)
-            {
-                var transform = new ObserverClientTransform(forEntity);
-
-                transform.Initialize(x, y, z, poe ?? forEntity.Server.Overworld);
-
-                return transform;
-            }
-        }
-
-
         private readonly IObserver _observer;
 
         public ObserverClientTransform(
