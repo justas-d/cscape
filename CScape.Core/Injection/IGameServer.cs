@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using CScape.Core.Game.NewEntity;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.World;
 using JetBrains.Annotations;
 

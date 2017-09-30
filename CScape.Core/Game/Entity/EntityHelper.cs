@@ -43,6 +43,7 @@ namespace CScape.Core.Game.Entity
 
         public static void WriteFacingDirection(IMovingEntity ent, (ushort x, ushort y)? nullableFacingCoordinate, Blob stream)
         {
+            // TODO : replace this null check with a negative check
             if (nullableFacingCoordinate != null)
             {
                 var facing = nullableFacingCoordinate.Value;

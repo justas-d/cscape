@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.NewEntity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using CScape.Core.Injection;
-using JetBrains.Annotations;
 using System.Net.Sockets;
+using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Injection;
 using CScape.Core.Network;
+using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities.Component
 {
     /// <summary>
     /// Responsible for managing the network part of the entity.
@@ -22,7 +23,15 @@ namespace CScape.Core.Game.NewEntity
         private ISocketContext Socket { get; }
         public Entity Parent { get; }
 
+        public int Priority { get; } = -1;
+
         private readonly ILogger _log;
+
+        /// <summary>
+        /// In milliseconds, the delay between a socket dying and it's player being removed
+        /// from the world.
+        /// </summary>
+        public long ReapTimeMs { get; set; } = 1000 * 60;
 
         public NetworkingComponent(
             [NotNull] Entity parent, 
@@ -35,6 +44,29 @@ namespace CScape.Core.Game.NewEntity
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             _log = parent.Server.Services.ThrowOrGet<ILogger>();
+        }
+
+        public void Sync([NotNull] IMainLoop loop)
+        {
+            // don't do anything if there's no connection
+            if (!Socket.IsConnected())
+                return;
+
+            // write our data
+            foreach (var sync in Parent.Network)
+                sync.Update(loop);
+
+            // send our data
+            Socket.FlushOutputStream();
+        }
+
+        private void CheckForHardDisconnect()
+        {
+            if (Socket.DeadForMs >= ReapTimeMs)
+            {
+                _log.Debug(this, $"Reaping {Parent}");
+                return;
+            }
         }
 
         public void Update(IMainLoop loop)
@@ -68,7 +100,7 @@ namespace CScape.Core.Game.NewEntity
                         case PacketMetadata.ParseStatus.UndefinedPacket:
                         {
                             var msg = $"Undefined packet opcode: {packet.Opcode}";
-                            var player = Parent.GetComponent<PlayerComponent>();
+                            var player = Parent.Components.Get<PlayerComponent>();
                             _log.Warning(this, msg);
                             player.ForcedLogout();
 
@@ -99,8 +131,6 @@ namespace CScape.Core.Game.NewEntity
 
             return true;
         }
-
-        public bool IsConnected() => Socket.IsConnected();
 
         public void SendPacket(IPacket);
 

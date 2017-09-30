@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entities.Prefab;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities
 {
     public sealed class EntitySystem : IEntitySystem
     {
@@ -75,7 +77,7 @@ namespace CScape.Core.Game.NewEntity
             var handle = new EntityHandle(this, _generationTracker[id], id);
             var entity = new Entity(name, handle);
 
-            entity.AddComponent(new ServerTransform(entity));
+            entity.Components.Add(new ServerTransform(entity));
 
             Debug.Assert(!_entities.ContainsKey(handle));
             _entities.Add(handle, entity);
@@ -149,10 +151,17 @@ namespace CScape.Core.Game.NewEntity
             Debug.Assert(_generationTracker.ContainsKey(handle.Id));
             Debug.Assert(_entities.ContainsKey(handle));
 
+            var ent = Get(handle);
+
+            ent.SendMessage(
+                new EntityMessage(null, EntityMessage.EventType.DestroyEntity, true));
+
             // advance the generation for this id
             _generationTracker[handle.Id] += 1;
 
             _entities.Remove(handle);
+
+
         }
 
         public Entity Get([NotNull] EntityHandle entityHandle)

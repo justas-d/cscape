@@ -1,7 +1,8 @@
 using System;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities.Component
 {
     /// <summary>
     /// Responsible for syncing the player to the database.

@@ -2,7 +2,7 @@
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities.Interface
 {
     public interface IEntitySystem
     {

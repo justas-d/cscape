@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities
 {
     public sealed class PlayerFactory : IPlayerFactory
     {

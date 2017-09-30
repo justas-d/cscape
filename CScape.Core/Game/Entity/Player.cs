@@ -71,7 +71,7 @@ namespace CScape.Core.Game.Entity
 
         [CanBeNull] private ChatMessage _lastChatMessage;
         [CanBeNull] private IWorldEntity _interactingEntity;
-        [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
+      //  [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
 
         private  ForcedMovement _forceMovement;
 
@@ -117,6 +117,7 @@ namespace CScape.Core.Game.Entity
             }
         }
 
+        /*
         // todo : maybe expose this via some interface? or move it to WorldEntity?
         [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
         {
@@ -128,6 +129,7 @@ namespace CScape.Core.Game.Entity
                     TickFlags |= UpdateFlags.FacingCoordinate;
             }
         }
+        */
 
         [NotNull] public IPlayerAppearance Appearance
         {
@@ -182,54 +184,63 @@ namespace CScape.Core.Game.Entity
         public byte TitleIcon => _model.TitleIcon;
         public bool IsMember => _model.IsMember;
 
-        [NotNull] public ISocketContext Connection { get; }
-        public IObservatory Observatory => _observatory;
+        //[NotNull] public ISocketContext Connection { get; }
+       // public IObservatory Observatory => _observatory;
         
-        [NotNull] private readonly ClientTransform _transform;
-        [NotNull] public IClientTransform ClientTransform => _transform;
+        //[NotNull] private readonly ClientTransform _transform;
+       // [NotNull] public IClientTransform ClientTransform => _transform;
         private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
 
-        public MovementController Movement { get; }
+        //public MovementController Movement { get; }
 
         public bool TeleportToDestWhenWalking { get; set; }
         
+        /*
         /// <summary>
         /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
         public const int MaxViewRange = 15;
-
+        */
         /// <summary>
         /// The player cannot see any entities who are further then this many tiles away from the player.
         /// </summary>
-        public int ViewRange
-        {
+   //     public int ViewRange
+    //    {
+            /*
             get => _viewRange;
             set
             {
                 var newRange = value.Clamp(0, MaxViewRange);
                 if (newRange != value)
                 {
-                    DebugMsg($"View range {_viewRange} => {value}", ref DebugEntitySync);
+               
+                   DebugMsg($"View range {_viewRange} => {value}", ref DebugEntitySync);
+                   */
+
                     Observatory.ReevaluateSightOverride = true;
+            /*
                 }
 
                 _viewRange= value;
             }
         }
         private int _viewRange;
+        */
 
         public HitData SecondaryHit { get; private set; }
         public HitData PrimaryHit { get; private set; }
 
         // todo : hook up Player.MaxHealth to player skills
+        /*
         public byte MaxHealth { get; set; } = 10;
         public byte CurrentHealth
         {
             get => _model.Health;
             private set => _model.Health = value;
         } 
+        */
 
         public bool Damage(byte dAmount, HitType type, bool secondary)
         {
@@ -258,29 +269,29 @@ namespace CScape.Core.Game.Entity
 
         [NotNull] public PlayerInterfaceController Interfaces { get; }
 
-        private readonly IServiceProvider _services;
+        //private readonly IServiceProvider _services;
 
         public Player([NotNull] IPlayerModel model, ISocketContext socket,
             [NotNull] IServiceProvider services, bool isHighDetail) : base(services)
         {
-            _services = services ?? throw new ArgumentNullException(nameof(services));
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+           // _services = services ?? throw new ArgumentNullException(nameof(services));
+            //_model = model ?? throw new ArgumentNullException(nameof(model));
 
-            Pid = IdPool.NextPlayer();
-            Connection = socket;
+           // Pid = IdPool.NextPlayer();
+           // Connection = socket;
 
             _observatory = new PlayerObservatory(services, this);
 
-            _transform = ObserverClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
-            Transform = _transform;
+            //_transform = ObserverClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
+           // Transform = _transform;
 
-            Movement = new MovementController(services, this);
+           // Movement = new MovementController(services, this);
             Interfaces = new PlayerInterfaceController(this);
 
             Connection.SyncMachines.Add(new RegionSyncMachine(this));
             Connection.SyncMachines.Add(new InterfaceSyncMachine(this));
 
-            Server.Players.Register(this);
+           // Server.Players.Register(this);
 
             // send init packets
             Connection.SendPacket(new InitializePlayerPacket(this));
@@ -340,20 +351,22 @@ namespace CScape.Core.Game.Entity
             IsAppearanceDirty = true;
 
             // queue for immediate update
-            _services.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
+            //_services.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
         }
 
         public void OnMoved()
         {
-            FacingCoordinate = null;
+            //FacingCoordinate = null;
             Interfaces.OnActionOccurred();
         }
 
+        /*
         /// <summary>
         /// In milliseconds, the delay between a socket dying and it's player being removed
         /// from the world.
         /// </summary>
         public long ReapTimeMs { get; set; } = 1000 * 60;
+        */
 
         public override void Update(IMainLoop loop)
         {
@@ -366,27 +379,31 @@ namespace CScape.Core.Game.Entity
             TickFlags = 0;
             NeedsPositionInit = false;
             NeedsSightEvaluation = false;
-            Movement.MoveUpdate.Reset();
+            //Movement.MoveUpdate.Reset();
             
             // reset pressed buttons
             Interfaces.PressedButtonIds.Clear();
 
             EntityHelper.TryResetInteractingEntity(this);
 
+            /*
             if (IsDestroyed)
             {
                 var msg = $"Updating destroyed player {Username}";
                 Log.Warning(this, msg);
                 Debug.Fail(msg);
             }
+            */
 
             // check for hard disconnects
+            /*
             if(Connection.DeadForMs >= ReapTimeMs)
             {
                 Log.Debug(this, $"Reaping {Username}");
                 Destroy();
                 return;
             }
+            */
 
             if (Connection.IsConnected())
             {
@@ -404,7 +421,7 @@ namespace CScape.Core.Game.Entity
                 }
             }
 
-            loop.Player.Enqueue(this);
+            //loop.Player.Enqueue(this);
         }
 
         /// <summary>

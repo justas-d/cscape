@@ -1,90 +1,93 @@
 ﻿using System;
 using System.Collections;
-using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
+using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities
 {
-    public sealed class EntityFragmentContainer<TFragment> 
-        : IEnumerable<TFragment>
-        where TFragment : class, IEntityFragment
-    {
-        [NotNull]
-        public Entity Parent { get; }
-
-        private readonly Dictionary<Type, TFragment> _lookup
-            = new Dictionary<Type, TFragment>();
-
-        // TODO : write tests for entity fragment sorting
-        [NotNull]
-        public IEnumerable<TFragment> All { get; private set; } = Enumerable.Empty<TFragment>();
-
-        public EntityFragmentContainer([NotNull] Entity parent)
-        {
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
-        }
-
-        private void Sort()
-        {
-            All = _lookup.Values.OrderBy(f => f.Priority);
-        }
-
-        public void Add<T>([NotNull] T fragment) 
-            where T : class, TFragment
-        {
-            if (fragment == null) throw new ArgumentNullException(nameof(fragment));
-
-            var type = typeof(T);
-
-            if(ContainsFragment<T>())
-                throw new EntityComponentAlreadyExists(type);    
-
-            _lookup.Add(type, fragment);
-            Sort();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ContainsFragment<T>()
-            where T : class, TFragment
-            => _lookup.ContainsKey(typeof(T));
-        
-        public T Get<T>() 
-            where T : class, TFragment
-        {
-            var type = typeof(T);
-
-            if (!ContainsFragment<T>())
-                return null;
-           
-            return (T) _lookup[type];
-        }
-
-        public void Remove<T>()
-            where T : class, TFragment
-        {
-            var type = typeof(T);
-
-            if (!ContainsFragment<T>())
-                return;
-
-            var statusLookup = _lookup.Remove(type);
-
-            Debug.Assert(statusLookup);
-        }
-
-        public IEnumerator<TFragment> GetEnumerator() => All.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    }
-
     public sealed class Entity : IEquatable<Entity>, IEnumerable<IEntityFragment>
     {
+        public sealed class EntityFragmentContainer<TFragment>
+            : IEnumerable<TFragment>
+            where TFragment : class, IEntityFragment
+        {
+            [NotNull]
+            public Entity Parent { get; }
+
+            private readonly Dictionary<Type, TFragment> _lookup
+                = new Dictionary<Type, TFragment>();
+
+            // TODO : write tests for entity fragment sorting
+            [NotNull]
+            public IEnumerable<TFragment> All { get; private set; } = Enumerable.Empty<TFragment>();
+
+            public EntityFragmentContainer([NotNull] Entity parent)
+            {
+                Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            }
+
+            private void Sort()
+            {
+                All = _lookup.Values.OrderBy(f => f.Priority);
+            }
+
+            public void Add<T>([NotNull] T fragment)
+                where T : class, TFragment
+            {
+                if (fragment == null) throw new ArgumentNullException(nameof(fragment));
+
+                var type = typeof(T);
+
+                if (ContainsFragment<T>())
+                    throw new EntityComponentAlreadyExists(type);
+
+                _lookup.Add(type, fragment);
+                Sort();
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool ContainsFragment<T>()
+                where T : class, TFragment
+                => _lookup.ContainsKey(typeof(T));
+
+            [CanBeNull]
+            public T Get<T>()
+                where T : class, TFragment
+            {
+                var type = typeof(T);
+
+                if (!ContainsFragment<T>())
+                    return null;
+
+                return (T)_lookup[type];
+            }
+
+            public void Remove<T>()
+                where T : class, TFragment
+            {
+                var type = typeof(T);
+
+                if (!ContainsFragment<T>())
+                    return;
+
+                var statusLookup = _lookup.Remove(type);
+
+                Debug.Assert(statusLookup);
+            }
+
+            public IEnumerator<TFragment> GetEnumerator() => All.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        }
+
         [NotNull]
         public string Name { get; }
 
@@ -131,16 +134,7 @@ namespace CScape.Core.Game.NewEntity
         {
             var net = Components.Get<NetworkingComponent>();
 
-            // don't do anything if there's no connection
-            if (!net.Socket.IsConnected())
-                return;
-
-            // write our data
-            foreach (var sync in Network)
-                sync.Update(loop);
-                
-            // send our data
-            net.Socket.FlushOutputStream();
+            net?.Sync(loop);
         }
 
         public override bool Equals(object obj)

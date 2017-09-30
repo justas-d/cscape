@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities
 {
     public sealed class RequiresFragment : Attribute
     {

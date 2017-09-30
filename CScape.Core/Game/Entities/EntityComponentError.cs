@@ -1,6 +1,7 @@
 ﻿using System;
+using CScape.Core.Game.Entities.Prefab;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities
 {
     public class EntityComponentNotSatisfied : EntityComponentError
     {

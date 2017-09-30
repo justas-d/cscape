@@ -1,9 +1,10 @@
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities.Component
 {
     public sealed class TileMovementComponent : IEntityComponent
     {

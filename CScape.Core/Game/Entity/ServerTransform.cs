@@ -1,5 +1,6 @@
 using System;
-using CScape.Core.Game.NewEntity;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
@@ -18,6 +19,16 @@ namespace CScape.Core.Game.Entity
         public int Z { get; private set; } = 0;
 
         /// <summary>
+        /// Facing X coordinate. Negative if not set.
+        /// </summary>
+        public int FacingX { get; private set; } = -1;
+
+        /// <summary>
+        /// Facing Y coordinate. Negative if not set
+        /// </summary>
+        public int FacingY { get; private set; } = -1;
+
+        /// <summary>
         /// Returns the current PoE region this transform is stored in.
         /// </summary>
         [NotNull] public Region Region { get; private set; }
@@ -27,11 +38,13 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         [NotNull] public PlaneOfExistence PoE { get; private set; }
 
-        public NewEntity.Entity Parent { get; }
+        public Entities.Entity Parent { get; }
+        public int Priority { get; }
 
+        // TODO : NeedsSightEvaluation is probably not needed
         public bool NeedsSightEvaluation { get; set; } = true;
 
-        public ServerTransform([NotNull] NewEntity.Entity parent)
+        public ServerTransform([NotNull] Entities.Entity parent)
         {
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             SwitchPoE(parent.Server.Overworld);
@@ -84,6 +97,18 @@ namespace CScape.Core.Game.Entity
                     new TeleportMessageData(oldPos, newPos)));
         }
 
+        // TODO : use SetFacingDirection
+        public void SetFacingDirection(int x, int y)
+        {
+            FacingX = x;
+            FacingY = y;
+
+            Parent.SendMessage(
+                new EntityMessage(
+                    this, 
+                    EntityMessage.EventType.NewFacingDirection, 
+                    (x, y)));
+        }
 
         private void UpdateRegion()
         {
@@ -124,8 +149,10 @@ namespace CScape.Core.Game.Entity
                 X += delta.x;
                 Y += delta.y;
 
-                NeedsSightEvaluation = true;
+                FacingX = -1;
+                FacingY = -1;
 
+                NeedsSightEvaluation = true;
             }
         }
     }

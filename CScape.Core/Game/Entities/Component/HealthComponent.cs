@@ -1,7 +1,7 @@
-using System;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities.Component
 {
     public sealed class HealthComponent : IEntityComponent
     {

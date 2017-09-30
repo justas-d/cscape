@@ -5,27 +5,27 @@ namespace CScape.Core.Game.Entity
 {
     public static class DirectionsProviderExtensions
     {
-        public static DirectionDelta GetNextDir(this IDirectionsProvider prov, [NotNull]NewEntity.Entity ent)
+        public static DirectionDelta GetNextDir(this IDirectionsProvider prov, [NotNull]Entities.Entity ent)
         {
             var t = ent.GetTransform();
             return prov.GetNextDir(ent, t.X, t.Y, t.Z);
         }
 
-        public static DirectionDelta GetNextDirOffset(this IDirectionsProvider prov, [NotNull]NewEntity.Entity ent,
+        public static DirectionDelta GetNextDirOffset(this IDirectionsProvider prov, [NotNull]Entities.Entity ent,
             int offX, int offY, int offZ)
         {
             var t = ent.GetTransform();
             return prov.GetNextDir(ent, t.X + offX, t.Y + offY, t.Z + offZ);
         }
 
-        public static bool IsDoneOffset(this IDirectionsProvider prov, [NotNull]NewEntity.Entity ent,
+        public static bool IsDoneOffset(this IDirectionsProvider prov, [NotNull]Entities.Entity ent,
             int offX, int offY, int offZ)
         {
             var t = ent.GetTransform();
             return prov.IsDone(ent, t.X + offX, t.Y + offY, t.Z + offZ);
         }
 
-        public static bool IsDone(this IDirectionsProvider prov, [NotNull]NewEntity.Entity ent)
+        public static bool IsDone(this IDirectionsProvider prov, [NotNull]Entities.Entity ent)
         {
             var t = ent.GetTransform();
             return prov.IsDone(ent, t.X, t.Y, t.Z);
@@ -34,7 +34,7 @@ namespace CScape.Core.Game.Entity
 
     public interface IDirectionsProvider
     {
-        DirectionDelta GetNextDir([NotNull] NewEntity.Entity ent, int x, int y, int z);
-        bool IsDone([NotNull] NewEntity.Entity ent, int x, int y, int z);
+        DirectionDelta GetNextDir([NotNull] Entities.Entity ent, int x, int y, int z);
+        bool IsDone([NotNull] Entities.Entity ent, int x, int y, int z);
     }
 }

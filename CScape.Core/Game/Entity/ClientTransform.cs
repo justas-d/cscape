@@ -1,4 +1,5 @@
-using CScape.Core.Game.NewEntity;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 
 namespace CScape.Core.Game.Entity
@@ -15,9 +16,9 @@ namespace CScape.Core.Game.Entity
         public (int x, int y) ClientRegion => _clientRegion;
         public (int x, int y) Local => _local;
 
-        public NewEntity.Entity Parent { get; }
+        public Entities.Entity Parent { get; }
 
-        public ClientPositionComponent(NewEntity.Entity parent)
+        public ClientPositionComponent(Entities.Entity parent)
         {
             Parent = parent;
         }

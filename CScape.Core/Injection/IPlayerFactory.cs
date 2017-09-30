@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using CScape.Core.Game.NewEntity;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Interface;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Injection

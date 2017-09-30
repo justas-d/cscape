@@ -1,10 +1,11 @@
 using System;
 using System.Diagnostics;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.NewEntity
+namespace CScape.Core.Game.Entities
 {
     public sealed class PoeSwitchMessageData
     {
@@ -39,11 +40,14 @@ namespace CScape.Core.Game.NewEntity
     {
         private readonly object _data;
 
+        [CanBeNull]
         public IEntityFragment Sender { get; }
         public EventType Event { get; }
 
         public enum EventType
         {
+            DestroyEntity, /* Sent whenever the entity is being destroyed */
+
             TookDamage,
             JustDied,
             Move, /* Moving by delta (ie walking or running) */
@@ -52,16 +56,19 @@ namespace CScape.Core.Game.NewEntity
 
             PoeSwitch,
             Teleport, /* Forced movement over an arbitrary size of land */
-            
+            NewFacingDirection,
+
             BeginMovePath, 
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
             UnhandledPacket,
             NetworkReinitialize /* The network connection has been reinitialized */
+
+
         };
 
-        public EntityMessage(IEntityFragment sender, EventType ev, object data)
+        public EntityMessage([CanBeNull] IEntityFragment sender, EventType ev, [CanBeNull] object data)
         {
             _data = data;
             Sender = sender;
@@ -79,6 +86,9 @@ namespace CScape.Core.Game.NewEntity
             Debug.Assert(Event == expected);
             return true;
         }
+
+        public (int x, int y) AsNewFacingDirection() => AssertCast<(int, int)>(EventType.NewFacingDirection);
+        public bool AsDestroyEntity() => AssertTrue(EventType.DestroyEntity);
 
         public PacketMetadata AsUnhandledPacket() => AssertCast<PacketMetadata>(EventType.UnhandledPacket);
         public bool AsNetworkReinitialize() => AssertTrue(EventType.NetworkReinitialize);

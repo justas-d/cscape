@@ -1,6 +1,6 @@
 using CScape.Core.Data;
 
-namespace CScape.Core.Network
+namespace CScape.Core.Network.Packet
 {
     public class SetDialogInterfacePacket : IPacket
     {
