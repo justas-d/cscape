@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.NewEntity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
 {
-    public class PlaneOfExistence : IEnumerable<IWorldEntity>
+    public class PlaneOfExistence : IEnumerable<EntityHandle>
     {
         [NotNull] public string Name { get; }
 
@@ -17,33 +18,20 @@ namespace CScape.Core.Game.World
 
         private ILogger Log { get; }
 
-        private readonly EntityPool<IWorldEntity> _entityPool;
-        private bool _isFreed;
+        private readonly HashSet<EntityHandle> _entities = new HashSet<EntityHandle>();
 
-        protected Dictionary<(int, int), Region> Regions { get; } = new Dictionary<(int, int), Region>();
+        protected Dictionary<(int, int), Region> Regions { get; } 
+            = new Dictionary<(int, int), Region>();
 
         public PlaneOfExistence([NotNull] IGameServer server, [NotNull] string name)
         {
             Server = server ?? throw new ArgumentNullException(nameof(server));
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Log = server.Services.ThrowOrGet<ILogger>();
-
-            _entityPool = new EntityPool<IWorldEntity>();
-            Server.Entities.Add(_entityPool);
         }
 
-        ~PlaneOfExistence()
-        {
-            if (!_isFreed && !IsOverworld)
-            {
-                Log.Warning(this, "Finalizer called on unfreed PoE.");
-                Free();
-            }
-        }
-
-        protected virtual void InternalFree() { }
-        protected virtual void InternalRemoveEntity([NotNull]IWorldEntity ent) { }
-        protected virtual void InternalAddEntity([NotNull] IWorldEntity ent) { }
+        protected virtual void InternalRemoveEntity([NotNull]ServerTransform ent) { }
+        protected virtual void InternalAddEntity([NotNull] ServerTransform ent) { }
 
         /// <summary>
         /// Gets the region coords by global position.
@@ -64,68 +52,58 @@ namespace CScape.Core.Game.World
             return Regions[regionCoords];
         }
 
-        public void Free()
-        {
-            if (_isFreed) return;
-            if(IsOverworld) return;
-
-            Server.Entities.Remove(_entityPool);
-            InternalFree();
-            _isFreed = true;
-        }
-
         /// <summary>
         /// !!Should only be called by ITransform.
         /// </summary>
-        internal void RemoveEntity([NotNull] ITransform owningTransform)
+        internal void RemoveEntity([NotNull] ServerTransform owningTransform)
         {
             if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
-            var ent = owningTransform.Entity;
+            var ent = owningTransform.Parent;
 
-            if (!ContainsEntity(ent))
+            if (!ContainsEntity(ent.Handle))
                 return;
 
-            _entityPool.Remove(ent);
-            InternalRemoveEntity(ent);
+            _entities.Remove(ent.Handle);
+            InternalRemoveEntity(owningTransform);
         }
 
         /// <summary>
         /// !!Should only be called by ITransform.
         /// </summary>
-        internal void AddEntity([NotNull] ITransform owningTransform)
+        internal void RegisterNewEntity([NotNull] ServerTransform transform)
         {
-            if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
+            if (transform == null) throw new ArgumentNullException(nameof(transform));
 
             // an entity can only belong to one poe at a time.
-            if (owningTransform.PoE != this)
+            if (transform.PoE != this)
             {
                 Debug.Fail("PoE tried to AddEntity on a entity that is in a different PoE.");
                 throw new InvalidOperationException("PoE tried to AddEntity on a entity that is in a different PoE.");
             }
 
-            var ent = owningTransform.Entity;
-
-            if (ContainsEntity(ent))
+            var ent = transform.Parent;
+                
+            if (ContainsEntity(ent.Handle))
                 return;
 
-            _entityPool.Add(ent);
-            InternalAddEntity(ent);
+            _entities.Add(ent.Handle);
+            
+            InternalAddEntity(transform);
         }
 
-        public bool ContainsEntity([NotNull] IWorldEntity obs)
+        public bool ContainsEntity([NotNull] EntityHandle handle)
         {
-            if (obs == null) throw new ArgumentNullException(nameof(obs));
-            return _entityPool.ContainsId(obs.UniqueEntityId);
+            return _entities.Contains(handle);
         }
 
-        public IEnumerator<IWorldEntity> GetEnumerator()
-            => _entityPool.GetEnumerator();
+        public IEnumerator<EntityHandle> GetEnumerator()
+            => _entities.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
         public override string ToString()
-            => $"Plane of existance: {Name}";
+            => $"Plane of existence: {Name}";
     }
 };

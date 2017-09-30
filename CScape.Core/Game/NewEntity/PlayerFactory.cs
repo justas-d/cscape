@@ -6,23 +6,23 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity
 {
-    public sealed class PlayerFactory
+    public sealed class PlayerFactory : IPlayerFactory
     {
         public const int InvalidPlayerId = -1;
 
         [NotNull]
         public IEntitySystem EntitySystem { get; }
 
-        private readonly List<PlayerComponent> _players;
+        private readonly List<EntityHandle> _players;
 
         [NotNull]
-        public IReadOnlyList<PlayerComponent> Players => _players;
+        public IReadOnlyList<EntityHandle> Players => _players;
 
         public PlayerFactory([NotNull] IEntitySystem entitySystem)
         {
             EntitySystem = entitySystem ?? throw new ArgumentNullException(nameof(entitySystem));
 
-            _players = new List<PlayerComponent>(entitySystem.Server.Services
+            _players = new List<EntityHandle>(entitySystem.Server.Services
                 .ThrowOrGet<IGameServerConfig>().MaxPlayers);
         }
 
@@ -39,15 +39,8 @@ namespace CScape.Core.Game.NewEntity
 
             return InvalidPlayerId;
         }
-
-        /// <summary>
-        /// Creates a player entity.
-        /// </summary>
-        /// <param name="model">The player model which the new player entity will represent db sync with.</param>
-        /// <param name="ctx">The connection context with which the player will net sync with</param>
-        /// <returns>An <see cref="EntityHandle"/> pointing to the new player entity or null if the player list is full.</returns>
-        /// <exception cref="EntityComponentNotSatisfied">One of the components of the entity is not satisfied</exception>
-        public EntityHandle Create([NotNull] IPlayerModel model, [NotNull] ISocketContext ctx)
+       
+        public EntityHandle Create(IPlayerModel model, ISocketContext ctx)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
@@ -60,16 +53,18 @@ namespace CScape.Core.Game.NewEntity
             var entHandle = EntitySystem.Create($"Entity for player {model.Id}");
             var ent = entHandle.Get();
             
-            ent.AddComponent(new ClientPositionComponent(ent));
+            ent.Components.Add(new ClientPositionComponent(ent));
 
             // TODO : apply hitpoints skill to HealthComponent when constructing player
-            ent.AddComponent(new HealthComponent(ent, 10, model.Health)); 
-            ent.AddComponent(new DbPlayerSyncComponent(ent));
-            ent.AddComponent(new NetPlayerSyncComponent(ent, ctx));
-            ent.AddComponent(new TileMovementComponent(ent));
-            ent.AddComponent(new PlayerComponent(ent, model.Id, id));
+            ent.Components.Add(new HealthComponent(ent, 10, model.Health)); 
+            ent.Components.Add(new DbPlayerSyncComponent(ent));
+            ent.Components.Add(new NetPlayerSyncComponent(ent, ctx));
+            ent.Components.Add(new TileMovementComponent(ent));
+            ent.Components.Add(new PlayerComponent(ent, model.Id, id));
 
             ent.AssertComponentRequirementsSatisfied();
+
+            _players.Add(entHandle);
 
             return entHandle;
         }

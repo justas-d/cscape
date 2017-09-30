@@ -14,6 +14,7 @@ namespace CScape.Basic.Server
     {
         public IServiceProvider Services { get; }
         public PlaneOfExistence Overworld { get; }
+        public IEntitySystem Entities { get; }
 
         public bool IsDisposed { get; private set; }
         public DateTime StartTime { get; private set; }
@@ -32,8 +33,8 @@ namespace CScape.Basic.Server
             Overworld = new PlaneOfExistence(this, "Overworld");
 
             Loop = Services.ThrowOrGet<IMainLoop>();
-            Log = Services.ThrowOrGet<ILogger>();
-            Services.ThrowOrGet<IEntitySystem>();
+            Log = Services.ThrowOrGet<ILogger>();;
+            Entities = new EntitySystem(this);
         }
 
         public ServerStateFlags GetState()

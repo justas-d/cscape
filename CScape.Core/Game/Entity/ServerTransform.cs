@@ -6,9 +6,6 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
-    // todo : Move collision checking
-    // todo : handle multi-tile entities in Move()
-
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
@@ -53,7 +50,7 @@ namespace CScape.Core.Game.Entity
             var oldPoe = PoE;
             PoE?.RemoveEntity(this);
             PoE = newPoe;
-            PoE.AddEntity(this);
+            PoE.RegisterNewEntity(this);
 
             Parent.SendMessage(
                 new EntityMessage(
@@ -94,7 +91,7 @@ namespace CScape.Core.Game.Entity
 
             if (Region == region) return;
 
-            Region?.RemoveEntity(Parent);
+            Region?.RemoveEntity(Parent.GetTransform());
             Region = region;
             Region.AddEntity(this);
 

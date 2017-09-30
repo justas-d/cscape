@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.ExceptionServices;
+using System.Linq;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Game.Entity;
@@ -14,71 +12,33 @@ namespace CScape.Basic.Server
 {
     public sealed class MainLoop : IMainLoop, IDisposable
     {
-        /// <summary>
-        /// Defines a queue for entities that need to be updated.
-        /// Only one of the same entity can exist in the queue.
-        /// </summary>
-        public sealed class UniqueEntUpdateQueue<T> : IUpdateQueue<T> where T : IEntity
-        {
-            private readonly HashSet<uint> _idSet = new HashSet<uint>();
-            private readonly Queue<T> _entQueue = new Queue<T>();
-            public int Count => _entQueue.Count;
-
-            public void Enqueue(T ent)
-            {
-                if (!_idSet.Add(ent.UniqueEntityId))
-                    return;
-
-                _entQueue.Enqueue(ent);
-            }
-
-            public T Dequeue()
-            {
-                var obj = _entQueue.Dequeue();
-                _idSet.Remove(obj.UniqueEntityId);
-                return obj;
-            }
-
-            public IEnumerator<T> GetEnumerator() => _entQueue.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        }
-
-        // update queues
-        public IUpdateQueue<IMovingEntity> Movement { get; } = new UniqueEntUpdateQueue<IMovingEntity>();
-
-        public IUpdateQueue<Player> Player { get; } = new UniqueEntUpdateQueue<Player>();
-        public IUpdateQueue<Npc> Npc { get; } = new UniqueEntUpdateQueue<Npc>();
-        public IUpdateQueue<GroundItem> Item { get; } = new UniqueEntUpdateQueue<GroundItem>();
-
         [NotNull] private readonly Stopwatch _tickWatch = new Stopwatch();
-        private readonly IPacketDispatch _dispatch;
-        private readonly IPacketParser _parser;
         private readonly ILoginService _login;
         private readonly ILogger _log;
         private readonly IGameServerConfig _config;
         private readonly IPlayerDatabase _db;
 
         private int _waitTimeCarry;
+        public IGameServer Server { get; }
         public long ElapsedMilliseconds => _tickWatch.ElapsedMilliseconds;
 
         public long DeltaTime { get; private set; }
         public long TickProcessTime { get; private set; }
         public int TickRate { get; set; }
 
+        public bool IsRunning { get; private set; } = true;
+
         public MainLoop(IServiceProvider services)
         {
+            Server = services.ThrowOrGet<IGameServer>();
             _log = services.ThrowOrGet<ILogger>();
             _login = services.ThrowOrGet<ILoginService>();
-            _dispatch = services.ThrowOrGet<IPacketDispatch>();
-            _parser = services.ThrowOrGet<IPacketParser>();
             _config = services.ThrowOrGet<IGameServerConfig>();
             _db = services.ThrowOrGet<IPlayerDatabase>();
 
             TickRate = _config.TickRate;
         }
-
-        public bool IsRunning { get; private set; } = true;
-
+        
         public async Task Run()
         {
             var timeSinceLastSave = 0L;
@@ -106,17 +66,11 @@ namespace CScape.Basic.Server
 
                 //================================================
 
-                // get & parse their data
-                foreach (var p in Player)
-                {
-                    // update connections
-                    if (!p.Connection.Update(DeltaTime + ElapsedMilliseconds))
-                        continue; // failed to update, skip this player.
+                foreach (var ent in Server.Entities.All.Values)
+                    ent.DoTickUpdate(this);
 
-                    // parse
-                    foreach (var pack in _parser.Parse(p))
-                        _dispatch.Handle(p, pack.Opcode, pack.Packet);
-                }
+                foreach (var ent in Server.Entities.All.Values)
+                    ent.DoNetworkUpdate(this);
 
                 //================================================
 
@@ -142,6 +96,8 @@ namespace CScape.Basic.Server
                     // send our data
                     p.Connection.FlushOutputStream();
                 }
+
+                //================================================
 
                 void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
                 {

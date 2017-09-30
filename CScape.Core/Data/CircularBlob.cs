@@ -34,7 +34,7 @@ namespace CScape.Core.Data
         public void WriteBlock(byte[] src, int srcOffset, int count)
         {
             for (var i = 0; i < count; i++)
-                Write(src[i]);
+                Write(src[srcOffset + i]);
         }
 
         public void Write(byte val)

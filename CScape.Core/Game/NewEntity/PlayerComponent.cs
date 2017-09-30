@@ -1,9 +1,66 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity
 {
+    public interface IVisionResolver : IEntityComponent
+    {
+        bool CanBeSeenBy(Entity ent);
+    }
+
+    /// <summary>
+    /// Tracks what the entity can see
+    /// </summary>
+    public sealed class VisionComponent : IEntityComponent
+    {
+        public const int DefaultViewRange = 15;
+
+        public Entity Parent { get; }
+
+        /// <summary>
+        /// "Can see up to n tiles".
+        /// </summary>
+        public int ViewRange { get; } = DefaultViewRange;
+
+        public VisionComponent(Entity parent)
+        {
+            
+            Parent = parent;
+        }
+
+        public void Update(IMainLoop loop)
+        {
+            
+        }
+
+        public bool CanSee(Entity ent)
+        {
+            var resolver = ent.GetComponent<IVisionResolver>();
+            if (resolver != null)
+            {
+                return resolver.CanBeSeenBy(ent);
+            }
+
+            return Parent.GetTransform().ChebyshevDistanceTo(ent.GetTransform()) <= ViewRange;
+        }
+
+        public IEnumerable<EntityHandle> GetVisibleEntities()
+        {
+            return Parent.GetTransform().Region.GetNearbyInclusive()
+                .SelectMany(e => e.Entities)
+                .Where(handle => !handle.IsDead())
+                .Where(handle => CanSee(handle.Get()));
+        }
+
+        public void ReceiveMessage(EntityMessage msg)
+        {
+        }
+    }
+
     public sealed class PlayerComponent : IEntityComponent, IEquatable<PlayerComponent>
     {
         public int PlayerId { get; }
@@ -12,6 +69,7 @@ namespace CScape.Core.Game.NewEntity
         public Entity Parent { get; }
 
         [NotNull]
+
         public string Username { get; }
 
         public PlayerComponent([NotNull] Entity parent, [NotNull] string username

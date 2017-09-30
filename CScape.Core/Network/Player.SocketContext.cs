@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using CScape.Core.Data;
@@ -12,52 +10,6 @@ namespace CScape.Core.Network
 {
     public class SocketContext : ISocketContext
     {
-        private sealed class SyncMachineCollection : IList<ISyncMachine>
-        {
-            private readonly SortedDictionary<int, ISyncMachine> _sync
-                = new SortedDictionary<int, ISyncMachine>();
-
-            public int Count => _sync.Count;
-            public bool IsReadOnly => false;
-
-            public void Add([NotNull] ISyncMachine item)
-            {
-                if (item == null) throw new ArgumentNullException(nameof(item));
-
-                // try adding, guaranteeing order
-                if (_sync.ContainsKey(item.Order))
-                    throw new InvalidOperationException();
-
-                _sync.Add(item.Order, item);
-            }
-
-            public IEnumerator<ISyncMachine> GetEnumerator() => _sync.Values.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-            public void Clear() => _sync.Clear();
-            public bool Contains(ISyncMachine item) => _sync.ContainsKey(item.Order);
-
-            public void CopyTo(ISyncMachine[] array, int arrayIndex) => throw new NotImplementedException();
-            public void Insert(int index, ISyncMachine item) => throw new NotImplementedException();
-
-            public bool Remove(ISyncMachine item) => _sync.Remove(item.Order);
-            public void RemoveAt(int index) => _sync.Remove(index);
-
-            public int IndexOf(ISyncMachine item)
-            {
-                if (!_sync.ContainsKey(item.Order))
-                    return -1;
-                return item.Order;
-            }
-
-
-            public ISyncMachine this[int index]
-            {
-                get => _sync[index];
-                set => throw new NotImplementedException();
-            }
-        }
-
         public const int OutStreamSize = 5000;
         public const int InBufferStreamSize = 1024;
         public const int InStreamSize = InBufferStreamSize * 2;
@@ -74,8 +26,6 @@ namespace CScape.Core.Network
 
         public OutBlob OutStream { get; }
         public CircularBlob InStream { get; private set; }
-
-        public IList<ISyncMachine> SyncMachines { get; } = new SyncMachineCollection();
 
         public long DeadForMs { get; private set; }
         public int SignlinkId { get; private set; }
@@ -102,9 +52,6 @@ namespace CScape.Core.Network
 
             _inBufferStream = new byte[InBufferStreamSize];
             _socket.Blocking = false;
-
-            SyncMachines.Add(new MessageSyncMachine());
-            _msg = (MessageSyncMachine)SyncMachines[SyncMachineConstants.Message];
         }
 
         public bool CanReinitialize(int signlinkId) => signlinkId == SignlinkId && !IsConnected();
@@ -127,20 +74,6 @@ namespace CScape.Core.Network
             OutStream.ResetHeads();
             InStream = new CircularBlob(InStreamSize);
 
-            // notify sync machines
-            for (var i = 0; i < SyncMachines.Count; i++)
-            {
-                var cur = SyncMachines[i];
-                SyncMachines[i].OnReinitialize();
-
-                if(cur.RemoveAfterInitialize)
-                {
-                    // remove
-                    SyncMachines.RemoveAt(i);
-                    --i;
-                }
-            }
-
             _msg = (MessageSyncMachine)SyncMachines[SyncMachineConstants.Message];
 
             return true;
@@ -151,23 +84,28 @@ namespace CScape.Core.Network
             // check if we're still alive.
             _msSinceData += deltaTime;
 
-            if (!IsConnected())
-            {
-                // todo : DeadForMs += deltaTime; resulted in a massive negative dead for ms
-                unchecked { DeadForMs += deltaTime; }
-                return false;
-            }
-
             // flush input data
             try
             {
-                var avail = _socket.Available;
-                if (avail <= 0) return true; // no data received, all is good.
+                if (!IsConnected())
+                {
+                    // todo : DeadForMs += deltaTime; resulted in a massive negative dead for ms
+                    DeadForMs += deltaTime;
+                    return false;
+                }
 
+                var avail = _socket.Available;
+
+                if (avail <= 0)
+                    return true; // no data received, all is good.
+
+                // flush the stuff we received into _inBufferStream
                 var recv = _socket.Receive(_inBufferStream, 0, avail, SocketFlags.None);
 
+                // flush the _inBufferStream into the circular InStream
                 InStream.WriteBlock(_inBufferStream, 0, recv);
                 _msSinceData = 0;
+
                 return true;
             }
             catch (Exception e)
@@ -185,7 +123,7 @@ namespace CScape.Core.Network
 
             // return if we're haven't actually written anything to the output blob
             if (OutStream.WriteCaret <= 0)
-                return true; // succesfully, do nothing
+                return true; // successfully, do nothing
 
             // flush output data
             try

@@ -6,7 +6,7 @@ namespace CScape.Core.Game.NewEntity
 {
     public interface IEntitySystem
     {
-        IReadOnlyDictionary<EntityHandle, Entity> Entities { get; }
+        IReadOnlyDictionary<EntityHandle, Entity> All { get; }
 
         IGameServer Server { get; }
 

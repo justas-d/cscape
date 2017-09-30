@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Game.World;
+using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity
@@ -38,7 +39,7 @@ namespace CScape.Core.Game.NewEntity
     {
         private readonly object _data;
 
-        public IEntityComponent Sender { get; }
+        public IEntityFragment Sender { get; }
         public EventType Event { get; }
 
         public enum EventType
@@ -55,9 +56,12 @@ namespace CScape.Core.Game.NewEntity
             BeginMovePath, 
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
+
+            UnhandledPacket,
+            NetworkReinitialize /* The network connection has been reinitialized */
         };
 
-        public EntityMessage(IEntityComponent sender, EventType ev, object data)
+        public EntityMessage(IEntityFragment sender, EventType ev, object data)
         {
             _data = data;
             Sender = sender;
@@ -75,7 +79,10 @@ namespace CScape.Core.Game.NewEntity
             Debug.Assert(Event == expected);
             return true;
         }
-        
+
+        public PacketMetadata AsUnhandledPacket() => AssertCast<PacketMetadata>(EventType.UnhandledPacket);
+        public bool AsNetworkReinitialize() => AssertTrue(EventType.NetworkReinitialize);
+
         public int AsTookDamage() => AssertCast<int>(EventType.TookDamage);
         public bool AsJustDied() => AssertTrue(EventType.JustDied);
         public MovementMetadata AsMove() => AssertCast<MovementMetadata>(EventType.Move);

@@ -22,10 +22,5 @@ namespace CScape.Core.Injection
         byte Z { get; set; }
 
         byte Health { get; set; }
-
-        /// <summary>
-        /// Sets the X Y and Z values to the X Y Z values found in the given <see cref="IPosition"/>
-        /// </summary>
-        void SyncPosition(IPosition pos);
     }
 }

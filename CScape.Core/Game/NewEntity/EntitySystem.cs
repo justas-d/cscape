@@ -29,7 +29,7 @@ namespace CScape.Core.Game.NewEntity
 
         private readonly Dictionary<EntityHandle, Entity> _entities = new Dictionary<EntityHandle, Entity>();
 
-        public IReadOnlyDictionary<EntityHandle, Entity> Entities => _entities;
+        public IReadOnlyDictionary<EntityHandle, Entity> All => _entities;
 
         [NotNull]
         public IGameServer Server { get; }

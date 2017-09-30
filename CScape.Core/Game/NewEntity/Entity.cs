@@ -1,14 +1,89 @@
 ﻿using System;
+using System.Collections;
 using JetBrains.Annotations;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 
 namespace CScape.Core.Game.NewEntity
 {
-    public sealed class Entity : IEquatable<Entity>
+    public sealed class EntityFragmentContainer<TFragment> 
+        : IEnumerable<TFragment>
+        where TFragment : class, IEntityFragment
+    {
+        [NotNull]
+        public Entity Parent { get; }
+
+        private readonly Dictionary<Type, TFragment> _lookup
+            = new Dictionary<Type, TFragment>();
+
+        // TODO : write tests for entity fragment sorting
+        [NotNull]
+        public IEnumerable<TFragment> All { get; private set; } = Enumerable.Empty<TFragment>();
+
+        public EntityFragmentContainer([NotNull] Entity parent)
+        {
+            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        }
+
+        private void Sort()
+        {
+            All = _lookup.Values.OrderBy(f => f.Priority);
+        }
+
+        public void Add<T>([NotNull] T fragment) 
+            where T : class, TFragment
+        {
+            if (fragment == null) throw new ArgumentNullException(nameof(fragment));
+
+            var type = typeof(T);
+
+            if(ContainsFragment<T>())
+                throw new EntityComponentAlreadyExists(type);    
+
+            _lookup.Add(type, fragment);
+            Sort();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ContainsFragment<T>()
+            where T : class, TFragment
+            => _lookup.ContainsKey(typeof(T));
+        
+        public T Get<T>() 
+            where T : class, TFragment
+        {
+            var type = typeof(T);
+
+            if (!ContainsFragment<T>())
+                return null;
+           
+            return (T) _lookup[type];
+        }
+
+        public void Remove<T>()
+            where T : class, TFragment
+        {
+            var type = typeof(T);
+
+            if (!ContainsFragment<T>())
+                return;
+
+            var statusLookup = _lookup.Remove(type);
+
+            Debug.Assert(statusLookup);
+        }
+
+        public IEnumerator<TFragment> GetEnumerator() => All.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    }
+
+    public sealed class Entity : IEquatable<Entity>, IEnumerable<IEntityFragment>
     {
         [NotNull]
         public string Name { get; }
@@ -19,32 +94,18 @@ namespace CScape.Core.Game.NewEntity
         [NotNull]
         public IGameServer Server => Handle.System.Server;
 
-        public ServerTransform GetTransform() => GetComponent<ServerTransform>();
+        public ServerTransform GetTransform() => Components.Get<ServerTransform>();
 
-        private readonly Dictionary<Type, IEntityComponent> _components = new Dictionary<Type, IEntityComponent>();
+        public EntityFragmentContainer<IEntityComponent> Components { get; }
+        public EntityFragmentContainer<IEntityNetFragment> Network { get; }
 
         public Entity([NotNull] string name, [NotNull] EntityHandle handle)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Handle = handle ?? throw new ArgumentNullException(nameof(handle));
-        }
 
-        public void AddComponent<T>(T component) where T : IEntityComponent
-        {
-            var type = typeof(T);
-            if (_components.ContainsKey(type))
-                throw new EntityComponentAlreadyExists(type);
-            
-            _components.Add(type, component);
-        }
-
-        public T GetComponent<T>() where T : IEntityComponent
-        {
-            var type = typeof(T);
-            if (!_components.ContainsKey(type))
-                throw new EntityComponentNotFound(type);
-            
-            return (T)_components[type];
+            Components = new EntityFragmentContainer<IEntityComponent>(this);
+            Network = new EntityFragmentContainer<IEntityNetFragment>(this);
         }
 
         public bool Equals(Entity other)
@@ -52,6 +113,34 @@ namespace CScape.Core.Game.NewEntity
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Handle.Equals(other.Handle);
+        }
+
+        public IEnumerator<IEntityFragment> GetEnumerator()
+        {
+            foreach (var c in Components) yield return c;
+            foreach (var c in Network) yield return c;
+        }
+
+        public void DoTickUpdate([NotNull] IMainLoop loop)
+        {
+            foreach(var component in Components)
+                component.Update(loop);
+        }
+
+        public void DoNetworkUpdate([NotNull] IMainLoop loop)
+        {
+            var net = Components.Get<NetworkingComponent>();
+
+            // don't do anything if there's no connection
+            if (!net.Socket.IsConnected())
+                return;
+
+            // write our data
+            foreach (var sync in Network)
+                sync.Update(loop);
+                
+            // send our data
+            net.Socket.FlushOutputStream();
         }
 
         public override bool Equals(object obj)
@@ -68,10 +157,10 @@ namespace CScape.Core.Game.NewEntity
         /// <param name="message">The message to be sent.</param>
         public void SendMessage([NotNull] EntityMessage message)
         {
-            foreach (var comp in _components.Values)
+            foreach (var frag in this)
             {
-                if(comp != message.Sender)
-                    comp.ReceiveMessage(message);
+                if(!ReferenceEquals(frag, message.Sender))
+                    frag.ReceiveMessage(message);
             }
         }
 
@@ -82,17 +171,18 @@ namespace CScape.Core.Game.NewEntity
         /// <exception cref="EntityComponentNotSatisfied">Thrown, when a component is not satisfied.</exception>
         public void AssertComponentRequirementsSatisfied()
         {
-            foreach (var comp in _components.Values)
+            foreach (var frag in this)
             {
                 foreach (var attrib in
-                    comp.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
+                    frag.GetType().GetTypeInfo().GetCustomAttributes<RequiresFragment>())
                 {
                     // look for required attrib
-                    var match = _components.Values.FirstOrDefault(c => c.GetType() == attrib.ComponentType);
+
+                    var match = this.FirstOrDefault(c => c.GetType() == attrib.FragmentType);
                     if (match == null)
                     {
                         throw new EntityComponentNotSatisfied
-                            (comp.GetType(), $"Requires attribute of type {attrib.ComponentType.Name} to be attached to the entity but it is not.");
+                            (frag.GetType(), $"Requires fragment of type {attrib.FragmentType.Name} to be attached to the entity but it is not.");
                     }
                 }
             }
@@ -107,6 +197,12 @@ namespace CScape.Core.Game.NewEntity
         {
             return $"Entity \"{Name}\" {Handle}";
         }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }
+
 

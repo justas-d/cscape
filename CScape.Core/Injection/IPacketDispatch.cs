@@ -1,13 +1,12 @@
-﻿using CScape.Core.Data;
-using CScape.Core.Game.Entity;
+﻿using CScape.Core.Game.NewEntity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Injection
 {
     public interface IPacketDispatch
     {
-        void Handle([NotNull] Player player, int opcode, [NotNull] Blob packet);
+        void Handle([NotNull] Entity entity, [NotNull] PacketMetadata packet);
 
-        bool CanHandle(int opcode);
+        bool CanHandle(byte opcode);
     }
 }

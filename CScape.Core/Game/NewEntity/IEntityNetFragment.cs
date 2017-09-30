@@ -1,13 +1,12 @@
-﻿using CScape.Core.Data;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.NewEntity
 {
     /// <summary>
-    /// Updates run during the entity update pass
+    /// Updates run during the sync pass
     /// </summary>
-    public interface IEntityComponent : IEntityFragment
+    public interface IEntityNetFragment : IEntityFragment
     {
         void Update([NotNull]IMainLoop loop);
     }

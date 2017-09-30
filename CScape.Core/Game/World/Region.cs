@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.NewEntity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
@@ -15,11 +16,10 @@ namespace CScape.Core.Game.World
         public const int Size = 16;
         public const int Shift = 4;
 
-        [NotNull]public RegisteredHashSet<Player> Players { get; } = new RegisteredHashSet<Player>();
-        [NotNull]public RegisteredHashSet<IObserver> Observers { get; } = new RegisteredHashSet<IObserver>();
-        [NotNull]public RegisteredHashSet<IWorldEntity> WorldEntities { get; } = new RegisteredHashSet<IWorldEntity>();
-        [NotNull]public RegisteredHashSet<GroundItem> Items { get; } = new RegisteredHashSet<GroundItem>();
+        private readonly HashSet<EntityHandle> _entities = new HashSet<EntityHandle>();
 
+        public IReadOnlyCollection<EntityHandle> Entities => _entities;
+        
         private IEnumerable<Region> _nearbyRegions;
 
         public Region([NotNull] PlaneOfExistence poe, int x, int y)
@@ -29,51 +29,25 @@ namespace CScape.Core.Game.World
             Y = y;
         }
 
-        public void AddEntity([NotNull] ITransform owningTransform)
+        public void AddEntity([NotNull] ServerTransform owningTransform)
         {
             if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
-            var ent = owningTransform.Entity;
-            if (ent.IsDestroyed)
-            {
-                ent.Log.Warning(this, $"Tried to add destroyed entity {ent} to region at {X} {Y}");
-                return;
-            }
-
+            var ent = owningTransform.Parent;
 
             // verify regions
             // entity region must be set to this before AddEntity
             if (owningTransform.Region != this)
                 throw new InvalidOperationException("ent.Position.Region must be set to the AddEntity region.");
 
-            WorldEntities.Add(ent);
-
-            if (ent is Player p)
-            {
-                p.DebugMsg($"Region.AddEntity {X} {Y}", ref p.DebugRegion);
-                Players.Add(p);
-            }
-            if (ent is IObserver o)
-                Observers.Add(o);
-            if (ent is GroundItem item)
-                Items.Add(ent);
+            _entities.Add(ent.Handle);
         }
 
-        public void RemoveEntity([NotNull] IWorldEntity ent)
+        public void RemoveEntity([NotNull] ServerTransform ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
-            WorldEntities.Remove(ent);
-
-            if (ent is Player p)
-            {
-                p.DebugMsg($"Region.RemoveEntity {X} {Y}", ref p.DebugRegion);
-                Players.Remove(p);
-            }
-            if (ent is IObserver o)
-                Observers.Remove(o);
-            if (ent is GroundItem item)
-                Items.Remove(item);
+            _entities.Remove(ent.Parent.Handle);
         }
 
         /// <summary>

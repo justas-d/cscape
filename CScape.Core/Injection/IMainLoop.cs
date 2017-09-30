@@ -6,10 +6,7 @@ namespace CScape.Core.Injection
 {
     public interface IMainLoop
     {
-        [NotNull] IUpdateQueue<IMovingEntity> Movement { get; }
-        [NotNull] IUpdateQueue<Player> Player { get; }
-        [NotNull] IUpdateQueue<Npc> Npc { get; }
-        [NotNull] IUpdateQueue<GroundItem> Item { get; }
+        IGameServer Server { get; }
 
         long ElapsedMilliseconds { get; }
         long DeltaTime { get; }

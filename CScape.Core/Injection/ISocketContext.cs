@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using CScape.Core.Data;
 using CScape.Core.Network;
-using CScape.Core.Network.Sync;
 
 namespace CScape.Core.Injection
 {
@@ -34,11 +32,6 @@ namespace CScape.Core.Injection
         /// Whether this context is disposed or not.
         /// </summary>
         bool IsDisposed { get; }
-
-        /// <summary>
-        /// The context's sync machines.
-        /// </summary>
-        IList<ISyncMachine> SyncMachines { get; }
 
         /// <summary>
         /// Attempts to reinitialize the context around the given socket.
