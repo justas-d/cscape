@@ -52,7 +52,6 @@ namespace CScape.Core.Game.Entities
             JustDied,
             Move, /* Moving by delta (ie walking or running) */
             HealedHealth,
-            Logout,
 
             PoeSwitch,
             Teleport, /* Forced movement over an arbitrary size of land */
@@ -62,10 +61,9 @@ namespace CScape.Core.Game.Entities
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
-            UnhandledPacket,
+            UnhandledPacket, /* Packet is ok but nobody is handling it */
+            UndefinedPacket, /* We have no idea what we just received and the network stream has been corrupted because of it */
             NetworkReinitialize /* The network connection has been reinitialized */
-
-
         };
 
         public EntityMessage([CanBeNull] IEntityFragment sender, EventType ev, [CanBeNull] object data)
@@ -90,6 +88,7 @@ namespace CScape.Core.Game.Entities
         public (int x, int y) AsNewFacingDirection() => AssertCast<(int, int)>(EventType.NewFacingDirection);
         public bool AsDestroyEntity() => AssertTrue(EventType.DestroyEntity);
 
+        public PacketMetadata AsUndefinedPacket() => AssertCast<PacketMetadata>(EventType.UndefinedPacket);
         public PacketMetadata AsUnhandledPacket() => AssertCast<PacketMetadata>(EventType.UnhandledPacket);
         public bool AsNetworkReinitialize() => AssertTrue(EventType.NetworkReinitialize);
 
@@ -97,7 +96,7 @@ namespace CScape.Core.Game.Entities
         public bool AsJustDied() => AssertTrue(EventType.JustDied);
         public MovementMetadata AsMove() => AssertCast<MovementMetadata>(EventType.Move);
         public int AsHealedHealth() => AssertCast<int>(EventType.HealedHealth);
-        public bool AsLogout() => AssertTrue(EventType.Logout);
+
         public PoeSwitchMessageData AsPoeSwitch() => AssertCast<PoeSwitchMessageData>(EventType.PoeSwitch);
         public TeleportMessageData AsTeleport() => AssertCast<TeleportMessageData>(EventType.Teleport);
 

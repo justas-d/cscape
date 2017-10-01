@@ -11,6 +11,7 @@ namespace CScape.Core.Game.Entities.Component
     /// <summary>
     /// Responsible for managing the network part of the entity.
     /// </summary>
+    [RequiresFragment(typeof(PlayerComponent))]
     public sealed class NetworkingComponent : IEntityComponent
     {
         [NotNull]
@@ -60,17 +61,16 @@ namespace CScape.Core.Game.Entities.Component
             Socket.FlushOutputStream();
         }
 
-        private void CheckForHardDisconnect()
+        public void Update(IMainLoop loop)
         {
+            // check if we have had a hard disconnect and if the dead time warrants a reap
             if (Socket.DeadForMs >= ReapTimeMs)
             {
                 _log.Debug(this, $"Reaping {Parent}");
+                Parent.Handle.System.Destroy(Parent.Handle);
                 return;
             }
-        }
 
-        public void Update(IMainLoop loop)
-        {
             // update the socket
             if (Socket.Update(loop.DeltaTime + loop.ElapsedMilliseconds))
             {
@@ -90,23 +90,18 @@ namespace CScape.Core.Game.Entities.Component
                                     new EntityMessage(
                                         this, EntityMessage.EventType.UnhandledPacket, packet));
                             }
-                            else if (player.DebugPackets)
-                            {
-                                player.SendSystemChatMessage($"Unhandled packet opcode: {opcode:000}");
-                            }
                             break;
                         }
 
                         case PacketMetadata.ParseStatus.UndefinedPacket:
                         {
-                            var msg = $"Undefined packet opcode: {packet.Opcode}";
-                            var player = Parent.Components.Get<PlayerComponent>();
-                            _log.Warning(this, msg);
-                            player.ForcedLogout();
+                            Parent.SendMessage(
+                                new EntityMessage(
+                                    this,
+                                    EntityMessage.EventType.UndefinedPacket, 
+                                    packet));
 
-#if DEBUG
-                            Debug.Fail(msg);
-#endif
+                            DropConnection();
                             break;
                         }
 
@@ -115,6 +110,17 @@ namespace CScape.Core.Game.Entities.Component
                     }
 
                 }
+            }
+        }
+
+        public void DropConnection()
+        {
+            if (Socket.IsConnected())
+            {
+                _log.Debug(this, $"Dropping connection for entity {Parent}");
+
+                Socket.FlushOutputStream();
+                Socket.Dispose();
             }
         }
 
@@ -136,7 +142,14 @@ namespace CScape.Core.Game.Entities.Component
 
         public void ReceiveMessage(EntityMessage msg)
         {
-            throw new NotImplementedException();
+            switch (msg.Event)
+            {
+                case EntityMessage.EventType.DestroyEntity:
+                {
+                    DropConnection();
+                    break;
+                }
+            }
         }
     }
 }

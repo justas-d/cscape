@@ -20,6 +20,8 @@ namespace CScape.Core.Game.Entities
         [NotNull]
         public IReadOnlyList<EntityHandle> Players => _players;
 
+        private ILogger Log => EntitySystem.Server.Services.ThrowOrGet<ILogger>();
+
         public PlayerFactory([NotNull] IEntitySystem entitySystem)
         {
             EntitySystem = entitySystem ?? throw new ArgumentNullException(nameof(entitySystem));
@@ -60,15 +62,27 @@ namespace CScape.Core.Game.Entities
             // TODO : apply hitpoints skill to HealthComponent when constructing player
             ent.Components.Add(new HealthComponent(ent, 10, model.Health)); 
             ent.Components.Add(new DbPlayerSyncComponent(ent));
-            ent.Components.Add(new NetPlayerSyncComponent(ent, ctx));
+            ent.Components.Add(new NetworkingComponent(ent, ctx));
             ent.Components.Add(new TileMovementComponent(ent));
-            ent.Components.Add(new PlayerComponent(ent, model.Id, id));
+            ent.Components.Add(new PlayerComponent(
+                ent, 
+                model.Id,
+                id,
+                DestroyCallback));
 
             ent.AssertComponentRequirementsSatisfied();
 
             _players.Add(entHandle);
 
             return entHandle;
+        }
+
+        private void DestroyCallback([NotNull] PlayerComponent component)
+        {
+            if (component == null) throw new ArgumentNullException(nameof(component));
+
+            Log.Normal(this, $"Freeing player slot {component.PlayerId} {component.Username}");
+            _players[component.PlayerId] = null;
         }
     }
 }

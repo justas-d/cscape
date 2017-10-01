@@ -73,6 +73,8 @@ namespace CScape.Core.Game.Entities
             public void Remove<T>()
                 where T : class, TFragment
             {
+                // TODO : assert that fragment requirements are still satisfied after removal of fragment
+
                 var type = typeof(T);
 
                 if (!ContainsFragment<T>())
@@ -96,6 +98,8 @@ namespace CScape.Core.Game.Entities
 
         [NotNull]
         public IGameServer Server => Handle.System.Server;
+
+        public ILogger Log => Handle.System.Server.Services.ThrowOrGet<ILogger>();
 
         public ServerTransform GetTransform() => Components.Get<ServerTransform>();
 
@@ -153,8 +157,7 @@ namespace CScape.Core.Game.Entities
         {
             foreach (var frag in this)
             {
-                if(!ReferenceEquals(frag, message.Sender))
-                    frag.ReceiveMessage(message);
+                frag.ReceiveMessage(message);
             }
         }
 

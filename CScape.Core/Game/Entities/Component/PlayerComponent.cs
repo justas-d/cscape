@@ -7,7 +7,7 @@ namespace CScape.Core.Game.Entities.Component
 {
     public sealed class PlayerComponent : IEntityComponent, IEquatable<PlayerComponent>
     {
-        [NotNull] private readonly IPlayerFactory _factory;
+        [NotNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public int PlayerId { get; }
 
@@ -21,11 +21,11 @@ namespace CScape.Core.Game.Entities.Component
 
         public PlayerComponent(
             [NotNull] Entity parent,
-            [NotNull] IPlayerFactory factory,
             [NotNull] string username,
-            int playerId)
+            int playerId,
+            [NotNull] Action<PlayerComponent> destroyCallback)
         {
-            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
             PlayerId = playerId;
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             Username = username ?? throw new ArgumentNullException(nameof(username));
@@ -42,10 +42,44 @@ namespace CScape.Core.Game.Entities.Component
             {
                 case EntityMessage.EventType.DestroyEntity:
                 {
-                    _factory.
+                    _destroyCallback(this);
                     break;
                 }
+
+                case EntityMessage.EventType.JustDied:
+                {
+                    // TODO : handle death in PlayerComponent
+                    break;
+                }
+
             }
+        }
+
+        /// <summary>
+        /// Logs out (destroys) the entity only if it's safe for the player to log out.
+        /// </summary>
+        /// <returns>True - the player logged out, false otherwise</returns>
+        public bool TryLogout()
+        {
+            // TODO : check if the player can log out. (in combat or something)
+
+            LogoffPacket.Static.Send(Connection.OutStream);
+
+            Parent.Handle.System.Destroy(Parent.Handle);
+            return true;
+        }
+
+        /// <summary>
+        /// Forcefully drops the connection. 
+        /// Keeps the player alive in the world.
+        /// Should only be used when something goes wrong.
+        /// </summary>
+        public void ForcedLogout()
+        {
+            var net = Parent.Components.Get<NetworkingComponent>();
+
+            LogoffPacket.Static.Send(Connection.OutStream);
+            net?.DropConnection();
         }
 
         public bool Equals(PlayerComponent other)
@@ -60,6 +94,11 @@ namespace CScape.Core.Game.Entities.Component
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             return obj is PlayerComponent && Equals((PlayerComponent) obj);
+        }
+
+        public override string ToString()
+        {
+            return $"Player \"{Username}\" PID: {PlayerId})";
         }
 
         public override int GetHashCode()

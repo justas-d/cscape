@@ -404,7 +404,7 @@ namespace CScape.Core.Game.Entity
                 return;
             }
             */
-
+            /*
             if (Connection.IsConnected())
             {
                 // if the logoff flag is set, log the player off.
@@ -420,6 +420,7 @@ namespace CScape.Core.Game.Entity
                     }
                 }
             }
+            */
 
             //loop.Player.Enqueue(this);
         }
@@ -445,11 +446,13 @@ namespace CScape.Core.Game.Entity
         public void ForceTeleport(int x, int y)
             => ForceTeleport(x, y, Transform.Z);
 
+        /*
         protected override void InternalDestroy()
         {
             IdPool.FreePlayer(Pid);
             Server.Players.Unregister(this);
         }
+        */
 
         public override bool CanSee(IWorldEntity obs)
         {
@@ -489,6 +492,7 @@ namespace CScape.Core.Game.Entity
                 Log.Debug(this, msg);
             }
         }
+        /*
 
         /// <summary>
         /// Provides a way to cleanly logout of the world.
@@ -534,20 +538,26 @@ namespace CScape.Core.Game.Entity
             Clean,
             Forced
         }
+        */
+
+        /*
 
         public override string ToString()
         {
             return $"Player \"{Username}\" (UEI: {UniqueEntityId} PID: {Pid})";
         }
+        */
 
         /// <summary>
         /// Indicates whether this player is equal to any other player based on the equality of their unique <see cref="Username"/>
         /// </summary>
+        /*
         public bool Equals(Player other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Username.Equals(other.Username, StringComparison.OrdinalIgnoreCase);
         }
+        */
     }
 }
