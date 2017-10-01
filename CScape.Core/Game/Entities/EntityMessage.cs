@@ -48,11 +48,13 @@ namespace CScape.Core.Game.Entities
         {
             DestroyEntity, /* Sent whenever the entity is being destroyed */
 
+            NewSystemMessage,
+
             TookDamage,
             JustDied,
-            Move, /* Moving by delta (ie walking or running) */
             HealedHealth,
 
+            Move, /* Moving by delta (ie walking or running) */
             PoeSwitch,
             Teleport, /* Forced movement over an arbitrary size of land */
             NewFacingDirection,
@@ -61,8 +63,7 @@ namespace CScape.Core.Game.Entities
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
-            UnhandledPacket, /* Packet is ok but nobody is handling it */
-            UndefinedPacket, /* We have no idea what we just received and the network stream has been corrupted because of it */
+            NewPacket,
             NetworkReinitialize /* The network connection has been reinitialized */
         };
 
@@ -85,11 +86,12 @@ namespace CScape.Core.Game.Entities
             return true;
         }
 
+        public string AsNewSystemMessage() => AssertCast<string>(EventType.NewSystemMessage);
+
         public (int x, int y) AsNewFacingDirection() => AssertCast<(int, int)>(EventType.NewFacingDirection);
         public bool AsDestroyEntity() => AssertTrue(EventType.DestroyEntity);
 
-        public PacketMetadata AsUndefinedPacket() => AssertCast<PacketMetadata>(EventType.UndefinedPacket);
-        public PacketMetadata AsUnhandledPacket() => AssertCast<PacketMetadata>(EventType.UnhandledPacket);
+        public PacketMetadata AsNewPacket() => AssertCast<PacketMetadata>(EventType.NewPacket);
         public bool AsNetworkReinitialize() => AssertTrue(EventType.NetworkReinitialize);
 
         public int AsTookDamage() => AssertCast<int>(EventType.TookDamage);

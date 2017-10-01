@@ -2,7 +2,7 @@ using System;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Game.Entities.Fragment.Component
 {
     /// <summary>
     /// Responsible for syncing the player to the database.

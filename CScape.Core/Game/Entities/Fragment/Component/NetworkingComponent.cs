@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using CScape.Core.Network;
+using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Game.Entities.Fragment.Component
 {
     /// <summary>
-    /// Responsible for managing the network part of the entity.
+    /// Responsible for managing the network part of the entity, sending out
+    /// new packet and network reinitialize events.
     /// </summary>
     [RequiresFragment(typeof(PlayerComponent))]
     public sealed class NetworkingComponent : IEntityComponent
@@ -18,13 +20,12 @@ namespace CScape.Core.Game.Entities.Component
         private IPacketParser PacketParser { get; }
 
         [NotNull]
-        private IPacketDispatch PacketDispatch { get; }
-
-        [NotNull]
         private ISocketContext Socket { get; }
         public Entity Parent { get; }
 
         public int Priority { get; } = -1;
+
+        private readonly List<IPacket> _queuedPackets = new List<IPacket>();
 
         private readonly ILogger _log;
 
@@ -36,12 +37,9 @@ namespace CScape.Core.Game.Entities.Component
 
         public NetworkingComponent(
             [NotNull] Entity parent, 
-            [NotNull] ISocketContext socket,
-            [NotNull] IPacketParser packetParser,
-            [NotNull] IPacketDispatch packetDispatch)
+            [NotNull] ISocketContext socket, [NotNull] IPacketParser packetParser)
         {
             PacketParser = packetParser ?? throw new ArgumentNullException(nameof(packetParser));
-            PacketDispatch = packetDispatch ?? throw new ArgumentNullException(nameof(packetDispatch));
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             _log = parent.Server.Services.ThrowOrGet<ILogger>();
@@ -56,6 +54,9 @@ namespace CScape.Core.Game.Entities.Component
             // write our data
             foreach (var sync in Parent.Network)
                 sync.Update(loop);
+
+            foreach (var packet in _queuedPackets)
+                packet.Send(Socket.OutStream);
 
             // send our data
             Socket.FlushOutputStream();
@@ -76,39 +77,12 @@ namespace CScape.Core.Game.Entities.Component
             {
                 foreach (var packet in PacketParser.Parse(Socket.InStream))
                 {
-                    switch (packet.Status)
-                    {
-                        case PacketMetadata.ParseStatus.Success:
-                        {
-                            if (PacketDispatch.CanHandle(packet.Opcode))
-                            {
-                                PacketDispatch.Handle(Parent, packet);
-                            }
-                            else
-                            {
-                                Parent.SendMessage(
-                                    new EntityMessage(
-                                        this, EntityMessage.EventType.UnhandledPacket, packet));
-                            }
-                            break;
-                        }
+                    if(packet.Status == PacketMetadata.ParseStatus.UndefinedPacket)
+                        DropConnection();
 
-                        case PacketMetadata.ParseStatus.UndefinedPacket:
-                        {
-                            Parent.SendMessage(
-                                new EntityMessage(
-                                    this,
-                                    EntityMessage.EventType.UndefinedPacket, 
-                                    packet));
-
-                            DropConnection();
-                            break;
-                        }
-
-                        default: throw new ArgumentOutOfRangeException();
-
-                    }
-
+                    Parent.SendMessage(
+                        new EntityMessage(
+                            this, EntityMessage.EventType.NewPacket, packet));
                 }
             }
         }
@@ -119,6 +93,8 @@ namespace CScape.Core.Game.Entities.Component
             {
                 _log.Debug(this, $"Dropping connection for entity {Parent}");
 
+                SendPacket(LogoffPacket.Static);
+                
                 Socket.FlushOutputStream();
                 Socket.Dispose();
             }
@@ -138,7 +114,7 @@ namespace CScape.Core.Game.Entities.Component
             return true;
         }
 
-        public void SendPacket(IPacket);
+        public void SendPacket(IPacket packet) => _queuedPackets.Add(packet);
 
         public void ReceiveMessage(EntityMessage msg)
         {

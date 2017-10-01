@@ -33,13 +33,6 @@ namespace CScape.Core.Game.Entities
         }
     }
 
-    public class EntityComponentNotFound : EntityComponentError
-    {
-        public EntityComponentNotFound(Type type) : base(type)
-        {
-        }
-    }
-
     public class EntityPrefabInstantiationFailure : Exception
     {
         public EntityPrefab WhenInstantiating { get; }

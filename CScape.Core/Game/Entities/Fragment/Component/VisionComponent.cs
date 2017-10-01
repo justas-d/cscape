@@ -4,7 +4,7 @@ using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Game.Entities.Fragment.Component
 {
     // TODO : view range adjuster component 
 

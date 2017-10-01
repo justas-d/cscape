@@ -1,7 +1,7 @@
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Game.Entities.Fragment.Component
 {
     public sealed class HealthComponent : IEntityComponent
     {
@@ -9,7 +9,9 @@ namespace CScape.Core.Game.Entities.Component
         private int _maxHealth;
         public Entity Parent { get; }
 
-        public int Health
+        public int Priority { get; }
+
+        private int Health
         {
             get => _health;
             set
@@ -19,7 +21,7 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        public int MaxHealth
+        private int MaxHealth
         {
             get => _maxHealth;
             set
@@ -32,10 +34,8 @@ namespace CScape.Core.Game.Entities.Component
         public HealthComponent(Entity parent, int maxHealth = 1, int health = 1)
         {
             Parent = parent;
-            _maxHealth = maxHealth;
-            Health = health.Clamp(0, maxHealth);
-
-            CheckForDeath();
+            MaxHealth = maxHealth;
+            Health = health;
         }
         
         public void Update(IMainLoop loop) { }
@@ -54,12 +54,20 @@ namespace CScape.Core.Game.Entities.Component
         
         public void ReceiveMessage(EntityMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.TookDamage)
+            switch (msg.Event)
             {
-                var dmg = msg.AsTookDamage();
-                Health -= dmg;
-
-                CheckForDeath();
+                case EntityMessage.EventType.TookDamage:
+                {
+                    var dmg = msg.AsTookDamage();
+                    Health -= dmg;
+                    break;
+                }
+                case EntityMessage.EventType.HealedHealth:
+                {
+                    var hp = msg.AsHealedHealth();
+                    Health += hp;
+                    break;
+                }
             }
         }
     }

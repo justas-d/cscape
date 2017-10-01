@@ -2,25 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using CScape.Core;
-using CScape.Core.Data;
-using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network.Handler;
 using JetBrains.Annotations;
 
 namespace CScape.Basic.Server
 {
-    public class PacketDispatch : IPacketDispatch
+    public class PacketHandlerCatalogue : IPacketHandlerCatalogue
     {
         private readonly IServiceProvider _services;
         private readonly ILogger _log;
         private readonly Dictionary<int, IPacketHandler> _handlers = new Dictionary<int, IPacketHandler>();
 
-        public IEnumerable<IPacketHandler> Handlers => _handlers.Values;
-
-        public PacketDispatch(IServiceProvider services)
+        public PacketHandlerCatalogue(IServiceProvider services)
         {
             _services = services;
             _log = _services.ThrowOrGet<ILogger>();
@@ -28,13 +23,15 @@ namespace CScape.Basic.Server
             RegisterAssembly(typeof(CScape.Core.Constant).GetTypeInfo().Assembly);
         }
 
-        public void Handle(Player player, int opcode, Blob packet)
+        public IPacketHandler GetHandler(byte opcode)
         {
-            player.DebugMsg($"{opcode:000} {_handlers[opcode].GetType().Name}", ref player.DebugPackets);
-            _handlers[opcode].Handle(player, opcode, packet);
-        }
+            if (_handlers.ContainsKey(opcode))
+            {
+                return _handlers[opcode];
+            }
 
-        public bool CanHandle(int opcode) => _handlers.ContainsKey(opcode);
+            return null;
+        }
 
         public void RegisterAssembly([NotNull] Assembly asm)
         {

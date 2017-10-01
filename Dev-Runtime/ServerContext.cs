@@ -66,7 +66,7 @@ namespace CScape.Dev.Runtime
                     Path.Combine(dirBuild, "config.json")));
 
             services.AddSingleton<IItemDefinitionDatabase>(s => new ItemDefinitionDatabase());
-            services.AddSingleton<IPacketDispatch>(s => new PacketDispatch(s));
+            services.AddSingleton<IPacketHandlerCatalogue>(s => new PacketHandlerCatalogue(s));
             services.AddSingleton<IPacketParser>(s => new PacketParser(s));
             services.AddSingleton<IIdPool>(s => new IdPool());
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());

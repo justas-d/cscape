@@ -3,7 +3,7 @@ using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Game.Entities.Fragment.Component
 {
     public sealed class PlayerComponent : IEntityComponent, IEquatable<PlayerComponent>
     {
@@ -63,8 +63,6 @@ namespace CScape.Core.Game.Entities.Component
         {
             // TODO : check if the player can log out. (in combat or something)
 
-            LogoffPacket.Static.Send(Connection.OutStream);
-
             Parent.Handle.System.Destroy(Parent.Handle);
             return true;
         }
@@ -77,8 +75,6 @@ namespace CScape.Core.Game.Entities.Component
         public void ForcedLogout()
         {
             var net = Parent.Components.Get<NetworkingComponent>();
-
-            LogoffPacket.Static.Send(Connection.OutStream);
             net?.DropConnection();
         }
 

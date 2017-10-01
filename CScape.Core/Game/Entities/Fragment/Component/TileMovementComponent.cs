@@ -4,7 +4,7 @@ using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Game.Entities.Fragment.Component
 {
     public sealed class TileMovementComponent : IEntityComponent
     {

@@ -1,5 +1,5 @@
-using CScape.Core.Data;
-using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entities;
+using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Handler
@@ -7,6 +7,6 @@ namespace CScape.Core.Network.Handler
     public interface IPacketHandler
     {
         byte[] Handles { get; }
-        void Handle([NotNull] Player player, int opcode, [NotNull] Blob packet);
+        void Handle([NotNull] Entity entity, [NotNull] PacketMetadata packet);
     }
 }

@@ -478,12 +478,16 @@ namespace CScape.Core.Game.Entity
             return observer.IsEntityInViewRange(this);
         }
 
+        /*
         /// <summary>
         /// Sends a system chat message to this player.
         /// </summary>
         public void SendSystemChatMessage(string msg) 
             => Connection.SendPacket(new SystemChatMessagePacket(msg));
 
+        */
+
+            /*
         public void DebugMsg(string msg, ref bool toggle)
         {
             if (toggle)
@@ -492,6 +496,7 @@ namespace CScape.Core.Game.Entity
                 Log.Debug(this, msg);
             }
         }
+        */
         /*
 
         /// <summary>

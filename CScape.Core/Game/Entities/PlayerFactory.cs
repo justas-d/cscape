@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Fragment.Component;
+using CScape.Core.Game.Entities.Fragment.Network;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
@@ -60,9 +61,17 @@ namespace CScape.Core.Game.Entities
             ent.Components.Add(new ClientPositionComponent(ent));
 
             // TODO : apply hitpoints skill to HealthComponent when constructing player
-            ent.Components.Add(new HealthComponent(ent, 10, model.Health)); 
+            
             ent.Components.Add(new DbPlayerSyncComponent(ent));
+
+            ent.Components.All(new PacketDispatcherComponent(ent,))
             ent.Components.Add(new NetworkingComponent(ent, ctx));
+            ent.Network.Add(new MessageSyncNetFragment(ent));
+
+            
+            ent.Components.Add(new MovementActionComponent(ent));
+            ent.Components.Add(new HealthComponent(ent, 10, model.Health));
+            ent.Components.Add(new MessageLogComponent(ent));
             ent.Components.Add(new TileMovementComponent(ent));
             ent.Components.Add(new PlayerComponent(
                 ent, 

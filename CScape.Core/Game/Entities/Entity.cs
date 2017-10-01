@@ -5,7 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Fragment;
+using CScape.Core.Game.Entities.Fragment.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
@@ -159,6 +160,18 @@ namespace CScape.Core.Game.Entities
             {
                 frag.ReceiveMessage(message);
             }
+        }
+
+        /// <summary>
+        /// Sends a system message to the entity.
+        /// </summary>
+        public void SystemMessage([NotNull] string msg)
+        {
+            if (msg == null) throw new ArgumentNullException(nameof(msg));
+
+            SendMessage(
+                new EntityMessage(
+                    null, EntityMessage.EventType.NewSystemMessage, msg));
         }
 
         /// <summary>
