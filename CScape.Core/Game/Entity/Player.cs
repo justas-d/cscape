@@ -189,7 +189,7 @@ namespace CScape.Core.Game.Entity
         
         //[NotNull] private readonly ClientTransform _transform;
        // [NotNull] public IClientTransform ClientTransform => _transform;
-        private readonly PlayerObservatory _observatory;
+       // private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
 
@@ -219,7 +219,7 @@ namespace CScape.Core.Game.Entity
                    DebugMsg($"View range {_viewRange} => {value}", ref DebugEntitySync);
                    */
 
-                    Observatory.ReevaluateSightOverride = true;
+                  //  Observatory.ReevaluateSightOverride = true;
             /*
                 }
 

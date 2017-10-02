@@ -53,7 +53,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
 
             // write our data
             foreach (var sync in Parent.Network)
-                sync.Update(loop);
+                sync.Update(loop, this);
 
             foreach (var packet in _queuedPackets)
                 packet.Send(Socket.OutStream);

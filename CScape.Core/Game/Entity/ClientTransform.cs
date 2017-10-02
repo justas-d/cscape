@@ -61,6 +61,8 @@ namespace CScape.Core.Game.Entity
 
         private void Recalc()
         {
+            var oldRegion = _clientRegion;
+
             // update locals and client region
             if (Local.x < MinRegionBorder)
             {
@@ -82,6 +84,14 @@ namespace CScape.Core.Game.Entity
             {
                 _local.y -= 32;
                 _clientRegion.y += 4;
+            }
+
+            if (!oldRegion.Equals(_clientRegion))
+            {
+                Parent.SendMessage(
+                    new EntityMessage(
+                        this, EntityMessage.EventType.ClientRegionChanged, 
+                        _clientRegion));                
             }
 
             Base = (_clientRegion.x * 8, _clientRegion.y * 8);

@@ -1,3 +1,4 @@
+/*
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
 
@@ -45,3 +46,4 @@ namespace CScape.Core.Network.Sync
         public void OnReinitialize() => _forceUpdate = true;
     }
 }
+*/
