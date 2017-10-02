@@ -71,6 +71,7 @@ namespace CScape.Core.Game.Entities.Fragment.Network
                 }
                 case EntityMessage.EventType.NetworkReinitialize:
                 {
+
                     SyncRegion(Pos.ClientRegion);
                     break;
                 }
