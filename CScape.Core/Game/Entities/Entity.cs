@@ -138,7 +138,6 @@ namespace CScape.Core.Game.Entities
         public void DoNetworkUpdate([NotNull] IMainLoop loop)
         {
             var net = Components.Get<NetworkingComponent>();
-
             net?.Sync(loop);
         }
 

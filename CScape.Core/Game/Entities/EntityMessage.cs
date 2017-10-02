@@ -64,7 +64,9 @@ namespace CScape.Core.Game.Entities
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
             NewPacket,
-            NetworkReinitialize /* The network connection has been reinitialized */
+            NetworkReinitialize, /* The network connection has been reinitialized */
+
+            ClientRegionChanged
         };
 
         public EntityMessage([CanBeNull] IEntityFragment sender, EventType ev, [CanBeNull] object data)
@@ -88,6 +90,7 @@ namespace CScape.Core.Game.Entities
 
         public string AsNewSystemMessage() => AssertCast<string>(EventType.NewSystemMessage);
 
+        public (int x, int y) AsClientRegionChanged() => AssertCast<(int, int)>(EventType.ClientRegionChanged);
         public (int x, int y) AsNewFacingDirection() => AssertCast<(int, int)>(EventType.NewFacingDirection);
         public bool AsDestroyEntity() => AssertTrue(EventType.DestroyEntity);
 

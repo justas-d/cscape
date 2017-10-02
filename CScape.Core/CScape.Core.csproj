@@ -22,4 +22,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Game\Entities\Fragment\Database\" />
+  </ItemGroup>
+
 </Project>

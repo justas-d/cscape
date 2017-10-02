@@ -7,8 +7,6 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Fragment.Network
 {
-    [RequiresFragment(typeof(PlayerComponent))]
-    [RequiresFragment(typeof(NetworkingComponent))]
     public sealed class MessageSyncNetFragment : IEntityNetFragment
     {
         public Entity Parent { get; }
@@ -39,7 +37,7 @@ namespace CScape.Core.Game.Entities.Fragment.Network
             }
         }
 
-        public void Update(IMainLoop loop)
+        public void Update(IMainLoop loop, NetworkingComponent network)
         {
             
         }

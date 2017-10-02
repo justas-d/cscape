@@ -2,7 +2,7 @@
 
 namespace CScape.Core.Game.Entities.Fragment
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
     public sealed class RequiresFragment : Attribute
     {
         public Type FragmentType { get; }
