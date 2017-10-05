@@ -64,10 +64,10 @@ namespace CScape.Core.Game.Entities
             
             ent.Components.Add(new DbPlayerSyncComponent(ent));
 
-            ent.Components.All(new PacketDispatcherComponent(ent,))
-            ent.Components.Add(new NetworkingComponent(ent, ctx));
+            ent.Components.Add(new PacketDispatcherComponent(ent,));
+            ent.Components.Add(new NetworkingComponent(ent, ctx,));
             ent.Network.Add(new MessageSyncNetFragment(ent));
-
+            ent.Network.Add(new RegionSyncNetFragment(ent));
             
             ent.Components.Add(new MovementActionComponent(ent));
             ent.Components.Add(new HealthComponent(ent, 10, model.Health));

@@ -1,4 +1,5 @@
 using System;
+using CScape.Core.Data;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.World;
@@ -7,11 +8,20 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
+    public interface IInteractingEntity
+    {
+        int Id { get; }
+        void Write([NotNull] OutBlob blob);
+    }
+
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
     public sealed class ServerTransform : IPosition, IEntityComponent
     {
+        [CanBeNull]
+        public IInteractingEntity InteractingEntity { get; private set; }
+
         public const int MaxZ = 4;
 
         public int X { get; private set; } = 0;
@@ -108,6 +118,16 @@ namespace CScape.Core.Game.Entity
                     this, 
                     EntityMessage.EventType.NewFacingDirection, 
                     (x, y)));
+        }
+
+        public void SetInteractingEntity([NotNull] IInteractingEntity ent)
+        {
+            if (ent == null) throw new ArgumentNullException(nameof(ent));
+            InteractingEntity = ent;
+            Parent.SendMessage(
+                new EntityMessage(
+                    this, EntityMessage.EventType.NewInteractingEntity,
+                    ent));
         }
 
         private void UpdateRegion()

@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using CScape.Core.Data;
 using CScape.Core.Network;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Injection
 {
@@ -11,6 +12,7 @@ namespace CScape.Core.Injection
         /// <summary>
         /// The data that will be sent to the client.
         /// </summary>
+        [NotNull]
         OutBlob OutStream { get; }
 
         /// <summary>

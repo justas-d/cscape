@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using CScape.Core.Data;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using CScape.Core.Network;
@@ -28,6 +29,9 @@ namespace CScape.Core.Game.Entities.Fragment.Component
         private readonly List<IPacket> _queuedPackets = new List<IPacket>();
 
         private readonly ILogger _log;
+
+        [NotNull]
+        public OutBlob OutStream => Socket.OutStream;
 
         /// <summary>
         /// In milliseconds, the delay between a socket dying and it's player being removed

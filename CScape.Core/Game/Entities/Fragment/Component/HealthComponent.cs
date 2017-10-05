@@ -59,7 +59,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
                 case EntityMessage.EventType.TookDamage:
                 {
                     var dmg = msg.AsTookDamage();
-                    Health -= dmg;
+                    Health -= dmg.Damage;
                     break;
                 }
                 case EntityMessage.EventType.HealedHealth:

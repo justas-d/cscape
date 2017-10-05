@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
@@ -54,6 +55,8 @@ namespace CScape.Core.Game.Entities
             JustDied,
             HealedHealth,
 
+            NewInteractingEntity,
+
             Move, /* Moving by delta (ie walking or running) */
             PoeSwitch,
             Teleport, /* Forced movement over an arbitrary size of land */
@@ -88,6 +91,8 @@ namespace CScape.Core.Game.Entities
             return true;
         }
 
+        public IInteractingEntity AsNewInteractingEntity() =>
+            AssertCast<IInteractingEntity>(EventType.NewInteractingEntity);
         public string AsNewSystemMessage() => AssertCast<string>(EventType.NewSystemMessage);
 
         public (int x, int y) AsClientRegionChanged() => AssertCast<(int, int)>(EventType.ClientRegionChanged);
@@ -97,7 +102,7 @@ namespace CScape.Core.Game.Entities
         public PacketMetadata AsNewPacket() => AssertCast<PacketMetadata>(EventType.NewPacket);
         public bool AsNetworkReinitialize() => AssertTrue(EventType.NetworkReinitialize);
 
-        public int AsTookDamage() => AssertCast<int>(EventType.TookDamage);
+        public HitData AsTookDamage() => AssertCast<HitData>(EventType.TookDamage);
         public bool AsJustDied() => AssertTrue(EventType.JustDied);
         public MovementMetadata AsMove() => AssertCast<MovementMetadata>(EventType.Move);
         public int AsHealedHealth() => AssertCast<int>(EventType.HealedHealth);
