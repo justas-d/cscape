@@ -177,7 +177,7 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public bool IsAppearanceDirty { get; set; }
 
-        public bool NeedsPositionInit { get; private set; } = true;
+  //      public bool NeedsPositionInit { get; private set; } = true;
         //public short Pid { get; }
         //public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
 
@@ -383,7 +383,7 @@ namespace CScape.Core.Game.Entity
 
             // reset sync vars
   //          TickFlags = 0;
-            NeedsPositionInit = false;
+        //    NeedsPositionInit = false;
             NeedsSightEvaluation = false;
             //Movement.MoveUpdate.Reset();
             
@@ -444,9 +444,9 @@ namespace CScape.Core.Game.Entity
                 return;
 
             Transform.Teleport(x,y,z);
-            NeedsPositionInit = true;
+         //   NeedsPositionInit = true;
 
-            Movement.DisposeDirections();
+         //   Movement.DisposeDirections();
         }
 
         public void ForceTeleport(int x, int y)

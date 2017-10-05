@@ -1,8 +1,8 @@
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
+using System.Diagnostics;
+using CScape.Core.Data;
 
 namespace CScape.Core.Game.Entities.Component
 {
@@ -57,7 +57,7 @@ namespace CScape.Core.Game.Entities.Component
                     DefinitionChange = msg.AsDefinitionChange();
                     break;
                 }
-                case EntityMessage.EventType.NeedsUpdateReiniaialize:
+                case EntityMessage.EventType.Teleport:
                 {
                     Reinitialize = true;
                     break;
@@ -79,12 +79,13 @@ namespace CScape.Core.Game.Entities.Component
     /// <summary>
     /// Responsible for syncing every visible player entity to the network.
     /// </summary>
-    public sealed class PlayerSyncFragment : EntityComponent
+    [RequiresComponent(typeof(NetworkingComponent))]
+    public sealed class PlayerNetworkSyncComponent : EntityComponent
     {
         public override int Priority { get; } = ComponentConstants.PriorityPlayerUpdate;
 
 
-        public PlayerSyncFragment(Entity parent)
+        public PlayerNetworkSyncComponent(Entity parent)
             :base(parent)
         {
             
@@ -100,8 +101,47 @@ namespace CScape.Core.Game.Entities.Component
 
         private void Sync()
         {
+            var net = Parent.Components.Get<NetworkingComponent>();
+            Debug.Assert(net != null);
+
+            var stream = net.OutStream;
+
+            stream.BeginPacket(81);
+
+            stream.BeginBitAccess();
+
             
+
+            stream.EndPacket();
         }
 
     }
+
+    public sealed class UpdateWriter
+    {
+        enum Flags : int
+        {
+            ForcedMovement = 0x400,
+            ParticleEffect = 0x100,
+            Animation = 8,
+            ForcedText = 4,
+            Chat = 0x80,
+            InteractEnt = 0x1,
+            Appearance = 0x10,
+            FacingCoordinate = 0x2,
+            PrimaryHit = 0x20,
+            SecondaryHit = 0x200,
+        }
+
+        public void SetFlag(int flag)
+        {
+            
+        }
+
+        public void Write(OutBlob stream)
+        {
+            
+        }
+    }
+
 }

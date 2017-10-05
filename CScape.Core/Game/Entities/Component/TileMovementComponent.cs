@@ -37,6 +37,8 @@ namespace CScape.Core.Game.Entities.Component
         /// </summary>
         public DirectionDelta LastMovedDirection { get; private set; }
 
+        public override int Priority { get; }
+
         public bool IsRunning { get; set; }
 
         public TileMovementComponent(Entity parent)
@@ -134,8 +136,19 @@ namespace CScape.Core.Game.Entities.Component
 
         public override void ReceiveMessage(EntityMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.FrameUpdate)
-                Update();
+            switch (msg.Event)
+            {
+                case EntityMessage.EventType.FrameUpdate:
+                {
+                    Update();
+                    break;
+                }
+                case EntityMessage.EventType.Teleport:
+                {
+                    CancelMovingAlongPath();
+                    break;
+                }
+            }
         }
     }
 }

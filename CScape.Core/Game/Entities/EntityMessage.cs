@@ -32,8 +32,7 @@ namespace CScape.Core.Game.Entities
             DatabaseUpdate, /* Time to do database sync logic */
 
             NewSystemMessage,
-            NeedsUpdateReiniaialize, /* Sent whenever an entity needs to have their position reinitialized in the update pass */
-
+   
             TookDamage,
             JustDied,
             HealedHealth,
@@ -75,7 +74,6 @@ namespace CScape.Core.Game.Entities
             return true;
         }
 
-        public bool AsNeedsUpdateReiniaialize() => AssertTrue(EventType.NeedsUpdateReiniaialize);
         public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);
 
         public IInteractingEntity AsNewInteractingEntity() =>

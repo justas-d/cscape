@@ -99,6 +99,7 @@ namespace CScape.Core.Game.Entity
                     this,
                     EntityMessage.EventType.Teleport,
                     new TeleportMessageData(oldPos, newPos)));
+
         }
 
         // TODO : use SetFacingDirection

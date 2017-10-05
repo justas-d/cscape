@@ -15,27 +15,32 @@ namespace CScape.Core.Game.Entities.Component
         public MovementActionComponent(Entity parent)
             : base(parent)
         {
-            
+
         }
-    
+
         public override void ReceiveMessage(EntityMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.ArrivedAtDestination)
+            switch (msg.Event)
             {
-                if (CurrentAction != null)
+                case EntityMessage.EventType.ArrivedAtDestination:
                 {
-                    // assign to local to allow MoveAction to reset itself in Execute()
-                    var action = CurrentAction;
-                    CurrentAction = null;
+                    if (CurrentAction != null)
+                    {
+                        // assign to local to allow MoveAction to reset itself in Execute()
+                        var action = CurrentAction;
+                        CurrentAction = null;
 
-                    // run action
-                    action.Execute();
+                        // run action
+                        action.Execute();
+                    }
+                    break;
                 }
-            }
-
-            else if (msg.Event == EntityMessage.EventType.StopMovingAlongMovePath)
-            {
-                CurrentAction = null;
+                case EntityMessage.EventType.Teleport:
+                case EntityMessage.EventType.StopMovingAlongMovePath:
+                {
+                    CurrentAction = null;
+                    break;
+                }
             }
         }
     }
