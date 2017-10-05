@@ -1,16 +1,15 @@
 using System.Diagnostics;
-using CScape.Core.Game.Entities.Fragment.Component;
 using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Fragment.Network
+namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class MessageSyncNetFragment : IEntityNetFragment
+    [RequiresComponent(typeof(NetworkingComponent))]
+    public sealed class MessageNetworkSyncComponent : EntityComponent
     {
-        public Entity Parent { get; }
-        public int Priority { get; }
+        // TODO : MessageNetworkSyncComponent priority
+        public override int Priority { get; }
 
         [NotNull]
         private NetworkingComponent Network
@@ -23,12 +22,13 @@ namespace CScape.Core.Game.Entities.Fragment.Network
             }
         }
 
-        public MessageSyncNetFragment(Entity parent)
+        public MessageNetworkSyncComponent(Entity parent)
+            :base(parent)
         {
-            Parent = parent;
+            
         }
 
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
             if (msg.Event == EntityMessage.EventType.NewSystemMessage)
             {
@@ -37,9 +37,5 @@ namespace CScape.Core.Game.Entities.Fragment.Network
             }
         }
 
-        public void Update(IMainLoop loop, NetworkingComponent network)
-        {
-            
-        }
     }
 }

@@ -26,6 +26,7 @@ namespace CScape.Core.Network.Sync
             IServiceProvider services,
             [NotNull] Player player, [NotNull] PlayerObservatory playerObservatory)
         {
+
             _playerObservatory = playerObservatory ?? throw new ArgumentNullException(nameof(playerObservatory));
 
             LocalPlayer = player ?? throw new ArgumentNullException(nameof(player));

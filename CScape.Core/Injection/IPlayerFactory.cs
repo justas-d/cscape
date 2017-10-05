@@ -9,7 +9,10 @@ namespace CScape.Core.Injection
     public interface IPlayerFactory
     {
         IEntitySystem EntitySystem { get; }
-        IReadOnlyList<EntityHandle> Players { get; }
+        IReadOnlyList<EntityHandle> All { get; }
+
+        [CanBeNull]
+        EntityHandle GetPlayer(int id);
 
         /// <summary>
         /// Creates a player entity.
@@ -18,6 +21,7 @@ namespace CScape.Core.Injection
         /// <param name="ctx">The connection context with which the player will net sync with</param>
         /// <returns>An <see cref="EntityHandle"/> pointing to the new player entity or null if the player list is full.</returns>
         /// <exception cref="EntityComponentNotSatisfied">One of the components of the entity is not satisfied</exception>
+        [CanBeNull]
         EntityHandle Create([NotNull] IPlayerModel model, [NotNull] ISocketContext ctx);
     }
 }

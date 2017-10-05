@@ -2,7 +2,7 @@ using System;
 using System.Net.Sockets;
 using CScape.Core;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Fragment.Component;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network;

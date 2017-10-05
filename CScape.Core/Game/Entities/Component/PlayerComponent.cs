@@ -1,20 +1,16 @@
 ﻿using System;
 using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class PlayerComponent : IEntityComponent, IEquatable<PlayerComponent>
+    public sealed class PlayerComponent : EntityComponent, IEquatable<PlayerComponent>
     {
         [NotNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public int PlayerId { get; }
 
-        [NotNull]
-        public Entity Parent { get; }
-
-        public int Priority { get; } = 1;
+        public override int Priority { get; } = 1;
 
         [NotNull]
         public string Username { get; }
@@ -24,19 +20,14 @@ namespace CScape.Core.Game.Entities.Fragment.Component
             [NotNull] string username,
             int playerId,
             [NotNull] Action<PlayerComponent> destroyCallback)
+            :base(parent)
         {
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
             PlayerId = playerId;
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             Username = username ?? throw new ArgumentNullException(nameof(username));
         }
 
-        public void Update(IMainLoop loop)
-        {
-
-        }
-
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
             switch (msg.Event)
             {

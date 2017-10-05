@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CScape.Core;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network;
@@ -66,58 +67,17 @@ namespace CScape.Basic.Server
 
                 //================================================
 
-                foreach (var ent in Server.Entities.All.Values)
-                    ent.DoTickUpdate(this);
-
-                foreach (var ent in Server.Entities.All.Values)
-                    ent.DoNetworkUpdate(this);
-
-                //================================================
-
-                // movement updates
-                var size = Movement.Count;
-                for (var i = 0; i < size; ++i)
-                    Movement.Dequeue().Movement.Update();
-
-                //================================================
-
-                // write & send
-                // todo : offload write & send to a different thread?
-                foreach (var p in Player)
+                void SendMessage(EntityMessage msg)
                 {
-                    // don't do anything if player isn't connected
-                    if (!p.Connection.IsConnected())
-                        continue;
-
-                    // write our data
-                    foreach (var sync in p.Connection.SyncMachines)
-                        sync.Synchronize(p.Connection.OutStream);
-
-                    // send our data
-                    p.Connection.FlushOutputStream();
+                    foreach (var ent in Server.Entities.All.Values)
+                        ent.SendMessage(msg);
                 }
 
-                //================================================
-
-                void EntityUpdate<T>(IUpdateQueue<T> queue) where T : IWorldEntity
-                {
-                    size = queue.Count;
-                    for (var i = 0; i < size; ++i)
-                        queue.Dequeue().Update(this);
-                }
-
-                //================================================
-
-                EntityUpdate(Player);
-
-                //================================================
-
-                EntityUpdate(Npc);
-
-                //================================================
-
-                EntityUpdate(Item);
-
+                SendMessage(EntityMessage.FrameUpdate);
+                SendMessage(EntityMessage.DatabaseUpdate);
+                SendMessage(EntityMessage.NetworkUpdate);
+                SendMessage(EntityMessage.FrameEnd);
+                
                 //================================================
 
                 // handle tick delays

@@ -2,21 +2,19 @@
 using System.Linq;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
     // TODO : view range adjuster component 
 
     /// <summary>
     /// Tracks what the entity can see
     /// </summary>
-    public sealed class VisionComponent : IEntityComponent
+    public sealed class VisionComponent : EntityComponent
     {
         public const int DefaultViewRange = 15;
 
-        public Entity Parent { get; }
-        public int Priority { get; }
+        public override int Priority { get; }
 
         /// <summary>
         /// "Can see up to n tiles".
@@ -24,12 +22,11 @@ namespace CScape.Core.Game.Entities.Fragment.Component
         public int ViewRange { get; } = DefaultViewRange;
 
         public VisionComponent(Entity parent)
+            :base(parent)
         {
-            Parent = parent;
+            
         }
-
-        public void Update(IMainLoop loop) { }
-
+        
         public bool CanSee(Entity ent)
         {
             // use resolver if the other entity has one
@@ -52,7 +49,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
                 .Where(handle => CanSee(handle.Get()));
         }
 
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg) 
         {
         }
     }

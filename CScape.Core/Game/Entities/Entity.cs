@@ -5,8 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using CScape.Core.Game.Entities.Fragment;
-using CScape.Core.Game.Entities.Fragment.Component;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
@@ -14,21 +13,21 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
 {
-    public sealed class Entity : IEquatable<Entity>, IEnumerable<IEntityFragment>
+    public sealed class Entity : IEquatable<Entity>, IEnumerable<IEntityComponent>
     {
-        public sealed class EntityFragmentContainer<TFragment>
-            : IEnumerable<TFragment>
-            where TFragment : class, IEntityFragment
+        public sealed class EntityFragmentContainer<TComponent>
+            : IEnumerable<TComponent>
+            where TComponent : class, IEntityComponent
         {
             [NotNull]
             public Entity Parent { get; }
 
-            private readonly Dictionary<Type, TFragment> _lookup
-                = new Dictionary<Type, TFragment>();
+            private readonly Dictionary<Type, TComponent> _lookup
+                = new Dictionary<Type, TComponent>();
 
             // TODO : write tests for entity fragment sorting
             [NotNull]
-            public IEnumerable<TFragment> All { get; private set; } = Enumerable.Empty<TFragment>();
+            public IEnumerable<TComponent> All { get; private set; } = Enumerable.Empty<TComponent>();
 
             public EntityFragmentContainer([NotNull] Entity parent)
             {
@@ -41,7 +40,7 @@ namespace CScape.Core.Game.Entities
             }
 
             public void Add<T>([NotNull] T fragment)
-                where T : class, TFragment
+                where T : class, TComponent
             {
                 if (fragment == null) throw new ArgumentNullException(nameof(fragment));
 
@@ -56,12 +55,12 @@ namespace CScape.Core.Game.Entities
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool ContainsFragment<T>()
-                where T : class, TFragment
+                where T : class, TComponent
                 => _lookup.ContainsKey(typeof(T));
 
             [CanBeNull]
             public T Get<T>()
-                where T : class, TFragment
+                where T : class, TComponent
             {
                 var type = typeof(T);
 
@@ -72,7 +71,7 @@ namespace CScape.Core.Game.Entities
             }
 
             public void Remove<T>()
-                where T : class, TFragment
+                where T : class, TComponent
             {
                 // TODO : assert that fragment requirements are still satisfied after removal of fragment
 
@@ -86,7 +85,7 @@ namespace CScape.Core.Game.Entities
                 Debug.Assert(statusLookup);
             }
 
-            public IEnumerator<TFragment> GetEnumerator() => All.GetEnumerator();
+            public IEnumerator<TComponent> GetEnumerator() => All.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         }
@@ -105,7 +104,6 @@ namespace CScape.Core.Game.Entities
         public ServerTransform GetTransform() => Components.Get<ServerTransform>();
 
         public EntityFragmentContainer<IEntityComponent> Components { get; }
-        public EntityFragmentContainer<IEntityNetFragment> Network { get; }
 
         public Entity([NotNull] string name, [NotNull] EntityHandle handle)
         {
@@ -113,7 +111,6 @@ namespace CScape.Core.Game.Entities
             Handle = handle ?? throw new ArgumentNullException(nameof(handle));
 
             Components = new EntityFragmentContainer<IEntityComponent>(this);
-            Network = new EntityFragmentContainer<IEntityNetFragment>(this);
         }
 
         public bool Equals(Entity other)
@@ -123,22 +120,9 @@ namespace CScape.Core.Game.Entities
             return Handle.Equals(other.Handle);
         }
 
-        public IEnumerator<IEntityFragment> GetEnumerator()
+        public IEnumerator<IEntityComponent> GetEnumerator()
         {
-            foreach (var c in Components) yield return c;
-            foreach (var c in Network) yield return c;
-        }
-
-        public void DoTickUpdate([NotNull] IMainLoop loop)
-        {
-            foreach(var component in Components)
-                component.Update(loop);
-        }
-
-        public void DoNetworkUpdate([NotNull] IMainLoop loop)
-        {
-            var net = Components.Get<NetworkingComponent>();
-            net?.Sync(loop);
+            return Components.GetEnumerator();
         }
 
         public override bool Equals(object obj)

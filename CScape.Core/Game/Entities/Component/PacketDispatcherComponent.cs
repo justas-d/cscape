@@ -4,22 +4,21 @@ using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class PacketDispatcherComponent: IEntityComponent
+    public sealed class PacketDispatcherComponent: EntityComponent
     {
         private readonly IPacketHandlerCatalogue _handlers;
 
-        public Entity Parent { get; }
-        public int Priority { get; }
+        public override int Priority { get; }
 
         public bool ShouldNotifyAboutUnhandledPackets { get; set; } = true;
         public bool ShouldNotifyAboutPacketsBeingHandled { get; set; } = true;
 
         public PacketDispatcherComponent(Entity parent, [NotNull] IPacketHandlerCatalogue handlers)
+            :base(parent)
         {
             _handlers = handlers ?? throw new ArgumentNullException(nameof(handlers));
-            Parent = parent;
         }
 
         private void HandlePacket(PacketMetadata packet)
@@ -57,7 +56,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
             }
         }
 
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
             switch (msg.Event)
             {
@@ -68,11 +67,6 @@ namespace CScape.Core.Game.Entities.Fragment.Component
                 }
             }
            
-        }
-
-        public void Update(IMainLoop loop)
-        {
-            
         }
     }
 }

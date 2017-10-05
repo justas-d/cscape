@@ -8,27 +8,24 @@ using CScape.Core.Network;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
     /// <summary>
     /// Responsible for managing the network part of the entity, sending out
     /// new packet and network reinitialize events.
     /// </summary>
     [RequiresFragment(typeof(PlayerComponent))]
-    public sealed class NetworkingComponent : IEntityComponent
+    public sealed class NetworkingComponent : EntityComponent
     {
         [NotNull]
         private IPacketParser PacketParser { get; }
 
         [NotNull]
         private ISocketContext Socket { get; }
-        public Entity Parent { get; }
 
-        public int Priority { get; } = -1;
+        public override int Priority { get; } = -1;
 
         private readonly List<IPacket> _queuedPackets = new List<IPacket>();
-
-        private readonly ILogger _log;
 
         [NotNull]
         public OutBlob OutStream => Socket.OutStream;
@@ -42,14 +39,13 @@ namespace CScape.Core.Game.Entities.Fragment.Component
         public NetworkingComponent(
             [NotNull] Entity parent, 
             [NotNull] ISocketContext socket, [NotNull] IPacketParser packetParser)
+            : base(parent)
         {
             PacketParser = packetParser ?? throw new ArgumentNullException(nameof(packetParser));
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            _log = parent.Server.Services.ThrowOrGet<ILogger>();
         }
 
-        public void Sync([NotNull] IMainLoop loop)
+        public void NetworkUpdate()
         {
             // don't do anything if there's no connection
             if (!Socket.IsConnected())
@@ -57,7 +53,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
 
             // write our data
             foreach (var sync in Parent.Network)
-                sync.Update(loop, this);
+                sync.Update(Loop, this);
 
             foreach (var packet in _queuedPackets)
                 packet.Send(Socket.OutStream);
@@ -66,18 +62,18 @@ namespace CScape.Core.Game.Entities.Fragment.Component
             Socket.FlushOutputStream();
         }
 
-        public void Update(IMainLoop loop)
+        private void FrameUpdate()
         {
             // check if we have had a hard disconnect and if the dead time warrants a reap
             if (Socket.DeadForMs >= ReapTimeMs)
             {
-                _log.Debug(this, $"Reaping {Parent}");
+                Log.Debug(this, $"Reaping {Parent}");
                 Parent.Handle.System.Destroy(Parent.Handle);
                 return;
             }
 
             // update the socket
-            if (Socket.Update(loop.DeltaTime + loop.ElapsedMilliseconds))
+            if (Socket.Update(Loop.DeltaTime + Loop.ElapsedMilliseconds))
             {
                 foreach (var packet in PacketParser.Parse(Socket.InStream))
                 {
@@ -95,7 +91,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
         {
             if (Socket.IsConnected())
             {
-                _log.Debug(this, $"Dropping connection for entity {Parent}");
+                Log.Debug(this, $"Dropping connection for entity {Parent}");
 
                 SendPacket(LogoffPacket.Static);
                 
@@ -120,13 +116,23 @@ namespace CScape.Core.Game.Entities.Fragment.Component
 
         public void SendPacket(IPacket packet) => _queuedPackets.Add(packet);
 
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
             switch (msg.Event)
             {
                 case EntityMessage.EventType.DestroyEntity:
                 {
                     DropConnection();
+                    break;
+                }
+                case EntityMessage.EventType.FrameUpdate:
+                {
+                    FrameUpdate();
+                    break;
+                }
+                case EntityMessage.EventType.NetworkUpdate:
+                {
+                    NetworkUpdate();
                     break;
                 }
             }

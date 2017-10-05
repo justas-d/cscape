@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
@@ -42,12 +43,22 @@ namespace CScape.Core.Game.Entities
         private readonly object _data;
 
         [CanBeNull]
-        public IEntityFragment Sender { get; }
+        public IEntityComponent Sender { get; }
         public EventType Event { get; }
+
+        public static EntityMessage FrameEnd { get; } = new EntityMessage(null, EventType.FrameEnd, null);
+        public static EntityMessage FrameUpdate { get; } = new EntityMessage(null, EventType.FrameUpdate, null);
+        public static EntityMessage NetworkUpdate { get; } = new EntityMessage(null, EventType.NetworkUpdate, null);
+        public static EntityMessage DatabaseUpdate { get; } = new EntityMessage(null, EventType.DatabaseUpdate, null);
 
         public enum EventType
         {
+            // system messages
             DestroyEntity, /* Sent whenever the entity is being destroyed */
+            FrameEnd, /* Frame has ended, used for resets */
+            FrameUpdate, /* Time to do update logic */
+            NetworkUpdate, /* Time to to network sync logic */
+            DatabaseUpdate, /* Time to do database sync logic */
 
             NewSystemMessage,
 
@@ -56,6 +67,7 @@ namespace CScape.Core.Game.Entities
             HealedHealth,
 
             NewInteractingEntity,
+            DefinitionChange,
 
             Move, /* Moving by delta (ie walking or running) */
             PoeSwitch,
@@ -72,7 +84,7 @@ namespace CScape.Core.Game.Entities
             ClientRegionChanged
         };
 
-        public EntityMessage([CanBeNull] IEntityFragment sender, EventType ev, [CanBeNull] object data)
+        public EntityMessage([CanBeNull] IEntityComponent sender, EventType ev, [CanBeNull] object data)
         {
             _data = data;
             Sender = sender;
@@ -90,6 +102,8 @@ namespace CScape.Core.Game.Entities
             Debug.Assert(Event == expected);
             return true;
         }
+
+        public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);
 
         public IInteractingEntity AsNewInteractingEntity() =>
             AssertCast<IInteractingEntity>(EventType.NewInteractingEntity);

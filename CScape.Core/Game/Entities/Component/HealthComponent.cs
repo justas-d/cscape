@@ -1,15 +1,13 @@
 using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Injection;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class HealthComponent : IEntityComponent
+    public sealed class HealthComponent : EntityComponent
     {
         private int _health;
         private int _maxHealth;
-        public Entity Parent { get; }
 
-        public int Priority { get; }
+        public override int Priority { get; }
 
         private int Health
         {
@@ -32,14 +30,12 @@ namespace CScape.Core.Game.Entities.Fragment.Component
         }
 
         public HealthComponent(Entity parent, int maxHealth = 1, int health = 1)
+            :base(parent)
         {
-            Parent = parent;
             MaxHealth = maxHealth;
             Health = health;
         }
         
-        public void Update(IMainLoop loop) { }
-
         private void CheckForDeath()
         {
             if (0 >= Health)
@@ -52,7 +48,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
             }
         }
         
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
             switch (msg.Event)
             {

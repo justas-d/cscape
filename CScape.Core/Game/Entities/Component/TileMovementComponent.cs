@@ -4,9 +4,9 @@ using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class TileMovementComponent : IEntityComponent
+    public sealed class TileMovementComponent : EntityComponent
     {
         private bool _isDirectionProviderNew;
         [CanBeNull] private IDirectionsProvider _directions;
@@ -32,8 +32,6 @@ namespace CScape.Core.Game.Entities.Fragment.Component
             }
         }
 
-        public Entity Parent { get; }
-
         /// <summary>
         /// The direction deltas in which this entity last moved successfully.
         /// </summary>
@@ -42,8 +40,8 @@ namespace CScape.Core.Game.Entities.Fragment.Component
         public bool IsRunning { get; set; }
 
         public TileMovementComponent(Entity parent)
+            :base(parent)
         {
-            Parent = parent;
         }
 
         private void CancelMovingAlongPath()
@@ -103,7 +101,7 @@ namespace CScape.Core.Game.Entities.Fragment.Component
                     new MovementMetadata(d1, d2)));
         }
 
-        public void Update(IMainLoop loop)
+        private void Update()
         {
             if (_isDirectionProviderNew)
             {
@@ -134,9 +132,10 @@ namespace CScape.Core.Game.Entities.Fragment.Component
             }            
         }
 
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
-            
+            if (msg.Event == EntityMessage.EventType.FrameUpdate)
+                Update();
         }
     }
 }

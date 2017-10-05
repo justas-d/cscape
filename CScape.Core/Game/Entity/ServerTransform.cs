@@ -1,5 +1,4 @@
 using System;
-using CScape.Core.Data;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.World;
@@ -8,16 +7,10 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
-    public interface IInteractingEntity
-    {
-        int Id { get; }
-        void Write([NotNull] OutBlob blob);
-    }
-
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
-    public sealed class ServerTransform : IPosition, IEntityComponent
+    public sealed class ServerTransform : EntityComponent, IPosition
     {
         [CanBeNull]
         public IInteractingEntity InteractingEntity { get; private set; }
@@ -48,15 +41,14 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         [NotNull] public PlaneOfExistence PoE { get; private set; }
 
-        public Entities.Entity Parent { get; }
-        public int Priority { get; }
+        public override int Priority { get; }
 
         // TODO : NeedsSightEvaluation is probably not needed
         public bool NeedsSightEvaluation { get; set; } = true;
 
         public ServerTransform([NotNull] Entities.Entity parent)
+            :base(parent)
         {
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             SwitchPoE(parent.Server.Overworld);
         }
 
@@ -155,12 +147,7 @@ namespace CScape.Core.Game.Entity
                 .Debug(this, "Synced client locals to globals.");
         }
 
-        public void Update(IMainLoop loop)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(EntityMessage msg)
         {
             if (msg.Event == EntityMessage.EventType.Move)
             {

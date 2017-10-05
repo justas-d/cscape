@@ -1,25 +1,24 @@
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Fragment.Component
+namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class MovementActionComponent : IEntityComponent
+    public sealed class MovementActionComponent : EntityComponent
     {
-        public Entity Parent { get; }
+        // TODO : MovementActionComponent  priority
+        public override int Priority { get; }
 
         [CanBeNull]
         public IMovementDoneAction CurrentAction { get; set; }
 
         public MovementActionComponent(Entity parent)
+            : base(parent)
         {
-            Parent = parent;
+            
         }
-        
-        public void Update(IMainLoop loop) { }
-        
-        public void ReceiveMessage(EntityMessage msg)
+    
+        public override void ReceiveMessage(EntityMessage msg)
         {
             if (msg.Event == EntityMessage.EventType.ArrivedAtDestination)
             {

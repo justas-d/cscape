@@ -23,6 +23,8 @@ namespace CScape.Basic.Server
         private ILogger Log { get; }
         private IMainLoop Loop { get; }
 
+        private IPlayerFactory Players { get; }
+
         public GameServer([NotNull] IServiceCollection services)
         {
             // register internal dependencies
@@ -36,6 +38,7 @@ namespace CScape.Basic.Server
             Loop = Services.ThrowOrGet<IMainLoop>();
             Log = Services.ThrowOrGet<ILogger>();;
             Entities = new EntitySystem(this);
+            Players = Services.ThrowOrGet<IPlayerFactory>();
         }
 
         public ServerStateFlags GetState()
@@ -66,11 +69,12 @@ namespace CScape.Basic.Server
             {
                 IsDisposed = true;
 
+                // destroy entities
+                foreach(var ent in Entities.All.Keys)
+                    Entities.Destroy(ent);
+                    
                 // block as we're saving.
                 Services.GetService<IPlayerDatabase>().Save().GetAwaiter().GetResult();
-
-                foreach (var p in Players.All.Values)
-                    p.Connection.Dispose();
 
                 (Services as IDisposable)?.Dispose();
             }

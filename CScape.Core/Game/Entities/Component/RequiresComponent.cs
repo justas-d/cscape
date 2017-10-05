@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace CScape.Core.Game.Entities.Fragment
+namespace CScape.Core.Game.Entities.Component
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
-    public sealed class RequiresFragment : Attribute
+    public sealed class RequiresComponent : Attribute
     {
         public Type FragmentType { get; }
 
-        public RequiresFragment(Type fragType)
+        public RequiresComponent(Type fragType)
         {
             FragmentType = fragType;
         }
