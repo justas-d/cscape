@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -34,6 +33,7 @@ namespace CScape.Basic.Model
         public int SocketReceiveTimeout { get; }
         public int TickRate { get; }
         public int AutoSaveIntervalMs { get; }
+        public int EntityGcInternalMs { get; }
         public ChatMessage.TextEffect DefaultChatEffect { get; }
         public ChatMessage.TextColor DefaultChatColor { get; }
         public string PrivateLoginKeyDir { get; }
@@ -48,7 +48,9 @@ namespace CScape.Basic.Model
         private JsonGameServerConfig([NotNull] string version, int revision,
             [NotNull] string privateLoginKeyDir, int maxPlayers,
             [NotNull] EndPoint listenEndPoint, int backlog, string greeting, int tickRate, 
-            int socketReceiveTimeout, int socketSendTimeout, int autoSaveIntervalMs, ChatMessage.TextEffect defaultChatEffect, ChatMessage.TextColor defaultChatColor)
+            int socketReceiveTimeout, int socketSendTimeout, int autoSaveIntervalMs, 
+            ChatMessage.TextEffect defaultChatEffect, ChatMessage.TextColor defaultChatColor, 
+            int entityGcInternalMs)
         {
             if (backlog <= 0) throw new ArgumentOutOfRangeException(nameof(backlog));
             if (maxPlayers <= 0) throw new ArgumentOutOfRangeException(nameof(maxPlayers));
@@ -57,6 +59,7 @@ namespace CScape.Basic.Model
             if (socketSendTimeout < 0) throw new ArgumentOutOfRangeException(nameof(socketSendTimeout));
             if (socketReceiveTimeout < 0) throw new ArgumentOutOfRangeException(nameof(socketReceiveTimeout));
             if (autoSaveIntervalMs <= 0) throw new ArgumentOutOfRangeException(nameof(autoSaveIntervalMs));
+            if (entityGcInternalMs <= 0) throw new ArgumentOutOfRangeException(nameof(entityGcInternalMs));
             Version = version ?? throw new ArgumentNullException(nameof(version));
             Revision = revision;
             PrivateLoginKeyDir = privateLoginKeyDir ?? throw new ArgumentNullException(nameof(privateLoginKeyDir));
@@ -70,6 +73,7 @@ namespace CScape.Basic.Model
             AutoSaveIntervalMs = autoSaveIntervalMs;
             DefaultChatEffect = defaultChatEffect;
             DefaultChatColor = defaultChatColor;
+            EntityGcInternalMs = entityGcInternalMs;
         }
     }
 }

@@ -39,24 +39,43 @@ namespace CScape.Basic.Server
 
             TickRate = _config.TickRate;
         }
-        
+
         public async Task Run()
         {
             var timeSinceLastSave = 0L;
+            var timeSinceGc = 0L;
+
             _log.Normal(this, "Starting main loop...");
 
             // todo : exception handle all over the main loop
             while (IsRunning)
             {
+                _tickWatch.Restart();
+
+                void SendMessage(EntityMessage msg)
+                {
+                    foreach (var ent in Server.Entities.All.Values)
+                        ent.SendMessage(msg);
+                }
+
                 /* Try autosave */
                 if ((timeSinceLastSave += DeltaTime) >= _config.AutoSaveIntervalMs)
                 {
-                    _log.Debug(this, "Autosaving...");
+                    _log.Normal(this, "Autosaving...");
                     await _db.Save();
                     timeSinceLastSave = 0;
                 }
 
-                _tickWatch.Restart();
+                /* Entity gc */
+                if ((timeSinceGc += DeltaTime) >= _config.AutoSaveIntervalMs)
+                {
+                    _log.Normal(this, "Sending Entity GC message");
+                    SendMessage(EntityMessage.GC);
+                    _log.Normal(this, "Performing world GC");
+                    Server.Overworld.GC();
+                    // TODO : PoE factory, iterate over all PoE's when it's time for entity GC
+                    timeSinceGc = 0;
+                }
 
                 //================================================
 
@@ -67,17 +86,12 @@ namespace CScape.Basic.Server
 
                 //================================================
 
-                void SendMessage(EntityMessage msg)
-                {
-                    foreach (var ent in Server.Entities.All.Values)
-                        ent.SendMessage(msg);
-                }
 
                 SendMessage(EntityMessage.FrameUpdate);
                 SendMessage(EntityMessage.DatabaseUpdate);
                 SendMessage(EntityMessage.NetworkUpdate);
                 SendMessage(EntityMessage.FrameEnd);
-                
+
                 //================================================
 
                 // handle tick delays
@@ -101,7 +115,6 @@ namespace CScape.Basic.Server
             }
             IsRunning = false;
         }
-
 
         public void Dispose()
         {

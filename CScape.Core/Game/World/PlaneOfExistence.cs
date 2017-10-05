@@ -43,6 +43,13 @@ namespace CScape.Core.Game.World
             return GetRegion(key);
         }
 
+        public void GC()
+        {
+            _entities.RemoveWhere(e => e.IsDead());
+            foreach(var region in Regions.Values)
+                region.GC();
+        }
+
         [NotNull]
         public virtual Region GetRegion((int rx, int ry) regionCoords)
         {

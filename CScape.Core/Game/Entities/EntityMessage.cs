@@ -21,6 +21,7 @@ namespace CScape.Core.Game.Entities
         public static EntityMessage FrameUpdate { get; } = new EntityMessage(null, EventType.FrameUpdate, null);
         public static EntityMessage NetworkUpdate { get; } = new EntityMessage(null, EventType.NetworkUpdate, null);
         public static EntityMessage DatabaseUpdate { get; } = new EntityMessage(null, EventType.DatabaseUpdate, null);
+        public static EntityMessage GC { get; } = new EntityMessage(null, EventType.GC, null);
 
         public enum EventType
         {
@@ -30,6 +31,7 @@ namespace CScape.Core.Game.Entities
             FrameUpdate, /* Time to do update logic */
             NetworkUpdate, /* Time to to network sync logic */
             DatabaseUpdate, /* Time to do database sync logic */
+            GC, /* Collect entity garbage */
 
             // visual messages
             EntityEnteredViewRange,
@@ -51,7 +53,7 @@ namespace CScape.Core.Game.Entities
             NewFacingDirection,
 
             // pathing messages
-            BeginMovePath, 
+            BeginMovePath,
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
@@ -81,6 +83,8 @@ namespace CScape.Core.Game.Entities
             Debug.Assert(Event == expected);
             return true;
         }
+
+        public bool AsGC() => AssertTrue(EventType.GC);
 
         public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);
 

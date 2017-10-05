@@ -111,11 +111,25 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        public override void ReceiveMessage(EntityMessage msg) 
+        private void GC()
         {
-            if (msg.Event == EntityMessage.EventType.FrameUpdate)
+            _seeableEntities.RemoveWhere(e => e.IsDead());
+        }
+
+        public override void ReceiveMessage(EntityMessage msg)
+        {
+            switch (msg.Event)
             {
-                Update();
+                case EntityMessage.EventType.FrameUpdate:
+                {
+                    Update();
+                    break;
+                }
+                case EntityMessage.EventType.GC:
+                {
+                    GC();
+                    break;
+                }
             }
         }
     }

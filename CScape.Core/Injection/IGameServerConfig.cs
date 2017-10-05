@@ -20,6 +20,7 @@ namespace CScape.Core.Injection
 
         int TickRate { get; }
         int AutoSaveIntervalMs { get; }
+        int EntityGcInternalMs { get; }
 
         ChatMessage.TextEffect DefaultChatEffect { get; }
         ChatMessage.TextColor DefaultChatColor { get; }

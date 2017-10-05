@@ -29,6 +29,11 @@ namespace CScape.Core.Game.World
             Y = y;
         }
 
+        public void GC()
+        {
+            _entities.RemoveWhere(e => e.IsDead());
+        }
+
         public void AddEntity([NotNull] ServerTransform owningTransform)
         {
             if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
