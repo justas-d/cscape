@@ -80,12 +80,12 @@ namespace CScape.Core.Game.Entities.Component
     /// Responsible for syncing every visible player entity to the network.
     /// </summary>
     [RequiresComponent(typeof(NetworkingComponent))]
-    public sealed class PlayerNetworkSyncComponent : EntityComponent
+    public sealed class EntityNetworkSyncComponent : EntityComponent
     {
         public override int Priority { get; } = ComponentConstants.PriorityPlayerUpdate;
 
 
-        public PlayerNetworkSyncComponent(Entity parent)
+        public EntityNetworkSyncComponent(Entity parent)
             :base(parent)
         {
             

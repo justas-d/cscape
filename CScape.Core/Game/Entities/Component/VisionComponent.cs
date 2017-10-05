@@ -17,6 +17,9 @@ namespace CScape.Core.Game.Entities.Component
 
         public override int Priority { get; }
 
+        private HashSet<EntityHandle> _seeableEntities { get; }
+            = new HashSet<EntityHandle>();
+
         /// <summary>
         /// "Can see up to n tiles".
         /// </summary>
@@ -64,6 +67,47 @@ namespace CScape.Core.Game.Entities.Component
             {
                 if(!CanSee(t.InteractingEntity.Entity))
                     t.SetInteractingEntity(NullInteractingEntity.Instance);
+            }
+
+            // handle visual messages
+
+            // remove entities which we cannot see anymore
+            // HACK : send message inside of predicate might not be a good design choice.
+            _seeableEntities.RemoveWhere(e =>
+            {
+                void SendDeleteMsg(EntityHandle ent)
+                {
+                    Parent.SendMessage(
+                        new EntityMessage(
+                            this, EntityMessage.EventType.EntityLeftViewRange, ent));
+                }
+
+                if (e.IsDead())
+                {
+                    SendDeleteMsg(e);
+                    return true;
+                }
+
+                if (!CanSee(e.Get()))
+                {
+                    SendDeleteMsg(e);
+                    return true;
+                }
+
+                return false;
+            });
+
+            
+            // add new entities
+            foreach (var handle in GetVisibleEntities())
+            {
+                if (!_seeableEntities.Contains(handle))
+                {
+                    _seeableEntities.Add(handle);
+                    Parent.SendMessage(
+                        new EntityMessage(
+                            this, EntityMessage.EventType.EntityEnteredViewRange, handle));
+                }
             }
         }
 

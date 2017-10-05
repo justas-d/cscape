@@ -31,28 +31,36 @@ namespace CScape.Core.Game.Entities
             NetworkUpdate, /* Time to to network sync logic */
             DatabaseUpdate, /* Time to do database sync logic */
 
-            NewSystemMessage,
-   
+            // visual messages
+            EntityEnteredViewRange,
+            EntityLeftViewRange,
+
+            // health
             TookDamage,
             JustDied,
             HealedHealth,
 
-            NewInteractingEntity,
+            // npc
             DefinitionChange,
 
+            // transform messages
+            NewInteractingEntity,
             Move, /* Moving by delta (ie walking or running) */
             PoeSwitch,
             Teleport, /* Forced movement over an arbitrary size of land */
             NewFacingDirection,
 
+            // pathing messages
             BeginMovePath, 
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
+            // network messages
             NewPacket,
             NetworkReinitialize, /* The network connection has been reinitialized */
 
-            ClientRegionChanged
+            ClientRegionChanged,
+            NewSystemMessage,
         };
 
         public EntityMessage([CanBeNull] IEntityComponent sender, EventType ev, [CanBeNull] object data)
@@ -75,6 +83,9 @@ namespace CScape.Core.Game.Entities
         }
 
         public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);
+
+        public EntityHandle AsEntityEnteredViewRange() => AssertCast<EntityHandle>(EventType.EntityEnteredViewRange);
+        public EntityHandle AsEntityLeftViewRange() => AssertCast<EntityHandle>(EventType.EntityLeftViewRange);
 
         public IInteractingEntity AsNewInteractingEntity() =>
             AssertCast<IInteractingEntity>(EventType.NewInteractingEntity);
