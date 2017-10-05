@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 

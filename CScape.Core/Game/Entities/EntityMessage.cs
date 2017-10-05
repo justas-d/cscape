@@ -1,43 +1,14 @@
-using System;
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
 {
-    public sealed class PoeSwitchMessageData
-    {
-        [CanBeNull]
-        public PlaneOfExistence OldPoe { get; }
-
-        [NotNull]
-        public PlaneOfExistence NewPoe { get; }
-
-        public PoeSwitchMessageData([CanBeNull] PlaneOfExistence oldPoe, [NotNull] PlaneOfExistence newPoe)
-        {
-            OldPoe = oldPoe;
-            NewPoe = newPoe ?? throw new ArgumentNullException(nameof(newPoe));
-        }
-    }
-
-    public sealed class TeleportMessageData
-    {
-        public (int x, int y, int z) OldPos { get; }
-        public (int x, int y, int z) NewPos { get; }
-
-        public TeleportMessageData(
-            (int x, int y, int z) oldPos,
-            (int x, int y, int z) newPos)
-        {
-            OldPos = oldPos;
-            NewPos = newPos;
-        }
-    }
-
     public sealed class EntityMessage
     {
         private readonly object _data;
@@ -61,6 +32,7 @@ namespace CScape.Core.Game.Entities
             DatabaseUpdate, /* Time to do database sync logic */
 
             NewSystemMessage,
+            NeedsUpdateReiniaialize, /* Sent whenever an entity needs to have their position reinitialized in the update pass */
 
             TookDamage,
             JustDied,
@@ -103,6 +75,7 @@ namespace CScape.Core.Game.Entities
             return true;
         }
 
+        public bool AsNeedsUpdateReiniaialize() => AssertTrue(EventType.NeedsUpdateReiniaialize);
         public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);
 
         public IInteractingEntity AsNewInteractingEntity() =>

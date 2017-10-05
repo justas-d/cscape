@@ -1,3 +1,5 @@
+using CScape.Core.Game.Entities.Message;
+
 namespace CScape.Core.Game.Entity
 {
     public interface IDamageable : IWorldEntity

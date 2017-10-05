@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
 

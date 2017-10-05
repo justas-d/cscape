@@ -1,6 +1,8 @@
 using System;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
@@ -114,8 +116,8 @@ namespace CScape.Core.Game.Entity
 
         public void SetInteractingEntity([NotNull] IInteractingEntity ent)
         {
-            if (ent == null) throw new ArgumentNullException(nameof(ent));
-            InteractingEntity = ent;
+            InteractingEntity = ent ?? throw new ArgumentNullException(nameof(ent));
+
             Parent.SendMessage(
                 new EntityMessage(
                     this, EntityMessage.EventType.NewInteractingEntity,

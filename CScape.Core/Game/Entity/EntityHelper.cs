@@ -1,9 +1,11 @@
 ﻿using CScape.Core.Data;
+using CScape.Core.Game.Entities.Message;
 
 namespace CScape.Core.Game.Entity
 {
     public static class EntityHelper
     {
+        /*
         public const int InteractingEntityPlayerFlag = 0x8000;
 
         public static void TryResetInteractingEntity(IMovingEntity ent)
@@ -12,6 +14,7 @@ namespace CScape.Core.Game.Entity
             if (ent.InteractingEntity != null && !ent.CanSee(ent.InteractingEntity))
                 ent.InteractingEntity = null;
         }
+        */
 
         public static void WriteHitData(Blob stream, IDamageable ent, bool secondary)
         {

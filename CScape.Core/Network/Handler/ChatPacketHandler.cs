@@ -1,5 +1,6 @@
 using System;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 
 namespace CScape.Core.Network.Handler

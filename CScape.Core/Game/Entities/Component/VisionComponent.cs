@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 
@@ -36,7 +37,13 @@ namespace CScape.Core.Game.Entities.Component
                 return resolver.CanBeSeenBy(ent);
             }
 
-            if (!Parent.GetTransform().PoE.ContainsEntity(ent.Handle))
+            var us = Parent.GetTransform();
+            var oth = ent.GetTransform();
+
+            if (us.PoE.ContainsEntity(ent.Handle))
+                return false;
+
+            if (us.Z != oth.Z)
                 return false;
 
             return Parent.GetTransform().ChebyshevDistanceTo(ent.GetTransform()) <= ViewRange;
@@ -49,8 +56,23 @@ namespace CScape.Core.Game.Entities.Component
                 .Where(handle => CanSee(handle.Get()));
         }
 
+        private void Update()
+        {
+            // reset interacting entity if it's out of range
+            var t = Parent.GetTransform();
+            if (t.InteractingEntity != null)
+            {
+                if(!CanSee(t.InteractingEntity.Entity))
+                    t.SetInteractingEntity(NullInteractingEntity.Instance);
+            }
+        }
+
         public override void ReceiveMessage(EntityMessage msg) 
         {
+            if (msg.Event == EntityMessage.EventType.FrameUpdate)
+            {
+                Update();
+            }
         }
     }
 }

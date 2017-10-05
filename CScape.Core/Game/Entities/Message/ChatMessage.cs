@@ -1,4 +1,6 @@
-namespace CScape.Core.Game.Entity
+using CScape.Core.Game.Entities.Component;
+
+namespace CScape.Core.Game.Entities.Message
 {
     public sealed class ChatMessage
     {
@@ -29,7 +31,7 @@ namespace CScape.Core.Game.Entity
         }
 
 
-        public Player Sender { get; }
+        public PlayerComponent Sender { get; }
         public string Message { get; }
 
         public TextColor Color { get; }
@@ -40,7 +42,9 @@ namespace CScape.Core.Game.Entity
         /// </summary>
         public bool IsForced { get; }
 
-        public ChatMessage(Player sender, string message, TextColor color, TextEffect effects, bool isForced)
+        public ChatMessage(
+            PlayerComponent sender, string message, 
+            TextColor color, TextEffect effects, bool isForced)
         {
             Sender = sender;
             Message = message;

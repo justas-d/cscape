@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.Interface.Showable;
 using CScape.Core.Game.World;
@@ -21,13 +22,14 @@ namespace CScape.Core.Game.Entity
         : WorldEntity, IMovingEntity, IObserver, IDamageable, IEquatable<Player>
     {
         #region debug vars
-
+        /*
         public bool DebugEntitySync = true;
         public bool DebugItems = false;
         public bool DebugCommands = false;
         public bool DebugPackets = false;
         public bool DebugInterface = true;
         public bool DebugRegion = false;
+        */
         public bool DebugStats
         {
             get => _debugStatSync?.IsEnabled ?? false;
@@ -57,20 +59,20 @@ namespace CScape.Core.Game.Entity
             Animation = 8,
             ForcedText = 4,
             Chat = 0x80,
-            InteractEnt = 0x1,
+          //  InteractEnt = 0x1,
             Appearance = 0x10,
-            FacingCoordinate = 0x2,
-            PrimaryHit = 0x20,
-            SecondaryHit = 0x200,
+         //   FacingCoordinate = 0x2,
+          //  PrimaryHit = 0x20,
+           // SecondaryHit = 0x200,
         }
 
         /// <summary>
         /// Reset every tick
         /// </summary>
-        public UpdateFlags TickFlags { get; private set; }
+       // public UpdateFlags TickFlags { get; private set; }
 
         [CanBeNull] private ChatMessage _lastChatMessage;
-        [CanBeNull] private IWorldEntity _interactingEntity;
+        //[CanBeNull] private IWorldEntity _interactingEntity;
       //  [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
 
         private  ForcedMovement _forceMovement;
@@ -144,6 +146,7 @@ namespace CScape.Core.Game.Entity
             }
         }
 
+        /*
         public IWorldEntity InteractingEntity
         {
             get => _interactingEntity;
@@ -153,6 +156,7 @@ namespace CScape.Core.Game.Entity
                 TickFlags |= UpdateFlags.InteractEnt;
             }
         }
+        */
 
         private string _forcedText;
         public string ForcedText
@@ -174,13 +178,13 @@ namespace CScape.Core.Game.Entity
         public bool IsAppearanceDirty { get; set; }
 
         public bool NeedsPositionInit { get; private set; } = true;
-        public short Pid { get; }
-        public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
+        //public short Pid { get; }
+        //public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
 
         #endregion
 
-        [NotNull] public string Username => _model.Id;
-        [NotNull] public string Password => _model.PasswordHash;
+       // [NotNull] public string Username => _model.Id;
+       // [NotNull] public string Password => _model.PasswordHash;
         public byte TitleIcon => _model.TitleIcon;
         public bool IsMember => _model.IsMember;
 
@@ -229,8 +233,8 @@ namespace CScape.Core.Game.Entity
         private int _viewRange;
         */
 
-        public HitData SecondaryHit { get; private set; }
-        public HitData PrimaryHit { get; private set; }
+     //   public HitData SecondaryHit { get; private set; }
+      //  public HitData PrimaryHit { get; private set; }
 
         // todo : hook up Player.MaxHealth to player skills
         /*
@@ -242,6 +246,7 @@ namespace CScape.Core.Game.Entity
         } 
         */
 
+            /*
         public bool Damage(byte dAmount, HitType type, bool secondary)
         {
             var hit = HitData.Calculate(this, type, dAmount);
@@ -262,6 +267,7 @@ namespace CScape.Core.Game.Entity
             // todo : handle player death
         }
 
+            */
         // todo : only register container interfaces if the player can see them
         [NotNull] public BasicItemManager Inventory { get; }
         [NotNull] public EquipmentManager Equipment { get; }
@@ -376,7 +382,7 @@ namespace CScape.Core.Game.Entity
             _model.Z = Transform.Z;
 
             // reset sync vars
-            TickFlags = 0;
+  //          TickFlags = 0;
             NeedsPositionInit = false;
             NeedsSightEvaluation = false;
             //Movement.MoveUpdate.Reset();
@@ -384,7 +390,7 @@ namespace CScape.Core.Game.Entity
             // reset pressed buttons
             Interfaces.PressedButtonIds.Clear();
 
-            EntityHelper.TryResetInteractingEntity(this);
+//            EntityHelper.TryResetInteractingEntity(this);
 
             /*
             if (IsDestroyed)
@@ -454,6 +460,7 @@ namespace CScape.Core.Game.Entity
         }
         */
 
+            /*
         public override bool CanSee(IWorldEntity obs)
         {
             if (obs.IsDestroyed)
@@ -467,16 +474,21 @@ namespace CScape.Core.Game.Entity
 
             return obs.CanBeSeenBy(this);
         }
+        */
 
+            /*
         public bool IsEntityInViewRange(IWorldEntity ent)
         {
             return Transform.ChebyshevDistanceTo(ent.Transform) <= ViewRange;
         }
+        */
 
+        /*
         public override bool CanBeSeenBy(IObserver observer)
         {
             return observer.IsEntityInViewRange(this);
         }
+        */
 
         /*
         /// <summary>

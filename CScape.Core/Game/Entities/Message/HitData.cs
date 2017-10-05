@@ -1,4 +1,4 @@
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities.Message
 {
     public enum HitType
     {

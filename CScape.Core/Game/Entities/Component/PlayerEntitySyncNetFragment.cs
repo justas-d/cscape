@@ -1,4 +1,6 @@
+using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 
@@ -10,6 +12,7 @@ namespace CScape.Core.Game.Entities.Component
         public (int x, int y)? FacingDir { get; private set; }
         public IInteractingEntity InteractingEntity { get; private set; }
         public int? DefinitionChange { get; private set; }
+        public bool Reinitialize { get; private set; }
 
         /* TODO:
          * 
@@ -54,12 +57,18 @@ namespace CScape.Core.Game.Entities.Component
                     DefinitionChange = msg.AsDefinitionChange();
                     break;
                 }
+                case EntityMessage.EventType.NeedsUpdateReiniaialize:
+                {
+                    Reinitialize = true;
+                    break;
+                }
                 case EntityMessage.EventType.FrameEnd:
                 {
                     Damage = null;
                     FacingDir = null;
                     InteractingEntity = null;
                     DefinitionChange = null;
+                    Reinitialize = false;
                     break;
                 }
             }
