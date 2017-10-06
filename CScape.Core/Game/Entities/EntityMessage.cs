@@ -32,6 +32,7 @@ namespace CScape.Core.Game.Entities
             NetworkUpdate, /* Time to to network sync logic */
             DatabaseUpdate, /* Time to do database sync logic */
             GC, /* Collect entity garbage */
+            NewSystemMessage,
 
             // visual messages
             EntityEnteredViewRange,
@@ -41,9 +42,20 @@ namespace CScape.Core.Game.Entities
             TookDamage,
             JustDied,
             HealedHealth,
+            ForcedMovement,
+
+            // entity
+            ParticleEffect,
+            NewAnimation,
+            NewOverheadText,
 
             // npc
             DefinitionChange,
+
+            // player
+            ChatMessage,
+            AppearanceChanged,
+            ClientRegionChanged,
 
             // transform messages
             NewInteractingEntity,
@@ -60,9 +72,6 @@ namespace CScape.Core.Game.Entities
             // network messages
             NewPacket,
             NetworkReinitialize, /* The network connection has been reinitialized */
-
-            ClientRegionChanged,
-            NewSystemMessage,
         };
 
         public EntityMessage([CanBeNull] IEntityComponent sender, EventType ev, [CanBeNull] object data)
@@ -84,6 +93,12 @@ namespace CScape.Core.Game.Entities
             return true;
         }
 
+        public string AsNewOverheadText() => AssertCast<string>(EventType.NewOverheadText);
+        public Animation AsNewAnimation() => AssertCast<Animation>(EventType.NewAnimation);
+        public ParticleEffect AsParticleEffect() => AssertCast<ParticleEffect>(EventType.ParticleEffect);
+        public ForcedMovement AsForcedMovement() => AssertCast<ForcedMovement>(EventType.ForcedMovement);
+        public ChatMessage AsChatMessage() => AssertCast<ChatMessage>(EventType.ChatMessage);
+        public bool AsAppearanceChanged => AssertTrue(EventType.AppearanceChanged);
         public bool AsGC() => AssertTrue(EventType.GC);
 
         public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);

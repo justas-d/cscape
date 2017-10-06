@@ -152,6 +152,8 @@ namespace CScape.Core.Game.Entity
 
         public override void ReceiveMessage(EntityMessage msg)
         {
+            // TODO : handle ForcedMovement in ServerTransform,
+            // TODO : handle ForcedMovement movement over time in a separate component
             if (msg.Event == EntityMessage.EventType.Move)
             {
                 var delta = msg.AsMove().SumMovements();

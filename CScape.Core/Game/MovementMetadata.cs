@@ -8,7 +8,7 @@ namespace CScape.Core.Game
     /// An appearance of this data type guarantees that it's members represent 
     /// at least walking and at most running.
     /// </summary>
-    public struct MovementMetadata
+    public class MovementMetadata
     {
         public bool IsWalking { get; }
 

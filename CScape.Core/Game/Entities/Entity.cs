@@ -70,6 +70,23 @@ namespace CScape.Core.Game.Entities
                 return (T)_lookup[type];
             }
 
+            [NotNull]
+            public T AssertGet<T>()
+                where T : class, TComponent
+            {
+                var val = Get<T>();
+#if DEBUG
+                Debug.Assert(val != null);
+#else
+                
+                if (val == null)
+                    throw new InvalidOperationException(
+                        $"Attempted to get component that does not exist. Comp: {typeof(T).Name} Ent: {Parent}");
+#endif
+
+                return val;
+            }
+
             public void Remove<T>()
                 where T : class, TComponent
             {

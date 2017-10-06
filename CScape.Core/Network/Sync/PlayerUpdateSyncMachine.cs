@@ -21,17 +21,17 @@ namespace CScape.Core.Network.Sync
 
             private Player.UpdateFlags _localFlags;
 
-            private readonly uint _id;
-
             public PlayerUpdateState([NotNull] Player player, bool isLocal)
             {
                 IsLocal = isLocal;
                 Player = player ?? throw new ArgumentNullException(nameof(player));
-                _id = player.UniqueEntityId;
             }
 
             public void SetLocalFlag(Player.UpdateFlags flag)
-                => _localFlags |= flag;
+            {
+                _cCombined = null;
+                _localFlags |= flag;
+            }
 
             private Player.UpdateFlags? _cCombined = null;
             public Player.UpdateFlags GetCombinedFlags()
@@ -189,7 +189,7 @@ namespace CScape.Core.Network.Sync
             }
 
             if (_local.Player.NeedsPositionInit)
-            {
+            {/*
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 3); // type
 
@@ -199,35 +199,44 @@ namespace CScape.Core.Network.Sync
 
                 stream.WriteBits(7, _local.Player.ClientTransform.Local.y); // local y
                 stream.WriteBits(7, _local.Player.ClientTransform.Local.x); // local x
+                */
             }
             // 1
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
             {
+                /*
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 1); // type
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(1, NeedsUpdates(_local)); // add to needs updating list
+                */
             }
             // 2
             else if (_local.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
             {
+                /*
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 2); // type
 
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir1);
                 stream.WriteBits(3, _local.Player.Movement.MoveUpdate.Dir2);
                 stream.WriteBits(1, NeedsUpdates(_local)); // add to needs updating list
+                */
             }
             // 0
             else if (NeedsUpdates(_local) != 0)
             {
+                /*
                 stream.WriteBits(1, 1); // continue reading?
                 stream.WriteBits(2, 0); // type
+                */
             }
             else
             {
+                /*
                 stream.WriteBits(1, 0); // continue reading?
+                */
             }
 
 
@@ -241,15 +250,19 @@ namespace CScape.Core.Network.Sync
                 // check if the entity is still qualified for updates
                 if (ent.Player.IsDestroyed || _removeQueue.Contains(ent.Player.UniqueEntityId))
                 {
+                    /*
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 3); // type
+                    */
                     RemoveState(ent);
                 }
                 // tp handling
                 else if (ent.Player.NeedsPositionInit)
                 {
+                    /*
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 3); // type
+                    */
 
                     if (_initQueueExisting.Add(ent.Player.UniqueEntityId))
                         _initQueue.Add(ent);
@@ -257,32 +270,39 @@ namespace CScape.Core.Network.Sync
 
                 // run
                 else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Run)
-                {
+                {/*
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 2); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir2);
                     stream.WriteBits(1, NeedsUpdates(ent)); // needs update?
+                    */
                 }
                 // walk
                 else if (ent.Player.Movement.MoveUpdate.Type == MovementController.MoveUpdateData.MoveType.Walk)
                 {
+                    /*
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 1); // type
                     stream.WriteBits(3, ent.Player.Movement.MoveUpdate.Dir1);
                     stream.WriteBits(1, NeedsUpdates(ent)); // needs update?
+                    */
                 }
                 // no pos update, just needs a flag update
                 else if (NeedsUpdates(ent) != 0)
                 {
+                    /*
                     stream.WriteBits(1, 1); // is not noop?
                     stream.WriteBits(2, 0); // type
+                    */
 
                 }
                 // absolutely no update
                 else
                 {
+                    /*
                     stream.WriteBits(1, 0); // is not noop?
+                    */
                 }
             }
 
@@ -322,11 +342,13 @@ namespace CScape.Core.Network.Sync
                     upd.IsNew = false;
                 }
 
+                /*
                 stream.WriteBits(11, upd.Player.Pid); // id
                 stream.WriteBits(1, NeedsUpdates(upd) != 0 ? 1 : 0); // needs update?
                 stream.WriteBits(1, 1); // todo :  setpos flag
                 stream.WriteBits(5, upd.Player.Transform.Y - _local.Player.Transform.Y); // ydelta
                 stream.WriteBits(5, upd.Player.Transform.X - _local.Player.Transform.X); // xdelta            
+                */
             }
             _initQueue.Clear();
             _initQueueExisting.Clear();

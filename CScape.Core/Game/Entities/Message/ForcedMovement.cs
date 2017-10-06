@@ -2,7 +2,7 @@ using CScape.Core.Game.World;
 
 namespace CScape.Core.Game.Entities.Message
 {
-    public struct ForcedMovement
+    public class ForcedMovement
     {
         public (byte x, byte y) Start { get; }
         public (byte x, byte y) End { get; }
