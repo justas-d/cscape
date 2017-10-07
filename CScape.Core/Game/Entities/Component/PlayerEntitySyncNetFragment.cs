@@ -1,33 +1,40 @@
 using System;
 using System.Collections.Generic;
-using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
 using System.Diagnostics;
 using System.Linq;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
+    public enum FlagType
+    {
+        Damage,
+        FacingDir,
+        InteractingEntity,
+        DefinitionChange,
+        Appearance,
+        ChatMessage,
+        ForcedMovement,
+        ParticleEffect,
+        Animation,
+        OverheadText
+    }
+
     public sealed class FlagAccumulatorComponent : EntityComponent
     {
-        public HitData Damage { get; private set; }
-        public (int x, int y)? FacingDir { get; private set; }
-        public IInteractingEntity InteractingEntity { get; private set; }
-        public int? DefinitionChange { get; private set; }
-        public MovementMetadata Movement { get; private set; }
-        public bool Appearance { get; private set; }
-        public ChatMessage ChatMessage { get; private set; }
-        public ForcedMovement ForcedMovement { get; private set; }
-        public ParticleEffect ParticleEffect{ get; private set; }
-        public Animation Animation { get; private set; }
-        public string OverheadText { get; private set; }
+        private readonly Dictionary<FlagType, EntityMessage> _flags
+            = new Dictionary<FlagType, EntityMessage>();
 
+        public IReadOnlyDictionary<FlagType, EntityMessage> Flags => _flags;
+
+        public MovementMetadata Movement { get; private set; }
         public bool Reinitialize { get; private set; }
-        
 
         public override int Priority { get; }
 
@@ -36,59 +43,73 @@ namespace CScape.Core.Game.Entities.Component
         {
         
         }
-       
+
+        private void SetFlag(FlagType type, EntityMessage msg)
+        {
+            if (_flags.ContainsKey(type))
+                _flags[type] = msg;
+            else
+                _flags.Add(type, msg);
+        }
+
         public override void ReceiveMessage(EntityMessage msg)
         {
             switch (msg.Event)
             {
                 case EntityMessage.EventType.NewOverheadText:
                 {
-                    OverheadText = msg.AsNewOverheadText();
+                    SetFlag(FlagType.OverheadText, msg);
+
                     break;
                 }
                 case EntityMessage.EventType.NewAnimation:
                 {
-                    Animation = msg.AsNewAnimation();
+                    SetFlag(FlagType.Animation, msg);
+
                     break;
                 }
                 case EntityMessage.EventType.ParticleEffect:
                 {
-                    ParticleEffect = msg.AsParticleEffect();
+                    SetFlag(FlagType.ParticleEffect, msg);
+
                     break;
                 }
                 case EntityMessage.EventType.ForcedMovement:
                 {
-                    ForcedMovement = msg.AsForcedMovement();
+                    SetFlag(FlagType.ForcedMovement, msg);
                     break;
                 }
                 case EntityMessage.EventType.ChatMessage:
                 {
-                    ChatMessage = msg.AsChatMessage();
+                    var chat = msg.AsChatMessage();
+                    if (chat.IsForced)
+                        SetFlag(FlagType.ChatMessage, msg);
+                    
                     break;
                 }
                 case EntityMessage.EventType.AppearanceChanged:
                 {
-                    Appearance = true;
+                    SetFlag(FlagType.Appearance, msg);
                     break;
                 }
                 case EntityMessage.EventType.TookDamage:
                 {
-                    Damage = msg.AsTookDamage();
+                    SetFlag(FlagType.Damage, msg);
                     break;
                 }
                 case EntityMessage.EventType.NewFacingDirection:
                 {
-                    FacingDir = msg.AsNewFacingDirection();
+                    SetFlag(FlagType.FacingDir, msg);
                     break;
                 }
                 case EntityMessage.EventType.NewInteractingEntity:
                 {
-                    InteractingEntity = msg.AsNewInteractingEntity();
+                    SetFlag(FlagType.InteractingEntity, msg);
                     break;
                 }
                 case EntityMessage.EventType.DefinitionChange:
                 {
-                    DefinitionChange = msg.AsDefinitionChange();
+                    SetFlag(FlagType.DefinitionChange, msg);
                     break;
                 }
                 case EntityMessage.EventType.Move:
@@ -99,23 +120,14 @@ namespace CScape.Core.Game.Entities.Component
                 case EntityMessage.EventType.Teleport:
                 {
                     Reinitialize = true;
-
                     break;
+
                 }
                 case EntityMessage.EventType.FrameEnd:
                 {
-                    Damage = null;
-                    FacingDir = null;
-                    InteractingEntity = null;
-                    DefinitionChange = null;
+                    _flags.Clear();
                     Reinitialize = false;
                     Movement = null;
-                    Appearance = false;
-                    ChatMessage = null;
-                    ForcedMovement = null;
-                    ParticleEffect = null;
-                    Animation = null;
-                    OverheadText = null;
                     break;
                 }
             }
@@ -296,14 +308,251 @@ namespace CScape.Core.Game.Entities.Component
         }
     }
 
-    public interface IUpdateFlagSegment
+    public sealed class UpdateComponent : IUpdateSegment
     {
-        FlagAccumulatorComponent Flags { get; }
+        private readonly FlagAccumulatorComponent _accumulator;
+        private readonly UpdateWriter _writer;
 
-        void Write(OutBlob stream);
-        bool NeedsUpdate();
+        public UpdateComponent(
+            [NotNull] FlagAccumulatorComponent accumulator,
+            [NotNull] UpdateWriter writer)
+        {
+            _accumulator = accumulator ?? throw new ArgumentNullException(nameof(accumulator));
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+        }
+
+        public void Write(OutBlob stream)
+        {
+            _writer.Write(stream, _accumulator);
+        }
     }
 
+    [Flags]
+    public enum PlayerFlag
+    {
+        ForcedMovement = 0x400,
+        ParticleEffect = 0x100,
+        Animation = 8,
+        ForcedText = 4,
+        Chat = 0x80,
+        InteractEnt = 0x1,
+        Appearance = 0x10,
+        FacingCoordinate = 0x2,
+        PrimaryHit = 0x20,
+        SecondaryHit = 0x200,
+    }
+
+    [Flags]
+    public enum NpcFlag
+    {
+        Animation = 0x10,
+        PrimaryHit = 8,
+        ParticleEffect = 0x80,
+        InteractingEntity = 0x20,
+        Text = 1,
+        SecondaryHit = 0x40,
+        Definition = 2,
+        FacingCoordinate = 4
+    }
+
+    public static class FlagHelpers
+    {
+        public static NpcFlag ToNpc(this FlagType flag)
+        {
+            switch (flag)
+            {
+                case FlagType.Damage:
+                    return NpcFlag.PrimaryHit;
+                        
+                case FlagType.FacingDir:
+                    return NpcFlag.FacingCoordinate;
+                        
+                case FlagType.InteractingEntity:
+                    return NpcFlag.InteractingEntity;
+                    
+                case FlagType.DefinitionChange:
+                    return NpcFlag.Definition;
+                
+                case FlagType.ParticleEffect:
+                    return NpcFlag.ParticleEffect;
+                    
+                case FlagType.Animation:
+                    return NpcFlag.Animation;
+                    
+                case FlagType.OverheadText:
+                    return NpcFlag.Text;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flag), flag, null);
+            }
+
+        }
+
+        public static PlayerFlag ToPlayer(this FlagType flag)
+        {
+            switch (flag)
+            {
+                case FlagType.Damage:
+                    return PlayerFlag.PrimaryHit;
+                    
+                case FlagType.FacingDir: return PlayerFlag.FacingCoordinate;
+                    
+                case FlagType.InteractingEntity:
+                    return PlayerFlag.InteractEnt;
+                    
+                case FlagType.Appearance:
+                    return PlayerFlag.Appearance;
+                    
+                case FlagType.ChatMessage:
+                    return PlayerFlag.Chat;
+                    
+                case FlagType.ForcedMovement:
+                    return PlayerFlag.ForcedMovement;
+                    
+                case FlagType.ParticleEffect:
+                    return PlayerFlag.ParticleEffect;
+                    
+                case FlagType.Animation:
+                    return PlayerFlag.Animation;
+
+                case FlagType.OverheadText:
+                    return PlayerFlag.ForcedText;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flag), flag, null);
+            }
+
+        }
+
+    }
+
+    public abstract class UpdateWriter
+    {
+        protected OutBlob Stream { get; }
+        protected FlagAccumulatorComponent Flags { get; }
+
+        public UpdateWriter(OutBlob blob, FlagAccumulatorComponent flags)
+        {
+            Stream = blob;
+            Flags = flags;
+        }
+
+        public abstract void Write();
+
+        protected void WriteForcedMovement(ForcedMovement data)
+        {
+            Stream.Write(data.Start.x);
+            Stream.Write(data.Start.y);
+            Stream.Write(data.End.x);
+            Stream.Write(data.End.y);
+            Stream.Write(data.Duration.x);
+            Stream.Write(data.Duration.y);
+            Stream.Write((byte) data.Direction);
+        }
+
+        protected void WriteParticleEffect(ParticleEffect effect)
+        {
+            
+        }
+
+        protected void WriteAnimation(Animation anim)
+        {
+            
+        }
+
+        protected void WriteForcedText(string text)
+        {
+            
+        }
+
+        protected void WritePlayerChat(ChatMessage msg)
+        {
+            
+        }
+
+        protected void WriteInteractingEntity(IInteractingEntity ent)
+        {
+            
+        }
+
+        protected void WritePlayerAppearance()
+        {
+            
+        }
+
+        protected void WriteFacingCoordinate((int x, int y) dir)
+        {
+            
+        }
+
+        protected void WriteDamage(HitData hit)
+        {
+            
+        }
+    }
+
+    public sealed class PlayerUpdateWriter : UpdateWriter
+    {
+        private PlayerFlag GetHeader()
+        {
+            PlayerFlag retval = 0;
+
+            foreach (var kvp in Flags.Flags)
+            {
+                retval |= kvp.Key.ToPlayer();
+            }
+
+            return retval;
+        }
+
+        public override void Write()
+        {
+            var header = GetHeader();
+            if (header != 0)
+            {
+                if ((header & PlayerFlag.ForcedMovement) != 0)
+                {
+                    WriteForcedMovement(Flags.Flags[FlagType.ForcedMovement].AsForcedMovement());
+                }
+                if ((header & PlayerFlag.ParticleEffect) != 0)
+                {
+                    WriteParticleEffect(Flags.Flags[FlagType.ParticleEffect].AsParticleEffect());
+                }
+                if ((header & PlayerFlag.Animation) != 0)
+                {
+                    WriteAnimation(Flags.Flags[FlagType.Animation].AsNewAnimation());
+                }
+                if ((header & PlayerFlag.ForcedText) != 0)
+                {
+                    WriteForcedText(Flags.Flags[FlagType.OverheadText].AsNewOverheadText());
+                }
+                if ((header & PlayerFlag.Chat) != 0)
+                {
+                    WritePlayerChat(Flags.Flags[FlagType.ChatMessage].AsChatMessage());
+                }
+                if ((header & PlayerFlag.InteractEnt) != 0)
+                {
+                    WriteInteractingEntity(Flags.Flags[FlagType.InteractingEntity].AsNewInteractingEntity());
+                }
+                if ((header & PlayerFlag.Appearance) != 0)
+                {
+                    WritePlayerAppearance();
+                }
+                if ((header & PlayerFlag.FacingCoordinate) != 0)
+                {
+                    WriteFacingCoordinate(Flags.Flags[FlagType.FacingDir].AsNewFacingDirection());
+                }
+                if ((header & PlayerFlag.PrimaryHit) != 0 ||
+                    (header & PlayerFlag.SecondaryHit) != 0)
+                {
+                    WriteDamage(Flags.Flags[FlagType.Damage].AsTookDamage());
+                }
+            }
+        }
+
+        public PlayerUpdateWriter(OutBlob blob, FlagAccumulatorComponent flags) : base(blob, flags)
+        {
+        }
+    }
 
     public sealed class LocalPlayerFlags : IUpdateFlagSegment
     {
@@ -322,6 +571,7 @@ namespace CScape.Core.Game.Entities.Component
 
         public bool NeedsUpdate()
         {
+            if()
             if (Flags.Damage != null) return true;
             if (Flags.FacingDir != null) return true;
             if (Flags.InteractingEntity != null) return true;
@@ -382,6 +632,8 @@ namespace CScape.Core.Game.Entities.Component
                 foreach (var flag in _flagSegments)
                     flag.Write(stream);
             }
+
+
 
             stream.EndPacket();
         }
@@ -502,7 +754,7 @@ namespace CScape.Core.Game.Entities.Component
             }
 
             /* Local */
-            IUpdateSegment local;
+        IUpdateSegment local;
             {
                 var flags = Parent.Components.AssertGet<FlagAccumulatorComponent>();
                 if (flags.Reinitialize)
@@ -524,32 +776,4 @@ namespace CScape.Core.Game.Entities.Component
         }
 
     }
-
-    public sealed class UpdateWriter
-    {
-        enum Flags : int
-        {
-            ForcedMovement = 0x400,
-            ParticleEffect = 0x100,
-            Animation = 8,
-            ForcedText = 4,
-            Chat = 0x80,
-            InteractEnt = 0x1,
-            Appearance = 0x10,
-            FacingCoordinate = 0x2,
-            PrimaryHit = 0x20,
-            SecondaryHit = 0x200,
-        }
-
-        public void SetFlag(int flag)
-        {
-            
-        }
-
-        public void Write(OutBlob stream)
-        {
-            
-        }
-    }
-
 }
