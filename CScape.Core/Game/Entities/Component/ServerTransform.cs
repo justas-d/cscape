@@ -14,24 +14,18 @@ namespace CScape.Core.Game.Entity
     /// </summary>
     public sealed class ServerTransform : EntityComponent, IPosition
     {
-        [CanBeNull]
+        [NotNull]
         public IInteractingEntity InteractingEntity { get; private set; }
+            = NullInteractingEntity.Instance;
+
+        [NotNull]
+        public IFacingData FacingData { get; private set; }
 
         public const int MaxZ = 4;
 
         public int X { get; private set; } = 0;
         public int Y { get; private set; } = 0;
         public int Z { get; private set; } = 0;
-
-        /// <summary>
-        /// Facing X coordinate. Negative if not set.
-        /// </summary>
-        public int FacingX { get; private set; } = -1;
-
-        /// <summary>
-        /// Facing Y coordinate. Negative if not set
-        /// </summary>
-        public int FacingY { get; private set; } = -1;
 
         /// <summary>
         /// Returns the current PoE region this transform is stored in.
@@ -51,6 +45,7 @@ namespace CScape.Core.Game.Entity
         public ServerTransform([NotNull] Entities.Entity parent)
             :base(parent)
         {
+            FacingData = new DefaultDirection(this);
             SwitchPoE(parent.Server.Overworld);
         }
 
@@ -103,16 +98,15 @@ namespace CScape.Core.Game.Entity
         }
 
         // TODO : use SetFacingDirection
-        public void SetFacingDirection(int x, int y)
+        public void SetFacingDirection([NotNull]IFacingData data)
         {
-            FacingX = x;
-            FacingY = y;
+            FacingData = data ?? throw new ArgumentNullException(nameof(data));
 
             Parent.SendMessage(
                 new EntityMessage(
                     this, 
                     EntityMessage.EventType.NewFacingDirection, 
-                    (x, y)));
+                    data));
         }
 
         public void SetInteractingEntity([NotNull] IInteractingEntity ent)

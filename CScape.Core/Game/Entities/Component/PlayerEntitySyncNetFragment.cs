@@ -146,11 +146,11 @@ namespace CScape.Core.Game.Entities.Component
         private readonly int _localx;
         private readonly int _localy;
 
-        public LocalPlayerInit([NotNull]PlayerComponent player)
+        public LocalPlayerInit([NotNull]PlayerComponent player, bool needsUpdate)
         {
             var local = player.Parent.Components.AssertGet<ClientPositionComponent>();
             _zplane = player.Parent.GetTransform().Z;
-            _needsUpdate = player.Parent.Components.AssertGet<FlagAccumulatorComponent>().NeedsUpdate;
+            _needsUpdate = needsUpdate;
             _localx = local.Local.x;
             _localy = local.Local.y;
         }
@@ -282,10 +282,12 @@ namespace CScape.Core.Game.Entities.Component
         private readonly int _xdelta;
         private readonly int _ydelta;
 
-        public NewSyncPlayer([NotNull] PlayerComponent newPlayer, [NotNull] PlayerComponent localPlayer)
+        public NewSyncPlayer(
+            [NotNull] PlayerComponent newPlayer, [NotNull] PlayerComponent localPlayer,
+            bool needsUpdate)
         {
             _pid = newPlayer.PlayerId;
-            _needsUpdate = newPlayer.Parent.Components.AssertGet<FlagAccumulatorComponent>().NeedsUpdate;
+            _needsUpdate = needsUpdate;
             _xdelta = newPlayer.Parent.GetTransform().X - localPlayer.Parent.GetTransform().X;
             _xdelta = newPlayer.Parent.GetTransform().Y - localPlayer.Parent.GetTransform().Y;
         }
@@ -308,23 +310,9 @@ namespace CScape.Core.Game.Entities.Component
         }
     }
 
-    public sealed class UpdateComponent : IUpdateSegment
+    public interface IUpdateWriter : IUpdateSegment
     {
-        private readonly FlagAccumulatorComponent _accumulator;
-        private readonly UpdateWriter _writer;
-
-        public UpdateComponent(
-            [NotNull] FlagAccumulatorComponent accumulator,
-            [NotNull] UpdateWriter writer)
-        {
-            _accumulator = accumulator ?? throw new ArgumentNullException(nameof(accumulator));
-            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
-        }
-
-        public void Write(OutBlob stream)
-        {
-            _writer.Write(stream, _accumulator);
-        }
+        bool NeedsUpdate();
     }
 
     [Flags]
@@ -425,68 +413,79 @@ namespace CScape.Core.Game.Entities.Component
 
     }
 
-    public abstract class UpdateWriter
+    public abstract class UpdateWriter : IUpdateWriter
     {
-        protected OutBlob Stream { get; }
         protected FlagAccumulatorComponent Flags { get; }
 
-        public UpdateWriter(OutBlob blob, FlagAccumulatorComponent flags)
+        public UpdateWriter(FlagAccumulatorComponent flags)
         {
-            Stream = blob;
             Flags = flags;
         }
 
-        public abstract void Write();
+        public abstract void Write(OutBlob stream);
+        public abstract bool NeedsUpdate();
 
-        protected void WriteForcedMovement(ForcedMovement data)
+        protected static void WriteForcedMovement(OutBlob stream, ForcedMovement data)
         {
-            Stream.Write(data.Start.x);
-            Stream.Write(data.Start.y);
-            Stream.Write(data.End.x);
-            Stream.Write(data.End.y);
-            Stream.Write(data.Duration.x);
-            Stream.Write(data.Duration.y);
-            Stream.Write((byte) data.Direction);
+            stream.Write(data.Start.x);
+            stream.Write(data.Start.y);
+            stream.Write(data.End.x);
+            stream.Write(data.End.y);
+            stream.Write(data.Duration.x);
+            stream.Write(data.Duration.y);
+            stream.Write((byte) data.Direction);
         }
 
-        protected void WriteParticleEffect(ParticleEffect effect)
+        protected static void WriteParticleEffect(OutBlob stream, ParticleEffect effect)
         {
-            
+            stream.Write16(effect.Id);
+            stream.Write16(effect.Height);
+            stream.Write16(effect.Delay);
         }
 
-        protected void WriteAnimation(Animation anim)
+        protected static void WriteAnimation(OutBlob stream, Animation anim)
         {
-            
+            stream.Write16(anim.Id);
+            stream.Write(anim.Delay);
         }
 
-        protected void WriteForcedText(string text)
+        protected static void WriteForcedText(OutBlob stream, string text)
         {
-            
+            stream.WriteString(text ?? "");
         }
 
-        protected void WritePlayerChat(ChatMessage msg)
+        protected static void WritePlayerChat(OutBlob stream, ChatMessage msg)
         {
-            
+            stream.Write((byte)msg.Color);
+            stream.Write((byte)msg.Effects);
+            stream.Write((byte)msg.Title);
+            stream.WriteString(msg.Message);
         }
 
-        protected void WriteInteractingEntity(IInteractingEntity ent)
+        protected static void WriteInteractingEntity(OutBlob stream, IInteractingEntity ent)
         {
-            
+            stream.Write16(ent.Id);
         }
 
-        protected void WritePlayerAppearance()
+        protected static void WritePlayerAppearance(OutBlob stream)
         {
-            
+            TODO
+            // TODO : WritePlayerAppearance
+            throw new NotImplementedException();
         }
 
-        protected void WriteFacingCoordinate((int x, int y) dir)
+        protected static void WriteFacingCoordinate(OutBlob stream, IFacingData facing)
         {
-            
+            stream.Write16(facing.SyncX);
+            stream.Write16(facing.SyncY);
         }
 
-        protected void WriteDamage(HitData hit)
+        protected static void WriteDamage(OutBlob stream, HitData hit)
         {
-            
+            stream.Write(hit.Damage);
+            stream.Write((byte)hit.Type);
+            stream.Write(hit.CurrentHealth);
+            stream.Write(hit.MaxHealth);
         }
     }
 
@@ -504,86 +503,58 @@ namespace CScape.Core.Game.Entities.Component
             return retval;
         }
 
-        public override void Write()
+        public override bool NeedsUpdate()
+        {
+            return Flags.Flags.Any();
+        }
+
+        public override void Write(OutBlob stream)
         {
             var header = GetHeader();
             if (header != 0)
             {
                 if ((header & PlayerFlag.ForcedMovement) != 0)
                 {
-                    WriteForcedMovement(Flags.Flags[FlagType.ForcedMovement].AsForcedMovement());
+                    WriteForcedMovement(stream, Flags.Flags[FlagType.ForcedMovement].AsForcedMovement());
                 }
                 if ((header & PlayerFlag.ParticleEffect) != 0)
                 {
-                    WriteParticleEffect(Flags.Flags[FlagType.ParticleEffect].AsParticleEffect());
+                    WriteParticleEffect(stream, Flags.Flags[FlagType.ParticleEffect].AsParticleEffect());
                 }
                 if ((header & PlayerFlag.Animation) != 0)
                 {
-                    WriteAnimation(Flags.Flags[FlagType.Animation].AsNewAnimation());
+                    WriteAnimation(stream, Flags.Flags[FlagType.Animation].AsNewAnimation());
                 }
                 if ((header & PlayerFlag.ForcedText) != 0)
                 {
-                    WriteForcedText(Flags.Flags[FlagType.OverheadText].AsNewOverheadText());
+                    WriteForcedText(stream, Flags.Flags[FlagType.OverheadText].AsNewOverheadText());
                 }
                 if ((header & PlayerFlag.Chat) != 0)
                 {
-                    WritePlayerChat(Flags.Flags[FlagType.ChatMessage].AsChatMessage());
+                    WritePlayerChat(stream, Flags.Flags[FlagType.ChatMessage].AsChatMessage());
                 }
                 if ((header & PlayerFlag.InteractEnt) != 0)
                 {
-                    WriteInteractingEntity(Flags.Flags[FlagType.InteractingEntity].AsNewInteractingEntity());
+                    WriteInteractingEntity(stream, Flags.Flags[FlagType.InteractingEntity].AsNewInteractingEntity());
                 }
                 if ((header & PlayerFlag.Appearance) != 0)
                 {
-                    WritePlayerAppearance();
+                    WritePlayerAppearance(stream);
                 }
                 if ((header & PlayerFlag.FacingCoordinate) != 0)
                 {
-                    WriteFacingCoordinate(Flags.Flags[FlagType.FacingDir].AsNewFacingDirection());
+                    WriteFacingCoordinate(stream, Flags.Flags[FlagType.FacingDir].AsNewFacingDirection());
                 }
                 if ((header & PlayerFlag.PrimaryHit) != 0 ||
                     (header & PlayerFlag.SecondaryHit) != 0)
                 {
-                    WriteDamage(Flags.Flags[FlagType.Damage].AsTookDamage());
+                    WriteDamage(stream, Flags.Flags[FlagType.Damage].AsTookDamage());
                 }
             }
         }
 
-        public PlayerUpdateWriter(OutBlob blob, FlagAccumulatorComponent flags) : base(blob, flags)
+        public PlayerUpdateWriter(FlagAccumulatorComponent flags) : base(flags)
         {
-        }
-    }
-
-    public sealed class LocalPlayerFlags : IUpdateFlagSegment
-    {
-        public FlagAccumulatorComponent Flags { get; }
-
-        public LocalPlayerFlags([NotNull] PlayerComponent player)
-        {
-            if (player == null) throw new ArgumentNullException(nameof(player));
-            Flags = player.Parent.Components.AssertGet<FlagAccumulatorComponent>();
-        }
-
-        public void Write(OutBlob stream)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool NeedsUpdate()
-        {
-            if()
-            if (Flags.Damage != null) return true;
-            if (Flags.FacingDir != null) return true;
-            if (Flags.InteractingEntity != null) return true;
-            if (Flags.Movement != null) return true;
-            if (Flags.Appearance) return true;
-            if (Flags.ChatMessage != null) return true;
-            if (Flags.ForcedMovement != null) return true;
-            if (Flags.ParticleEffect != null) return true;
-            if (Flags.Animation != null) return true;
-            if (Flags.OverheadText != null) return true;
-
-            return false;
         }
     }
     
@@ -633,21 +604,9 @@ namespace CScape.Core.Game.Entities.Component
                     flag.Write(stream);
             }
 
-
-
             stream.EndPacket();
         }
     }
-
-    public sealed class LocalPlayer : IUpdateSegment
-    {
-        public void Write(OutBlob stream)
-        {
-            
-        }
-    }
-
-
 
     /// <summary>
     /// Responsible for syncing every visible player entity to the network.
@@ -658,11 +617,11 @@ namespace CScape.Core.Game.Entities.Component
     {
         public override int Priority { get; } = ComponentConstants.PriorityPlayerUpdate;
 
-        private HashSet<EntityHandle> _syncEntities = 
-            new HashSet<EntityHandle>();
+        private readonly List<EntityHandle> _syncEntities = 
+            new List<EntityHandle>();
 
-        private List<EntityMessage> _initEntities
-            = new List<EntityMessage>();
+        private readonly HashSet<EntityHandle> _initEntities
+            = new HashSet<EntityHandle>();
 
         public PlayerNetworkSyncComponent(Entity parent)
             :base(parent)
@@ -690,63 +649,64 @@ namespace CScape.Core.Game.Entities.Component
                 }
                 case EntityMessage.EventType.EntityEnteredViewRange:
                 {
-                    var p = GetPlayer(msg.AsEntityEnteredViewRange());
-                    if (p == null)
+                    var h = msg.AsEntityEnteredViewRange();
+                    if (GetPlayer(h) == null)
                         break;
 
-                    AddPlayer(p);
+                    AddPlayer(h);
                     break;
                 }
                 case EntityMessage.EventType.EntityLeftViewRange:
                 {
-                    var p = GetPlayer(msg.AsEntityLeftViewRange());
-                    if (p == null)
+                    var h = msg.AsEntityLeftViewRange();
+                    if (GetPlayer(h) == null)
                         break;
 
-                    RemovePlayer(p);
+                    RemovePlayer(h);
                     break;
                 }
             }
         }
 
-        private void AddPlayer([NotNull] PlayerComponent ent)
+        private void AddPlayer([NotNull] EntityHandle ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
+
+            _initEntities.Add(ent);
         }
 
-        private void RemovePlayer([NotNull] PlayerComponent ent)
+        private void RemovePlayer([NotNull] EntityHandle ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
+
+            _syncEntities.Add(ent);
+            _initEntities.Add(ent);
         }
+
         private void Sync()
         {
-            void AddToUpdateQueueIfNeeded(FlagAccumulatorComponent flags)
-            {
-                if (!flags.NeedsUpdate) return;
+            var updates = new List<IUpdateWriter>();
 
-                // TODO : AddToUpdateQueueIfNeeded(flags);
-            }
-
-            IUpdateSegment CommonSegmentResolve(FlagAccumulatorComponent flags)
+            IUpdateSegment CommonSegmentResolve(
+                bool needsUpdate, FlagAccumulatorComponent flags)
             {
                 if (flags.Movement != null)
                 {
                     if (flags.Movement.IsWalking)
                     {
                         return new EntityMovementWalk(
-                            flags.Movement.Dir1.Direction, flags.NeedsUpdate);
+                            flags.Movement.Dir1.Direction, needsUpdate);
                     }
                     else
                     {
                         return new EntityMovementRun(
                             flags.Movement.Dir1.Direction,
                             flags.Movement.Dir2.Direction,
-                            flags.NeedsUpdate);
+                            needsUpdate);
                     }
                 }
-                if (flags.NeedsUpdate)
+                if (needsUpdate)
                 {
-
                     return OnlyNeedsUpdate.Instance;
                 }
 
@@ -754,18 +714,23 @@ namespace CScape.Core.Game.Entities.Component
             }
 
             /* Local */
-        IUpdateSegment local;
+            IUpdateSegment local;
             {
                 var flags = Parent.Components.AssertGet<FlagAccumulatorComponent>();
+                var updater = new PlayerUpdateWriter(flags);
+                var needsUpdate = updater.NeedsUpdate();
+
                 if (flags.Reinitialize)
                 {
-                    AddToUpdateQueueIfNeeded(flags);
-                    local = new LocalPlayerInit(Parent.Components.AssertGet<PlayerComponent>());
+                    local = new LocalPlayerInit(
+                        Parent.Components.AssertGet<PlayerComponent>(),
+                        needsUpdate);
                 }
                 else
-                    local = CommonSegmentResolve(flags);
+                    local = CommonSegmentResolve(needsUpdate, flags);
 
-                if(flags.NeedsUpdate)
+                if (needsUpdate)
+                    updates.Add(updater);
             }
             
             /* Sync */
@@ -773,6 +738,11 @@ namespace CScape.Core.Game.Entities.Component
             /* Initialize */
 
             /* Update */
+
+            /* Send packet */
+            Parent.Components.AssertGet<NetworkingComponent>().SendPacket(
+                new PlayerUpdatePacket(
+                    local));
         }
 
     }

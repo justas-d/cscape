@@ -6,6 +6,15 @@ namespace CScape.Core.Game.Entities.Component
 {
     public sealed class PlayerComponent : EntityComponent, IEquatable<PlayerComponent>
     {
+        public enum Title : byte
+        {
+            Normal = 0,
+            Moderator = 1,
+            Admin = 2
+        }
+
+        public Title TitleIcon { get; }
+
         [NotNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public int PlayerId { get; }

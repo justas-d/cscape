@@ -33,6 +33,7 @@ namespace CScape.Core.Game.Entities.Message
 
         public PlayerComponent Sender { get; }
         public string Message { get; }
+        public PlayerComponent.Title Title { get; }
 
         public TextColor Color { get; }
         public TextEffect Effects { get; }
@@ -44,10 +45,11 @@ namespace CScape.Core.Game.Entities.Message
 
         public ChatMessage(
             PlayerComponent sender, string message, 
-            TextColor color, TextEffect effects, bool isForced)
+           PlayerComponent.Title title, TextColor color, TextEffect effects, bool isForced)
         {
             Sender = sender;
             Message = message;
+            Title = title;
             Color = color;
             Effects = effects;
             IsForced = isForced;

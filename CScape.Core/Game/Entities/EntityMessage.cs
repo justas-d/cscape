@@ -111,7 +111,7 @@ namespace CScape.Core.Game.Entities
         public string AsNewSystemMessage() => AssertCast<string>(EventType.NewSystemMessage);
 
         public (int x, int y) AsClientRegionChanged() => AssertCast<(int, int)>(EventType.ClientRegionChanged);
-        public (int x, int y) AsNewFacingDirection() => AssertCast<(int, int)>(EventType.NewFacingDirection);
+        public IFacingData AsNewFacingDirection() => AssertCast<IFacingData>(EventType.NewFacingDirection);
         public bool AsDestroyEntity() => AssertTrue(EventType.DestroyEntity);
 
         public PacketMetadata AsNewPacket() => AssertCast<PacketMetadata>(EventType.NewPacket);

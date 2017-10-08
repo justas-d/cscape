@@ -2,7 +2,7 @@ namespace CScape.Core.Game.Entities.InteractingEntity
 {
     public class NullInteractingEntity : IInteractingEntity
     {
-        public int Id { get; } = -1;
+        public short Id { get; } = -1;
         public Entity Entity { get; } = null;
 
         private NullInteractingEntity()

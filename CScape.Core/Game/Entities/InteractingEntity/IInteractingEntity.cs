@@ -4,7 +4,7 @@ namespace CScape.Core.Game.Entities.InteractingEntity
 {
     public interface IInteractingEntity
     {
-        int Id { get; }
+        short Id { get; }
 
         [NotNull]
         Entity Entity { get; }

@@ -6,7 +6,7 @@ namespace CScape.Core.Game.Entities.InteractingEntity
 {
     public class PlayerInteractingEntity : IInteractingEntity
     {
-        public int Id { get; }
+        public short Id { get; }
         
         public Entity Entity { get; }
 

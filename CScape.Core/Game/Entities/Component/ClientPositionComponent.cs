@@ -17,6 +17,7 @@ namespace CScape.Core.Game.Entity
         public (int x, int y) Local => _local;
 
         public Entities.Entity Parent { get; }
+        public int Priority { get; }
 
         public ClientPositionComponent(Entities.Entity parent)
         {
