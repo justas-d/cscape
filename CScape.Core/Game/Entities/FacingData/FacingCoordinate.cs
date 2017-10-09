@@ -1,6 +1,6 @@
 using System;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities.FacingData
 {
     public sealed class FacingCoordinate : IFacingData
     {

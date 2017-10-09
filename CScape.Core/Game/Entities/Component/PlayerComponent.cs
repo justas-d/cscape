@@ -1,5 +1,6 @@
 ﻿using System;
 using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Network.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component

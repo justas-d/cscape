@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Network.Entity.Component
 {
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class MessageNetworkSyncComponent : EntityComponent
@@ -22,7 +24,7 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        public MessageNetworkSyncComponent(Entity parent)
+        public MessageNetworkSyncComponent(Game.Entities.Entity parent)
             :base(parent)
         {
             

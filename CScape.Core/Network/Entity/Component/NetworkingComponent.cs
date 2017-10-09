@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
-using CScape.Core.Network;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Network.Entity.Component
 {
     /// <summary>
     /// Responsible for managing the network part of the entity, sending out
@@ -37,7 +38,7 @@ namespace CScape.Core.Game.Entities.Component
         public long ReapTimeMs { get; set; } = 1000 * 60;
 
         public NetworkingComponent(
-            [NotNull] Entity parent, 
+            [NotNull] Game.Entities.Entity parent, 
             [NotNull] ISocketContext socket, [NotNull] IPacketParser packetParser)
             : base(parent)
         {

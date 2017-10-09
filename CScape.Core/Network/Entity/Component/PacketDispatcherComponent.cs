@@ -1,10 +1,11 @@
 using System;
 using System.Diagnostics;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Network.Entity.Component
 {
     public sealed class PacketDispatcherComponent: EntityComponent
     {
@@ -15,7 +16,7 @@ namespace CScape.Core.Game.Entities.Component
         public bool ShouldNotifyAboutUnhandledPackets { get; set; } = true;
         public bool ShouldNotifyAboutPacketsBeingHandled { get; set; } = true;
 
-        public PacketDispatcherComponent(Entity parent, [NotNull] IPacketHandlerCatalogue handlers)
+        public PacketDispatcherComponent(Game.Entities.Entity parent, [NotNull] IPacketHandlerCatalogue handlers)
             :base(parent)
         {
             _handlers = handlers ?? throw new ArgumentNullException(nameof(handlers));

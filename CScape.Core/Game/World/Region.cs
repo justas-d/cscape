@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
 

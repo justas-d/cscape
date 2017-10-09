@@ -1,21 +1,20 @@
 using System;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Interface;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities
 {
     public class NpcComponent : EntityComponent
     {
         private readonly Action<NpcComponent> _destroyCallback;
         public override int Priority { get; }
 
-        public int DefinitionId { get; private set; }
+        public short DefinitionId { get; private set; }
         public int NpcId { get; }
 
         public NpcComponent(
             Entities.Entity parent,
-            int defId,
+            short defId,
             int npcId,
             [NotNull] Action<NpcComponent> destroyCallback)
             :base(parent)
@@ -25,7 +24,7 @@ namespace CScape.Core.Game.Entity
             NpcId = npcId;
         }
 
-        public void ChangeDefinitionId(int newId)
+        public void ChangeDefinitionId(short newId)
         {
             DefinitionId = newId;
             Parent.SendMessage(

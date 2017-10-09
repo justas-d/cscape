@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;

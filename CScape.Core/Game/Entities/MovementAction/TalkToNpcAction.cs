@@ -1,4 +1,6 @@
-namespace CScape.Core.Game.Entity
+using CScape.Core.Game.Entity;
+
+namespace CScape.Core.Game.Entities.MovementAction
 {
     public class TalkToNpcAction : IMovementDoneAction
     {

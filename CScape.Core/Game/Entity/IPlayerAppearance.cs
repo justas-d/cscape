@@ -1,4 +1,6 @@
-﻿namespace CScape.Core.Game.Entity
+﻿using CScape.Core.Game.Entities;
+
+namespace CScape.Core.Game.Entity
 {
     public interface IPlayerAppearance
     {

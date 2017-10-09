@@ -5,6 +5,7 @@ using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
+using CScape.Core.Network.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
@@ -79,7 +80,7 @@ namespace CScape.Core.Game.Entities
             ent.Components.Add(new PacketDispatcherComponent(ent,));
             ent.Components.Add(new NetworkingComponent(ent, ctx,));
             ent.Components.Add(new MessageNetworkSyncComponent(ent));
-            ent.Components.Add(new RegionSyncNetFragment(ent));
+            ent.Components.Add(new RegionNetworkSyncComponent(ent));
             
             ent.Components.Add(new MovementActionComponent(ent));
             ent.Components.Add(new HealthComponent(ent, 10, model.Health));

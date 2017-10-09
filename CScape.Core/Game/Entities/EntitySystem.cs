@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Prefab;
 using CScape.Core.Game.Entity;

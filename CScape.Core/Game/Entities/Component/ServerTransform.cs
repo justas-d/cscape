@@ -1,13 +1,14 @@
 using System;
-using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities.Component
 {
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.

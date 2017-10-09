@@ -1,7 +1,9 @@
 using System;
+using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entity;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities
 {
     public static class TransformExtensions
     {

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
@@ -101,7 +102,7 @@ namespace CScape.Core.Game.Entities
         public bool AsAppearanceChanged => AssertTrue(EventType.AppearanceChanged);
         public bool AsGC() => AssertTrue(EventType.GC);
 
-        public int AsDefinitionChange() => AssertCast<int>(EventType.DefinitionChange);
+        public short AsDefinitionChange() => AssertCast<short>(EventType.DefinitionChange);
 
         public EntityHandle AsEntityEnteredViewRange() => AssertCast<EntityHandle>(EventType.EntityEnteredViewRange);
         public EntityHandle AsEntityLeftViewRange() => AssertCast<EntityHandle>(EventType.EntityLeftViewRange);

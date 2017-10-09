@@ -1,8 +1,7 @@
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities.Component
 {
     public sealed class ClientPositionComponent : IEntityComponent
     {

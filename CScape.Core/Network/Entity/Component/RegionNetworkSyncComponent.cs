@@ -1,19 +1,19 @@
 ﻿using System.Diagnostics;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
-using CScape.Core.Game.Entities.Interface;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Network.Entity.Component
 {
     /// <summary>
     /// Responsible for syncing current client position region coordinates to the network.
     /// Requires a ClientPositionComponent
     /// </summary>
-    [RequiresFragment(typeof(ClientPositionComponent))]
-    [RequiresFragment(typeof(NetworkingComponent))]
-    public sealed class RegionSyncNetFragment : EntityComponent
+    [RequiresComponent(typeof(ClientPositionComponent))]
+    [RequiresComponent(typeof(NetworkingComponent))]
+    public sealed class RegionNetworkSyncComponent : EntityComponent
     {
         public override int Priority { get; } = ComponentConstants.PriorityRegion;
 
@@ -41,7 +41,7 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        public RegionSyncNetFragment(Entity parent)
+        public RegionNetworkSyncComponent(Game.Entities.Entity parent)
             :base(parent)
         {
             
