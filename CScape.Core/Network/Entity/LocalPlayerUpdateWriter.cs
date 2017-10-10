@@ -3,8 +3,12 @@ using CScape.Core.Network.Entity.Flag;
 
 namespace CScape.Core.Network.Entity
 {
-    public sealed class LocalUpdateWriter : PlayerUpdateWriter
+    public sealed class LocalPlayerUpdateWriter : PlayerUpdateWriter
     {
+        public LocalPlayerUpdateWriter(FlagAccumulatorComponent flags) : base(flags)
+        {
+        }
+
         protected override PlayerFlag GetHeader()
         {
             PlayerFlag retval = 0;
@@ -24,17 +28,7 @@ namespace CScape.Core.Network.Entity
                 }
             }
 
-
             return retval;
-        }
-
-        public override bool NeedsUpdate()
-        {
-            return GetHeader() != 0;
-        }
-
-        public LocalUpdateWriter(FlagAccumulatorComponent flags) : base(flags)
-        {
         }
     }
 }

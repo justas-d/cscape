@@ -6,7 +6,7 @@ namespace CScape.Core.Game.Entities.InteractingEntity
     {
         short Id { get; }
 
-        [NotNull]
+        [CanBeNull]
         Entity Entity { get; }
     }
 }

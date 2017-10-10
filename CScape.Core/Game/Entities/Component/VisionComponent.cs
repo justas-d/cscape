@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Entity;
 
 namespace CScape.Core.Game.Entities.Component
 {
@@ -52,6 +52,11 @@ namespace CScape.Core.Game.Entities.Component
             return Parent.GetTransform().ChebyshevDistanceTo(ent.GetTransform()) <= ViewRange;
         }
 
+        private void Reset()
+        {
+            _seeableEntities.Clear();
+        }
+
         public IEnumerable<EntityHandle> GetVisibleEntities()
         {
             return Parent.GetTransform().Region.GetNearbyInclusive().SelectMany(e => e.Entities)
@@ -63,10 +68,9 @@ namespace CScape.Core.Game.Entities.Component
         {
             // reset interacting entity if it's out of range
             var t = Parent.GetTransform();
-            if (t.InteractingEntity != null)
+            if (t.InteractingEntity.Entity != null && !CanSee(t.InteractingEntity.Entity))
             {
-                if(!CanSee(t.InteractingEntity.Entity))
-                    t.SetInteractingEntity(NullInteractingEntity.Instance);
+                t.SetInteractingEntity(NullInteractingEntity.Instance);
             }
 
             // handle visual messages
@@ -97,7 +101,6 @@ namespace CScape.Core.Game.Entities.Component
                 return false;
             });
 
-            
             // add new entities
             foreach (var handle in GetVisibleEntities())
             {
@@ -120,6 +123,11 @@ namespace CScape.Core.Game.Entities.Component
         {
             switch (msg.Event)
             {
+                case EntityMessage.EventType.NetworkReinitialize:
+                {
+                    Reset();
+                    break;
+                }
                 case EntityMessage.EventType.FrameUpdate:
                 {
                     Update();
