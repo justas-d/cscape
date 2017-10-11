@@ -1,7 +1,6 @@
 using System;
 using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;

@@ -1,4 +1,3 @@
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;

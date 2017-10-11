@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Network.Entity.Segment;
 using JetBrains.Annotations;
 

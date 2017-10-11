@@ -1,6 +1,4 @@
-﻿using CScape.Core.Game.Entities.Interface;
-
-namespace CScape.Core.Game.Entities.Component
+﻿namespace CScape.Core.Game.Entities.Component
 {
     /// <summary>
     /// Logs system messages to ILogger

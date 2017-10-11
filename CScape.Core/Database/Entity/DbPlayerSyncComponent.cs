@@ -1,6 +1,5 @@
 using System;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Interface;
 
 namespace CScape.Core.Database.Entity
 {

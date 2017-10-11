@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using CScape.Core.Data;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;

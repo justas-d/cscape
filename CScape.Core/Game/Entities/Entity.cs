@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;

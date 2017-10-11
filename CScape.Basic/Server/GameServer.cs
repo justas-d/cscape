@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;

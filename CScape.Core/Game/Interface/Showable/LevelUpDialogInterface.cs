@@ -1,4 +1,5 @@
-﻿using CScape.Core.Network;
+﻿using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Network;
 
 namespace CScape.Core.Game.Interface.Showable
 {

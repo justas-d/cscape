@@ -35,6 +35,10 @@ namespace CScape.Core.Game.Entities
             GC, /* Collect entity garbage */
             NewSystemMessage,
 
+            // interface
+            NewInterfaceShown,
+            InterfaceClosed,
+
             // visual messages
             EntityEnteredViewRange,
             EntityLeftViewRange,
@@ -93,6 +97,9 @@ namespace CScape.Core.Game.Entities
             Debug.Assert(Event == expected);
             return true;
         }
+
+        public InterfaceMetadata AsInterfaceClosed() => AssertCast<InterfaceMetadata>(EventType.InterfaceClosed);
+        public InterfaceMetadata AsNewInterfaceShown() => AssertCast<InterfaceMetadata>(EventType.NewInterfaceShown);
 
         public string AsNewOverheadText() => AssertCast<string>(EventType.NewOverheadText);
         public Animation AsNewAnimation() => AssertCast<Animation>(EventType.NewAnimation);

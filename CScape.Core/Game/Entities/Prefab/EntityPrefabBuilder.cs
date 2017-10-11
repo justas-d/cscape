@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Game.Entities.Interface;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Prefab

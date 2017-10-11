@@ -1,5 +1,4 @@
 using System;
-using CScape.Core.Game.Entities.Interface;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities

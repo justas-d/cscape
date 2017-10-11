@@ -2,7 +2,7 @@
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Interface
+namespace CScape.Core.Game.Entities
 {
     /// <summary>
     /// Updates run during the entity update pass

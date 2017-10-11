@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using CScape.Core.Game.Entities.InteractingEntity;
-using CScape.Core.Game.Entities.Interface;
 
 namespace CScape.Core.Game.Entities.Component
 {

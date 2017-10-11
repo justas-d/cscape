@@ -1,4 +1,4 @@
-namespace CScape.Core.Game.Entities.Interface
+namespace CScape.Core.Game.Entities
 {
     public interface IVisionResolver : IEntityComponent
     {

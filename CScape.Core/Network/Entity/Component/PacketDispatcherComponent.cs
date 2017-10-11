@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 

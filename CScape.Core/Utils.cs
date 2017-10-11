@@ -18,6 +18,14 @@ namespace CScape.Core
 
     public static class Utils
     {
+        /// <summary>
+        /// Checks if val is in range [begin, end)
+        /// </summary>
+        public static bool InRange(this int val, int begin, int end)
+        {
+            return val >= begin && end > val;
+        }
+
         //smh
         public static long StringToLong(string s)
         {

@@ -1,4 +1,5 @@
-﻿using CScape.Core.Network.Packet;
+﻿using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
