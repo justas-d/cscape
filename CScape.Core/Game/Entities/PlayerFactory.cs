@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using CScape.Core.Database.Entity;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network.Entity.Component;
 using JetBrains.Annotations;

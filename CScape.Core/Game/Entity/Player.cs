@@ -1,10 +1,8 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Data;
-using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.Interface.Showable;
-using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
 using CScape.Core.Network.Sync;
@@ -21,117 +19,8 @@ namespace CScape.Core.Game.Entity
     public sealed class Player 
         : WorldEntity, IMovingEntity, IObserver, IDamageable, IEquatable<Player>
     {
-        #region debug vars
-        /*
-        public bool DebugEntitySync = true;
-        public bool DebugItems = false;
-        public bool DebugCommands = false;
-        public bool DebugPackets = false;
-        public bool DebugInterface = true;
-        public bool DebugRegion = false;
-        */
-        public bool DebugStats
-        {
-            get => _debugStatSync?.IsEnabled ?? false;
-            set
-            {
-                if (value && _debugStatSync == null)
-                {
-                    _debugStatSync = new DebugStatSyncMachine(_services);
-                    Connection.SyncMachines.Add(_debugStatSync);
-                }
 
-                _debugStatSync.IsEnabled = value;
-            }
-        }
-
-        private DebugStatSyncMachine _debugStatSync;
-
-        #endregion
-
-        #region sync vars
-
-        [Flags]
-        public enum UpdateFlags
-        {
-            ForcedMovement = 0x400,
-            ParticleEffect = 0x100,
-            Animation = 8,
-            ForcedText = 4,
-            Chat = 0x80,
-          //  InteractEnt = 0x1,
-            Appearance = 0x10,
-         //   FacingCoordinate = 0x2,
-          //  PrimaryHit = 0x20,
-           // SecondaryHit = 0x200,
-        }
-
-        /// <summary>
-        /// Reset every tick
-        /// </summary>
-       // public UpdateFlags TickFlags { get; private set; }
-
-        [CanBeNull] private ChatMessage _lastChatMessage;
-        //[CanBeNull] private IWorldEntity _interactingEntity;
-      //  [CanBeNull] private (ushort x, ushort y)? _facingCoordinate;
-
-        private  ForcedMovement _forceMovement;
-
-        public ForcedMovement ForcedMovement
-        {
-            get => _forceMovement;
-            set
-            {
-                TickFlags |= UpdateFlags.ForcedMovement;
-                ForcedMovement = value;
-            }
-        }
-
-        private ParticleEffect _effect;
-        public ParticleEffect Effect
-        {
-            get => _effect;
-            set
-            {
-                TickFlags |= UpdateFlags.ParticleEffect;
-                _effect = value;
-            }
-        }
-
-        private Animation _animData;
-        public Animation Animation
-        {
-            get => _animData;
-            set
-            {
-                TickFlags |= UpdateFlags.Animation;
-                _animData = value;
-            }
-        }
-
-        [CanBeNull] public ChatMessage LastChatMessage
-        {
-            get => _lastChatMessage;
-            set
-            {
-                _lastChatMessage = value;
-                TickFlags |= UpdateFlags.Chat;
-            }
-        }
-
-        /*
-        // todo : maybe expose this via some interface? or move it to WorldEntity?
-        [CanBeNull] public (ushort x, ushort y)? FacingCoordinate
-        {
-            get => _facingCoordinate;
-            set
-            {
-                _facingCoordinate = value;
-                if (value != null)
-                    TickFlags |= UpdateFlags.FacingCoordinate;
-            }
-        }
-        */
+      
 
         [NotNull] public IPlayerAppearance Appearance
         {
@@ -146,128 +35,23 @@ namespace CScape.Core.Game.Entity
             }
         }
 
-        /*
-        public IWorldEntity InteractingEntity
-        {
-            get => _interactingEntity;
-            set
-            {
-                _interactingEntity = value;
-                TickFlags |= UpdateFlags.InteractEnt;
-            }
-        }
-        */
 
-        private string _forcedText;
-        public string ForcedText
-        {
-            get => _forcedText;
-            set
-            {
-                _forcedText = value;
-                TickFlags |= UpdateFlags.ForcedText;
-            }
-        }
 
         public const int MaxAppearanceUpdateSize = 64;
         public Blob AppearanceUpdateCache { get; set; } = new Blob(MaxAppearanceUpdateSize);
 
-        /// <summary>
-        /// If set, will invalidate appearance update caches.
-        /// </summary>
         public bool IsAppearanceDirty { get; set; }
 
-  //      public bool NeedsPositionInit { get; private set; } = true;
-        //public short Pid { get; }
-        //public (sbyte x, sbyte y) LastMovedDirection { get; set; } = DirectionHelper.GetDelta(Direction.South);
 
-        #endregion
-
-       // [NotNull] public string Username => _model.Id;
-       // [NotNull] public string Password => _model.PasswordHash;
-        public byte TitleIcon => _model.TitleIcon;
         public bool IsMember => _model.IsMember;
 
-        //[NotNull] public ISocketContext Connection { get; }
-       // public IObservatory Observatory => _observatory;
-        
-        //[NotNull] private readonly ClientTransform _transform;
-       // [NotNull] public IClientTransform ClientTransform => _transform;
-       // private readonly PlayerObservatory _observatory;
 
         [NotNull] private readonly IPlayerModel _model;
 
-        //public MovementController Movement { get; }
+
 
         public bool TeleportToDestWhenWalking { get; set; }
-        
-        /*
-        /// <summary>
-        /// The player cannot see any entities who are further then this many tiles away from the player.
-        /// </summary>
-        public const int MaxViewRange = 15;
-        */
-        /// <summary>
-        /// The player cannot see any entities who are further then this many tiles away from the player.
-        /// </summary>
-   //     public int ViewRange
-    //    {
-            /*
-            get => _viewRange;
-            set
-            {
-                var newRange = value.Clamp(0, MaxViewRange);
-                if (newRange != value)
-                {
-               
-                   DebugMsg($"View range {_viewRange} => {value}", ref DebugEntitySync);
-                   */
 
-                  //  Observatory.ReevaluateSightOverride = true;
-            /*
-                }
-
-                _viewRange= value;
-            }
-        }
-        private int _viewRange;
-        */
-
-     //   public HitData SecondaryHit { get; private set; }
-      //  public HitData PrimaryHit { get; private set; }
-
-        // todo : hook up Player.MaxHealth to player skills
-        /*
-        public byte MaxHealth { get; set; } = 10;
-        public byte CurrentHealth
-        {
-            get => _model.Health;
-            private set => _model.Health = value;
-        } 
-        */
-
-            /*
-        public bool Damage(byte dAmount, HitType type, bool secondary)
-        {
-            var hit = HitData.Calculate(this, type, dAmount);
-            CurrentHealth = hit.CurrentHealth;
-
-            if (secondary)
-            {
-                SecondaryHit = hit;
-                TickFlags |= UpdateFlags.SecondaryHit;
-            }
-            else
-            {
-                PrimaryHit = hit;
-                TickFlags |= UpdateFlags.PrimaryHit;
-            }
-
-            return CurrentHealth == 0;
-            // todo : handle player death
-        }
-
-            */
         // todo : only register container interfaces if the player can see them
         [NotNull] public BasicItemManager Inventory { get; }
         [NotNull] public EquipmentManager Equipment { get; }
@@ -286,7 +70,7 @@ namespace CScape.Core.Game.Entity
            // Pid = IdPool.NextPlayer();
            // Connection = socket;
 
-            _observatory = new PlayerObservatory(services, this);
+          //  _observatory = new PlayerObservatory(services, this);
 
             //_transform = ObserverClientTransform.Factory.Create(this, _model.X, _model.Y, _model.Z);
            // Transform = _transform;
@@ -366,14 +150,6 @@ namespace CScape.Core.Game.Entity
             Interfaces.OnActionOccurred();
         }
 
-        /*
-        /// <summary>
-        /// In milliseconds, the delay between a socket dying and it's player being removed
-        /// from the world.
-        /// </summary>
-        public long ReapTimeMs { get; set; } = 1000 * 60;
-        */
-
         public override void Update(IMainLoop loop)
         {
             // sync db model
@@ -430,151 +206,5 @@ namespace CScape.Core.Game.Entity
 
             //loop.Player.Enqueue(this);
         }
-
-        /// <summary>
-        /// Forcibly teleports the player to the given coords.
-        /// Use this instead of manually setting player position.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        public void ForceTeleport(int x, int y, byte z)
-        {
-            if (Transform.X == x && Transform.Y == y && Transform.Z == z)
-                return;
-
-            Transform.Teleport(x,y,z);
-         //   NeedsPositionInit = true;
-
-         //   Movement.DisposeDirections();
-        }
-
-        public void ForceTeleport(int x, int y)
-            => ForceTeleport(x, y, Transform.Z);
-
-        /*
-        protected override void InternalDestroy()
-        {
-            IdPool.FreePlayer(Pid);
-            Server.Players.Unregister(this);
-        }
-        */
-
-            /*
-        public override bool CanSee(IWorldEntity obs)
-        {
-            if (obs.IsDestroyed)
-                return false;
-
-            if (obs.Transform.Z != Transform.Z)
-                return false;
-
-            if (!Transform.PoE.ContainsEntity(obs))
-                return false;
-
-            return obs.CanBeSeenBy(this);
-        }
-        */
-
-            /*
-        public bool IsEntityInViewRange(IWorldEntity ent)
-        {
-            return Transform.ChebyshevDistanceTo(ent.Transform) <= ViewRange;
-        }
-        */
-
-        /*
-        public override bool CanBeSeenBy(IObserver observer)
-        {
-            return observer.IsEntityInViewRange(this);
-        }
-        */
-
-        /*
-        /// <summary>
-        /// Sends a system chat message to this player.
-        /// </summary>
-        public void SendSystemChatMessage(string msg) 
-            => Connection.SendPacket(new SystemChatMessagePacket(msg));
-
-        */
-
-            /*
-        public void DebugMsg(string msg, ref bool toggle)
-        {
-            if (toggle)
-            {
-                SendSystemChatMessage(msg);
-                Log.Debug(this, msg);
-            }
-        }
-        */
-        /*
-
-        /// <summary>
-        /// Provides a way to cleanly logout of the world.
-        /// Imposes checks to make sure the player doesn't logout when they can't.
-        /// Socket is immediatelly closed.
-        /// Player data is saved.
-        /// </summary>
-        /// <param name="reason">The reason for which the player cannot logout.</param>
-        /// <returns>Can or cannot the player logout.</returns>
-        public bool Logout([CanBeNull] out string reason)
-        {
-            reason = null;
-
-            if (LogoutMethod != LogoutType.None)
-                return false;
-
-            // todo : do logoff checks, i.e in combat or something
-
-            LogoutMethod = LogoutType.Clean;
-            LogoffPacket.Static.Send(Connection.OutStream);
-            return true;
-        }
-
-        /// <summary>
-        /// Sends a logoff packet then forcefully drops the connection. 
-        /// Keeps the player alive in the world.
-        /// Should only be used when something goes wrong.
-        /// </summary>
-        public void ForcedLogout()
-        {
-            if (LogoutMethod != LogoutType.None)
-                return;
-
-            LogoutMethod = LogoutType.Forced;
-            LogoffPacket.Static.Send(Connection.OutStream);
-        }
-
-        private LogoutType LogoutMethod { get; set; }
-
-        private enum LogoutType
-        {
-            None,
-            Clean,
-            Forced
-        }
-        */
-
-        /*
-
-        public override string ToString()
-        {
-            return $"Player \"{Username}\" (UEI: {UniqueEntityId} PID: {Pid})";
-        }
-        */
-
-        /// <summary>
-        /// Indicates whether this player is equal to any other player based on the equality of their unique <see cref="Username"/>
-        /// </summary>
-        /*
-        public bool Equals(Player other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Username.Equals(other.Username, StringComparison.OrdinalIgnoreCase);
-        }
-        */
     }
 }

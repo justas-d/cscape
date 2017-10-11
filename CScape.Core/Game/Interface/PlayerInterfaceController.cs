@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network;
@@ -9,15 +11,10 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
 {
-    public class PlayerInterfaceController : IInterfaceManager
+    public class InterfaceComponent : EntityComponent, IInterfaceManager
     {
-        public Player Player { get; }
-        private ILogger Log => Player.Log;
-
-        private class Backend : IInterfaceManagerApiBackend
+        private sealed class Backend : IInterfaceManagerApiBackend
         {
-            private readonly PlayerInterfaceController _frontEnd;
-
             public const int MaxSidebarInterfaces = 15;
 
             private readonly List<IShowableInterface> _sidebar = new List<IShowableInterface>(MaxSidebarInterfaces);
@@ -33,11 +30,11 @@ namespace CScape.Core.Game.Interface
 
             public IReadOnlyDictionary<int, IBaseInterface> PublicAll => _all;
             public IDictionary<int, IBaseInterface> All => _all;
-            public IInterfaceManager Frontend => _frontEnd;
+            public IInterfaceManager Frontend { get; }
 
-            public Backend(PlayerInterfaceController frontEnd)
+            public Backend(IInterfaceManager frontEnd)
             {
-                _frontEnd = frontEnd;
+                Frontend = frontEnd;
                 _sidebar.AddRange(Enumerable.Repeat(default(IShowableInterface), MaxSidebarInterfaces));
             }
 
@@ -55,7 +52,7 @@ namespace CScape.Core.Game.Interface
                 UpdBacklog = UpdBacklog.Add(interf.GetUpdates());
 
                 // unregister
-                _frontEnd.TryUnregister(interf.Id);
+                Frontend.TryUnregister(interf.Id);
             }
         }
 
@@ -68,11 +65,19 @@ namespace CScape.Core.Game.Interface
 
         private readonly Backend _backend;
 
-        public PlayerInterfaceController([NotNull] Player player)
+        public override int Priority { get; }
+
+        public InterfaceComponent([NotNull] Entities.Entity parent) : base(parent)
         {
-            Player = player ?? throw new ArgumentNullException(nameof(player));
             _backend = new Backend(this);
         }
+
+
+        public override void ReceiveMessage(EntityMessage msg)
+        {
+
+        }
+
 
         public IBaseInterface TryGetById(int id) => !All.ContainsKey(id) ? null : All[id];
 

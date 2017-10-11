@@ -1,17 +1,17 @@
 using System;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Interface;
 
-namespace CScape.Core.Game.Entities.Component
+namespace CScape.Core.Database.Entity
 {
     /// <summary>
     /// Responsible for syncing the player to the database.
     /// </summary>
     public sealed class DbPlayerSyncComponent : EntityComponent
     {
-        // TODO : DbPlayerSyncComponent
         public override int Priority { get; }
         
-        public DbPlayerSyncComponent(Entity parent)
+        public DbPlayerSyncComponent(Game.Entities.Entity parent)
             :base(parent)
         {
             

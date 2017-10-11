@@ -1,4 +1,12 @@
 ﻿# TODO
+	* Interface system rewrite
+		* InterfaceComponent -> keep track of which interfaces the player has open
+		* IGameInterface
+			* GetShowPacket()
+			* GetClosePacket()
+			* Receives entity messages from InterfaceComponent
+			* GetUpdatePackets()
+
 	* New entity system
 		* Component based
 		* Handle based. (We must dereference the entity in order to access it. This battles and catches cases where we keep a reference to a dead entity past the frame boundary)
@@ -6,7 +14,6 @@
 	* Negative numbers aren't parsed by the command interpreter
 	* Invensitage reconnect limbo
 	* Replace complicated abstraction hierarchies with a strategy pattern
-	* WeakReferences in ob1servatories and sync machines
 
 	* Collision
 		* Multi-tile entity movement
