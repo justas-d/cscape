@@ -1,22 +1,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Interface;
 
 namespace CScape.Core.Network.Packet
 {
     public sealed class UpdateInterfaceItemPacket : IPacket
     {
-        private readonly IContainerInterface _itemManager;
-        private readonly ICollection<int> _indicies;
+        private readonly IGameInterface _interf;
+        private readonly IItemContainer _container;
+        private readonly HashSet<int> _indicies;
 
         public const int Id = 34;
 
-        public UpdateInterfaceItemPacket(IContainerInterface itemManager, 
+        public UpdateInterfaceItemPacket(
+            IGameInterface interf,
+            IItemContainer container, 
             ICollection<int> indicies)
         {
-            _itemManager = itemManager;
-            _indicies = indicies;
+            _interf = interf;
+            _container = container;
+            _indicies = new HashSet<int>(indicies);
         }
 
         public void Send(OutBlob stream)
@@ -27,7 +32,7 @@ namespace CScape.Core.Network.Packet
 
             stream.BeginPacket(Id);
 
-            stream.Write16((short)_itemManager.Id);
+            stream.Write16((short)_interf.Id);
 
             foreach (var i in _indicies)
             {
@@ -37,11 +42,12 @@ namespace CScape.Core.Network.Packet
                 else
                     stream.Write16((short)i);
 
+                var item = _container.Provider[i];
                 // write id
-                stream.Write16((short)_itemManager.Items.Provider.GetId(i));
+                stream.Write16((short)item.Id.ItemId);
 
                 // write size as byte-int32 smart
-                stream.WriteByteInt32Smart(_itemManager.Items.Provider.GetAmount(i));
+                stream.WriteByteInt32Smart(item.Amount);
             }
 
             stream.EndPacket();

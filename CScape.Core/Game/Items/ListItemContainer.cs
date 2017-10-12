@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Interface;

@@ -31,7 +31,7 @@ namespace CScape.Core.Game.Interface
             PushUpdate(new MassSendInterfaceItemsPacket(this));
         }
 
-        public bool ExecuteChangeInfo(ItemProviderChangeInfo info)
+        public bool ExecuteChangeInfo(ItemChangeInfo info)
         {
             if (!info.IsValid)
                 return false;
@@ -40,9 +40,9 @@ namespace CScape.Core.Game.Interface
             return InternalExecuteChangeInfo(info);
         }
 
-        protected abstract bool InternalExecuteChangeInfo(ItemProviderChangeInfo info);
-        public abstract int Contains(int id);
-        public abstract ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount);
+        protected abstract bool InternalExecuteChangeInfo(ItemChangeInfo info);
+        public abstract int Count(int id);
+        public abstract ItemChangeInfo CalcChangeInfo(int id, int deltaAmount);
 
         public override bool Equals(object obj)
         {

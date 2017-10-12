@@ -1,14 +1,15 @@
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Interface;
 
 namespace CScape.Core.Network.Packet
 {
     public sealed class ShowSidebarInterfacePacket : IPacket
     {
-        private readonly ISidebarInterface _interf;
+        private readonly IGameInterface _interf;
         public const int Id = 71;
 
-        public ShowSidebarInterfacePacket(ISidebarInterface interf) 
+        public ShowSidebarInterfacePacket(IGameInterface interf) 
             => _interf = interf;
 
         public void Send(OutBlob stream)

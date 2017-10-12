@@ -1,32 +1,33 @@
 using CScape.Core.Data;
 using CScape.Core.Game.Interface;
-using CScape.Core.Game.Item;
-
 namespace CScape.Core.Network.Packet
 {
     public sealed class MassSendInterfaceItemsPacket : IPacket
     {
-        private readonly IContainerInterface _itemManager;
-        private IItemProvider Provider => _itemManager.Items.Provider;
+        private readonly int _id;
+        private readonly IItemContainer _container;
 
         public const int Id = 53;
 
-        public MassSendInterfaceItemsPacket(IContainerInterface itemManager)
+        public MassSendInterfaceItemsPacket(int id, IItemContainer container)
         {
-            _itemManager = itemManager;
+            _id = id;
+            _container = container;
         }
 
         public void Send(OutBlob stream)
         {
             stream.BeginPacket(Id);
 
-            stream.Write16((short) _itemManager.Id);
+            stream.Write16((short) _id);
 
             // find upper bound in inventory
             var upperBoundIdx = 0;
-            for (var i = 0; i < Provider.Count; i++)
+            for (var i = 0; i < _container.Provider.Count; i++)
             {
-                if(Provider.IsEmptyAtIndex(i)) continue;
+                if(_container.Provider[i].IsEmpty())
+                    continue;
+
                 upperBoundIdx = i;
             }
 
@@ -36,18 +37,19 @@ namespace CScape.Core.Network.Packet
 
             for (var i = 0; i < upperBoundIdx; i++)
             {
-                if (Provider.IsEmptyAtIndex(i))
+                var item = _container.Provider[i];
+                if (item.IsEmpty())
                 {
                     stream.Write(0); // amnt
-                    stream.Write16(0); // idz
+                    stream.Write16(0); // id
                     continue;
                 }
 
                 // write amount. If amount is > 255, write it as an int32
-                stream.WriteByteInt32Smart(Provider.GetAmount(i));
+                stream.WriteByteInt32Smart(item.Amount);
 
                 // write id
-                stream.Write16((short)Provider.GetId(i));
+                stream.Write16((short)item.Id.ItemId);
             }
 
             stream.EndPacket();
