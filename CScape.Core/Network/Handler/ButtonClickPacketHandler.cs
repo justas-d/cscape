@@ -1,17 +1,21 @@
-using CScape.Core.Data;
-using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Message;
+using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Handler
 {
     public class ButtonClickPacketHandler : IPacketHandler
     {
         public byte[] Handles { get; } = {185};
-        public void Handle(Player player, int opcode, Blob packet)
-        {
-            var buttonId = packet.ReadInt16();
-            var interfaceId = packet.ReadInt16();
 
-            player.Interfaces.HandleButton(player, interfaceId, buttonId);
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        {
+            var buttonId = packet.Data.ReadInt16();
+            var interfaceId = packet.Data.ReadInt16();
+
+            entity.SendMessage(
+                new GameMessage(
+                    null, GameMessage.Type.ButtonClicked, new ButtonClick(buttonId, interfaceId)));
         }
     }
 }

@@ -31,6 +31,7 @@ namespace CScape.Core.Game.Entities.Component
         public IReadOnlyDictionary<int, InterfaceMetadata> All => _interfaces;
 
         private readonly HashSet<int> _interfaceIdsInQueue = new HashSet<int>();
+        private readonly HashSet<int> _pressedButtonIds = new HashSet<int>();
         private readonly List<InterfaceMetadata> _queue = new List<InterfaceMetadata>();
 
         public InterfaceComponent([NotNull] Entity parent) : base(parent)
@@ -168,16 +169,69 @@ namespace CScape.Core.Game.Entities.Component
                 else
                     ++i;
             }
+
+            _pressedButtonIds.Clear();
         }
-        
+
+        private void OnActionOccurred()
+        {
+            void CloseNotNull(IGameInterface interf) { if(interf != null) Close(interf.Id); } 
+
+            CloseNotNull(Input);
+            CloseNotNull(Chat);
+            CloseNotNull(Main);
+
+            _queue.Clear();
+            _interfaceIdsInQueue.Clear();
+        }
+
+        private void PropogateMsgToInterfaces(GameMessage msg)
+        {
+            foreach (var interf in _interfaces.Values)
+            {
+                interf.Interface.ReceiveMessage(msg);
+            }
+        }
+
         public override void ReceiveMessage(GameMessage msg)
         {
-            if (msg.Event == GameMessage.Type.FrameUpdate)
-                Update();
+            switch (msg.Event)
+            {
+                case GameMessage.Type.ForcedMovement:
+                case GameMessage.Type.HealedHealth:
+                case GameMessage.Type.TookDamage:
+                case GameMessage.Type.JustDied:
+                case GameMessage.Type.Move:
+                case GameMessage.Type.Teleport:
+                    OnActionOccurred();
+                    break;
 
-            foreach(var interf in _interfaces.Values)
-                interf.Interface.ReceiveMessage(msg);
-                
+                case GameMessage.Type.FrameUpdate:
+                    Update();
+                    break;
+
+                case GameMessage.Type.ButtonClicked:
+                {
+                    /*
+                     * we handle button click data separately in order to filter out duplicate
+                     * clicks during a frame.
+                     * 
+                     * We want to ensure that if a button id is pressed, we only send out one
+                     * event that signal that during that frame.
+                     */
+
+                    var data = msg.AsButtonClicked();
+
+                    if (_pressedButtonIds.Add(data.ButtonId))
+                        PropogateMsgToInterfaces(msg);
+                        
+                    break;
+                }
+            }
+
+            // we handle ButtonClicked events separately in OnButtonClicked
+            if (msg.Event != GameMessage.Type.ButtonClicked)
+                PropogateMsgToInterfaces(msg);
         }
     }
 }

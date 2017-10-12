@@ -71,7 +71,7 @@ namespace CScape.Core.Game.Items
                     var overflow = delta.Id.GetOverflow(delta.Amount);
                     return new ItemChangeInfo(
                         emptySlotIdx.Value,
-                        new ItemStack(delta.Id, delta.Amount - overflow),
+                        new ItemStack(delta.Id, (int)(delta.Amount - overflow)),
                         overflow);
                 }
                 else // we found no empty slots. in this case, it means that the container is full.
@@ -100,7 +100,7 @@ namespace CScape.Core.Game.Items
                 if (finalNewAmount > 0)
                     return new ItemChangeInfo(
                         nullExistingIdx.Value,
-                        new ItemStack(existingItem.Id, finalNewAmount - overflow),
+                        new ItemStack(existingItem.Id, (int)(finalNewAmount - overflow)),
                         overflow);
 
                 // crap

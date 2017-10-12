@@ -11,15 +11,17 @@ namespace CScape.Core.Game.Interface
     /// Defines an item manager that manages standard item equipment and stats for characters.
     /// Provider should be at least 14 slots in size. Any extra slots will be ignored.
     /// </summary>
+    
     public class EquipmentManager : AbstractSyncedItemManager
     {
+        /*
         public const int EquipmentMaxSize = 14;
 
         public EquipmentStats Stats { get; }
 
         [NotNull] private readonly Player _player;
         private readonly IItemDefinitionDatabase _db;
-
+        
         public EquipmentManager(
             int interfaceId, [NotNull] Player player, [NotNull] IServiceProvider services,
             [NotNull] IItemProvider provider)
@@ -80,24 +82,27 @@ namespace CScape.Core.Game.Interface
 
             return ItemChangeInfo.Invalid;
         }
+        */
 
         protected override bool InternalExecuteChangeInfo(ItemChangeInfo info)
         {
+            /*
             var success = ItemHelper.ExecuteChangeInfo(this, info);
             if (!success)
                 return false;
 
             var def = _db.GetAsserted(info.NewItemDefId) as IEquippableItem;
-
+            */
             // keep stats updated
             Stats.Update(this);
             SyncStats();
 
             // call on equip on def.
             def?.OnEquip(_player, this, info.Index);
-            return true;
+            //return true;
         }
 
+        /*
         private (bool status, int val) IsValidIdx(EquipSlotType slot)
         {
             var idx = (int) slot;
@@ -107,6 +112,7 @@ namespace CScape.Core.Game.Interface
 
             return (true, idx);
         }
+        */
 
         private void SyncStats()
         {
@@ -130,6 +136,7 @@ namespace CScape.Core.Game.Interface
             PushUpdate(new SetInterfaceTextPacket(1687, $"Prayer: {Format(Stats.PrayerBonus)}"));
         }
 
+        /*
         public override int Count(int id)
         {
             var def = _db.GetAsserted(id) as IEquippableItem;
@@ -144,5 +151,6 @@ namespace CScape.Core.Game.Interface
             // return amount in slot
             return Provider.GetAmount(idx);
         }
+        */
     }
 }

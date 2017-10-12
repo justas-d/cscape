@@ -53,8 +53,6 @@ namespace CScape.Core.Game.Entity
         public bool TeleportToDestWhenWalking { get; set; }
 
         // todo : only register container interfaces if the player can see them
-        [NotNull] public BasicItemManager Inventory { get; }
-        [NotNull] public EquipmentManager Equipment { get; }
         [NotNull] public PlayerSkills Skills { get; }
 
 

@@ -6,7 +6,7 @@ namespace CScape.Core.Game.Item
 {
     public static class ItemHelper
     {
-        public static int GetOverflow(this IItemDefinition def, int uncheckedAmount)
+        public static long GetOverflow(this IItemDefinition def, long uncheckedAmount)
             => uncheckedAmount > def.MaxAmount ? uncheckedAmount - def.MaxAmount : 0;
 
         public static (int? existingIdx, int? emptyIdx) GetExistingOrEmptyIdx(

@@ -3,7 +3,6 @@ using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
@@ -36,10 +35,12 @@ namespace CScape.Core.Game.Entities
 
             // item
             ItemChange,
+            EquipmentChange,
 
             // interface
             NewInterfaceShown,
             InterfaceClosed,
+            ButtonClicked,
 
             // visual messages
             EntityEnteredViewRange,
@@ -94,7 +95,7 @@ namespace CScape.Core.Game.Entities
             return (T) _data;
         }
 
-
+        public ButtonClick AsButtonClicked() => AssertCast<ButtonClick>(Type.ButtonClicked);
         public ItemChange AsItemChange() => AssertCast<ItemChange>(Type.ItemChange);
 
         public InterfaceMetadata AsInterfaceClosed() => AssertCast<InterfaceMetadata>(Type.InterfaceClosed);

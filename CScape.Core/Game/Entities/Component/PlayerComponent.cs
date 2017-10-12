@@ -1,4 +1,5 @@
 ﻿using System;
+using CScape.Core.Game.Interface;
 using CScape.Core.Network.Entity.Component;
 using JetBrains.Annotations;
 
@@ -13,8 +14,17 @@ namespace CScape.Core.Game.Entities.Component
             Admin = 2
         }
 
+        // TODO : fill player component with data from DB
+
         public Title TitleIcon { get; }
 
+        [NotNull]
+        public IItemContainer Backpack { get; }
+        [NotNull]
+        public IItemContainer Equipment { get; }
+        [NotNull]
+        public IItemContainer Bank { get; }
+        
         [NotNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public int PlayerId { get; }

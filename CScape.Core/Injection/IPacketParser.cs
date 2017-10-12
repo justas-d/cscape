@@ -14,7 +14,6 @@ namespace CScape.Core.Injection
 
         public byte Opcode { get; }
 
-        [CanBeNull]
         public Blob Data { get; }
 
         public ParseStatus Status { get; }
