@@ -62,10 +62,5 @@ namespace CScape.Core.Injection
         /// Returns whether the client is connected, true, or not, false.
         /// </summary>
         bool IsConnected();
-
-        /// <summary>
-        /// Schedules a packet to be sent to the client.
-        /// </summary>
-        void SendPacket(IPacket packet);
     }
 }

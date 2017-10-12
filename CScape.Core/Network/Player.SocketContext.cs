@@ -160,8 +160,6 @@ namespace CScape.Core.Network
             return true;
         }
 
-        public void SendPacket(IPacket packet) => _msg.Enqueue(packet);
-
         public void Dispose()
         {
             if (IsDisposed) return;
