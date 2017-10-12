@@ -45,15 +45,14 @@ namespace CScape.Core.Network.Entity.Component
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
         }
 
+        // TODO : flushing should be done at the end of the network update cycle (separate msg? use FrameEnd?)
         public void NetworkUpdate()
         {
             // don't do anything if there's no connection
             if (!Socket.IsConnected())
                 return;
 
-            // write our data
-            foreach (var sync in Parent.Network)
-                sync.Update(Loop, this);
+            TODO
 
             foreach (var packet in _queuedPackets)
                 packet.Send(Socket.OutStream);
