@@ -81,8 +81,8 @@ namespace CScape.Core.Network.Entity.Component
                         DropConnection();
 
                     Parent.SendMessage(
-                        new EntityMessage(
-                            this, EntityMessage.EventType.NewPacket, packet));
+                        new GameMessage(
+                            this, GameMessage.Type.NewPacket, packet));
                 }
             }
         }
@@ -108,29 +108,29 @@ namespace CScape.Core.Network.Entity.Component
             // reinitialize was successful
 
             Parent.SendMessage(
-                new EntityMessage(
-                    this, EntityMessage.EventType.NetworkReinitialize, null));
+                new GameMessage(
+                    this, GameMessage.Type.NetworkReinitialize, null));
 
             return true;
         }
 
         public void SendPacket(IPacket packet) => _queuedPackets.Add(packet);
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.DestroyEntity:
+                case GameMessage.Type.DestroyEntity:
                 {
                     DropConnection();
                     break;
                 }
-                case EntityMessage.EventType.FrameUpdate:
+                case GameMessage.Type.FrameUpdate:
                 {
                     FrameUpdate();
                     break;
                 }
-                case EntityMessage.EventType.NetworkUpdate:
+                case GameMessage.Type.NetworkUpdate:
                 {
                     NetworkUpdate();
                     break;

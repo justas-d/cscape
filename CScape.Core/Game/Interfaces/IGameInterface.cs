@@ -12,6 +12,6 @@ namespace CScape.Core.Game.Entities.Interface
         IPacket GetClosePacket();
         IEnumerable<IPacket> GetUpdatePackets();
 
-        void ReceiveMessage(EntityMessage msg);
+        void ReceiveMessage(GameMessage msg);
     }
 }

@@ -36,35 +36,35 @@ namespace CScape.Core.Game.Interface
             SyncStats();
         }
 
-        public override ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount)
+        public override ItemChangeInfo CalcChangeInfo(int id, int deltaAmount)
         {
             if(deltaAmount == 0)
-                return ItemProviderChangeInfo.Invalid;
+                return ItemChangeInfo.Invalid;
 
             // get def
             var def = _db.GetAsserted(id) as IEquippableItem;
 
             // only add equipables
             if (def == null)
-                return ItemProviderChangeInfo.Invalid;
+                return ItemChangeInfo.Invalid;
 
             // validate idx
             var (isValid, idx) = IsValidIdx(def.Slot);
             if (!isValid)
-                return ItemProviderChangeInfo.Invalid;
+                return ItemChangeInfo.Invalid;
 
             if (Provider.IsEmptyAtIndex(idx))
             {
                 // disallow remove operations
                 if (deltaAmount < 0)
-                    return ItemProviderChangeInfo.Invalid;
+                    return ItemChangeInfo.Invalid;
 
                 // try equipping.
                 if (!def.CanEquip(_player))
-                    return ItemProviderChangeInfo.Invalid;
+                    return ItemChangeInfo.Invalid;
 
                 // can equip and slot is empty, return info.
-                return new ItemProviderChangeInfo(idx, deltaAmount, 0, id);
+                return new ItemChangeInfo(idx, deltaAmount, 0, id);
             }
 
             // item exists, only allow valid info if id's match
@@ -74,14 +74,14 @@ namespace CScape.Core.Game.Interface
                 long uncheckedAmount = Provider.GetAmount(idx) + deltaAmount;
                 var overflow = ItemHelper.CalculateOverflow(def, uncheckedAmount);
 
-                return new ItemProviderChangeInfo(idx, Convert.ToInt32(uncheckedAmount - overflow), overflow, id);
+                return new ItemChangeInfo(idx, Convert.ToInt32(uncheckedAmount - overflow), overflow, id);
 
             }
 
-            return ItemProviderChangeInfo.Invalid;
+            return ItemChangeInfo.Invalid;
         }
 
-        protected override bool InternalExecuteChangeInfo(ItemProviderChangeInfo info)
+        protected override bool InternalExecuteChangeInfo(ItemChangeInfo info)
         {
             var success = ItemHelper.ExecuteChangeInfo(this, info);
             if (!success)
@@ -130,7 +130,7 @@ namespace CScape.Core.Game.Interface
             PushUpdate(new SetInterfaceTextPacket(1687, $"Prayer: {Format(Stats.PrayerBonus)}"));
         }
 
-        public override int Contains(int id)
+        public override int Count(int id)
         {
             var def = _db.GetAsserted(id) as IEquippableItem;
             if (def == null)

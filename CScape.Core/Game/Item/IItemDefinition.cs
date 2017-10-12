@@ -1,6 +1,5 @@
 using System;
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
 
 namespace CScape.Core.Game.Item
 {
@@ -48,11 +47,11 @@ namespace CScape.Core.Game.Item
         /// Called whenever this type of item is used with another item.
         /// </summary>
         void UseWith(Player player, 
-            IContainerInterface ourContainer, int ourIdx, 
+            IContainerInterface ourContainers, int ourIdx, 
             IContainerInterface otherContainer, int otherIdx);
 
         /// <summary>
-        /// CAlled whenever an action occurs on an item with this definition.
+        /// Called whenever an action occurs on an item with this definition.
         /// </summary>
         /// <param name="container">The container that this item belongs to.</param>
         /// <param name="index">The index in the container of this item.</param>

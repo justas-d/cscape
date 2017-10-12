@@ -22,9 +22,9 @@ namespace CScape.Core.Network.Entity.Component
             net.SendPacket(new DebugInfoPacket((int)loop.DeltaTime, (int)loop.TickProcessTime));
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.NetworkUpdate)
+            if (msg.Event == GameMessage.Type.NetworkUpdate)
                 Sync();
         }
     }

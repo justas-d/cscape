@@ -57,7 +57,6 @@ namespace CScape.Core.Game.Entity
         [NotNull] public EquipmentManager Equipment { get; }
         [NotNull] public PlayerSkills Skills { get; }
 
-        [NotNull] public PlayerInterfaceController Interfaces { get; }
 
         //private readonly IServiceProvider _services;
 

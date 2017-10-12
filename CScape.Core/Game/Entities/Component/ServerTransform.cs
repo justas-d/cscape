@@ -65,9 +65,9 @@ namespace CScape.Core.Game.Entities.Component
             PoE.RegisterNewEntity(this);
 
             Parent.SendMessage(
-                new EntityMessage(
+                new GameMessage(
                     this, 
-                    EntityMessage.EventType.PoeSwitch, 
+                    GameMessage.Type.PoeSwitch, 
                     new PoeSwitchMessageData(oldPoe, newPoe)));
 
             UpdateRegion();
@@ -90,9 +90,9 @@ namespace CScape.Core.Game.Entities.Component
             NeedsSightEvaluation = true;
 
             Parent.SendMessage(
-                new EntityMessage(
+                new GameMessage(
                     this,
-                    EntityMessage.EventType.Teleport,
+                    GameMessage.Type.Teleport,
                     new TeleportMessageData(oldPos, newPos)));
 
         }
@@ -103,9 +103,9 @@ namespace CScape.Core.Game.Entities.Component
             FacingData = data ?? throw new ArgumentNullException(nameof(data));
 
             Parent.SendMessage(
-                new EntityMessage(
+                new GameMessage(
                     this, 
-                    EntityMessage.EventType.NewFacingDirection, 
+                    GameMessage.Type.NewFacingDirection, 
                     data));
         }
 
@@ -114,8 +114,8 @@ namespace CScape.Core.Game.Entities.Component
             InteractingEntity = ent ?? throw new ArgumentNullException(nameof(ent));
 
             Parent.SendMessage(
-                new EntityMessage(
-                    this, EntityMessage.EventType.NewInteractingEntity,
+                new GameMessage(
+                    this, GameMessage.Type.NewInteractingEntity,
                     ent));
         }
 
@@ -144,11 +144,11 @@ namespace CScape.Core.Game.Entities.Component
                 .Debug(this, "Synced client locals to globals.");
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             // TODO : handle ForcedMovement in ServerTransform,
             // TODO : handle ForcedMovement movement over time in a separate component
-            if (msg.Event == EntityMessage.EventType.Move)
+            if (msg.Event == GameMessage.Type.Move)
             {
                 var delta = msg.AsMove().SumMovements();
 

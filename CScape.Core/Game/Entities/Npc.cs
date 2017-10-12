@@ -27,8 +27,8 @@ namespace CScape.Core.Game.Entities
         {
             DefinitionId = newId;
             Parent.SendMessage(
-                new EntityMessage(
-                    this, EntityMessage.EventType.DefinitionChange, newId));
+                new GameMessage(
+                    this, GameMessage.Type.DefinitionChange, newId));
         }
 
         public void Say(string text)
@@ -36,11 +36,11 @@ namespace CScape.Core.Game.Entities
            throw new NotImplementedException();
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.DestroyEntity:
+                case GameMessage.Type.DestroyEntity:
                 {
                     _destroyCallback(this);
                     break;

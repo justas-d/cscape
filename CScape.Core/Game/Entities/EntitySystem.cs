@@ -154,7 +154,7 @@ namespace CScape.Core.Game.Entities
             var ent = Get(handle);
 
             ent.SendMessage(
-                new EntityMessage(null, EntityMessage.EventType.DestroyEntity, true));
+                new GameMessage(null, GameMessage.Type.DestroyEntity, true));
 
             // advance the generation for this id
             _generationTracker[handle.Id] += 1;

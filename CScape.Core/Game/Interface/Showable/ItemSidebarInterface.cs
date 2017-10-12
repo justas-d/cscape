@@ -2,7 +2,7 @@
 {
     public class ItemSidebarInterface : SingleUserSidebarInterface, IContainerInterface
     {
-        public IItemManager Items => _items;
+        public IItemContainer Items => _items;
 
         private readonly AbstractSyncedItemManager _items;
 

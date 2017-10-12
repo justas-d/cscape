@@ -26,15 +26,15 @@ namespace CScape.Core.Game.Entities.Component
         {
         }
 
-        public void ReceiveMessage(EntityMessage msg)
+        public void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.Teleport:
+                case GameMessage.Type.Teleport:
                     UpdatePosition();
                     break;
 
-                case EntityMessage.EventType.Move:
+                case GameMessage.Type.Move:
                     UpdateOnMove(msg.AsMove().SumMovements());
                     break;
             }
@@ -88,8 +88,8 @@ namespace CScape.Core.Game.Entities.Component
             if (!oldRegion.Equals(_clientRegion))
             {
                 Parent.SendMessage(
-                    new EntityMessage(
-                        this, EntityMessage.EventType.ClientRegionChanged, 
+                    new GameMessage(
+                        this, GameMessage.Type.ClientRegionChanged, 
                         _clientRegion));                
             }
 

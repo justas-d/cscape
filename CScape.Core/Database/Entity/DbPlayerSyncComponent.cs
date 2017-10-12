@@ -16,7 +16,7 @@ namespace CScape.Core.Database.Entity
             
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             throw new NotImplementedException();
         }

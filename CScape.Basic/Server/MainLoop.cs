@@ -52,7 +52,7 @@ namespace CScape.Basic.Server
             {
                 _tickWatch.Restart();
 
-                void SendMessage(EntityMessage msg)
+                void SendMessage(GameMessage msg)
                 {
                     foreach (var ent in Server.Entities.All.Values)
                         ent.SendMessage(msg);
@@ -70,7 +70,7 @@ namespace CScape.Basic.Server
                 if ((timeSinceGc += DeltaTime) >= _config.AutoSaveIntervalMs)
                 {
                     _log.Normal(this, "Sending Entity GC message");
-                    SendMessage(EntityMessage.GC);
+                    SendMessage(GameMessage.GC);
                     _log.Normal(this, "Performing world GC");
                     Server.Overworld.GC();
                     // TODO : PoE factory, iterate over all PoE's when it's time for entity GC
@@ -87,10 +87,10 @@ namespace CScape.Basic.Server
                 //================================================
 
 
-                SendMessage(EntityMessage.FrameUpdate);
-                SendMessage(EntityMessage.DatabaseUpdate);
-                SendMessage(EntityMessage.NetworkUpdate);
-                SendMessage(EntityMessage.FrameEnd);
+                SendMessage(GameMessage.FrameUpdate);
+                SendMessage(GameMessage.DatabaseUpdate);
+                SendMessage(GameMessage.NetworkUpdate);
+                SendMessage(GameMessage.FrameEnd);
 
                 //================================================
 

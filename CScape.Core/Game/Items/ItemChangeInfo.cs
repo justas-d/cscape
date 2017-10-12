@@ -1,11 +1,11 @@
-using CScape.Core.Game.Item;
+using CScape.Core.Game.Items;
 
 namespace CScape.Core.Game.Interface
 {
     /// <summary>
     /// Describes how to manipulate an underlying item provider;
     /// </summary>
-    public struct ItemProviderChangeInfo
+    public struct ItemChangeInfo
     {
         /// <summary>
         /// Whether this operation can be carried out. (set if input is invalid, empty, null, container is full etc).
@@ -17,42 +17,32 @@ namespace CScape.Core.Game.Interface
         /// </summary>
         public int Index { get; }
 
-        /// <summary>
-        /// The new amount of the item.
-        /// </summary>
-        public int NewAmount { get; }
-
-        /// <summary>
-        /// The new id of the item.
-        /// </summary>
-        public int NewItemDefId { get; }
+        public ItemStack NewItem { get; }
 
         /// <summary>
         /// The amount of the item that, due to maximum stack amounts, or because the contains is full, could not have been added to the container.
         /// </summary>
         public long OverflowAmount { get; }
 
-        public static ItemProviderChangeInfo Invalid => new ItemProviderChangeInfo(false);
+        public static ItemChangeInfo Invalid => new ItemChangeInfo(false);
 
-        private ItemProviderChangeInfo(bool validity)
+        private ItemChangeInfo(bool validity)
         {
             IsValid = validity;
             Index = -1;
-            NewItemDefId = -1;
-            NewAmount = 0;
+            NewItem = ItemStack.Empty;
             OverflowAmount = 0;
         }
 
-        public static ItemProviderChangeInfo Remove(int index) => new ItemProviderChangeInfo(index);
+        public static ItemChangeInfo Remove(int index) => new ItemChangeInfo(index);
 
         /// <summary>
         /// Mangaged remove item ctor
         /// </summary>
-        private ItemProviderChangeInfo(int index)
+        private ItemChangeInfo(int index)
         {
             Index = index;
-            NewItemDefId = ItemHelper.EmptyId;
-            NewAmount = ItemHelper.EmptyAmount;
+            NewItem = ItemStack.Empty;
             OverflowAmount = 0;
             IsValid = true;
         }
@@ -60,13 +50,13 @@ namespace CScape.Core.Game.Interface
         /// <summary>
         /// Change item state ctor  
         /// </summary>
-        public ItemProviderChangeInfo(int index, int newAmount, long overflowAmount, int newItemDefId)
+        /// public ItemProviderChangeInfo(int index, int newAmount, long overflowAmount, int newItemDefId)
+        public ItemChangeInfo(int index, ItemStack newItem, long overflowAmount)
         {
             IsValid = true;
             Index = index;
-            NewAmount = newAmount;
+            NewItem = newItem;
             OverflowAmount = overflowAmount;
-            NewItemDefId = newItemDefId;
         }
     }
 }

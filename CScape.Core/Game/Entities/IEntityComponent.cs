@@ -13,7 +13,7 @@ namespace CScape.Core.Game.Entities
         Entity Parent { get; }
         int Priority { get; }
 
-        void ReceiveMessage([NotNull] EntityMessage msg);
+        void ReceiveMessage([NotNull] GameMessage msg);
     }
 
     public abstract class EntityComponent : IEntityComponent
@@ -36,6 +36,6 @@ namespace CScape.Core.Game.Entities
             Loop = parent.Server.Services.ThrowOrGet<IMainLoop>();
         }
 
-        public abstract void ReceiveMessage(EntityMessage msg);
+        public abstract void ReceiveMessage(GameMessage msg);
     }
 }

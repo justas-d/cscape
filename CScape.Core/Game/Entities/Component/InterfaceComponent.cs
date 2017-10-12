@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Interface;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -67,8 +66,8 @@ namespace CScape.Core.Game.Entities.Component
             }
 
             Parent.SendMessage(
-                new EntityMessage(
-                    this, EntityMessage.EventType.InterfaceClosed, meta));
+                new GameMessage(
+                    this, GameMessage.Type.InterfaceClosed, meta));
         }
 
         public void Show(InterfaceMetadata meta)
@@ -146,8 +145,8 @@ namespace CScape.Core.Game.Entities.Component
             }
 
             Parent.SendMessage(
-                new EntityMessage(
-                    this, EntityMessage.EventType.NewInterfaceShown, meta));
+                new GameMessage(
+                    this, GameMessage.Type.NewInterfaceShown, meta));
         }
 
         private void Update()
@@ -171,10 +170,14 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
         
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.FrameUpdate)
+            if (msg.Event == GameMessage.Type.FrameUpdate)
                 Update();
+
+            foreach(var interf in _interfaces.Values)
+                interf.Interface.ReceiveMessage(msg);
+                
         }
     }
 }

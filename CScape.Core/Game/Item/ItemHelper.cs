@@ -6,33 +6,20 @@ namespace CScape.Core.Game.Item
 {
     public static class ItemHelper
     {
-        public static readonly (int id, int amount) EmptyItem = (EmptyId, EmptyAmount);
+        public static int GetOverflow(this IItemDefinition def, int uncheckedAmount)
+            => uncheckedAmount > def.MaxAmount ? uncheckedAmount - def.MaxAmount : 0;
 
-        public const int EmptyId = 0;
-        public const int EmptyAmount = 0;
-
-        public static bool IsEmpty(int id, int amount) => id <= EmptyId || amount <= EmptyAmount;
-        public static bool IsEmpty((int id, int amount) item) => IsEmpty(item.id, item.amount);
-        public static bool IsEmptyAtIndex(this IItemProvider provider, int idx)
-        {
-            if (0 > idx || idx >= provider.Count) return true;
-            return IsEmpty(provider.GetId(idx), provider.GetAmount(idx));
-        }
-
-        public static long CalculateOverflow(IItemDefinition def, long uncheckedAmount)
-        {
-            return uncheckedAmount > def.MaxAmount ? uncheckedAmount - def.MaxAmount : 0;
-        }
-
-        public static (int? existingIdx, int? emptyIdx) GetExistingOrEmptyIdx(IItemManager manager, int id)
+        public static (int? existingIdx, int? emptyIdx) GetExistingOrEmptyIdx(
+            this IItemContainer container, int id)
         {
             int? emptyIdx = null;
             int? existingIdx = null;
 
-            for (var i = 0; i < manager.Size; i++)
+            for (var i = 0; i < container.Provider.Count; i++)
             {
                 // handle empty items, store the first index we find just in case.
-                if (manager.Provider.IsEmptyAtIndex(i))
+                var item = container.Provider[i];
+                if (item.IsEmpty())
                 {
                     if (emptyIdx == null)
                         emptyIdx = i;
@@ -40,7 +27,7 @@ namespace CScape.Core.Game.Item
                 }
 
                 // compare id's
-                if (manager.Provider.GetId(i) == id)
+                if (item.Id.ItemId == id)
                 {
                     // todo : should we skip items that are fully stacked when looking for items with the same id in BasicItemManager?
                     // we found an existing item, set the existing item index and gtfo out of the loop.
@@ -54,15 +41,15 @@ namespace CScape.Core.Game.Item
 
 
         public static bool RemoveFromA_AddToB(
-            IItemManager containerA, int idxA,
-            IItemManager containerB)
+            IItemContainer containerA, int idxA,
+            IItemContainer containerB)
         {
             // verify idxA
             if (IsNotInRange(idxA, containerA.Size)) return false;
             var id = containerA.Provider.GetId(idxA);
 
             // calc changes
-            var remFromA = ItemProviderChangeInfo.Remove(idxA);
+            var remFromA = ItemChangeInfo.Remove(idxA);
             var addToB = containerB.CalcChangeInfo(id,
                 containerA.Provider.GetAmount(idxA));
 
@@ -82,8 +69,8 @@ namespace CScape.Core.Game.Item
         /// </summary>
         /// <returns>True on success, false otherwise</returns>
         public static bool InterManagerSwap(
-            IItemManager containerA, int idxA, 
-            IItemManager containerB, int idxB)
+            IItemContainer containerA, int idxA, 
+            IItemContainer containerB, int idxB)
         {
             // if idxB is null, find either an item idx with the same id or an empty slot.
 
@@ -102,7 +89,7 @@ namespace CScape.Core.Game.Item
             var cBtoA = containerA.CalcChangeInfo(itemB.id, itemB.amount);
 
             // operation is undefinied if any changeInfo's are invalid or have overflow, return false
-            bool IsInvalidChangeInfo(ref ItemProviderChangeInfo info) 
+            bool IsInvalidChangeInfo(ref ItemChangeInfo info) 
                 => !info.IsValid || info.OverflowAmount != 0;
 
             if(IsInvalidChangeInfo(ref cAtoB)) return false;
@@ -110,8 +97,8 @@ namespace CScape.Core.Game.Item
 
             // managed remove A and B
             if (!SafeDoubleInfoExecute(
-                containerA, ItemProviderChangeInfo.Remove(idxA),
-                containerB, ItemProviderChangeInfo.Remove(idxB))) return false;
+                containerA, ItemChangeInfo.Remove(idxA),
+                containerB, ItemChangeInfo.Remove(idxB))) return false;
 
             // execute change infos we calculated earlier
             if (!SafeDoubleInfoExecute(
@@ -122,12 +109,12 @@ namespace CScape.Core.Game.Item
         }
 
         private static bool SafeDoubleInfoExecute(
-            IItemManager managerA, ItemProviderChangeInfo infoA,
-            IItemManager managerB, ItemProviderChangeInfo infoB)
+            IItemContainer managerA, ItemChangeInfo infoA,
+            IItemContainer managerB, ItemChangeInfo infoB)
         {
             // cache state of A.
             var idx = infoA.Index;
-            var cacheA = new ItemProviderChangeInfo(idx, managerA.Provider.GetAmount(idx), 0,
+            var cacheA = new ItemChangeInfo(idx, managerA.Provider.GetAmount(idx), 0,
                 managerA.Provider.GetId(idx));
 
             // execute
@@ -156,8 +143,8 @@ namespace CScape.Core.Game.Item
         /// </summary>
         /// <returns>True on success, false otherwise</returns>
         public static bool InterManagerSwapPreserveIndex(
-            IItemManager containerA, int idxA,
-            IItemManager containerB, int idxB,
+            IItemContainer containerA, int idxA,
+            IItemContainer containerB, int idxB,
             IItemDefinitionDatabase db)
         {
             // validate indicies
@@ -182,10 +169,10 @@ namespace CScape.Core.Game.Item
                 if (!SafeDoubleInfoExecute(
                     // stack A into B
                     containerB,
-                    new ItemProviderChangeInfo(idxB, Convert.ToInt32(uncheckedOverflow - overflow), 0, itemB.id),
+                    new ItemChangeInfo(idxB, Convert.ToInt32(uncheckedOverflow - overflow), 0, itemB.id),
                     // leave overflow for A
                     containerA,
-                    new ItemProviderChangeInfo(idxA, Convert.ToInt32(overflow), 0, itemA.id)))
+                    new ItemChangeInfo(idxA, Convert.ToInt32(overflow), 0, itemA.id)))
 
                     return false;
             }
@@ -193,36 +180,15 @@ namespace CScape.Core.Game.Item
             {
                 // remove A and B
                 if (!SafeDoubleInfoExecute(
-                    containerA, ItemProviderChangeInfo.Remove(idxA),
-                    containerB, ItemProviderChangeInfo.Remove(idxB)))
+                    containerA, ItemChangeInfo.Remove(idxA),
+                    containerB, ItemChangeInfo.Remove(idxB)))
                     return false;
 
                 // exec swap
                 if (!SafeDoubleInfoExecute(
-                    containerA, new ItemProviderChangeInfo(idxA, itemB.amount, 0, itemB.id),
-                    containerB, new ItemProviderChangeInfo(idxB, itemA.amount, 0, itemA.id)))
+                    containerA, new ItemChangeInfo(idxA, itemB.amount, 0, itemB.id),
+                    containerB, new ItemChangeInfo(idxB, itemA.amount, 0, itemA.id)))
                     return false;
-            }
-
-            return true;
-        }
-
-        public static bool  ExecuteChangeInfo(IItemManager manager, ItemProviderChangeInfo info)
-        {
-            if (!info.IsValid)
-                return false;
-
-            if (info.Index < 0 || info.Index >= manager.Size)
-                return false;
-
-            // execute
-            manager.Provider.SetId(info.Index, info.NewItemDefId);
-            manager.Provider.SetAmount(info.Index, info.NewAmount);
-
-            if (manager.Provider.IsEmptyAtIndex(info.Index))
-            {
-                manager.Provider.SetId(info.Index, EmptyId);
-                manager.Provider.SetAmount(info.Index, EmptyAmount);
             }
 
             return true;

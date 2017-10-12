@@ -1,5 +1,4 @@
-﻿using System;
-using CScape.Core.Game.Entities;
+﻿using CScape.Core.Game.Entities;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,19 +55,19 @@ namespace CScape.Core.Network.Entity.Component
             _packetQueue.Add(meta.Interface.GetClosePacket());
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.NetworkUpdate:
+                case GameMessage.Type.NetworkUpdate:
                     Sync();
                     break;
-                case EntityMessage.EventType.InterfaceClosed:
+                case GameMessage.Type.InterfaceClosed:
                 {
                     InterfaceClosed(msg.AsInterfaceClosed());
                     break;
                 }
-                case EntityMessage.EventType.NewInterfaceShown:
+                case GameMessage.Type.NewInterfaceShown:
                 {
                     InterfaceShown(msg.AsNewInterfaceShown());
                     break;

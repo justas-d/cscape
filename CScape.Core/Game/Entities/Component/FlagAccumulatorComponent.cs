@@ -30,71 +30,71 @@ namespace CScape.Core.Game.Entities.Component
                 _flags.Add(flag.Type, flag);
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.NewOverheadText:
+                case GameMessage.Type.NewOverheadText:
                 {
                     SetFlag(new OverheadForcedTextUpdateFlag(msg.AsNewOverheadText()));
                     break;
                 }
-                case EntityMessage.EventType.NewAnimation:
+                case GameMessage.Type.NewAnimation:
                 {
                     SetFlag(new AnimationUpdateFlag(msg.AsNewAnimation()));
                     break;
                 }
-                case EntityMessage.EventType.ParticleEffect:
+                case GameMessage.Type.ParticleEffect:
                 {
                     SetFlag(new ParticleEffectUpdateFlag(msg.AsParticleEffect()));
                     break;
                 }
-                case EntityMessage.EventType.ForcedMovement:
+                case GameMessage.Type.ForcedMovement:
                 {
                     SetFlag(new ForcedMovementUpdateFlag(msg.AsForcedMovement()));
                     break;
                 }
-                case EntityMessage.EventType.ChatMessage:
+                case GameMessage.Type.ChatMessage:
                 {
                     SetFlag(new PlayerChatUpdateFlag(msg.AsChatMessage()));
                     break;
                 }
-                case EntityMessage.EventType.AppearanceChanged:
+                case GameMessage.Type.AppearanceChanged:
                 {
                     SetFlag(new PlayerAppearanceUpdateFlag());
                     break;
                 }
-                case EntityMessage.EventType.TookDamage:
+                case GameMessage.Type.TookDamage:
                 {
                     SetFlag(new DamageUpdateFlag(msg.AsTookDamage()));
                     break;
                 }
-                case EntityMessage.EventType.NewFacingDirection:
+                case GameMessage.Type.NewFacingDirection:
                 {
                     SetFlag(new FacingCoordinateUpdateFlag(msg.AsNewFacingDirection()));
                     break;
                 }
-                case EntityMessage.EventType.NewInteractingEntity:
+                case GameMessage.Type.NewInteractingEntity:
                 {
                     SetFlag(new InteractingEntityUpdateFlag(msg.AsNewInteractingEntity()));
                     break;
                 }
-                case EntityMessage.EventType.DefinitionChange:
+                case GameMessage.Type.DefinitionChange:
                 {
                     SetFlag(new DefinitionChangeUpdateFlag(msg.AsDefinitionChange()));
                     break;
                 }
-                case EntityMessage.EventType.Move:
+                case GameMessage.Type.Move:
                 {
                     Movement = msg.AsMove();
                     break;
                 }
-                case EntityMessage.EventType.Teleport:
+                case GameMessage.Type.Teleport:
                 {
                     Reinitialize = true;
                     break;
                 }
-                case EntityMessage.EventType.FrameEnd:
+                case GameMessage.Type.FrameEnd:
                 {
                     _flags.Clear();
                     Reinitialize = false;

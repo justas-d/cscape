@@ -36,17 +36,17 @@ namespace CScape.Core.Game.Entities.Component
             Username = username ?? throw new ArgumentNullException(nameof(username));
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.DestroyEntity:
+                case GameMessage.Type.DestroyEntity:
                 {
                     _destroyCallback(this);
                     break;
                 }
 
-                case EntityMessage.EventType.JustDied:
+                case GameMessage.Type.JustDied:
                 {
                     // TODO : handle death in PlayerComponent
                     break;

@@ -49,8 +49,8 @@ namespace CScape.Core.Game.Entities.Component
         {
             Directions = null;
 
-            Parent.SendMessage(new EntityMessage(
-                this, EntityMessage.EventType.StopMovingAlongMovePath, null));
+            Parent.SendMessage(new GameMessage(
+                this, GameMessage.Type.StopMovingAlongMovePath, null));
         }
 
         private void ProcessMovement()
@@ -96,9 +96,9 @@ namespace CScape.Core.Game.Entities.Component
             
             // notify entity of movement.
             Parent.SendMessage(
-                new EntityMessage(
+                new GameMessage(
                     this, 
-                    EntityMessage.EventType.Move, 
+                    GameMessage.Type.Move, 
                     new MovementMetadata(d1, d2)));
         }
 
@@ -108,7 +108,7 @@ namespace CScape.Core.Game.Entities.Component
             {
                 // we just received a new direction provider, let's send a begin move path message.
                 Parent.SendMessage(
-                    new EntityMessage(this, EntityMessage.EventType.BeginMovePath, null));
+                    new GameMessage(this, GameMessage.Type.BeginMovePath, null));
 
                 _isDirectionProviderNew = false;
             }
@@ -120,7 +120,7 @@ namespace CScape.Core.Game.Entities.Component
                 {
                     // we're done moving. send the message
                     Parent.SendMessage(
-                        new EntityMessage(this, EntityMessage.EventType.ArrivedAtDestination, null));
+                        new GameMessage(this, GameMessage.Type.ArrivedAtDestination, null));
 
                     // we're done with the Directions provider, dispose it.
                     Directions = null;
@@ -133,16 +133,16 @@ namespace CScape.Core.Game.Entities.Component
             }            
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.FrameUpdate:
+                case GameMessage.Type.FrameUpdate:
                 {
                     Update();
                     break;
                 }
-                case EntityMessage.EventType.Teleport:
+                case GameMessage.Type.Teleport:
                 {
                     CancelMovingAlongPath();
                     break;

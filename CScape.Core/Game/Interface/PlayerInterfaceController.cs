@@ -73,7 +73,7 @@ namespace CScape.Core.Game.Interface
         }
 
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
 
         }

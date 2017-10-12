@@ -41,24 +41,24 @@ namespace CScape.Core.Game.Entities.Component
             if (0 >= Health)
             {
                 Parent.SendMessage(
-                    new EntityMessage(
+                    new GameMessage(
                         this,
-                        EntityMessage.EventType.JustDied,
+                        GameMessage.Type.JustDied,
                         null));
             }
         }
         
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.TookDamage:
+                case GameMessage.Type.TookDamage:
                 {
                     var dmg = msg.AsTookDamage();
                     Health -= dmg.Damage;
                     break;
                 }
-                case EntityMessage.EventType.HealedHealth:
+                case GameMessage.Type.HealedHealth:
                 {
                     var hp = msg.AsHealedHealth();
                     Health += hp;

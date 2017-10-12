@@ -153,23 +153,23 @@ namespace CScape.Core.Network.Entity.Component
             return init;
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.NetworkReinitialize:
+                case GameMessage.Type.NetworkReinitialize:
                 {
                     // todo : maybe send remove entity segments when resetting?
                     SyncEntities.Clear();
                     InitEntities.Clear();
                     break;
                 }
-                case EntityMessage.EventType.NetworkUpdate:
+                case GameMessage.Type.NetworkUpdate:
                 {
                     Sync();
                     break;
                 }
-                case EntityMessage.EventType.EntityEnteredViewRange:
+                case GameMessage.Type.EntityEnteredViewRange:
                 {
                     var h = msg.AsEntityEnteredViewRange();
                     if (IsHandleableEntity(h))
@@ -177,7 +177,7 @@ namespace CScape.Core.Network.Entity.Component
 
                     break;
                 }
-                case EntityMessage.EventType.EntityLeftViewRange:
+                case GameMessage.Type.EntityLeftViewRange:
                 {
                     var h = msg.AsEntityLeftViewRange();
                     if (IsHandleableEntity(h))

@@ -12,6 +12,6 @@ namespace CScape.Dev.Tests.Impl
             Items = new BasicItemManager(Id, services, new MockItemProvider(10));
         }
 
-        public IItemManager Items { get; }
+        public IItemContainer Items { get; }
     }
 }

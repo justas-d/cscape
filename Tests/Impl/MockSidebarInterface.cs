@@ -15,7 +15,7 @@ namespace CScape.Dev.Tests.Impl
             Items = new BasicItemManager(id, server.Services, new MockItemProvider(28));
         }
 
-        public IItemManager Items { get; }
+        public IItemContainer Items { get; }
     }
 
     public class MockSidebarInterface : SingleUserShowableInterface, ISidebarInterface

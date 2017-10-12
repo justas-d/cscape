@@ -201,7 +201,7 @@ namespace CScape.Basic.Commands
         public void ClearInv(CommandContext ctx)
         {
             for (var i = 0; i < ctx.Callee.Inventory.Size; i++)
-                ctx.Callee.Inventory.ExecuteChangeInfo(ItemProviderChangeInfo.Remove(i));
+                ctx.Callee.Inventory.ExecuteChangeInfo(ItemChangeInfo.Remove(i));
         }
 
         [CommandMethod("rngitem")]

@@ -56,11 +56,11 @@ namespace CScape.Core.Network.Entity.Component
             }
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.NewPacket:
+                case GameMessage.Type.NewPacket:
                 {
                     HandlePacket(msg.AsNewPacket());
                     break;

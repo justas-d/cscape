@@ -81,8 +81,8 @@ namespace CScape.Core.Game.Entities.Component
                 void SendDeleteMsg(EntityHandle ent)
                 {
                     Parent.SendMessage(
-                        new EntityMessage(
-                            this, EntityMessage.EventType.EntityLeftViewRange, ent));
+                        new GameMessage(
+                            this, GameMessage.Type.EntityLeftViewRange, ent));
                 }
 
                 if (e.IsDead())
@@ -107,8 +107,8 @@ namespace CScape.Core.Game.Entities.Component
                 {
                     _seeableEntities.Add(handle);
                     Parent.SendMessage(
-                        new EntityMessage(
-                            this, EntityMessage.EventType.EntityEnteredViewRange, handle));
+                        new GameMessage(
+                            this, GameMessage.Type.EntityEnteredViewRange, handle));
                 }
             }
         }
@@ -118,21 +118,21 @@ namespace CScape.Core.Game.Entities.Component
             _seeableEntities.RemoveWhere(e => e.IsDead());
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.NetworkReinitialize:
+                case GameMessage.Type.NetworkReinitialize:
                 {
                     Reset();
                     break;
                 }
-                case EntityMessage.EventType.FrameUpdate:
+                case GameMessage.Type.FrameUpdate:
                 {
                     Update();
                     break;
                 }
-                case EntityMessage.EventType.GC:
+                case GameMessage.Type.GC:
                 {
                     GC();
                     break;

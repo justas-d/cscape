@@ -59,16 +59,16 @@ namespace CScape.Core.Network.Entity.Component
                     (short)(pos.y + 6)));
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.ClientRegionChanged:
+                case GameMessage.Type.ClientRegionChanged:
                 {
                     SyncRegion(msg.AsClientRegionChanged());
                     break;
                 }
-                case EntityMessage.EventType.NetworkReinitialize:
+                case GameMessage.Type.NetworkReinitialize:
                 {
 
                     SyncRegion(Pos.ClientRegion);

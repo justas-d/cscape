@@ -14,9 +14,9 @@
             
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.NewSystemMessage)
+            if (msg.Event == GameMessage.Type.NewSystemMessage)
             {
                 var strMSg = msg.AsNewSystemMessage();
                 Log.Normal(this, $"({Parent}): {strMSg}");

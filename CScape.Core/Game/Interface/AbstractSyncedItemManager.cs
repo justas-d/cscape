@@ -7,10 +7,10 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
 {
-    public abstract class AbstractSyncedItemManager : IItemManager, IContainerInterface
+    public abstract class AbstractSyncedItemManager : IItemContainer, IContainerInterface
     {
         public IItemProvider Provider { get; }
-        public IItemManager Items => this;
+        public IItemContainer Items => this;
 
         public int Size { get; }
         public int Id { get; }

@@ -29,9 +29,9 @@ namespace CScape.Core.Network.Entity.Component
             
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
-            if (msg.Event == EntityMessage.EventType.NewSystemMessage)
+            if (msg.Event == GameMessage.Type.NewSystemMessage)
             {
                 var msgStr = msg.AsNewSystemMessage();
                 Network.SendPacket(new SystemChatMessagePacket(msgStr));

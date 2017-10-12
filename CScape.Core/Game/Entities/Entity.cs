@@ -149,11 +149,11 @@ namespace CScape.Core.Game.Entities
         }
 
         /// <summary>
-        /// Sends out an <see cref="EntityMessage"/> to each and every component
+        /// Sends out an <see cref="GameMessage"/> to each and every component
         /// of this entity. The sender of the message will not receive the message.
         /// </summary>
         /// <param name="message">The message to be sent.</param>
-        public void SendMessage([NotNull] EntityMessage message)
+        public void SendMessage([NotNull] GameMessage message)
         {
             foreach (var frag in this)
             {
@@ -169,8 +169,8 @@ namespace CScape.Core.Game.Entities
             if (msg == null) throw new ArgumentNullException(nameof(msg));
 
             SendMessage(
-                new EntityMessage(
-                    null, EntityMessage.EventType.NewSystemMessage, msg));
+                new GameMessage(
+                    null, GameMessage.Type.NewSystemMessage, msg));
         }
 
         /// <summary>

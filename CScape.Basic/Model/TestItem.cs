@@ -65,7 +65,7 @@ namespace CScape.Basic.Model
                     var item = container.Items.Provider[index];
 
                     // remove item
-                    if (!container.Items.ExecuteChangeInfo(ItemProviderChangeInfo.Remove(index)))
+                    if (!container.Items.ExecuteChangeInfo(ItemChangeInfo.Remove(index)))
                         return;
 
                     // drop item

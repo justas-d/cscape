@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using CScape.Core.Game.Items;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interface
@@ -5,35 +7,30 @@ namespace CScape.Core.Game.Interface
     /// <summary>
     /// Safely manages item adding, removing and look up on the items of an underlying item provider.
     /// </summary>
-    public interface IItemManager
+    public interface IItemContainer
     {
         /// <summary>
         /// The underlying item provider.
         /// </summary>
-        [NotNull] IItemProvider Provider { get; }
+        [NotNull] IList<ItemStack> Provider { get; }
 
         /// <summary>
-        /// The maximum capacity.
+        /// Calculates the underlying item provider change info based on the
+        /// given item definition id and the amount of that item.
         /// </summary>
-        int Size { get; }
-
-        /// <summary>
-        /// Calculates the underlying item provider change info based on the given item definition id and the amount of that item.
-        /// </summary>
-        /// <param name="deltaAmount">The amount of the item, given by its id, we want to change. Positive numbers add items, negative numbers remove items.
-        /// 0 produces an invalid change info.</param>
-        ItemProviderChangeInfo CalcChangeInfo(int id, int deltaAmount);
+        /// <param name="delta">The item, for which change info will be calculated</param>
+        ItemChangeInfo CalcChangeInfo(ItemStack delta);
 
         /// <summary>
         /// Changes the underlying item container as describe in the change info, without taking into account the OverflowAmount.
         /// Does nothing on invalid info.
         /// </summary>
         /// <returns>True if executed succesfully, false otherwise.</returns>
-        bool ExecuteChangeInfo(ItemProviderChangeInfo info);
+        bool ExecuteChangeInfo(ItemChangeInfo info);
 
         /// <summary>
         /// Returns a sum of the amount of items that share the given id.
         /// </summary>
-        int Contains(int id);
+        int Count(int id);
     }
 }

@@ -18,11 +18,11 @@ namespace CScape.Core.Game.Entities.Component
 
         }
 
-        public override void ReceiveMessage(EntityMessage msg)
+        public override void ReceiveMessage(GameMessage msg)
         {
             switch (msg.Event)
             {
-                case EntityMessage.EventType.ArrivedAtDestination:
+                case GameMessage.Type.ArrivedAtDestination:
                 {
                     if (CurrentAction != null)
                     {
@@ -35,8 +35,8 @@ namespace CScape.Core.Game.Entities.Component
                     }
                     break;
                 }
-                case EntityMessage.EventType.Teleport:
-                case EntityMessage.EventType.StopMovingAlongMovePath:
+                case GameMessage.Type.Teleport:
+                case GameMessage.Type.StopMovingAlongMovePath:
                 {
                     CurrentAction = null;
                     break;
