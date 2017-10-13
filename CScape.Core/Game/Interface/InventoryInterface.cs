@@ -27,9 +27,15 @@ namespace CScape.Core.Game.Interfaces
 
         public bool Equals(IGameInterface other) => Id == other.Id;
 
-        public IPacket GetShowPacket() => new MassSendInterfaceItemsPacket(Id, Container);
-        
-        public IPacket GetClosePacket() => new ClearItemInterfacePacket(Id);
+        public IEnumerable<IPacket> GetShowPackets()
+        {
+            yield return new MassSendInterfaceItemsPacket(Id, Container);
+        }
+
+        public IEnumerable<IPacket> GetClosePackets()
+        {
+            yield return new ClearItemInterfacePacket(Id);
+        }
         
         public IEnumerable<IPacket> GetUpdatePackets()
         {

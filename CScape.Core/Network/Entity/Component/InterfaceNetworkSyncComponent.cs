@@ -47,12 +47,12 @@ namespace CScape.Core.Network.Entity.Component
 
         private void InterfaceShown(InterfaceMetadata meta)
         {
-            _packetQueue.Add(meta.Interface.GetShowPacket());
+            _packetQueue.AddRange(meta.Interface.GetShowPackets());
         }
 
         private void InterfaceClosed(InterfaceMetadata meta)
         {
-            _packetQueue.Add(meta.Interface.GetClosePacket());
+            _packetQueue.AddRange(meta.Interface.GetClosePackets());
         }
 
         public override void ReceiveMessage(GameMessage msg)

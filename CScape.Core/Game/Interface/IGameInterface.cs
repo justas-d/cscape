@@ -8,8 +8,8 @@ namespace CScape.Core.Game.Entities.Interface
     {
         int Id { get; }
 
-        IPacket GetShowPacket();
-        IPacket GetClosePacket();
+        IEnumerable<IPacket> GetShowPackets();
+        IEnumerable<IPacket> GetClosePackets();
         IEnumerable<IPacket> GetUpdatePackets();
 
         void ReceiveMessage(GameMessage msg);
