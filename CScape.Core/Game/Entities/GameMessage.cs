@@ -101,6 +101,7 @@ namespace CScape.Core.Game.Entities
         public ItemChange AsItemChange() => AssertCast<ItemChange>(Type.ItemChange);
         public ItemChange AsEquipmentChange() => AssertCast<ItemChange>(Type.EquipmentChange);
 
+        TODO
         // TODO : update player appearances when AsEquipmentChange is called (except if the item is any type of arrow)
 
         public InterfaceMetadata AsInterfaceClosed() => AssertCast<InterfaceMetadata>(Type.InterfaceClosed);

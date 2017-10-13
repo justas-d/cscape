@@ -1,7 +1,6 @@
 using System;
 using CScape.Core.Game.Interface;
-using CScape.Core.Injection;
-
+using CScape.Core.Game.Items;
 namespace CScape.Core.Game.Item
 {
     public static class ItemHelper
@@ -39,7 +38,7 @@ namespace CScape.Core.Game.Item
             return (existingIdx, emptyIdx);
         }
 
-
+        /*
         public static bool RemoveFromA_AddToB(
             IItemContainer containerA, int idxA,
             IItemContainer containerB)
@@ -63,6 +62,9 @@ namespace CScape.Core.Game.Item
 
             return true;
         }
+        */
+
+        // TODO : write tests for InterManagerSwap
 
         /// <summary>
         /// Swaps items between two containers without preserving the item indicies.
@@ -75,8 +77,8 @@ namespace CScape.Core.Game.Item
             // if idxB is null, find either an item idx with the same id or an empty slot.
 
             // validate indicies
-            if (IsNotInRange(idxA, containerA.Size)) return false;
-            if (IsNotInRange(idxB, containerB.Size)) return false;
+            if (IsNotInRange(idxA, containerA.Provider.Count)) return false;
+            if (IsNotInRange(idxB, containerB.Provider.Count)) return false;
 
             // get items
             var itemA = containerA.Provider[idxA];
@@ -84,9 +86,9 @@ namespace CScape.Core.Game.Item
 
             // calc change info
             // add A to containerB
-            var cAtoB = containerB.CalcChangeInfo(itemA.id, itemA.amount);
+            var cAtoB = containerB.CalcChangeInfo(itemA);
             // add B to containerA
-            var cBtoA = containerA.CalcChangeInfo(itemB.id, itemB.amount);
+            var cBtoA = containerA.CalcChangeInfo(itemB);
 
             // operation is undefinied if any changeInfo's are invalid or have overflow, return false
             bool IsInvalidChangeInfo(ref ItemChangeInfo info) 
@@ -108,31 +110,45 @@ namespace CScape.Core.Game.Item
             return true;
         }
 
+        /// <summary>
+        /// Executes two ItemChangeInfo's in such a way that change will only occur if the two of them are successful.
+        /// </summary>
+        /// <returns>True if both infos were executed succesfully, false otherwise.</returns>
         private static bool SafeDoubleInfoExecute(
             IItemContainer managerA, ItemChangeInfo infoA,
             IItemContainer managerB, ItemChangeInfo infoB)
         {
             // cache state of A.
             var idx = infoA.Index;
-            var cacheA = new ItemChangeInfo(idx, managerA.Provider.GetAmount(idx), 0,
-                managerA.Provider.GetId(idx));
+            var cacheA = new ItemChangeInfo(idx, managerA.Provider[idx], 0);
 
             // execute
             if (!managerA.ExecuteChangeInfo(infoA)) return false;
             if (!managerB.ExecuteChangeInfo(infoB))
             {
                 // A succeeded, B didn't. Revert changes to A.
-                if (!managerA.ExecuteChangeInfo(cacheA))
-                {
-                    // managed revert failed, do it manually.
-                    managerA.Provider.SetId(idx, cacheA.NewItemDefId);
-                    managerA.Provider.SetAmount(idx, cacheA.NewAmount);
-                }
-
+                GuaranteedExecuteInfo(managerA, cacheA);
+                
                 return false;
             }
 
             return true;
+        }
+
+        private static void GuaranteedExecuteInfo(
+            IItemContainer container, ItemChangeInfo info)
+        {
+            // make sure we're in range.
+            if(0 > info.Index || info.Index >= container.Provider.Count)
+                return;
+
+            // try managed
+            if (!container.ExecuteChangeInfo(info))
+            {
+                // it failed, force it
+                container.Provider[info.Index] = info.NewItem;
+            }
+
         }
 
         private static bool IsNotInRange(int val, int max)
@@ -144,37 +160,33 @@ namespace CScape.Core.Game.Item
         /// <returns>True on success, false otherwise</returns>
         public static bool InterManagerSwapPreserveIndex(
             IItemContainer containerA, int idxA,
-            IItemContainer containerB, int idxB,
-            IItemDefinitionDatabase db)
+            IItemContainer containerB, int idxB)
         {
             // validate indicies
-            if (IsNotInRange(idxA, containerA.Size)) return false;
-            if (IsNotInRange(idxB, containerB.Size)) return false;
+            if (IsNotInRange(idxA, containerA.Provider.Count)) return false;
+            if (IsNotInRange(idxB, containerB.Provider.Count)) return false;
 
             // get items
             var itemA = containerA.Provider[idxA];
             var itemB = containerB.Provider[idxB];
 
             // check ids
-            if (itemA.id == itemB.id)
+            if (itemA.Id== itemB.Id)
             {
-                // get def
-                var def = db.GetAsserted(itemA.id);
-                if (def == null) return false;
-
                 // calc stacking A into B
-                long uncheckedOverflow = itemB.amount + itemA.amount;
-                var overflow = CalculateOverflow(def, uncheckedOverflow);
+                long uncheckedOverflow = itemB.Amount + itemA.Amount;
+                var overflow = itemB.Id.GetOverflow(uncheckedOverflow);
 
                 if (!SafeDoubleInfoExecute(
                     // stack A into B
                     containerB,
-                    new ItemChangeInfo(idxB, Convert.ToInt32(uncheckedOverflow - overflow), 0, itemB.id),
+                    new ItemChangeInfo(idxB, new ItemStack(itemB.Id, Convert.ToInt32(uncheckedOverflow - overflow)), 0),
                     // leave overflow for A
                     containerA,
-                    new ItemChangeInfo(idxA, Convert.ToInt32(overflow), 0, itemA.id)))
-
+                    new ItemChangeInfo(idxA, new ItemStack(itemA.Id, Convert.ToInt32(overflow)), 0)))
+                {
                     return false;
+                }
             }
             else
             {
@@ -186,9 +198,14 @@ namespace CScape.Core.Game.Item
 
                 // exec swap
                 if (!SafeDoubleInfoExecute(
-                    containerA, new ItemChangeInfo(idxA, itemB.amount, 0, itemB.id),
-                    containerB, new ItemChangeInfo(idxB, itemA.amount, 0, itemA.id)))
-                    return false;
+                    containerA, new ItemChangeInfo(idxA, itemB, 0),
+                    containerB, new ItemChangeInfo(idxB, itemA, 0)))
+
+                {
+                    // reverse removal
+                    GuaranteedExecuteInfo(containerA, new ItemChangeInfo(idxA, itemA, 0));
+                    GuaranteedExecuteInfo(containerB, new ItemChangeInfo(idxB, itemB, 0));
+                }
             }
 
             return true;
