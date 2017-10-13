@@ -97,6 +97,7 @@ namespace CScape.Core.Game.Entities
 
         public ButtonClick AsButtonClicked() => AssertCast<ButtonClick>(Type.ButtonClicked);
         public ItemChange AsItemChange() => AssertCast<ItemChange>(Type.ItemChange);
+        public ItemChange AsEquipmentChange() => AssertCast<ItemChange>(Type.EquipmentChange);
 
         public InterfaceMetadata AsInterfaceClosed() => AssertCast<InterfaceMetadata>(Type.InterfaceClosed);
         public InterfaceMetadata AsNewInterfaceShown() => AssertCast<InterfaceMetadata>(Type.NewInterfaceShown);
