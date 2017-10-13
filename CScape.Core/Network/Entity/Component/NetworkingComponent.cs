@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     /// Responsible for managing the network part of the entity, sending out
     /// new packet and network reinitialize events.
     /// </summary>
-    [RequiresFragment(typeof(PlayerComponent))]
+    [RequiresComponent(typeof(PlayerComponent))]
     public sealed class NetworkingComponent : EntityComponent
     {
         [NotNull]
@@ -26,9 +26,6 @@ namespace CScape.Core.Network.Entity.Component
         public override int Priority { get; } = -1;
 
         private readonly List<IPacket> _queuedPackets = new List<IPacket>();
-
-        [NotNull]
-        public OutBlob OutStream => Socket.OutStream;
 
         /// <summary>
         /// In milliseconds, the delay between a socket dying and it's player being removed
@@ -45,14 +42,11 @@ namespace CScape.Core.Network.Entity.Component
             Socket = socket ?? throw new ArgumentNullException(nameof(socket));
         }
 
-        // TODO : flushing should be done at the end of the network update cycle (separate msg? use FrameEnd?)
-        public void NetworkUpdate()
+        private void FlushPackets()
         {
             // don't do anything if there's no connection
             if (!Socket.IsConnected())
                 return;
-
-            TODO
 
             foreach (var packet in _queuedPackets)
                 packet.Send(Socket.OutStream);
@@ -129,9 +123,9 @@ namespace CScape.Core.Network.Entity.Component
                     FrameUpdate();
                     break;
                 }
-                case GameMessage.Type.NetworkUpdate:
+                case GameMessage.Type.FrameEnd:
                 {
-                    NetworkUpdate();
+                    FlushPackets();
                     break;
                 }
             }
