@@ -36,6 +36,7 @@ namespace CScape.Core.Game.Entities
             // item
             ItemChange,
             EquipmentChange,
+            ItemAction,
 
             // interface
             NewInterfaceShown,
@@ -95,9 +96,12 @@ namespace CScape.Core.Game.Entities
             return (T) _data;
         }
 
+        public ItemActionMetadata AsItemAction() => AssertCast<ItemActionMetadata>(Type.ItemAction);
         public ButtonClick AsButtonClicked() => AssertCast<ButtonClick>(Type.ButtonClicked);
         public ItemChange AsItemChange() => AssertCast<ItemChange>(Type.ItemChange);
         public ItemChange AsEquipmentChange() => AssertCast<ItemChange>(Type.EquipmentChange);
+
+        // TODO : update player appearances when AsEquipmentChange is called (except if the item is any type of arrow)
 
         public InterfaceMetadata AsInterfaceClosed() => AssertCast<InterfaceMetadata>(Type.InterfaceClosed);
         public InterfaceMetadata AsNewInterfaceShown() => AssertCast<InterfaceMetadata>(Type.NewInterfaceShown);

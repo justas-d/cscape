@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using CScape.Core.Data;
-using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Interfaces;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
 
@@ -17,10 +18,12 @@ namespace CScape.Core.Network.Handler
             {122, ItemActionType.Generic2},
             {16, ItemActionType.Generic3},
             {87, ItemActionType.Drop},
-            {145, ItemActionType.Remove }
+            {145, ItemActionType.Remove } // TODO : figure out what ItemActionType.Remove is
         };
 
         public byte[] Handles { get; } = {122, 41, 16, 87, 145};
+
+        
 
         private readonly IItemDefinitionDatabase _db;
 
@@ -28,63 +31,72 @@ namespace CScape.Core.Network.Handler
         {
             _db = services.ThrowOrGet<IItemDefinitionDatabase>();
         }
-        
-        public void Handle(Player player, int opcode, Blob packet)
+
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
         {
             // read
-            var interf = packet.ReadInt16();
-            var idx = packet.ReadInt16();
-            var itemId = packet.ReadInt16() + 1;
+            var interfId = packet.Data.ReadInt16();
+            var idx = packet.Data.ReadInt16();
+            var itemId = packet.Data.ReadInt16() + 1;
 
-            player.DebugMsg(
-                $"Action: interf: {interf} idx: {idx} id: {itemId}", 
-                ref player.DebugCommands);
+            entity.SystemMessage($"Action: interfId: {interfId} idx: {idx} id: {itemId}");
 
             // check if we have defined the action given by the current opcode
-            if (!OpcodeToActionMap.ContainsKey(opcode))
+            if (!OpcodeToActionMap.ContainsKey(packet.Opcode))
             {
-                player.Log.Warning(this, $"Undefined item action for action opcode: {opcode}");
+                entity.SystemMessage($"Undefined item action for action opcode: {packet.Opcode}");
+                return;
+            }
+
+            var interfaces = entity.Components.Get<InterfaceComponent>();
+            if (interfaces == null)
+            {
+                entity.SystemMessage($"Attempted to handle an ItemAction packet but this entity does not have an InterfaceComponent");
                 return;
             }
 
             // find interf
-            var container = player.Interfaces.TryGetById(interf) as IContainerInterface;
-            if (container == null)
+            if (!interfaces.All.TryGetValue(interfId, out var interfaceMetadata))
             {
-                player.Log.Warning(this, $"Item action opcode {opcode} was passed unregistered iid: {interf}");
+                entity.SystemMessage($"ItemAction packet referenced interface which cannot be found: Id: {interfId}");
+                return;
+            }
+
+            // find container
+            if (!(interfaceMetadata.Interface is IItemGameInterface itemInterface))
+            {
+                entity.SystemMessage($"ItemAction packet reference an interface which is not an item interface. Id: {interfId}");
                 return;
             }
 
             // verify idx
-            if (0 > idx || idx >= container.Items.Size)
+            var max = itemInterface.Container.Provider.Count;
+            if (0 > idx || idx >= max)
             {
-                player.Log.Warning(this, $"Out of range idx in item action (op {opcode}): {idx} max size: {container.Items.Size}");
+                entity.SystemMessage($"ItemAction packet gave an out of range index: {idx}. Max size: {max}");
                 return;
             }
 
             // verify itemId == item pointed at by idx
-            var serverSideId = container.Items.Provider.GetId(idx);
-            if (itemId != serverSideId)
+            var serverSideId = itemInterface.Container.Provider[idx];
+            if (itemId != serverSideId.Id.ItemId)
             {
-                player.Log.Warning(this, $"Item action item id did not match the one in the given iid {interf} at given idx {idx} (client {itemId} != server {serverSideId})");
+                entity.SystemMessage($"ItemAction server item id did not match the one in the given. Interface: {interfId} at given idx {idx} (client {itemId} != server {serverSideId})");
                 return;
             }
-
-            // get definition
-            var def = _db.GetAsserted(serverSideId);
-
-            if (def == null)
-            {
-                player.Log.Warning(this, $"No definition found for item id {serverSideId}");
-                return;
-            }
-
-            // opcode is verified, we got all the data, time to execute it.
-            player.Interfaces.OnActionOccurred();
-
-            // determine action type by opcode
-            var action = OpcodeToActionMap[opcode];
             
+            // determine action type by opcode
+            var action = OpcodeToActionMap[packet.Opcode];
+
+            entity.SendMessage(
+                new GameMessage(
+                    null, GameMessage.Type.ItemAction, 
+                    new ItemActionMetadata(
+                        action,
+                        itemInterface.Container,
+                        interfaceMetadata,
+                        idx)));
+
             // execute action
             def.OnAction(player, container, idx, action);
         }

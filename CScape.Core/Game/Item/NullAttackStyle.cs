@@ -4,7 +4,12 @@ namespace CScape.Core.Game.Item
 {
     public sealed class NullAttackStyle : IAttackStyle
     {
-        public static NullAttackStyle Singleton { get; } = new NullAttackStyle();
+        public static NullAttackStyle Instance { get; } = new NullAttackStyle();
+
+        private NullAttackStyle()
+        {
+            
+        }
 
         public int AttackInterval { get; } = 4;
 

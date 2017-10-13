@@ -9,8 +9,8 @@ using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interfaces
-{ 
-    public class InventoryInterface : IGameInterface
+{
+    public class InventoryInterface : IItemGameInterface
     {
         public int Id { get; }
         [NotNull]

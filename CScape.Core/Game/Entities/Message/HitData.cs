@@ -9,6 +9,7 @@ namespace CScape.Core.Game.Entities.Message
         UnknownYellow2
     }
 
+
     public class HitData
     {
         public byte Damage { get; }
