@@ -14,7 +14,7 @@ namespace CScape.Core.Game.Entities
 {
     public sealed class Entity : IEquatable<Entity>, IEnumerable<IEntityComponent>
     {
-        public sealed class EntityFragmentContainer<TComponent>
+        public sealed class EntityComponentContainer<TComponent>
             : IEnumerable<TComponent>
             where TComponent : class, IEntityComponent
         {
@@ -25,10 +25,13 @@ namespace CScape.Core.Game.Entities
                 = new Dictionary<Type, TComponent>();
 
             // TODO : write tests for entity fragment sorting
+
+            // we set this to Enimerable.Empty because as soon as this container is modified,
+            // we immediatelly call Sort(), which assigns a sorted, by IEntityComponent.Priority, IEnumerable
             [NotNull]
             public IEnumerable<TComponent> All { get; private set; } = Enumerable.Empty<TComponent>();
 
-            public EntityFragmentContainer([NotNull] Entity parent)
+            public EntityComponentContainer([NotNull] Entity parent)
             {
                 Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             }
@@ -119,14 +122,14 @@ namespace CScape.Core.Game.Entities
 
         public ServerTransform GetTransform() => Components.Get<ServerTransform>();
 
-        public EntityFragmentContainer<IEntityComponent> Components { get; }
+        public EntityComponentContainer<IEntityComponent> Components { get; }
 
         public Entity([NotNull] string name, [NotNull] EntityHandle handle)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Handle = handle ?? throw new ArgumentNullException(nameof(handle));
 
-            Components = new EntityFragmentContainer<IEntityComponent>(this);
+            Components = new EntityComponentContainer<IEntityComponent>(this);
         }
 
         public bool Equals(Entity other)
