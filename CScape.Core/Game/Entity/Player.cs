@@ -73,10 +73,10 @@ namespace CScape.Core.Game.Entity
            // Transform = _transform;
 
            // Movement = new MovementController(services, this);
-            Interfaces = new PlayerInterfaceController(this);
+          //  Interfaces = new PlayerInterfaceController(this);
 
-            Connection.SyncMachines.Add(new RegionSyncMachine(this));
-            Connection.SyncMachines.Add(new InterfaceSyncMachine(this));
+        //    Connection.SyncMachines.Add(new RegionSyncMachine(this));
+         //   Connection.SyncMachines.Add(new InterfaceSyncMachine(this));
 
            // Server.Players.Register(this);
 
@@ -87,16 +87,16 @@ namespace CScape.Core.Game.Entity
             Connection.SendPacket(SetPlayerOptionPacket.Report);
     
             // set up the sidebar containers
-            var ids = _services.ThrowOrGet<IInterfaceIdDatabase>();
-            Inventory = new BasicItemManager(ids.BackpackContainer,
-                _services, _model.BackpackItems);
+       //     var ids = _services.ThrowOrGet<IInterfaceIdDatabase>();
+       //     Inventory = new BasicItemManager(ids.BackpackContainer,
+       //         _services, _model.BackpackItems);
 
-            Equipment = new EquipmentManager(ids.EquipmentContainer,
-                this, _services, _model.Equipment);
+       //     Equipment = new EquipmentManager(ids.EquipmentContainer,
+       //         this, _services, _model.Equipment);
 
             // register sidebar containers
-            Interfaces.TryRegister(Inventory);
-            Interfaces.TryRegister(Equipment);
+        //    Interfaces.TryRegister(Inventory);
+        //    Interfaces.TryRegister(Equipment);
 
             // sidebar interfaces
             void Interface(int id, int idx, IButtonHandler handler = null)
@@ -137,15 +137,8 @@ namespace CScape.Core.Game.Entity
             TickFlags |= UpdateFlags.Appearance;
             IsAppearanceDirty = true;
 
-            // queue for immediate update
-            //_services.ThrowOrGet<IMainLoop>().Player.Enqueue(this);
         }
 
-        public void OnMoved()
-        {
-            //FacingCoordinate = null;
-            Interfaces.OnActionOccurred();
-        }
 
         public override void Update(IMainLoop loop)
         {
@@ -154,54 +147,6 @@ namespace CScape.Core.Game.Entity
             _model.Y = Transform.Y;
             _model.Z = Transform.Z;
 
-            // reset sync vars
-  //          TickFlags = 0;
-        //    NeedsPositionInit = false;
-            NeedsSightEvaluation = false;
-            //Movement.MoveUpdate.Reset();
-            
-            // reset pressed buttons
-            Interfaces.PressedButtonIds.Clear();
-
-//            EntityHelper.TryResetInteractingEntity(this);
-
-            /*
-            if (IsDestroyed)
-            {
-                var msg = $"Updating destroyed player {Username}";
-                Log.Warning(this, msg);
-                Debug.Fail(msg);
-            }
-            */
-
-            // check for hard disconnects
-            /*
-            if(Connection.DeadForMs >= ReapTimeMs)
-            {
-                Log.Debug(this, $"Reaping {Username}");
-                Destroy();
-                return;
-            }
-            */
-            /*
-            if (Connection.IsConnected())
-            {
-                // if the logoff flag is set, log the player off.
-                if (LogoutMethod != LogoutType.None)
-                {
-                    Connection.Dispose(); // shut down the connection
-
-                    // queue the player for removal from playing list, since they cleanly logged out.
-                    if (LogoutMethod == LogoutType.Clean)
-                    {
-                        Destroy();
-                        return;
-                    }
-                }
-            }
-            */
-
-            //loop.Player.Enqueue(this);
         }
     }
 }
