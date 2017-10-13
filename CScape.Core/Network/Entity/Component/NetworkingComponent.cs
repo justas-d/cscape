@@ -28,7 +28,7 @@ namespace CScape.Core.Network.Entity.Component
         private readonly List<IPacket> _queuedPackets = new List<IPacket>();
 
         /// <summary>
-        /// In milliseconds, the delay between a socket dying and it's player being removed
+        /// In milliseconds, the delay between a socket dying and its entity being removed
         /// from the world.
         /// </summary>
         public long ReapTimeMs { get; set; } = 1000 * 60;
