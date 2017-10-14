@@ -2,7 +2,6 @@ using System;
 using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
@@ -20,6 +19,8 @@ namespace CScape.Core.Game.Entities.Component
 
         [NotNull]
         public IFacingData FacingData { get; private set; }
+
+        public DirectionDelta LastMovedDirection { get; private set; }
 
         public const int MaxZ = 4;
 
@@ -39,10 +40,7 @@ namespace CScape.Core.Game.Entities.Component
 
         public override int Priority { get; }
 
-        // TODO : NeedsSightEvaluation is probably not needed
-        public bool NeedsSightEvaluation { get; set; } = true;
-
-        public ServerTransform([NotNull] Entities.Entity parent)
+        public ServerTransform([NotNull] Entity parent)
             :base(parent)
         {
             FacingData = new DefaultDirection(this);
@@ -87,8 +85,6 @@ namespace CScape.Core.Game.Entities.Component
             Y = y;
             Z = z;
 
-            NeedsSightEvaluation = true;
-
             Parent.SendMessage(
                 new GameMessage(
                     this,
@@ -128,8 +124,6 @@ namespace CScape.Core.Game.Entities.Component
             Region?.RemoveEntity(Parent.GetTransform());
             Region = region;
             Region.AddEntity(this);
-
-            NeedsSightEvaluation = true;
         }
 
         public void SyncLocalsToGlobals(ClientPositionComponent client)
@@ -137,7 +131,6 @@ namespace CScape.Core.Game.Entities.Component
             X = client.Base.x + client.Local.x;
             X = client.Base.y + client.Local.y;
 
-            NeedsSightEvaluation = true;
             UpdateRegion();
 
             Parent.Server.Services.ThrowOrGet<ILogger>()
@@ -150,16 +143,39 @@ namespace CScape.Core.Game.Entities.Component
             // TODO : handle ForcedMovement movement over time in a separate component
             if (msg.Event == GameMessage.Type.Move)
             {
-                var delta = msg.AsMove().SumMovements();
+                var data = msg.AsMove();
+                var delta = data.SumMovements();
 
                 X += delta.x;
                 Y += delta.y;
 
-                FacingX = -1;
-                FacingY = -1;
+                /* 
+                 * client implicitly sets the facing direction for the movign entity itself
+                 * so there is no need to call SetFacingDirection and send out an entity-wide message
+                 * we can just silently change the direction and if we need to ever check it, we
+                 * will find good data no matter what.
+                 */
 
-                NeedsSightEvaluation = true;
+                // also we set the last moving direction here
+                if (data.IsWalking)
+                {
+                    FacingData = new FacingDirection(data.Dir1, this);
+                    LastMovedDirection = data.Dir1;
+                }
+                else
+                {
+                    LastMovedDirection = data.Dir2;
+                    FacingData = new FacingDirection(data.Dir2, this);
+                }
             }
+        }
+
+        public bool Equals(IPosition other)
+        {
+            return 
+                other.X == X && 
+                other.Y == Y && 
+                other.Z == Z;
         }
     }
 }

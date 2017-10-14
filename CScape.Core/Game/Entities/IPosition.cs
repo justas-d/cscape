@@ -1,9 +1,12 @@
-namespace CScape.Core.Game.Entity
+using System;
+
+namespace CScape.Core.Game.Entities
 {
+    /// <inheritdoc />
     /// <summary>
     /// Defines a representation of a position in the game world.
     /// </summary>
-    public interface IPosition
+    public interface IPosition : IEquatable<IPosition>
     {
         /// <summary>
         /// The global X coordinate in the world.

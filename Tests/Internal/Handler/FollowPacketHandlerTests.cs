@@ -3,6 +3,7 @@ using CScape.Core.Game.Entity;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FollowDirectionProvider = CScape.Core.Game.Entities.Directions.FollowDirectionProvider;
 
 namespace CScape.Dev.Tests.Internal.Handler
 {

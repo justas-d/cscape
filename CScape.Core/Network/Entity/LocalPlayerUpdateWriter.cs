@@ -1,3 +1,4 @@
+using System;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Network.Entity.Flag;
 
@@ -9,7 +10,7 @@ namespace CScape.Core.Network.Entity
         {
         }
 
-        protected override PlayerFlag GetHeader()
+        protected override int GetHeader(Func<FlagType, int> converter)
         {
             PlayerFlag retval = 0;
 
@@ -28,7 +29,7 @@ namespace CScape.Core.Network.Entity
                 }
             }
 
-            return retval;
+            return (int)retval;
         }
     }
 }

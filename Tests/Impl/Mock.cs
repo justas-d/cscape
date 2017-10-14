@@ -5,6 +5,7 @@ using CScape.Basic.Database;
 using CScape.Basic.Model;
 using CScape.Core;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Injection;

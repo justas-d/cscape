@@ -14,7 +14,7 @@ namespace CScape.Core.Game.Entities.FacingData
 
         public DefaultDirection(ServerTransform transform)
         {
-            _default = new FacingDirection(new DirectionDelta(Direction.South), transform);
+            _default = new FacingDirection(new DirectionDelta(World.Direction.South), transform);
         }
 
     }

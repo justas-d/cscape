@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Prefab;
-using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
@@ -14,13 +13,6 @@ namespace CScape.Core.Game.Entities
 {
     public sealed class EntitySystem : IEntitySystem
     {
-        public enum TransformType
-        {
-            None,
-            Server,
-            Client,
-        }
-        
         public const int IdBits = sizeof(int) - GenerationBits;
         public const int GenerationBits = 8;
         public int IdThreshold { get; }

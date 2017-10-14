@@ -1,6 +1,5 @@
-using CScape.Core.Game.Entity;
-using CScape.Core.Game.World;
-using CScape.Core.Injection;
+using CScape.Core.Game.Entities.Directions;
+using CScape.Core.Game.Entities.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -31,11 +30,6 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        /// <summary>
-        /// The direction deltas in which this entity last moved successfully.
-        /// </summary>
-        public DirectionDelta LastMovedDirection { get; private set; }
-
         public override int Priority { get; }
 
         public bool IsRunning { get; set; }
@@ -58,48 +52,21 @@ namespace CScape.Core.Game.Entities.Component
             if (Directions == null)
                 return;
 
-            // get first movement since we've got an active direction
-            var d1 = Directions.GetNextDir(Parent);
-            var d2 = DirectionDelta.Noop;
-
-            // handle running only if we actually have more direction data
-            // we use IsDoneOffset in order to mimic the walking done by the first call to GetNextDir
-            if (IsRunning && !Directions.IsDoneOffset(Parent, d1.X, d1.Y, 0))
-            {
-                // update d2 since we're running and we actually have new data in d2
-                d2 = Directions.GetNextDirOffset(Parent, d1.X, d1.Y, 0);
-            }
-
-            // swap places if d1 is noop but d2 isn't.
-            if (d1.IsNoop() && !d2.IsNoop())
-            {
-                var buf = d1;
-                d1 = d2;
-                d2 = buf;
-            }
+            // get move data
+            var data = Directions.GetNextDirections(Parent);
 
             // both ops are noops, no work to be done there.
-            if (d1.IsNoop() && d2.IsNoop())
+            if (data.IsNoop())
                 return;
 
             // TODO : check collision (with size) and then clamp movement
-
-            // set last moved direction
-            if (!d2.IsNoop())
-            {
-                LastMovedDirection = d2;
-            }
-            else if(!d1.IsNoop())
-            {
-                LastMovedDirection = d1;
-            }
             
             // notify entity of movement.
             Parent.SendMessage(
                 new GameMessage(
                     this, 
                     GameMessage.Type.Move, 
-                    new MovementMetadata(d1, d2)));
+                    new MovementMetadata(data.Walk, data.Run)));
         }
 
         private void Update()

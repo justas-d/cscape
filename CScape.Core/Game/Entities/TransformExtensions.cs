@@ -10,7 +10,7 @@ namespace CScape.Core.Game.Entities
         /// <summary>
         /// Returns the absolute distance to the given transform.
         /// </summary>
-        public static (int x, int y, int z) TaxicabDistanceTo(this ServerTransform us, [NotNull] ServerTransform other)
+        public static (int x, int y, int z) TaxicabDistanceTo(this IPosition us, [NotNull] IPosition other)
         {
             return (Math.Abs(us.X - other.X), Math.Abs(us.Y - other.Y), Math.Abs(us.Z - other.Z));
         }
@@ -19,7 +19,7 @@ namespace CScape.Core.Game.Entities
         /// Returns the maximum distances of absolute x and y position differences 
         /// between this and the other transform.
         /// </summary>
-        public static int ChebyshevDistanceTo(this ServerTransform us, [NotNull] ServerTransform other)
+        public static int ChebyshevDistanceTo(this IPosition us, [NotNull] IPosition other)
         {
             return Math.Max(Math.Abs(us.X - other.X), Math.Abs(us.Y - other.Y));
         }

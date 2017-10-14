@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using CScape.Core.Game.World;
 
-namespace CScape.Core.Game
+namespace CScape.Core.Game.Entities.Message
 {
     /// <summary>
     /// Defines valid movement data. 
