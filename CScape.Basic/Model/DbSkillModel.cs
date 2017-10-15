@@ -1,4 +1,5 @@
 using System.Linq;
+using CScape.Core.Game.Entities.Skill;
 using CScape.Core.Game.Entity;
 
 namespace CScape.Basic.Model

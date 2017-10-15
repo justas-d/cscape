@@ -10,7 +10,7 @@ namespace CScape.Core.Game.Entities.Message
     }
 
 
-    public class HitData
+    public sealed class HitData
     {
         public byte Damage { get; }
         public byte CurrentHealth { get; }

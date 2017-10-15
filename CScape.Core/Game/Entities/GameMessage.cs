@@ -3,6 +3,7 @@ using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entities.Skill;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
@@ -32,6 +33,10 @@ namespace CScape.Core.Game.Entities
             DatabaseUpdate, /* Time to do database sync logic */
             GC, /* Collect entity garbage */
             NewSystemMessage,
+
+            // skill
+            GainExperience,
+            LevelUp,
 
             // item
             ItemChange,
@@ -96,6 +101,10 @@ namespace CScape.Core.Game.Entities
             return (T) _data;
         }
 
+        public ExperienceGainMetadata AsGainExperience() => AssertCast<ExperienceGainMetadata>(Type.GainExperience);
+        public ISkillModel AsLevelUp() => AssertCast<ISkillModel>(Type.LevelUp);
+
+        // TODO : handle ItemAction events
         public ItemActionMetadata AsItemAction() => AssertCast<ItemActionMetadata>(Type.ItemAction);
         public ButtonClick AsButtonClicked() => AssertCast<ButtonClick>(Type.ButtonClicked);
         public ItemChange AsItemChange() => AssertCast<ItemChange>(Type.ItemChange);

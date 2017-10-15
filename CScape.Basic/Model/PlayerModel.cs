@@ -1,3 +1,4 @@
+using CScape.Core.Game.Entities.Skill;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
