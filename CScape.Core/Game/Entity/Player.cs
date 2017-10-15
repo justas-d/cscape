@@ -53,7 +53,7 @@ namespace CScape.Core.Game.Entity
         public bool TeleportToDestWhenWalking { get; set; }
 
         // todo : only register container interfaces if the player can see them
-        [NotNull] public PlayerSkills Skills { get; }
+     //   [NotNull] public PlayerSkills Skills { get; }
 
 
         //private readonly IServiceProvider _services;
@@ -129,9 +129,9 @@ namespace CScape.Core.Game.Entity
             Debug.Assert(res, "Cannot show container interface in player ctor ");
 
             // setup skills
-            var skillSync = new SkillSyncMachine(model.Skills.Experience.Length);
-            Connection.SyncMachines.Add(skillSync);
-            Skills = new PlayerSkills(services, this, model, skillSync);
+         //   var skillSync = new SkillSyncMachine(model.Skills.Experience.Length);
+         //   Connection.SyncMachines.Add(skillSync);
+         //   Skills = new PlayerSkills(services, this, model, skillSync);
 
             // set update flags
             TickFlags |= UpdateFlags.Appearance;
