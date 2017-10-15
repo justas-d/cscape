@@ -42,6 +42,7 @@ namespace CScape.Core.Game.Entities
             ItemChange,
             EquipmentChange,
             ItemAction,
+            GroundItemAmountUpdate,
 
             // interface
             NewInterfaceShown,
@@ -100,6 +101,9 @@ namespace CScape.Core.Game.Entities
             Debug.Assert(expected == Event);
             return (T) _data;
         }
+
+        public GroundItemChangeMetadata AsGroundItemAmountUpdate() =>
+            AssertCast<GroundItemChangeMetadata>(Type.GroundItemAmountUpdate);
 
         public ExperienceGainMetadata AsGainExperience() => AssertCast<ExperienceGainMetadata>(Type.GainExperience);
         public ISkillModel AsLevelUp() => AssertCast<ISkillModel>(Type.LevelUp);

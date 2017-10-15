@@ -1,10 +1,8 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network;
 using JetBrains.Annotations;
@@ -21,9 +19,8 @@ namespace CScape.Basic.Server
 
         private int _waitTimeCarry;
         public IGameServer Server { get; }
-        public long ElapsedMilliseconds => _tickWatch.ElapsedMilliseconds;
 
-        public long DeltaTime { get; private set; }
+        private long DeltaTime { get; set; }
         public long TickProcessTime { get; private set; }
         public int TickRate { get; set; }
 
@@ -39,6 +36,8 @@ namespace CScape.Basic.Server
 
             TickRate = _config.TickRate;
         }
+
+        public long GetDeltaTime() => DeltaTime + _tickWatch.ElapsedMilliseconds;
 
         public async Task Run()
         {

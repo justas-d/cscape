@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using CScape.Core.Game.Entities.InteractingEntity;
 
 namespace CScape.Core.Game.Entities.Component
@@ -32,13 +31,6 @@ namespace CScape.Core.Game.Entities.Component
         
         public bool CanSee(Entity ent)
         {
-            // use resolver if the other entity has one
-            var resolver = ent.Components.Get<IVisionResolver>();
-            if (resolver != null)
-            {
-                return resolver.CanBeSeenBy(ent);
-            }
-
             var us = Parent.GetTransform();
             var oth = ent.GetTransform();
 
@@ -48,12 +40,32 @@ namespace CScape.Core.Game.Entities.Component
             if (us.Z != oth.Z)
                 return false;
 
-            return Parent.GetTransform().ChebyshevDistanceTo(ent.GetTransform()) <= ViewRange;
+            var inRange = Parent.GetTransform().ChebyshevDistanceTo(ent.GetTransform()) <= ViewRange;
+            
+            // use resolver if the other entity has one
+            var resolver = ent.Components.Get<IVisionResolver>();
+            if (resolver != null)
+            {
+                return resolver.CanBeSeenBy(ent, inRange);
+            }
+
+            return inRange;
         }
 
         private void Reset()
         {
             _seeableEntities.Clear();
+        }
+
+        /// <summary>
+        /// Broadcasts a message to all visible entities.
+        /// </summary>
+        public void Broadcast(GameMessage msg)
+        {
+            foreach (var ent in GetVisibleEntities().Where(e => !e.IsDead()).Select(e => e.Get()))
+            {
+                ent.SendMessage(msg);
+            }
         }
 
         public IEnumerable<EntityHandle> GetVisibleEntities()

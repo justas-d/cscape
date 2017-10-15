@@ -11,6 +11,7 @@ namespace CScape.Core.Injection
         [NotNull] IServiceProvider Services { get; }
         [NotNull] PlaneOfExistence Overworld { get; }
 
+        IMainLoop Loop { get; }
         IEntitySystem Entities { get; }
 
         bool IsDisposed { get; }

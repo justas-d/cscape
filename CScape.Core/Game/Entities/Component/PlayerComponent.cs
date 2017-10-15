@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class PlayerComponent : EntityComponent, IEquatable<PlayerComponent>
+    public sealed class PlayerComponent : EntityComponent, IEquatable<PlayerComponent>, IEquatable<string>
     {
         public enum Title : byte
         {
@@ -25,7 +25,7 @@ namespace CScape.Core.Game.Entities.Component
         [NotNull]
         public IItemContainer Bank { get; }
         
-        [NotNull] private readonly Action<PlayerComponent> _destroyCallback;
+        [CanBeNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public int PlayerId { get; }
 
@@ -38,7 +38,7 @@ namespace CScape.Core.Game.Entities.Component
             [NotNull] Entity parent,
             [NotNull] string username,
             int playerId,
-            [NotNull] Action<PlayerComponent> destroyCallback)
+            [CanBeNull] Action<PlayerComponent> destroyCallback)
             :base(parent)
         {
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
@@ -52,7 +52,7 @@ namespace CScape.Core.Game.Entities.Component
             {
                 case GameMessage.Type.DestroyEntity:
                 {
-                    _destroyCallback(this);
+                    _destroyCallback?.Invoke(this);
                     break;
                 }
 
@@ -92,7 +92,12 @@ namespace CScape.Core.Game.Entities.Component
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Username, other.Username, StringComparison.OrdinalIgnoreCase);
+            return Equals(other.Username);
+        }
+
+        public bool Equals(string other)
+        {
+            return string.Equals(Username, other, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
