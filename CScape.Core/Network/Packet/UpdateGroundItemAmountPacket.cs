@@ -1,5 +1,6 @@
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Items;
 
 namespace CScape.Core.Network.Packet
 {
@@ -8,24 +9,16 @@ namespace CScape.Core.Network.Packet
     /// </summary>
     public class UpdateGroundItemAmountPacket : AbstractBaseGroundItemPacket
     {
-        private readonly short _newAmount;
+        private readonly short _oldAmount;
         public const int Id = 84;
 
         public UpdateGroundItemAmountPacket(
-            GroundItem item,
+            ItemStack item,
+            int oldAmount,
             (int x, int y) off)
-            :this(item.ItemId, item.ItemAmount, item.OldAmount , off.x, off.y)
+            : base(item, off.x, off.y)
         {
-            
-        }
-
-        public UpdateGroundItemAmountPacket(
-            int id, int amount, 
-            int newAmount,  
-            int offX, int offY) 
-            : base(id, amount, offX, offY)
-        {
-            _newAmount = (short)Utils.Clamp(newAmount, 0, ushort.MaxValue);
+            _oldAmount = (short)oldAmount.Clamp(0, ushort.MaxValue);
         }
 
         protected override void InternalSend(OutBlob stream)
@@ -33,9 +26,9 @@ namespace CScape.Core.Network.Packet
             stream.BeginPacket(Id);
 
             stream.Write(PackedPos);
-            stream.Write16(ItemId);
-            stream.Write16(Amount);
-            stream.Write16(_newAmount);
+            stream.Write16((short)Item.Id.ItemId);
+            stream.Write16((short)Item.Amount.Clamp(0, short.MaxValue));
+            stream.Write16(_oldAmount);
 
             stream.EndPacket();
         }

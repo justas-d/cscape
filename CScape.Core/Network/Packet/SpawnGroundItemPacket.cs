@@ -1,5 +1,7 @@
 using CScape.Core.Data;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Items;
 
 namespace CScape.Core.Network.Packet
 {
@@ -11,36 +13,19 @@ namespace CScape.Core.Network.Packet
         public const int Id = 44;
 
         public SpawnGroundItemPacket(
-            GroundItem item,
+            ItemStack item,
             (int x, int y) off)
-            : this(item.ItemId, item.ItemAmount,
-                  off.x, off.y)
+            : base(item, off.x, off.y)
         {
             
-        }
-
-        public SpawnGroundItemPacket(
-            (int id, int amount) item,
-            int offX, int offY)
-            : base(item, offX, offY)
-        {
-
-        }
-
-        public SpawnGroundItemPacket(
-            int id, int amount,
-            int offX, int offY)
-            : base(id, amount, offX, offY)
-        {
-
         }
 
         protected override void InternalSend(OutBlob stream)
         {
             stream.BeginPacket(Id);
 
-            stream.Write16(ItemId);
-            stream.Write16(Amount);
+            stream.Write16((short)Item.Id.ItemId);
+            stream.Write16((short)Item.Amount.Clamp(0,short.MaxValue));
             stream.Write(PackedPos);
 
             stream.EndPacket();

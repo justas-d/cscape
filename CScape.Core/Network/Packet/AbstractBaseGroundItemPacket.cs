@@ -1,4 +1,4 @@
-﻿using CScape.Core.Game.Item;
+﻿using CScape.Core.Game.Items;
 
 namespace CScape.Core.Network.Packet
 {
@@ -7,26 +7,18 @@ namespace CScape.Core.Network.Packet
     /// </summary>
     public abstract class AbstractBaseGroundItemPacket : BaseGroundObjectPacket
     {
-        protected short ItemId { get; }
-        protected short Amount { get; }
+        protected ItemStack Item { get; }
 
         protected AbstractBaseGroundItemPacket(
-            (int id, int amount) item, int offX, int offY)
-            : this(item.id, item.amount, offX, offY)
-        {
-        }
-
-        protected AbstractBaseGroundItemPacket(
-            int id, int amount, int offX, int offY)
+            ItemStack item, int offX, int offY)
             : base(offX, offY)
         {
-            if (ItemHelper.IsEmpty(id, amount))
+            if (item.IsEmpty())
                 IsInvalid = true;
-
+            
             if (!IsInvalid)
             {
-                ItemId = (short) (id - 1);
-                Amount = (short) Utils.Clamp(amount, 0, ushort.MaxValue);
+                Item = item;
             }
         }
     }

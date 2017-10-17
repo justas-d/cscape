@@ -1,5 +1,4 @@
 using CScape.Core.Data;
-using CScape.Core.Game.Entity;
 
 namespace CScape.Core.Network.Packet
 {
@@ -8,25 +7,16 @@ namespace CScape.Core.Network.Packet
     /// </summary>
     public class DeleteGroundItemPacket : BaseGroundObjectPacket
     {
+        public const int Id = 156;
         private readonly int _id;
 
         public DeleteGroundItemPacket(
-            GroundItem item,
+            int itemId,
             (int x, int y) off)
-            :this(item.ItemId, off.x,off.y)
+            :base(off.x, off.y)
         {
-            
+            _id = itemId - 1;
         }
-
-        public DeleteGroundItemPacket(
-            int id,
-            int offX, int offY)
-            :base(offX, offY)
-        {
-            _id = id - 1;
-        }
-
-        public const int Id = 156;
 
         protected override void InternalSend(OutBlob stream)
         {
@@ -37,7 +27,5 @@ namespace CScape.Core.Network.Packet
 
             stream.EndPacket();
         }
-
-
     }
 }

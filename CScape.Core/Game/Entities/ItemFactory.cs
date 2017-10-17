@@ -31,7 +31,10 @@ namespace CScape.Core.Game.Entities
             var handle = System.Create($"Ground item: {name} ({stack.Id.Name}: {stack.Amount}");
             var ent = handle.Get();
 
+            ent.Components.Add(new VisionComponent(ent));
             ent.Components.Add(new GroundItemComponent(ent, stack, null));
+            
+            ent.AssertComponentRequirementsSatisfied();
 
             return handle;
         }

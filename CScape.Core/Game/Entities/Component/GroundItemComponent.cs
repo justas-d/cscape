@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
+    [RequiresComponent(typeof(VisionComponent))]
     public class GroundItemComponent : EntityComponent
     {
         [CanBeNull]
@@ -13,6 +14,8 @@ namespace CScape.Core.Game.Entities.Component
         public override int Priority { get; }
 
         public ItemStack Item { get; private set; }
+
+        private VisionComponent Vision => Parent.Components.AssertGet<VisionComponent>();
 
         /// <summary>
         /// How many milliseconds need to pass for the item to despawn.
@@ -61,10 +64,10 @@ namespace CScape.Core.Game.Entities.Component
             var old = Item;
             Item = new ItemStack(Item.Id, newAmount);
 
-            Parent.SendMessage(
+            Vision.Broadcast(
                 new GameMessage(
                     this, GameMessage.Type.GroundItemAmountUpdate, 
-                    new GroundItemChangeMetadata(old, Item)));
+                    new GroundItemChangeMetadata(old, Item, this)));
         }
     }
 }
