@@ -1,6 +1,7 @@
-﻿using CScape.Core.Data;
+﻿using System;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.MovementAction;
-using CScape.Core.Game.Entity;
+using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Handler
 {
@@ -8,22 +9,27 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = {155};
 
-        public void Handle(Player player, int opcode, Blob packet)
+        private INpcFactory _npcs;
+
+        public TalkToPacketHandler(IServiceProvider services)
         {
-            // read
-            var npcId = packet.ReadInt16();
+            _npcs = services.ThrowOrGet<INpcFactory>();
+        }
 
-            // get 
-            var npc = player.Server.Npcs.GetById(npcId);
-
-            // verify
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        {
+            var npcId = packet.Data.ReadInt16();
+            var npc = _npcs.Get(npcId);
             if (npc == null)
             {
-                player.Log.Warning(this, $"Attempted to talk to unregistered npc id {npcId}");
+                entity.SystemMessage($"Attempted to talk to unregistered npc id {npcId}");
                 return;
             }
 
-            player.Movement.MoveAction = new TalkToNpcAction(player, npc);
+            var action = entity.Components.Get<MovementActionComponent>();
+            if (action == null) return;
+
+            action.CurrentAction = new TalkToNpcAction(entity.Handle, npc);
         }
     }
 }

@@ -46,7 +46,7 @@ namespace CScape.Core.Game.Entities
             return InvalidPlayerId;
         }
 
-        public EntityHandle GetPlayer(int id)
+        public EntityHandle Get(int id)
         {
             // check if id is in range.
             if (0 >= id && _players.Length > id)

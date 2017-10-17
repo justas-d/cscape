@@ -4,14 +4,13 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Injection
 {
-
     public interface IPlayerFactory
     {
         IEntitySystem EntitySystem { get; }
         IReadOnlyList<EntityHandle> All { get; }
 
         [CanBeNull]
-        EntityHandle GetPlayer(int id);
+        EntityHandle Get(int id);
 
         /// <summary>
         /// Creates a player entity.
