@@ -1,7 +1,10 @@
 using System;
 using CScape.Core.Data;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
+using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Handler
 {
@@ -11,30 +14,43 @@ namespace CScape.Core.Network.Handler
 
         public int MinimumSize { get; } = 2;
 
-        public void Handle(Player player, int opcode, Blob packet)
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
         {
+            var player = entity.Components.Get<PlayerComponent>();
+            if (player == null)
+                return;
+
             // min size is 2
-            if (MinimumSize > packet.Buffer.Length) return;
+            if (MinimumSize > packet.Data.Buffer.Length) return;
 
-            var effect = (ChatMessage.TextEffect)packet.ReadByte();
-            var color = (ChatMessage.TextColor)packet.ReadByte();
+            var effect = (ChatMessage.TextEffect)packet.Data.ReadByte();
+            var color = (ChatMessage.TextColor)packet.Data.ReadByte();
 
-            if(!Enum.IsDefined(typeof(ChatMessage.TextColor), color))
+            // verify enum values
+            if (!Enum.IsDefined(typeof(ChatMessage.TextColor), color))
             {
-                player.Log.Debug(this, $"Invalid color: {color}");
+                entity.SystemMessage($"Invalid color: {color}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
                 color = ChatMessage.TextColor.Yellow;
             }
 
             if (!Enum.IsDefined(typeof(ChatMessage.TextEffect), effect))
             {
-                player.Log.Debug(this, $"Invalid effect: {effect}");
+                entity.SystemMessage($"Invalid effect: {effect}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
                 effect = ChatMessage.TextEffect.None;
             }
 
-            if (packet.TryReadString(out string msg))
-                player.LastChatMessage = new ChatMessage(player, msg, color, effect, false);
+            if (packet.Data.TryReadString(out var msg))
+            {
+                entity.SendMessage(
+                    new GameMessage(
+                        null, GameMessage.Type.ChatMessage,
+                            new ChatMessage(msg, player.TitleIcon, color, effect, false)));
+            }
             else
-                player.Log.Warning(this, "Couldn't read chat message.");
+            {
+                entity.SystemMessage("Couldn't read chat message.", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+            }
+                
         }
     }
 }

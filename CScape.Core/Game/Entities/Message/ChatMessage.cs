@@ -29,9 +29,7 @@ namespace CScape.Core.Game.Entities.Message
             Scroll = 4,
             Slide = 5
         }
-
-
-        public PlayerComponent Sender { get; }
+       
         public string Message { get; }
         public PlayerComponent.Title Title { get; }
 
@@ -43,11 +41,8 @@ namespace CScape.Core.Game.Entities.Message
         /// </summary>
         public bool IsForced { get; }
 
-        public ChatMessage(
-            PlayerComponent sender, string message, 
-           PlayerComponent.Title title, TextColor color, TextEffect effects, bool isForced)
+        public ChatMessage(string message, PlayerComponent.Title title, TextColor color, TextEffect effects, bool isForced)
         {
-            Sender = sender;
             Message = message;
             Title = title;
             Color = color;
