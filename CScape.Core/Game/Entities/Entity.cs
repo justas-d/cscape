@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
@@ -30,6 +30,8 @@ namespace CScape.Core.Game.Entities
             // we immediatelly call Sort(), which assigns a sorted, by IEntityComponent.Priority, IEnumerable
             [NotNull]
             public IEnumerable<TComponent> All { get; private set; } = Enumerable.Empty<TComponent>();
+
+            
 
             public EntityComponentContainer([NotNull] Entity parent)
             {
@@ -167,13 +169,13 @@ namespace CScape.Core.Game.Entities
         /// <summary>
         /// Sends a system message to the entity.
         /// </summary>
-        public void SystemMessage([NotNull] string msg)
+        public void SystemMessage([NotNull] string msg, SystemMessageFlags flags = SystemMessageFlags.None)
         {
-            if (msg == null) throw new ArgumentNullException(nameof(msg));
+            if (string.IsNullOrEmpty(msg)) return;
 
             SendMessage(
                 new GameMessage(
-                    null, GameMessage.Type.NewSystemMessage, msg));
+                    null, GameMessage.Type.NewSystemMessage, new SystemMessage(msg, flags)));
         }
 
         /// <summary>
@@ -186,7 +188,7 @@ namespace CScape.Core.Game.Entities
             foreach (var frag in this)
             {
                 foreach (var attrib in
-                    frag.GetType().GetTypeInfo().GetCustomAttributes<RequiresFragment>())
+                    frag.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
                 {
                     // look for required attrib
 

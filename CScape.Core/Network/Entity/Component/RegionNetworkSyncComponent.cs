@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
@@ -50,7 +51,7 @@ namespace CScape.Core.Network.Entity.Component
         {
             if (ShouldSendSystemMessageWhenSyncing)
             {
-                Parent.SystemMessage($"Sync region: {pos.x} + 6 {pos.y} + 6");
+                Parent.SystemMessage($"Sync region: {pos.x} + 6 {pos.y} + 6", SystemMessageFlags.Debug | SystemMessageFlags.Network);
             }
 
             Net.SendPacket(

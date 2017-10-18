@@ -39,33 +39,33 @@ namespace CScape.Core.Network.Handler
             var idx = packet.Data.ReadInt16();
             var itemId = packet.Data.ReadInt16() + 1;
 
-            entity.SystemMessage($"Action: interfId: {interfId} idx: {idx} id: {itemId}");
+            entity.SystemMessage($"Action: interfId: {interfId} idx: {idx} id: {itemId}", SystemMessageFlags.Debug | SystemMessageFlags.Item);
 
             // check if we have defined the action given by the current opcode
             if (!OpcodeToActionMap.ContainsKey(packet.Opcode))
             {
-                entity.SystemMessage($"Undefined item action for action opcode: {packet.Opcode}");
+                entity.SystemMessage($"Undefined item action for action opcode: {packet.Opcode}", SystemMessageFlags.Debug | SystemMessageFlags.Item);
                 return;
             }
 
             var interfaces = entity.Components.Get<InterfaceComponent>();
             if (interfaces == null)
             {
-                entity.SystemMessage($"Attempted to handle an ItemAction packet but this entity does not have an InterfaceComponent");
+                entity.SystemMessage($"Attempted to handle an ItemAction packet but this entity does not have an InterfaceComponent", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                 return;
             }
 
             // find interf
             if (!interfaces.All.TryGetValue(interfId, out var interfaceMetadata))
             {
-                entity.SystemMessage($"ItemAction packet referenced interface which cannot be found: Id: {interfId}");
+                entity.SystemMessage($"ItemAction packet referenced interface which cannot be found: Id: {interfId}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                 return;
             }
 
             // find container
             if (!(interfaceMetadata.Interface is IItemGameInterface itemInterface))
             {
-                entity.SystemMessage($"ItemAction packet reference an interface which is not an item interface. Id: {interfId}");
+                entity.SystemMessage($"ItemAction packet reference an interface which is not an item interface. Id: {interfId}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                 return;
             }
 
@@ -73,7 +73,7 @@ namespace CScape.Core.Network.Handler
             var max = itemInterface.Container.Provider.Count;
             if (0 > idx || idx >= max)
             {
-                entity.SystemMessage($"ItemAction packet gave an out of range index: {idx}. Max size: {max}");
+                entity.SystemMessage($"ItemAction packet gave an out of range index: {idx}. Max size: {max}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace CScape.Core.Network.Handler
             var serverSideId = itemInterface.Container.Provider[idx];
             if (itemId != serverSideId.Id.ItemId)
             {
-                entity.SystemMessage($"ItemAction server item id did not match the one in the given. Interface: {interfId} at given idx {idx} (client {itemId} != server {serverSideId})");
+                entity.SystemMessage($"ItemAction server item id did not match the one in the given. Interface: {interfId} at given idx {idx} (client {itemId} != server {serverSideId})", SystemMessageFlags.Debug | SystemMessageFlags.Item);
                 return;
             }
             

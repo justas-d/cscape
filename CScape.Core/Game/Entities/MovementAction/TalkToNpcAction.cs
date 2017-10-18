@@ -1,4 +1,5 @@
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 
 namespace CScape.Core.Game.Entities.MovementAction
 {
@@ -26,8 +27,8 @@ namespace CScape.Core.Game.Entities.MovementAction
                 return;
 
             // todo : talk-to logic
-            Requestee.Get().SystemMessage($"Talks to {TalkTarget}");
-            TalkTarget.Get().SystemMessage($"Talks to {Requestee}");
+            Requestee.Get().SystemMessage($"Talks to {TalkTarget}", SystemMessageFlags.Debug);
+            TalkTarget.Get().SystemMessage($"Talks to {Requestee}", SystemMessageFlags.Debug);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace CScape.Core.Game.Entities.Component
 
             if (model == null)
             {
-                Parent.SystemMessage($"Tried to gain experience in skill {skill} but no model for it was found.");
+                Parent.SystemMessage($"Tried to gain experience in skill {skill} but no model for it was found.", SystemMessageFlags.Debug | SystemMessageFlags.Skill);
                 return;
             }
 

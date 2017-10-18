@@ -60,7 +60,7 @@ namespace CScape.Core.Network.Entity.Component
 
             // log invalid offsets
             if (packet.IsInvalid)
-                Parent.SystemMessage($"Invalid spawn ground item packet at offsets: ({regionGrid.x} {regionGrid.y})");
+                Parent.SystemMessage($"Invalid spawn ground item packet at offsets: ({regionGrid.x} {regionGrid.y})", SystemMessageFlags.Debug | SystemMessageFlags.Network);
         }
 
         private void RemoveItem(GroundItemComponent item)

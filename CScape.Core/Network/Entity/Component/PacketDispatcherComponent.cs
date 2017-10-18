@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
 using JetBrains.Annotations;
 
@@ -34,10 +35,10 @@ namespace CScape.Core.Network.Entity.Component
                         handler.Handle(Parent, packet);
 
                         if(ShouldNotifyAboutPacketsBeingHandled)
-                            Parent.SystemMessage($"Packet: {packet.Opcode:000} -> {handler.GetType().Name}");
+                            Parent.SystemMessage($"Packet: {packet.Opcode:000} -> {handler.GetType().Name}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
                     }
                     else if(ShouldNotifyAboutUnhandledPackets)
-                        Parent.SystemMessage($"Unhandled packet opcode: {packet.Opcode:000}");
+                        Parent.SystemMessage($"Unhandled packet opcode: {packet.Opcode:000}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
                     
                     break;
                 }

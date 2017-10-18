@@ -1,5 +1,6 @@
 ﻿using System;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entities.MovementAction;
 using CScape.Core.Injection;
 
@@ -22,7 +23,7 @@ namespace CScape.Core.Network.Handler
             var npc = _npcs.Get(npcId);
             if (npc == null)
             {
-                entity.SystemMessage($"Attempted to talk to unregistered npc id {npcId}");
+                entity.SystemMessage($"Attempted to talk to unregistered npc id {npcId}", SystemMessageFlags.Debug | SystemMessageFlags.Entity);
                 return;
             }
 

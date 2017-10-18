@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
 using JetBrains.Annotations;
 
@@ -11,6 +12,8 @@ namespace CScape.Core.Network.Entity.Component
     {
         // TODO : MessageNetworkSyncComponent priority
         public override int Priority { get; }
+
+        public bool SyncDebugMessages { get; }
 
         [NotNull]
         private NetworkingComponent Network
@@ -26,7 +29,9 @@ namespace CScape.Core.Network.Entity.Component
         public MessageNetworkSyncComponent(Game.Entities.Entity parent)
             :base(parent)
         {
-            
+#if DEBUG
+            SyncDebugMessages = true;
+#endif
         }
 
         public override void ReceiveMessage(GameMessage msg)
@@ -34,7 +39,10 @@ namespace CScape.Core.Network.Entity.Component
             if (msg.Event == GameMessage.Type.NewSystemMessage)
             {
                 var msgStr = msg.AsNewSystemMessage();
-                Network.SendPacket(new SystemChatMessagePacket(msgStr));
+                var isDebugBitSet = (msgStr.Flags & SystemMessageFlags.Debug) != 0;
+
+                if (!isDebugBitSet || SyncDebugMessages)
+                    Network.SendPacket(new SystemChatMessagePacket(msgStr.Msg));
             }
         }
 

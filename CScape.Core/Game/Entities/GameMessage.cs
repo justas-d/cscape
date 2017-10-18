@@ -134,7 +134,7 @@ namespace CScape.Core.Game.Entities
 
         public IInteractingEntity AsNewInteractingEntity() =>
             AssertCast<IInteractingEntity>(Type.NewInteractingEntity);
-        public string AsNewSystemMessage() => AssertCast<string>(Type.NewSystemMessage);
+        public SystemMessage AsNewSystemMessage() => AssertCast<SystemMessage>(Type.NewSystemMessage);
 
         public (int x, int y) AsClientRegionChanged() => AssertCast<(int, int)>(Type.ClientRegionChanged);
         public IFacingData AsNewFacingDirection() => AssertCast<IFacingData>(Type.NewFacingDirection);

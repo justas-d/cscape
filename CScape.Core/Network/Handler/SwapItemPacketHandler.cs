@@ -1,5 +1,6 @@
 ﻿using CScape.Core.Data;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Interfaces;
 using CScape.Core.Injection;
@@ -20,7 +21,7 @@ namespace CScape.Core.Network.Handler
             // swapping item A with item A is a no-op, skip.
             if (fromIdx == toIdx) return;
 
-            entity.SystemMessage($"Swap {fromIdx} -> {toIdx} (magic: {magic} )");
+            entity.SystemMessage($"Swap {fromIdx} -> {toIdx} (magic: {magic} )", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
             
             // get inventory
             var interfaces = entity.Components.Get<InterfaceComponent>();

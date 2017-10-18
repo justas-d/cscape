@@ -19,7 +19,7 @@
             if (msg.Event == GameMessage.Type.NewSystemMessage)
             {
                 var strMSg = msg.AsNewSystemMessage();
-                Log.Normal(this, $"({Parent}): {strMSg}");
+                Log.Normal(this, $"({strMSg.Flags}) ({Parent}): {strMSg.Msg}");
             }
         }
     }

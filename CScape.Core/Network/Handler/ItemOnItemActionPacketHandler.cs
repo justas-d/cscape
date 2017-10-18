@@ -1,7 +1,6 @@
 ﻿using System;
 using CScape.Core.Data;
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
 using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Handler
