@@ -1,6 +1,9 @@
-﻿using System;
-using CScape.Core.Data;
+﻿using CScape.Core.Data;
+using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Interface;
+using CScape.Core.Game.Interfaces;
 using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Handler
@@ -9,86 +12,61 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = {53};
 
-        private readonly IItemDefinitionDatabase _db;
-
-        public ItemOnItemActionPacketHandler(IServiceProvider services)
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
         {
-            _db = services.ThrowOrGet<IItemDefinitionDatabase>();
-        }
+            var interfaces = entity.Components.Get<InterfaceComponent>();
+            if (interfaces == null)
+                return;
 
-        public void Handle(Player player, int opcode, Blob packet)
-        {
-            void SendNIH() => player.SendSystemChatMessage(Constant.NothingInterestingHappens);
+            void SendNIH() => entity.SystemMessage(Constant.NothingInterestingHappens);
 
-            var idxB = packet.ReadInt16();
-            var idxA = packet.ReadInt16();
-            var itemIdB = packet.ReadInt16() + 1;
-            var interfaceIdA = packet.ReadInt16();
-            var itemIdA = packet.ReadInt16() + 1;
-            var interfaceIdB = packet.ReadInt16();
+            var idxB = packet.Data.ReadInt16();
+            var idxA = packet.Data.ReadInt16();
+            var itemIdB = packet.Data.ReadInt16() + 1;
+            var interfaceIdA = packet.Data.ReadInt16();
+            var itemIdA = packet.Data.ReadInt16() + 1;
+            var interfaceIdB = packet.Data.ReadInt16();
 
             // make sure we're not operating on the same item instance
             if (idxA == idxB) return;
 
             // try getting interfaces
-            IContainerInterface GetContainer(int id)
+            IItemGameInterface GetContainer(int id)
             {
-                var ret = player.Interfaces.TryGetById(id) as IContainerInterface;
-                if (ret == null)
+                if (!interfaces.All.TryGetValue(id, out var meta))
                 {
-                    player.Log.Warning(this, $"Unregistered Item on Item interface: {id}");
+                    entity.SystemMessage($"Unregistered Item on Item interface: {id}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                     SendNIH();
                     return null;
                 }
+
+                var ret = meta.Interface as IItemGameInterface;
                 return ret;
             }
 
             var containerA = GetContainer(interfaceIdA);
             var containerB = GetContainer(interfaceIdB);
 
+            // verify we got all containers
             if (containerA == null || containerB == null) return;
 
             // validate indicies
             bool IsNotValidIdx(int idx, int max)
             {
-                var ret = 0 > idx || idx >= max;
-                if (ret)
+                if (0 > idx || idx >= max)
                 {
-                    player.Log.Warning(this, $"Out of range item index on Item on Item: {idx}, max: {max}");
+                    entity.SystemMessage($"Out of range item index on Item on Item: {idx}, max: {max}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                     SendNIH();
+                    return false;
                 }
 
-                return ret;
+                return true;
             }
 
-            if (IsNotValidIdx(idxA, containerA.Items.Size)) return;
-            if (IsNotValidIdx(idxB, containerB.Items.Size)) return;
+            if (IsNotValidIdx(idxA, containerA.Container.Provider.Count)) return;
+            if (IsNotValidIdx(idxB, containerB.Container.Provider.Count)) return;
 
-            // compare and validate ids
-            bool IsNotValidId(int clientId, IItemProvider provider, int idx)
-            {
-                var serverId = provider.GetId(idx);
-                var ret = clientId != serverId;
-                if (ret)
-                {
-                    player.Log.Warning(this, $"item on item id mismatch: server: {serverId} client: {clientId}");
-                    SendNIH();
-                }
-                return ret;
-            }
-
-            if (IsNotValidId(itemIdA, containerA.Items.Provider, idxA)) return;
-            if (IsNotValidId(itemIdB, containerB.Items.Provider, idxB)) return;
-
-            // get def of A
-            var defA = _db.Get(itemIdA);
-
-            if (defA == null)
-            {
-                player.Log.Warning(this, $"Undefined itemA on item on item, id: {itemIdA}");
-                SendNIH();
-                return;
-            }
+            // TODO : when do we handle item interaction?
 
             // data's valid, pass it on
             player.Interfaces.OnActionOccurred();
