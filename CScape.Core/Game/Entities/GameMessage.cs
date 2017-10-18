@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Interface;
@@ -80,6 +81,7 @@ namespace CScape.Core.Game.Entities
             NewFacingDirection,
 
             // pathing messages
+            NewPlayerFollowTarget,
             BeginMovePath,
             StopMovingAlongMovePath, /* We suddenly stop moving on the current path (direction provider) without actually arriving at the destination */
             ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
@@ -101,6 +103,8 @@ namespace CScape.Core.Game.Entities
             Debug.Assert(expected == Event);
             return (T) _data;
         }
+
+        public PlayerComponent AsNewFollowTarget() => AssertCast<PlayerComponent>(Type.NewPlayerFollowTarget);
 
         public GroundItemChangeMetadata AsGroundItemAmountUpdate() =>
             AssertCast<GroundItemChangeMetadata>(Type.GroundItemAmountUpdate);

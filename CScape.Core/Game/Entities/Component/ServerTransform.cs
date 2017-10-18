@@ -141,31 +141,41 @@ namespace CScape.Core.Game.Entities.Component
         {
             // TODO : handle ForcedMovement in ServerTransform,
             // TODO : handle ForcedMovement movement over time in a separate component
-            if (msg.Event == GameMessage.Type.Move)
+            switch (msg.Event)
             {
-                var data = msg.AsMove();
-                var delta = data.SumMovements();
-
-                X += delta.x;
-                Y += delta.y;
-
-                /* 
-                 * client implicitly sets the facing direction for the movign entity itself
-                 * so there is no need to call SetFacingDirection and send out an entity-wide message
-                 * we can just silently change the direction and if we need to ever check it, we
-                 * will find good data no matter what.
-                 */
-
-                // also we set the last moving direction here
-                if (data.IsWalking)
+                case GameMessage.Type.Move:
                 {
-                    FacingData = new FacingDirection(data.Dir1, this);
-                    LastMovedDirection = data.Dir1;
+                    var data = msg.AsMove();
+                    var delta = data.SumMovements();
+
+                    X += delta.x;
+                    Y += delta.y;
+
+                    /* 
+                     * client implicitly sets the facing direction for the movign entity itself
+                     * so there is no need to call SetFacingDirection and send out an entity-wide message
+                     * we can just silently change the direction and if we need to ever check it, we
+                     * will find good data no matter what.
+                     */
+
+                    // also we set the last moving direction here
+                    if (data.IsWalking)
+                    {
+                        FacingData = new FacingDirection(data.Dir1, this);
+                        LastMovedDirection = data.Dir1;
+                    }
+                    else
+                    {
+                        LastMovedDirection = data.Dir2;
+                        FacingData = new FacingDirection(data.Dir2, this);
+                    }
+                    break;
                 }
-                else
+                case GameMessage.Type.NewPlayerFollowTarget:
                 {
-                    LastMovedDirection = data.Dir2;
-                    FacingData = new FacingDirection(data.Dir2, this);
+                    var targ = msg.AsNewFollowTarget();
+                    InteractingEntity = new PlayerInteractingEntity(targ);
+                    break;
                 }
             }
         }

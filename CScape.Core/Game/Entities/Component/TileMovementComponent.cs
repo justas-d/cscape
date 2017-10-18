@@ -35,7 +35,7 @@ namespace CScape.Core.Game.Entities.Component
         public bool IsRunning { get; set; }
 
         public TileMovementComponent(Entity parent)
-            :base(parent)
+            : base(parent)
         {
         }
 
@@ -60,12 +60,12 @@ namespace CScape.Core.Game.Entities.Component
                 return;
 
             // TODO : check collision (with size) and then clamp movement
-            
+
             // notify entity of movement.
             Parent.SendMessage(
                 new GameMessage(
-                    this, 
-                    GameMessage.Type.Move, 
+                    this,
+                    GameMessage.Type.Move,
                     new MovementMetadata(data.Walk, data.Run)));
         }
 
@@ -97,7 +97,13 @@ namespace CScape.Core.Game.Entities.Component
                     // we have a provider and it's not done. Process it's movement.
                     ProcessMovement();
                 }
-            }            
+            }
+        }
+
+        private void SetNewFollowTarget(EntityHandle ent)
+        {
+            if (ent.IsDead()) return;
+            Directions = new FollowDirectionProvider(ent);
         }
 
         public override void ReceiveMessage(GameMessage msg)
@@ -112,6 +118,11 @@ namespace CScape.Core.Game.Entities.Component
                 case GameMessage.Type.Teleport:
                 {
                     CancelMovingAlongPath();
+                    break;
+                }
+                case GameMessage.Type.NewPlayerFollowTarget:
+                {
+                    SetNewFollowTarget(msg.AsNewFollowTarget().Parent.Handle);
                     break;
                 }
             }

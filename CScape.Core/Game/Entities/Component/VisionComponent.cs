@@ -79,7 +79,9 @@ namespace CScape.Core.Game.Entities.Component
         {
             // reset interacting entity if it's out of range
             var t = Parent.GetTransform();
-            if (t.InteractingEntity.Entity != null && !CanSee(t.InteractingEntity.Entity))
+            if (t.InteractingEntity.Entity != null && 
+                !t.InteractingEntity.Entity.IsDead() 
+                && !CanSee(t.InteractingEntity.Entity.Get()))
             {
                 t.SetInteractingEntity(NullInteractingEntity.Instance);
             }
