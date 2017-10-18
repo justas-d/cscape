@@ -81,10 +81,13 @@ namespace CScape.Core.Game.Entities
             ent.Components.Add(new MessageNetworkSyncComponent(ent));
             ent.Components.Add(new RegionNetworkSyncComponent(ent));
             
+            // todo : finish adding player components
             ent.Components.Add(new MovementActionComponent(ent));
             ent.Components.Add(new HealthComponent(ent, 10, model.Health));
             ent.Components.Add(new MessageLogComponent(ent));
             ent.Components.Add(new TileMovementComponent(ent));
+            ent.Components.Add<IInventoryComponent>(new PlayerInventoryComponent(ent));
+            ent.Components.Add(new InterfaceComponent(ent));
             ent.Components.Add(new PlayerComponent(
                 ent, 
                 model.Id,

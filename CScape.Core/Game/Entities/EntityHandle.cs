@@ -5,13 +5,13 @@ namespace CScape.Core.Game.Entities
 {
     public sealed class EntityHandle : IEquatable<EntityHandle>
     {
-        public EntitySystem System { get; }
+        public IEntitySystem System { get; }
         public int Generation { get; }
         public int Id { get; }
 
         private readonly int _baked; 
 
-        public EntityHandle([NotNull] EntitySystem system, int generation, int id)
+        public EntityHandle([NotNull] IEntitySystem system, int generation, int id)
         {
             System = system ?? throw new ArgumentNullException(nameof(system));
             Generation = generation;
@@ -22,7 +22,9 @@ namespace CScape.Core.Game.Entities
 
         public bool IsDead() => System.IsDead(this);
         public Entity Get() => System.Get(this);
-        
+
+        public void Destroy() => System.Destroy(this);
+
         public bool Equals(EntityHandle other)
         {
             if (Object.ReferenceEquals(null, other)) return false;

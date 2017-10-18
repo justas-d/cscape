@@ -1,11 +1,11 @@
 ﻿using System;
-using CScape.Core.Game.Interface;
 using CScape.Core.Network.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class PlayerComponent : EntityComponent, IEquatable<PlayerComponent>, IEquatable<string>
+    public sealed class PlayerComponent :
+        EntityComponent, IEquatable<PlayerComponent>, IEquatable<string>
     {
         public enum Title : byte
         {
@@ -18,13 +18,6 @@ namespace CScape.Core.Game.Entities.Component
 
         public Title TitleIcon { get; }
 
-        [NotNull]
-        public IItemContainer Backpack { get; }
-        [NotNull]
-        public IItemContainer Equipment { get; }
-        [NotNull]
-        public IItemContainer Bank { get; }
-        
         [CanBeNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public int PlayerId { get; }

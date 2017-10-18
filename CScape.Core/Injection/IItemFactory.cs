@@ -4,6 +4,9 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
 {
+    /// <summary>
+    /// Defines a factory which create entities that have a valid IGroundItemComponent component attached to them.
+    /// </summary>
     public interface IItemFactory
     {
         [NotNull]

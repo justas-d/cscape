@@ -141,9 +141,9 @@ namespace CScape.Core.Game.Entities
             if (IsDead(handle)) return;
 
             Debug.Assert(_generationTracker.ContainsKey(handle.Id));
-            Debug.Assert(_entities.ContainsKey(handle));
 
-            var ent = Get(handle);
+            if (!_entities.TryGetValue(handle, out var ent))
+                return;
 
             ent.SendMessage(
                 new GameMessage(null, GameMessage.Type.DestroyEntity, true));

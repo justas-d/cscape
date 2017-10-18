@@ -20,8 +20,8 @@ namespace CScape.Core.Game.Entities
             var ent = handle.Get();
 
             var item = new PlayerDroppedItemComponent(ent, stack, null, player.Username);
-            ent.Components.Add(item);
-            ent.Components.Add((IVisionResolver)item);
+            ent.Components.Add<IGroundItemComponent>(item);
+            ent.Components.Add<IVisionResolver>(item);
 
             return handle;
         }
@@ -32,7 +32,7 @@ namespace CScape.Core.Game.Entities
             var ent = handle.Get();
 
             ent.Components.Add(new VisionComponent(ent));
-            ent.Components.Add(new GroundItemComponent(ent, stack, null));
+            ent.Components.Add<IGroundItemComponent>(new GroundItemComponent(ent, stack, null));
             
             ent.AssertComponentRequirementsSatisfied();
 

@@ -4,6 +4,7 @@ using System.Linq;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Interface;
+using CScape.Core.Game.Interfaces;
 using CScape.Core.Game.Item;
 using JetBrains.Annotations;
 
@@ -14,7 +15,7 @@ namespace CScape.Core.Game.Items
     /// When adding/removing an item, this item list container will attempt to stack
     /// it any ONE other same ItemStack, if they can be stacked without overflow.
     /// </summary>
-    public sealed class ListItemContainer : IItemContainer
+    public sealed class ListItemContainer : ISwappableItemContainer
     {
         [NotNull]
         public Entities.Entity Parent { get; }

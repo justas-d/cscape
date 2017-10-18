@@ -1,57 +1,50 @@
 ﻿using CScape.Core.Data;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
+using CScape.Core.Game.Interfaces;
+using CScape.Core.Injection;
 
 namespace CScape.Core.Network.Handler
 {
     public sealed class SwapItemPacketHandler : IPacketHandler
     {
-            public byte[] Handles { get; } = { 214 };
+        public byte[] Handles { get; } = { 214 };
 
-        public void Handle(Player player, int opcode, Blob packet)
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
         {
-            // read
-            var interfaceIdx = packet.ReadInt16();
-            var magic = packet.ReadByte();
-
-            player.DebugMsg($"Swap iidx: {interfaceIdx} w/ magic: {magic}", ref player.DebugItems);
-
-            var fromIdx = packet.ReadInt16();
-            var toIdx = packet.ReadInt16();
+            var interfaceIdx = packet.Data.ReadInt16();
+            var magic = packet.Data.ReadByte();
+            var fromIdx = packet.Data.ReadInt16();
+            var toIdx = packet.Data.ReadInt16();
 
             // swapping item A with item A is a no-op, skip.
             if (fromIdx == toIdx) return;
 
-            player.DebugMsg($"Swap {fromIdx} -> {toIdx}", ref player.DebugItems);
-
-            // get and verify container interface
-            var container = player.Interfaces.TryGetById(interfaceIdx) as IContainerInterface;
-            if (container == null)
-            {
-                player.Log.Warning(this, $"Attempted to switch in unregistered interface: {interfaceIdx}");
+            entity.SystemMessage($"Swap {fromIdx} -> {toIdx} (magic: {magic} )");
+            
+            // get inventory
+            var interfaces = entity.Components.Get<InterfaceComponent>();
+            if (interfaces == null)
                 return;
-            }
 
-            var swappable = container.Items as ISwappableItemManager;
-            if (swappable == null)
-            {
-                player.Log.Warning(this, $"Attempted to switch in unswappable interface: {interfaceIdx}");
+            if (!interfaces.All.TryGetValue(interfaceIdx, out var interfMetadata))
                 return;
-            }
+
+            var interf = interfMetadata.Interface as IItemGameInterface;
+
+            var inventory = interf?.Container as ISwappableItemContainer;
+
+            if (inventory == null)
+                return;
 
             // check if idx are in range
-            bool IsNotInRange(int val)
-            {
-                var ret = 0 > val || val >= container.Items.Size;
-                if (ret) player.Log.Warning(this, $"Out of range swap indicies: {fromIdx} -> {toIdx} (max is {container.Items.Size})");
-                return ret;
-            }
+            bool IsNotInRange(int val) =>  0 > val || val >= inventory.Provider.Count;
 
             if (IsNotInRange(fromIdx)) return;
             if (IsNotInRange(toIdx)) return;
 
-            // execute managed swap
-            swappable.Swap(fromIdx, toIdx);
+
+            inventory.Swap(fromIdx, toIdx);
         }
     }
 }

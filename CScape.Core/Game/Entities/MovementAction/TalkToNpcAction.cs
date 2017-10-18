@@ -13,31 +13,16 @@ namespace CScape.Core.Game.Entities.MovementAction
             TalkTarget = target;
         }
 
-        private bool CanSee()
-        {
-            var reqEnt = Requestee.Get();
-            var talkEnt = TalkTarget.Get();
-
-            // can reqEnt see talkEnt
-            var vision = reqEnt.Components.Get<VisionComponent>();
-            if (vision != null)
-                return vision.CanSee(talkEnt);
-            
-            // can talkEnt see reqEnt
-            vision = talkEnt.Components.Get<VisionComponent>();
-            if (vision != null)
-                return vision.CanSee(reqEnt);
-
-            return false;
-        }
-
         public void Execute()
         {
             // make sure our ents are alive
             if (Requestee.IsDead()) return;
             if (TalkTarget.IsDead()) return;
 
-            if (!CanSee())
+            var reqEnt = Requestee.Get();
+            var talkEnt = TalkTarget.Get();
+
+            if (!reqEnt.CanSee(talkEnt))
                 return;
 
             // todo : talk-to logic

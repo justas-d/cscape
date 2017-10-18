@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace CScape.Core.Game.Entities.Component
 {
     [RequiresComponent(typeof(VisionComponent))]
-    public class GroundItemComponent : EntityComponent
+    public class GroundItemComponent : EntityComponent, IGroundItemComponent
     {
         [CanBeNull]
         private readonly Action<GroundItemComponent> _destroyCallback;
