@@ -16,7 +16,8 @@ namespace CScape.Core.Game.Entities.Message
         Item,
         Network,
         Interface,
-        Entity
+        Entity,
+        Command
     }
 
 

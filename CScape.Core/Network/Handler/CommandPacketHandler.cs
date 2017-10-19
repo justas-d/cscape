@@ -1,6 +1,5 @@
 using System;
-using CScape.Core.Data;
-using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,27 +9,26 @@ namespace CScape.Core.Network.Handler
     {
         private readonly IServiceProvider _services;
         public byte[] Handles { get; } = { 103 };
-
-        public CommandPacketHandler(IServiceProvider services)
+        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
         {
-            _services = services;
-        }
-
-        public void Handle(Player player, int opcode, Blob packet)
-        {
-            if (packet.TryReadString(out string cmd))
+            if (packet.Data.TryReadString(out string cmd))
             {
                 var allFailed = true;
 
                 foreach (var c in _services.GetServices<ICommandHandler>())
                 {
-                    if (c.Push(player, cmd))
+                    if (c.Push(entity, cmd))
                         allFailed = false;
                 }
 
-                if(allFailed)
-                    player.SendSystemChatMessage($"Unknown command: \"{cmd}\"");
+                if (allFailed)
+                    entity.SystemMessage($"Unknown command: \"{cmd}\"", SystemMessageFlags.Command);
             }
+        }
+
+        public CommandPacketHandler(IServiceProvider services)
+        {
+            _services = services;
         }
     }
 }

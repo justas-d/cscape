@@ -19,6 +19,8 @@ namespace CScape.Core.Network.Handler
 
         public void Handle(Player player, int opcode, Blob packet)
         {
+            // TODO : rewrite movement packet handling. preferably when we have collision data.
+
             // non-paired
             var rawWaypointNum = packet.Buffer.Length - 1;
 
