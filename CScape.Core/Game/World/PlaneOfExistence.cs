@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
 {
-    public class PlaneOfExistence : IEnumerable<EntityHandle>
+    public class PlaneOfExistence : IEnumerable<EntityHandle>, IPlaneOfExistence
     {
         [NotNull] public string Name { get; }
 

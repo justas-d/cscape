@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
 {
-    public sealed class EntityHandle : IEquatable<EntityHandle>
+    public sealed class EntityHandle : IEquatable<EntityHandle>, IEntityHandle
     {
         public IEntitySystem System { get; }
         public int Generation { get; }

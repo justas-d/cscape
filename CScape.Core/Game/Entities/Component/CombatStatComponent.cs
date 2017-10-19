@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class CombatStatComponent : EntityComponent
+    public sealed class CombatStatComponent : EntityComponent, ICombatStatComponent
     {
         private sealed class Stats : IEquipmentStats
         {

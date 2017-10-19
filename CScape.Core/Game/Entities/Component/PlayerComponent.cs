@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace CScape.Core.Game.Entities.Component
 {
     public sealed class PlayerComponent :
-        EntityComponent, IEquatable<PlayerComponent>, IEquatable<string>
+        EntityComponent, , IPlayerComponent
     {
         public enum Title : byte
         {

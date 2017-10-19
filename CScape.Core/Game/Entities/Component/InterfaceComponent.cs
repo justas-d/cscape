@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class InterfaceComponent : EntityComponent
+    public sealed class InterfaceComponent : EntityComponent, IInterfaceComponent
     {
         public const int MaxSidebarInterfaces = 15;
 

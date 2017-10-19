@@ -2,14 +2,14 @@ using System.Linq;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class HealthComponent : EntityComponent
+    public sealed class HealthComponent : EntityComponent, IHealthComponent
     {
         private int _health;
         private int _maxHealth;
 
         public override int Priority { get; }
 
-        private int Health
+        public int Health
         {
             get => _health;
             set
@@ -19,7 +19,7 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        private int MaxHealth
+        public int MaxHealth
         {
             get => _maxHealth;
             set

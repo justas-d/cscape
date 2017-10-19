@@ -11,7 +11,7 @@ namespace CScape.Core.Game.Entities.Component
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
-    public sealed class ServerTransform : EntityComponent, IPosition
+    public sealed class ServerTransform : EntityComponent, , IServerTransform
     {
         [NotNull]
         public IInteractingEntity InteractingEntity { get; private set; }
@@ -43,7 +43,7 @@ namespace CScape.Core.Game.Entities.Component
         public ServerTransform([NotNull] Entity parent)
             :base(parent)
         {
-            FacingData = new DefaultDirection(this);
+            FacingData = new NullFacingData(this);
             SwitchPoE(parent.Server.Overworld);
         }
 
@@ -147,9 +147,11 @@ namespace CScape.Core.Game.Entities.Component
                 {
                     var data = msg.AsMove();
                     var delta = data.SumMovements();
-
+                    
                     X += delta.x;
                     Y += delta.y;
+
+                    UpdateRegion();
 
                     /* 
                      * client implicitly sets the facing direction for the movign entity itself

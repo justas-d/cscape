@@ -10,10 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CScape.Basic\CScape.Basic.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="cryptokey-private.pem">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class SkillComponent : EntityComponent
+    public sealed class SkillComponent : EntityComponent, ISkillComponent
     {
         public Dictionary<SkillID, ISkillModel> All { get; }
             = new Dictionary<SkillID, ISkillModel>();

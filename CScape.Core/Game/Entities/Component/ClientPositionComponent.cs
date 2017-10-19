@@ -2,7 +2,7 @@ using CScape.Core.Injection;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class ClientPositionComponent : IEntityComponent
+    public sealed class ClientPositionComponent : IClientPositionComponent
     {
         private (int x, int y) _local;
         private (int x, int y) _clientRegion;

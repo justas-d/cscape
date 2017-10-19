@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entities.Component
     /// <summary>
     /// Tracks what the entity can see
     /// </summary>
-    public sealed class VisionComponent : EntityComponent
+    public sealed class VisionComponent : EntityComponent, IVisionComponent
     {
         public const int DefaultViewRange = 15;
 

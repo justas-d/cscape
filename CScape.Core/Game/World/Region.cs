@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
 {
-    public class Region
+    public class Region : IRegion
     {
         [NotNull] public PlaneOfExistence Poe { get; }
 
