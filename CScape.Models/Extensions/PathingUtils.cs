@@ -24,10 +24,12 @@ namespace CScape.Models.Extensions
              */
             var x = us.X;
             var y = us.Y;
+            var z = us.Z;
             
-            while (!target.Equals(us))
+            while (x != target.X &&
+                   y != target.Y)
             {
-                if (us.Z != target.Z)
+                if (z != target.Z)
                 {
                     yield return DirectionDelta.Noop;
                 }
