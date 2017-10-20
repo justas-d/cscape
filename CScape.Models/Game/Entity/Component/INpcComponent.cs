@@ -1,6 +1,8 @@
-﻿namespace CScape.Core.Game.Entities
+﻿using CScape.Models.Game.Entity;
+
+namespace CScape.Core.Game.Entities
 {
-    public interface INpcComponent
+    public interface INpcComponent : IEntityComponent
     {
         /// <summary>
         /// The implementation specific definition id of the npc.

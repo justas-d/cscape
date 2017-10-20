@@ -6,6 +6,8 @@ namespace CScape.Models.Data
 {
     public class Blob
     {
+        public byte NullTerminator { get; }
+
         public byte[] Buffer { get; private set; }
 
         // or just "Bytes(Read/Written)"
@@ -22,9 +24,10 @@ namespace CScape.Models.Data
         {
         }
 
-        public Blob(byte[] buffer)
+        public Blob(byte[] buffer, int nullTerminator = 10)
         {
             Buffer = buffer;
+            NullTerminator = 10;
         }
 
         #region Byte I/O
@@ -116,9 +119,8 @@ namespace CScape.Models.Data
                         return false;
                     }
 
-                    const byte nullterm = 10;
                     var c = ReadByte();
-                    if (c == nullterm)
+                    if (c == NullTerminator)
                         break;
 
                     builder.Append(Convert.ToChar(c));
@@ -142,7 +144,7 @@ namespace CScape.Models.Data
         {
             foreach (var c in str)
                 Write((byte)c);
-            Write(Constant.StringNullTerminator);
+            Write(NullTerminator);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

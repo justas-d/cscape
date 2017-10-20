@@ -5,11 +5,10 @@ using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Entity.Component
 {
-    /// <inheritdoc />
     /// <summary>
     /// Defines the entity's position in the game world.
     /// </summary>
-    public interface ITransform : IPosition
+    public interface ITransform : IPosition, IEntityComponent
     {
         /// <summary>
         /// The facing data of the entity.

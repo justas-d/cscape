@@ -6,7 +6,7 @@ namespace CScape.Models.Game.Entity.Component
     /// <summary>
     /// Defines a component which can resolve what the entity can see, allows us to get the entities visible entities within the given view range.
     /// </summary>
-    public interface IVisionComponent
+    public interface IVisionComponent : IEntityComponent
     {
         /// <summary>
         /// In tiles, the view range of the component and its entity.

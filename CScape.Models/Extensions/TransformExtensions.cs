@@ -1,5 +1,7 @@
 using System;
 using CScape.Models.Game;
+using CScape.Models.Game.Entity.Component;
+using JetBrains.Annotations;
 
 namespace CScape.Models.Extensions
 {
@@ -25,7 +27,7 @@ namespace CScape.Models.Extensions
         /// <summary>
         /// Forcibly teleports the transform to the given coordinates.
         /// </summary>
-        public static void Teleport(this ServerTransform us, IPosition pos)
+        public static void Teleport(this ITransform us, IPosition pos)
         {
             us.Teleport(pos.X, pos.Y, pos.Z);
         }
@@ -33,7 +35,7 @@ namespace CScape.Models.Extensions
         /// <summary>
         /// Forcibly teleports the transform to the given coordinates.
         /// </summary>
-        public static void Teleport(this ServerTransform us, int x, int y)
+        public static void Teleport(this ITransform us, int x, int y)
         {
             us.Teleport(x, y, us.Z);
         }

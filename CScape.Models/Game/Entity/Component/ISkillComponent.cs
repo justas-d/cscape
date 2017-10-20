@@ -6,7 +6,7 @@ namespace CScape.Models.Game.Entity.Component
     /// <summary>
     /// Defines a component which keep track of arbitrary skills and allows the gaining of experience.
     /// </summary>
-    public interface ISkillComponent
+    public interface ISkillComponent : IEntityComponent
     {
         /// <summary>
         /// The rw skill map.

@@ -2,7 +2,7 @@
 
 namespace CScape.Models.Game.Entity.Component
 {
-    public interface IPlayerComponent : IEquatable<IPlayerComponent>
+    public interface IPlayerComponent : IEquatable<IPlayerComponent>, IEntityComponent
     {
         /// <summary>
         /// The instance id of the player.
