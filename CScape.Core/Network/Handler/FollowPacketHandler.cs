@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Handler
             _players = services.ThrowOrGet<IPlayerFactory>();
         }
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var id = packet.Data.ReadInt16();
 

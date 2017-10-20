@@ -32,7 +32,7 @@ namespace CScape.Core.Network.Handler
             _db = services.ThrowOrGet<IItemDefinitionDatabase>();
         }
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             // read
             var interfId = packet.Data.ReadInt16();

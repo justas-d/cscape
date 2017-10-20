@@ -5,6 +5,7 @@ using CScape.Core;
 using CScape.Core.Game.Entities;
 using CScape.Core.Injection;
 using CScape.Core.Network;
+using CScape.Models;
 using JetBrains.Annotations;
 
 namespace CScape.Basic.Server
@@ -12,10 +13,10 @@ namespace CScape.Basic.Server
     public sealed class MainLoop : IMainLoop, IDisposable
     {
         [NotNull] private readonly Stopwatch _tickWatch = new Stopwatch();
-        private readonly ILoginService _login;
+
         private readonly ILogger _log;
         private readonly IGameServerConfig _config;
-        private readonly IPlayerDatabase _db;
+        private SocketAndPlayerDatabaseDispatch _dispatch;
 
         private int _waitTimeCarry;
         public IGameServer Server { get; }
@@ -30,10 +31,9 @@ namespace CScape.Basic.Server
         {
             Server = services.ThrowOrGet<IGameServer>();
             _log = services.ThrowOrGet<ILogger>();
-            _login = services.ThrowOrGet<ILoginService>();
             _config = services.ThrowOrGet<IGameServerConfig>();
-            _db = services.ThrowOrGet<IPlayerDatabase>();
-
+            _dispatch = new SocketAndPlayerDatabaseDispatch(services);
+        
             TickRate = _config.TickRate;
         }
 

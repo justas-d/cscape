@@ -121,7 +121,7 @@ namespace CScape.Core.Game.Items
 
             Parent.SendMessage(
                 new GameMessage(
-                    null, GameMessage.Type.ItemChange, new ItemChange(this, info)));
+                    null, GameMessage.Type.ItemChange, new ItemChangeMessage(this, info)));
 
             return true;
         }

@@ -12,7 +12,7 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = {53};
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var interfaces = entity.Components.Get<InterfaceComponent>();
             if (interfaces == null)

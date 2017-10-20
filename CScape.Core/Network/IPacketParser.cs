@@ -6,6 +6,6 @@ namespace CScape.Core.Injection
 {
     public interface IPacketParser
     {
-        IEnumerable<PacketMetadata> Parse([NotNull] CircularBlob stream);
+        IEnumerable<PacketMessage> Parse([NotNull] CircularBlob stream);
     }
 }

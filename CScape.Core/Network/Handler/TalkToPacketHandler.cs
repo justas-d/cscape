@@ -17,7 +17,7 @@ namespace CScape.Core.Network.Handler
             _npcs = services.ThrowOrGet<INpcFactory>();
         }
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var npcId = packet.Data.ReadInt16();
             var npc = _npcs.Get(npcId);

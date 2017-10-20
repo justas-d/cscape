@@ -8,9 +8,9 @@ namespace CScape.Core.Network.Entity.Flag
     public sealed class DamageUpdateFlag : IUpdateFlag
     {
         [NotNull]
-        public HitData Hit { get; }
+        public TakeDamageMessage Hit { get; }
 
-        public DamageUpdateFlag([NotNull] HitData hit)
+        public DamageUpdateFlag([NotNull] TakeDamageMessage hit)
         {
             Hit = hit ?? throw new ArgumentNullException(nameof(hit));
         }

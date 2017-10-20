@@ -1,4 +1,4 @@
-using CScape.Core.Game.World;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Game.Entities.Message
 {

@@ -66,7 +66,7 @@ namespace CScape.Core.Game.Entities.Component
                 new GameMessage(
                     this, 
                     GameMessage.Type.PoeSwitch, 
-                    new PoeSwitchMessageData(oldPoe, newPoe)));
+                    new PoeSwitchMessage(oldPoe, newPoe)));
 
             UpdateRegion();
         }
@@ -89,7 +89,7 @@ namespace CScape.Core.Game.Entities.Component
                 new GameMessage(
                     this,
                     GameMessage.Type.Teleport,
-                    new TeleportMessageData(oldPos, newPos)));
+                    new TeleportMessage(oldPos, newPos)));
 
         }
 

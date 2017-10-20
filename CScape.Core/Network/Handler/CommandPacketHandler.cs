@@ -9,7 +9,7 @@ namespace CScape.Core.Network.Handler
     {
         private readonly IServiceProvider _services;
         public byte[] Handles { get; } = { 103 };
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             if (packet.Data.TryReadString(out string cmd))
             {

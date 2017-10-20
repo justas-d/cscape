@@ -1,5 +1,7 @@
 using System;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
+using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Interface
 {
@@ -13,6 +15,26 @@ namespace CScape.Models.Game.Interface
         /// </summary>
         int Id { get; }
 
-        void ReceiveMessage(IGameMessage msg);
+        /// <summary>
+        /// Shows the interfaces for the given entity.
+        /// </summary>
+        void ShowForEntity([NotNull] IEntity entity);
+
+        /// <summary>
+        /// Closes this interface for the given entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        void CloseForEntity([NotNull] IEntity entity);
+
+        /// <summary>
+        /// Updates this interface for the given entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        void UpdateForEntity([NotNull] IEntity entity);
+
+        /// <summary>
+        /// Receives a message that was sent for the given entity.
+        /// </summary>
+        void ReceiveMessage([NotNull] IEntity entity, [NotNull] IGameMessage msg);
     }
 }

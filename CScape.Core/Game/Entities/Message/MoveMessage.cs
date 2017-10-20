@@ -1,5 +1,6 @@
-using System.Diagnostics;
-using CScape.Core.Game.World;
+﻿using System.Diagnostics;
+using CScape.Models.Game.Message;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Game.Entities.Message
 {
@@ -8,8 +9,10 @@ namespace CScape.Core.Game.Entities.Message
     /// An appearance of this data type guarantees that it's members represent 
     /// at least walking and at most running.
     /// </summary>
-    public class MovementMetadata
+    public sealed class MoveMessage : IGameMessage
     {
+        public int EventId => MessageId.Move;
+
         public bool IsWalking { get; }
 
         public DirectionDelta Dir1 { get; }
@@ -20,7 +23,7 @@ namespace CScape.Core.Game.Entities.Message
         /// </summary>
         /// <param name="walk">Must be a valid movement. CANNOT be a noop.</param>
         /// <param name="run">Optional, if set, movement is will be interpreted as running.</param>
-        public MovementMetadata(DirectionDelta walk, DirectionDelta run)
+        public MoveMessage(DirectionDelta walk, DirectionDelta run)
         {
             Debug.Assert(!walk.IsNoop());
 

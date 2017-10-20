@@ -8,14 +8,14 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = {185};
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var buttonId = packet.Data.ReadInt16();
             var interfaceId = packet.Data.ReadInt16();
 
             entity.SendMessage(
                 new GameMessage(
-                    null, GameMessage.Type.ButtonClicked, new ButtonClick(buttonId, interfaceId)));
+                    null, GameMessage.Type.ButtonClicked, new ButtonClickMessage(buttonId, interfaceId)));
         }
     }
 }

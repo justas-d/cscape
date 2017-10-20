@@ -1,12 +1,13 @@
 using System;
-using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Item;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Message
 {
-    public sealed class ItemActionMetadata
+    public sealed class ItemActionMessage : IGameMessage
     {
         public ItemActionType Type { get; }
         [NotNull]
@@ -16,7 +17,7 @@ namespace CScape.Core.Game.Entities.Message
 
         public int Index { get; }
 
-        public ItemActionMetadata(
+        public ItemActionMessage(
             ItemActionType type, 
             [NotNull] IItemContainer container,
             InterfaceMetadata @interface, 
@@ -27,5 +28,7 @@ namespace CScape.Core.Game.Entities.Message
             Interface = @interface;
             Index = index;
         }
+
+        public int EventId => MessageId.ItemAction;
     }
 }

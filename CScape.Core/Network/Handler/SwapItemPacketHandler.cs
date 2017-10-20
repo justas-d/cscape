@@ -11,7 +11,7 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = { 214 };
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var interfaceIdx = packet.Data.ReadInt16();
             var magic = packet.Data.ReadByte();

@@ -1,4 +1,6 @@
 ﻿using System;
+using CScape.Models.Game.Message;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Message
 {
@@ -21,13 +23,21 @@ namespace CScape.Core.Game.Entities.Message
     }
 
 
-    public sealed class SystemMessage
+    public sealed class SystemMessage : IGameMessage
     {
+        [NotNull]
         public string Msg { get; }
         public SystemMessageFlags Flags { get; }
 
-        public SystemMessage(string msg, SystemMessageFlags flags = SystemMessageFlags.None)
+        public int EventId => MessageId.NewSystemMessage;
+
+        public SystemMessage([NotNull] string msg, SystemMessageFlags flags = SystemMessageFlags.None)
         {
+            if (string.IsNullOrEmpty(msg))
+            {
+                throw new ArgumentException("message", nameof(msg));
+            }
+
             Msg = msg;
         }
     }

@@ -17,7 +17,7 @@ namespace CScape.Basic.Server
             _db = service.ThrowOrGet<IPacketDatabase>();
         }
 
-        public IEnumerable<PacketMetadata> Parse(CircularBlob stream)
+        public IEnumerable<PacketMessage> Parse(CircularBlob stream)
         {
         
             while (stream.CanRead())
@@ -45,7 +45,7 @@ namespace CScape.Basic.Server
                         break;
 
                     case PacketLength.Undefined:
-                        yield return PacketMetadata.Undefined(opcodePeek);
+                        yield return PacketMessage.Undefined(opcodePeek);
                         yield break;
 
                     default:
@@ -72,7 +72,7 @@ namespace CScape.Basic.Server
                         lenPayload = stream.ReadInt16();
                         break;
                     case PacketLength.Undefined:
-                        yield return PacketMetadata.Undefined(opcodePeek);
+                        yield return PacketMessage.Undefined(opcodePeek);
                         yield break;
                     default:
                         lenPayload = (byte) lenType;
@@ -84,14 +84,14 @@ namespace CScape.Basic.Server
                 // don't bother creating a new Blob if we're storing nothing.
                 if (lenPayload == 0)
                 {
-                    yield return PacketMetadata.Success(opcode, null);
+                    yield return PacketMessage.Success(opcode, null);
                 }
                 else
                 {
                     var payload = new byte[lenPayload];
                     stream.ReadBlock(payload, 0, lenPayload);
 
-                    yield return PacketMetadata.Success(opcode, new Blob(payload));
+                    yield return PacketMessage.Success(opcode, new Blob(payload));
                 }
             }
         }

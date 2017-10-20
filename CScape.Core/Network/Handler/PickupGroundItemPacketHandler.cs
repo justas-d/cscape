@@ -11,7 +11,7 @@ namespace CScape.Core.Network.Handler
     public class PickupGroundItemPacketHandler : IPacketHandler
     {
         public byte[] Handles { get; } = {236};
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var actionComponent = entity.Components.Get<MovementActionComponent>();
             if (actionComponent == null)

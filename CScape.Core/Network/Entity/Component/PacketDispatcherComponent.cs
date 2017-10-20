@@ -22,11 +22,11 @@ namespace CScape.Core.Network.Entity.Component
             _handlers = handlers ?? throw new ArgumentNullException(nameof(handlers));
         }
 
-        private void HandlePacket(PacketMetadata packet)
+        private void HandlePacket(PacketMessage packet)
         {
             switch (packet.Status)
             {
-                case PacketMetadata.ParseStatus.Success:
+                case PacketMessage.ParseStatus.Success:
                 {
                     var handler = _handlers.GetHandler(packet.Opcode);
 
@@ -42,7 +42,7 @@ namespace CScape.Core.Network.Entity.Component
                     
                     break;
                 }
-                case PacketMetadata.ParseStatus.UndefinedPacket:
+                case PacketMessage.ParseStatus.UndefinedPacket:
                 {
                     Parent.Log.Warning(this, $"Undefined packet opcode: {packet.Opcode}");
 #if DEBUG

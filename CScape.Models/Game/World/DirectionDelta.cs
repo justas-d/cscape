@@ -7,25 +7,6 @@ namespace CScape.Models.Game.World
     /// </summary>
     public struct DirectionDelta : IEquatable<DirectionDelta>, IEquatable<Direction>
     {
-        private struct IntVec3 : IPosition
-        {
-            public int X { get; }
-            public int Y { get; }
-            public int Z { get; }
-
-            public IntVec3(int x, int y, int z)
-            {
-                X = x;
-                Y = y;
-                Z = z;
-            }
-
-            public bool Equals(IPosition other)
-            {
-                return X == other.X && Y == other.Y && Z == other.Z;
-            }
-        }
-
         public Direction Direction { get; }
 
         public sbyte X { get; }

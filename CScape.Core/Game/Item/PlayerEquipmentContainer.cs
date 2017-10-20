@@ -82,7 +82,7 @@ namespace CScape.Core.Game.Items
 
             Provider[info.Index] = info.NewItem;
 
-            var msg = new ItemChange(this, info);
+            var msg = new ItemChangeMessage(this, info);
             Parent.SendMessage(
                 new GameMessage(
                     null, GameMessage.Type.ItemChange, msg));

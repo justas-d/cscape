@@ -1,4 +1,5 @@
 using CScape.Core.Game.Entities.Component;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Message
 {
@@ -30,6 +31,7 @@ namespace CScape.Core.Game.Entities.Message
             Slide = 5
         }
        
+        [NotNull]
         public string Message { get; }
         public PlayerComponent.Title Title { get; }
 
@@ -41,8 +43,13 @@ namespace CScape.Core.Game.Entities.Message
         /// </summary>
         public bool IsForced { get; }
 
-        public ChatMessage(string message, PlayerComponent.Title title, TextColor color, TextEffect effects, bool isForced)
+        public ChatMessage([NotNull] string message, PlayerComponent.Title title, TextColor color, TextEffect effects, bool isForced)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new System.ArgumentException("message", nameof(message));
+            }
+
             Message = message;
             Title = title;
             Color = color;

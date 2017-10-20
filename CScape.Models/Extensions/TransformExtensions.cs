@@ -7,13 +7,14 @@ namespace CScape.Models.Extensions
 {
     public static class TransformExtensions
     {
+        public static IPosition Copy(this IPosition pos) => new IntVec3(pos);
+
         /// <summary>
         /// Returns the absolute distance to the given transform.
-        /// </summary>
-        public static (int x, int y, int z) TaxicabDistanceTo(this IPosition us, [NotNull] IPosition other)
-        {
-            return (Math.Abs(us.X - other.X), Math.Abs(us.Y - other.Y), Math.Abs(us.Z - other.Z));
-        }
+        /// </summary>s
+        public static IntVec3 TaxicabDistanceTo(this IPosition us, [NotNull] IPosition other)
+            => new IntVec3(Math.Abs(us.X - other.X), Math.Abs(us.Y - other.Y), Math.Abs(us.Z - other.Z));
+        
 
         /// <summary>
         /// Returns the maximum distances of absolute x and y position differences 

@@ -70,7 +70,7 @@ namespace CScape.Core.Network.Entity.Component
             {
                 foreach (var packet in PacketParser.Parse(Socket.InStream))
                 {
-                    if(packet.Status == PacketMetadata.ParseStatus.UndefinedPacket)
+                    if(packet.Status == PacketMessage.ParseStatus.UndefinedPacket)
                         DropConnection();
 
                     Parent.SendMessage(

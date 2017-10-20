@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using CScape.Core.Data;
-using CScape.Core.Game.Item;
-using CScape.Core.Injection;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using CScape.Models.Data;
 
 namespace CScape.Core
 {
@@ -45,13 +43,6 @@ namespace CScape.Core
             return l;
         }
 
-        public static Action<TOut> ActionCast<TIn, TOut>(this Action<TIn> act)
-            where TIn: TOut
-        {
-            if (act == null) return null;
-            return t => act((TIn)t);
-        }
-
         [DebuggerStepThrough]
         [DebuggerHidden]
         public static BlobPlaceholder Placeholder(this Blob blob, int size)
@@ -66,28 +57,6 @@ namespace CScape.Core
         {
             if (val.CompareTo(min) < 0) return min;
             return val.CompareTo(max) > 0 ? max : val;
-        }
-
-        /// <summary>
-        /// Returns the item definition for the given item id from the server db, asserting that returned item def id == given id and that the max amount value is in (0; int.MaxValue]
-        /// </summary>
-        [CanBeNull]
-        internal static IItemDefinition GetAsserted(this IItemDefinitionDatabase db, int id)
-        {
-            var item = db.Get(id);
-            if (item == null)
-                return null;
-
-#if RELEASE
-            if(id != item.ItemId) throw new InvalidOperationException("id != item.ItemId");
-            if(0 >= item.MaxAmount && item.MaxAmount > int.MaxValue) throw new InvalidOperationException($"0 >= item.MaxAmount ({item.MaxAmount}) && item.MaxAmount ({item.MaxAmount}) > int.MaxValue");
- 
-#else
-            Debug.Assert(id == item.ItemId);
-            Debug.Assert(0 < item.MaxAmount && item.MaxAmount <= int.MaxValue);
-#endif
-
-            return item;
         }
     }
 }

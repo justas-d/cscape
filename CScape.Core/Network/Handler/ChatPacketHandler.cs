@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Handler
 
         public int MinimumSize { get; } = 2;
 
-        public void Handle(Game.Entities.Entity entity, PacketMetadata packet)
+        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
         {
             var player = entity.Components.Get<PlayerComponent>();
             if (player == null)

@@ -30,6 +30,6 @@ namespace CScape.Models.Game.Item
         /// <summary>
         /// Called whenever the given entity equips an item of this definition.
         /// </summary>
-        void OnEquip([NotNull] IEntity ent);
+        void OnEquip([NotNull] IEntity entity);
     }
 }
