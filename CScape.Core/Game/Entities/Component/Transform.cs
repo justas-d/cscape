@@ -2,8 +2,15 @@ using System;
 using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.World;
-using CScape.Core.Injection;
+using CScape.Models;
+using CScape.Models.Extensions;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Entity.FacingData;
+using CScape.Models.Game.Entity.InteractingEntity;
+using CScape.Models.Game.Message;
+using CScape.Models.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -11,13 +18,11 @@ namespace CScape.Core.Game.Entities.Component
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
-    public sealed class ServerTransform : EntityComponent, , IServerTransform
+    public sealed class Transform : EntityComponent, ITransform
     {
-        [NotNull]
         public IInteractingEntity InteractingEntity { get; private set; }
             = NullInteractingEntity.Instance;
 
-        [NotNull]
         public IFacingData FacingData { get; private set; }
 
         public DirectionDelta LastMovedDirection { get; private set; }
@@ -28,19 +33,14 @@ namespace CScape.Core.Game.Entities.Component
         public int Y { get; private set; } = 0;
         public int Z { get; private set; } = 0;
 
-        /// <summary>
-        /// Returns the current PoE region this transform is stored in.
-        /// </summary>
-        [NotNull] public Region Region { get; private set; }
 
-        /// <summary>
-        /// The entities current PoE
-        /// </summary>
-        [NotNull] public PlaneOfExistence PoE { get; private set; }
+        public IRegion Region { get; private set; }
+
+        public IPlaneOfExistence PoE { get; private set; }
 
         public override int Priority { get; }
 
-        public ServerTransform([NotNull] Entity parent)
+        public Transform([NotNull] IEntity parent)
             :base(parent)
         {
             FacingData = new NullFacingData(this);
@@ -50,7 +50,7 @@ namespace CScape.Core.Game.Entities.Component
         /// <summary>
         /// Cleanly switches the PoE of the entity.
         /// </summary>
-        public void SwitchPoE([NotNull] PlaneOfExistence newPoe)
+        public void SwitchPoE(IPlaneOfExistence newPoe)
         {
             if (newPoe == null) throw new ArgumentNullException(nameof(newPoe));
 
@@ -62,12 +62,7 @@ namespace CScape.Core.Game.Entities.Component
             PoE = newPoe;
             PoE.RegisterNewEntity(this);
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, 
-                    GameMessage.Type.PoeSwitch, 
-                    new PoeSwitchMessage(oldPoe, newPoe)));
-
+            Parent.SendMessage(new PoeSwitchMessage(oldPoe, newPoe));
             UpdateRegion();
         }
 
@@ -78,19 +73,13 @@ namespace CScape.Core.Game.Entities.Component
         {
             if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than {MaxZ}.");
 
-            var oldPos = (X, Y, Z);
-            var newPos = (x, y, z);
+            var oldPos = new ImmIntVec3(x, y, z);
 
             X = x;
             Y = y;
             Z = z;
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this,
-                    GameMessage.Type.Teleport,
-                    new TeleportMessage(oldPos, newPos)));
-
+            Parent.SendMessage(new TeleportMessage(oldPos, new ImmIntVec3(X, Y, Z)));
         }
 
         // TODO : use SetFacingDirection
@@ -98,26 +87,19 @@ namespace CScape.Core.Game.Entities.Component
         {
             FacingData = data ?? throw new ArgumentNullException(nameof(data));
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, 
-                    GameMessage.Type.NewFacingDirection, 
-                    data));
+            Parent.SendMessage(new FacingDirectionMessage(data));
         }
 
         public void SetInteractingEntity([NotNull] IInteractingEntity ent)
         {
             InteractingEntity = ent ?? throw new ArgumentNullException(nameof(ent));
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, GameMessage.Type.NewInteractingEntity,
-                    ent));
+            Parent.SendMessage(new InteractingEntityMessage(ent));
         }
 
         private void UpdateRegion()
         {
-            var region = PoE.GetRegion(X, Y);
+            var region = PoE.GetRegion(X, Y) ?? throw new ArgumentNullException("PoE.GetRegion(X, Y)");
 
             if (Region == region) return;
 
@@ -126,10 +108,10 @@ namespace CScape.Core.Game.Entities.Component
             Region.AddEntity(this);
         }
 
-        public void SyncLocalsToGlobals(ClientPositionComponent client)
+        public void SyncLocalsToGlobals(IClientPositionComponent client)
         {
-            X = client.Base.x + client.Local.x;
-            X = client.Base.y + client.Local.y;
+            X = client.Base.X + client.Local.Y;
+            X = client.Base.Y + client.Local.Y;
 
             UpdateRegion();
 
@@ -137,17 +119,17 @@ namespace CScape.Core.Game.Entities.Component
                 .Debug(this, "Synced client locals to globals.");
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
             // TODO : handle ForcedMovement in ServerTransform,
             // TODO : handle ForcedMovement movement over time in a separate component
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.Move:
+                case (int) MessageId.BeginMovePath:
                 {
                     var data = msg.AsMove();
                     var delta = data.SumMovements();
-                    
+
                     X += delta.x;
                     Y += delta.y;
 
@@ -171,12 +153,18 @@ namespace CScape.Core.Game.Entities.Component
                         LastMovedDirection = data.Dir2;
                         FacingData = new FacingDirection(data.Dir2, this);
                     }
-                    break;
+                        break;
                 }
-                case GameMessage.Type.NewPlayerFollowTarget:
+                case (int) MessageId.NewPlayerFollowTarget:
                 {
-                    var targ = msg.AsNewFollowTarget();
-                    InteractingEntity = new PlayerInteractingEntity(targ);
+                    var ent = msg.AsNewPlayerFollowTarget().Entity;
+                    if (ent.IsDead())
+                        break;
+                    var player = ent.Get().GetPlayer();
+                    if (player == null)
+                        break;
+
+                    InteractingEntity = new PlayerInteractingEntity(player);
                     break;
                 }
             }

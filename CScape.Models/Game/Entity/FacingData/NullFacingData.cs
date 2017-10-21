@@ -4,7 +4,7 @@ using CScape.Models.Game.World;
 
 namespace CScape.Models.Game.Entity.FacingData
 {
-    public sealed class DefaultDirection : IFacingData
+    public sealed class NullFacingData : IFacingData
     {
         private readonly FacingDirection _default;
 
@@ -13,7 +13,7 @@ namespace CScape.Models.Game.Entity.FacingData
         public int RawX => _default.RawX;
         public int RawY => _default.RawY;
 
-        public DefaultDirection(ITransform transform)
+        public NullFacingData(ITransform transform)
         {
             _default = new FacingDirection(new DirectionDelta(Direction.South), transform);
         }

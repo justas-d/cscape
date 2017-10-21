@@ -1,10 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using CScape.Core.Data;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Network.Entity.Flag;
+using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity
@@ -55,10 +54,7 @@ namespace CScape.Core.Network.Entity
             return retval;
         }
 
-        public virtual bool NeedsUpdate()
-        {
-            return GetHeader() != 0;
-        }
+        public abstract bool NeedsUpate();
 
         public void SetFlag(IUpdateFlag flag)
         {

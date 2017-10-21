@@ -1,25 +1,26 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Message;
 using CScape.Models.Game.Message;
-
 namespace CScape.Core.Game.Entities
 {
     public static class GameMessageExtensions
     {
-        private static T AssertCast<T>(IGameMessage msg, int id)
+        private static T AssertCast<T>(IGameMessage msg, MessageId id)
             where T : class, IGameMessage
         {
-            Debug.Assert(msg.EventId == id);
+            Debug.Assert(msg.EventId == (int)id);
             var val = msg as T;
             Debug.Assert(val != null);
             return val;
         }
 
+        public static bool Is(this IGameMessage msg, MessageId id) => msg.EventId == (int)id;
+
         public static SystemMessage AsSystemMessage(this IGameMessage msg) =>
             AssertCast<SystemMessage>(msg, MessageId.NewSystemMessage);
 
         public static ExperienceGainMessage AsExperienceGain(this IGameMessage msg) =>
-            AssertCast<ExperienceGainMessage>(msg, MessageId.ExperienceGain);
+            AssertCast<ExperienceGainMessage>(msg, MessageId.GainExperience);
 
         public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
             AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
@@ -98,28 +99,5 @@ namespace CScape.Core.Game.Entities
 
         public static EntityMessage AsNewPlayerFollowTarget(this IGameMessage msg) =>
             AssertCast<EntityMessage>(msg, MessageId.NewPlayerFollowTarget);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-        public static LevelUpMessage AsLevelUp(this IGameMessage msg) =>
-            AssertCast<LevelUpMessage>(msg, MessageId.LevelUp);
-
-
     }
 }

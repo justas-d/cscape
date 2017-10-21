@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
+﻿using System.Collections.Generic;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Interfaces;
 using CScape.Core.Game.Item;
 using CScape.Core.Injection;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
 
 namespace CScape.Core.Network.Handler
 {
@@ -23,17 +23,15 @@ namespace CScape.Core.Network.Handler
 
         public byte[] Handles { get; } = {122, 41, 16, 87, 145};
 
-        
-
-        private readonly IItemDefinitionDatabase _db;
-
-        public ItemActionPacketHandlers(IServiceProvider services)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
-            _db = services.ThrowOrGet<IItemDefinitionDatabase>();
-        }
+            var interfaces = entity.GetInterfaces();
+            if (interfaces == null)
+            {
+                entity.SystemMessage($"Attempted to handle an ItemAction packet but this entity does not have an InterfaceComponent", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
+                return;
+            }
 
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
-        {
             // read
             var interfId = packet.Data.ReadInt16();
             var idx = packet.Data.ReadInt16();
@@ -45,13 +43,6 @@ namespace CScape.Core.Network.Handler
             if (!OpcodeToActionMap.ContainsKey(packet.Opcode))
             {
                 entity.SystemMessage($"Undefined item action for action opcode: {packet.Opcode}", SystemMessageFlags.Debug | SystemMessageFlags.Item);
-                return;
-            }
-
-            var interfaces = entity.Components.Get<InterfaceComponent>();
-            if (interfaces == null)
-            {
-                entity.SystemMessage($"Attempted to handle an ItemAction packet but this entity does not have an InterfaceComponent", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
                 return;
             }
 
@@ -88,14 +79,7 @@ namespace CScape.Core.Network.Handler
             // determine action type by opcode
             var action = OpcodeToActionMap[packet.Opcode];
 
-            entity.SendMessage(
-                new GameMessage(
-                    null, GameMessage.Type.ItemAction, 
-                    new ItemActionMetadata(
-                        action,
-                        itemInterface.Container,
-                        interfaceMetadata,
-                        idx)));
+            entity.SendMessage(new ItemActionMessage(action, itemInterface.Container, interfaceMetadata, idx);
 
             // execute action
             def.OnAction(player, container, idx, action);

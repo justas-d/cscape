@@ -1,12 +1,15 @@
 using System;
 using System.Net.Sockets;
 using CScape.Core;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network;
 using CScape.Core.Network.Entity.Component;
+using CScape.Models;
+using CScape.Models.Extensions;
 using JetBrains.Annotations;
 
 namespace CScape.Basic.Server
@@ -19,7 +22,7 @@ namespace CScape.Basic.Server
 
         private ILogger Log => Existing.System.Server.Services.ThrowOrGet<ILogger>();
 
-        public ReconnectPlayerLogin([NotNull] Player existing, [NotNull] Socket newConnection, int signlinkUid)
+        public ReconnectPlayerLogin([NotNull] EntityHandle existing, [NotNull] Socket newConnection, int signlinkUid)
         {
             NewConnection = newConnection ?? throw new ArgumentNullException(nameof(newConnection));
             Existing = existing ?? throw new ArgumentNullException(nameof(existing));
@@ -33,7 +36,7 @@ namespace CScape.Basic.Server
 
             var entity = Existing.Get();
 
-            var net = entity.Components.Get<NetworkingComponent>();
+            var net = entity.GetNetwork();
             if (net == null)
                 return;
 
@@ -43,7 +46,7 @@ namespace CScape.Basic.Server
                 return;
             }
 
-            Log.Normal(this, $"Reconnected client iid {Existing.UniqueEntityId} Disposed? {Existing.Connection.IsDisposed}");
+            Log.Normal(this, $"Reconnected entity {Existing}.");
         }
     }
 }

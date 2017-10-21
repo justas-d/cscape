@@ -1,31 +1,29 @@
-using CScape.Core.Data;
+
 using CScape.Core.Game.Entities.Component;
+using CScape.Models.Data;
+using CScape.Models.Extensions;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Segment
 {
     public sealed class LocalPlayerInitSegment : IUpdateSegment
     {
-        private readonly int _zplane;
-        private readonly bool _needsUpdate;
-        private readonly int _localx;
-        private readonly int _localy;
+        private readonly bool _needsUpdate;   
+        private IPosition _local;
 
-        public LocalPlayerInitSegment([NotNull]PlayerComponent player, bool needsUpdate)
+        public LocalPlayerInitSegment([NotNull]IPlayerComponent player, bool needsUpdate)
         {
             var local = player.Parent.Components.AssertGet<ClientPositionComponent>();
-            _zplane = player.Parent.GetTransform().Z;
             _needsUpdate = needsUpdate;
-            _localx = local.Local.x;
-            _localy = local.Local.y;
+            _local = local.Local;
         }
 
-        public LocalPlayerInitSegment(int zplane, bool needsUpdate, int localx, int localy)
+        public LocalPlayerInitSegment(IPosition pos, bool needsUpdate)
         {
-            _zplane = zplane;
+            _local = pos;
             _needsUpdate = needsUpdate;
-            _localx = localx;
-            _localy = localy;
         }
 
         public void Write(OutBlob stream)
@@ -33,12 +31,12 @@ namespace CScape.Core.Network.Entity.Segment
             stream.WriteBits(1, 1); // continue reading?
             stream.WriteBits(2, 3); // type
 
-            stream.WriteBits(2, _zplane); // plane
+            stream.WriteBits(2, _local.Z); // plane
             stream.WriteBits(1, 1); // todo :  setpos flag
             stream.WriteBits(1, _needsUpdate ? 1 : 0); // add to needs updating list
 
-            stream.WriteBits(7, _localy); // local y
-            stream.WriteBits(7, _localx); // local x
+            stream.WriteBits(7, _local.Y); // local y
+            stream.WriteBits(7, _local.Z); // local x
         }
     }
 }

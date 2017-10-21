@@ -3,8 +3,12 @@ using CScape.Core.Data;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Directions;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Factory;
 
 namespace CScape.Core.Network.Handler
 {
@@ -19,7 +23,7 @@ namespace CScape.Core.Network.Handler
             _players = services.ThrowOrGet<IPlayerFactory>();
         }
 
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
             var id = packet.Data.ReadInt16();
 
@@ -31,12 +35,11 @@ namespace CScape.Core.Network.Handler
             if (target.IsDead())
                 return;
 
-            var player = target.Get().Components.Get<PlayerComponent>();
+            var player = target.Get().GetPlayer();
 
             // target handle is good, make dir provider
-            entity.SendMessage(
-                new GameMessage(
-                    null, GameMessage.Type.NewPlayerFollowTarget, player));
+            entity.SendMessage(EntityMessage.PlayerFollowTarget(entity.Handle));
+
         }
     }
 }

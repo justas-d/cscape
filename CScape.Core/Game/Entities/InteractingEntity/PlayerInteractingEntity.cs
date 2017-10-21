@@ -1,4 +1,6 @@
-using CScape.Core.Game.Entities.Component;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Entity.InteractingEntity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.InteractingEntity
@@ -7,9 +9,9 @@ namespace CScape.Core.Game.Entities.InteractingEntity
     {
         public short Id { get; }
         
-        public EntityHandle Entity { get; }
+        public IEntityHandle Entity { get; }
 
-        public PlayerInteractingEntity([NotNull] PlayerComponent player)
+        public PlayerInteractingEntity([NotNull] IPlayerComponent player)
         {
             Entity = player.Parent.Handle;
             Id = (short) (player.PlayerId + 32768);

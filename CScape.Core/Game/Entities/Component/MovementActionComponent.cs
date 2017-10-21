@@ -1,5 +1,5 @@
-using CScape.Core.Game.Entities.MovementAction;
-using CScape.Core.Game.Entity;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -18,11 +18,11 @@ namespace CScape.Core.Game.Entities.Component
 
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.ArrivedAtDestination:
+                case (int)MessageId.ArrivedAtDestination:
                 {
                     if (CurrentAction != null)
                     {
@@ -35,8 +35,8 @@ namespace CScape.Core.Game.Entities.Component
                     }
                     break;
                 }
-                case GameMessage.Type.Teleport:
-                case GameMessage.Type.StopMovingAlongMovePath:
+                case (int)MessageId.Teleport:
+                case (int)MessageId.StopMovingAlongMovePath:
                 {
                     CurrentAction = null;
                     break;

@@ -1,14 +1,16 @@
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Game.Entities.MovementAction
 {
     public class TalkToNpcAction : IMovementDoneAction
     {
-        public EntityHandle Requestee { get; }
-        public EntityHandle TalkTarget { get; }
+        public IEntityHandle Requestee { get; }
+        public IEntityHandle TalkTarget { get; }
 
-        public TalkToNpcAction(EntityHandle requestee, EntityHandle target)
+        public TalkToNpcAction(IEntityHandle requestee, IEntityHandle target)
         {
             Requestee = requestee;
             TalkTarget = target;

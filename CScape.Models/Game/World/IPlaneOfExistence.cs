@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Models.Game.World
@@ -26,6 +27,17 @@ namespace CScape.Models.Game.World
         /// Removes any dead entities from the PoE and it's regions.
         /// </summary>
         void GC();
+
+        /// <summary>
+        /// Removes an entity from the PoE without notifying the entity.
+        /// </summary>
+        /// <param name="owningTransform"></param>
+        void RemoveEntity([NotNull] ITransform owningTransform);
+
+        /// <summary>
+        /// Adds an entity to this PoE without notifying the entity.
+        /// </summary>
+        void RegisterNewEntity([NotNull] ITransform transform);
 
         /// <summary>
         /// Returns a region at the given coordinates. If it doesn't exist, a new one is created.

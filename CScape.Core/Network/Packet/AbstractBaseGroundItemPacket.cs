@@ -1,4 +1,4 @@
-﻿using CScape.Core.Game.Items;
+﻿using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Packet
 {

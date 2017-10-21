@@ -1,6 +1,6 @@
 ﻿namespace CScape.Models.Game.Message
 {
-    public static class System
+    public static class SysMessage
     {
         /* Sent whenever the entity is being destroyed */
         public const int DestroyEntity = int.MinValue + 1;

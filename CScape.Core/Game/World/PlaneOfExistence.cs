@@ -2,15 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
+using CScape.Models;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
 {
-    public class PlaneOfExistence : IEnumerable<EntityHandle>, IPlaneOfExistence
+    public sealed class PlaneOfExistence : IPlaneOfExistence
     {
         [NotNull] public string Name { get; }
 
@@ -19,9 +20,9 @@ namespace CScape.Core.Game.World
 
         private ILogger Log { get; }
 
-        private readonly HashSet<EntityHandle> _entities = new HashSet<EntityHandle>();
+        private readonly HashSet<IEntityHandle> _entities = new HashSet<IEntityHandle>();
 
-        protected Dictionary<(int, int), Region> Regions { get; } 
+        private Dictionary<(int, int), Region> Regions { get; } 
             = new Dictionary<(int, int), Region>();
 
         public PlaneOfExistence([NotNull] IGameServer server, [NotNull] string name)
@@ -31,14 +32,11 @@ namespace CScape.Core.Game.World
             Log = server.Services.ThrowOrGet<ILogger>();
         }
 
-        protected virtual void InternalRemoveEntity([NotNull]ServerTransform ent) { }
-        protected virtual void InternalAddEntity([NotNull] ServerTransform ent) { }
-
         /// <summary>
         /// Gets the region coords by global position.
         /// </summary>
         [NotNull]
-        public virtual Region GetRegion(int x, int y)
+        public IRegion GetRegion(int x, int y)
         {
             var key = (x >> Region.Shift, y >> Region.Shift);
             return GetRegion(key);
@@ -52,7 +50,7 @@ namespace CScape.Core.Game.World
         }
 
         [NotNull]
-        public virtual Region GetRegion((int rx, int ry) regionCoords)
+        public IRegion GetRegion((int rx, int ry) regionCoords)
         {
             if(!Regions.ContainsKey(regionCoords))
                 Regions.Add(regionCoords, new Region(this, regionCoords.rx, regionCoords.ry));
@@ -63,7 +61,7 @@ namespace CScape.Core.Game.World
         /// <summary>
         /// !!Should only be called by ITransform.
         /// </summary>
-        internal void RemoveEntity([NotNull] ServerTransform owningTransform)
+        public void RemoveEntity(ITransform owningTransform)
         {
             if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
@@ -73,13 +71,12 @@ namespace CScape.Core.Game.World
                 return;
 
             _entities.Remove(ent.Handle);
-            InternalRemoveEntity(owningTransform);
         }
 
         /// <summary>
         /// !!Should only be called by ITransform.
         /// </summary>
-        internal void RegisterNewEntity([NotNull] ServerTransform transform)
+        public void RegisterNewEntity(ITransform transform)
         {
             if (transform == null) throw new ArgumentNullException(nameof(transform));
 
@@ -96,22 +93,23 @@ namespace CScape.Core.Game.World
                 return;
 
             _entities.Add(ent.Handle);
-            
-            InternalAddEntity(transform);
+           
         }
 
-        public bool ContainsEntity([NotNull] EntityHandle handle)
+        public bool ContainsEntity([NotNull] IEntityHandle handle)
         {
             return _entities.Contains(handle);
         }
 
-        public IEnumerator<EntityHandle> GetEnumerator()
+        public IEnumerator<IEntityHandle> GetEnumerator()
             => _entities.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
+        public bool Equals(IPlaneOfExistence other) => ReferenceEquals(this, other);
+
         public override string ToString()
             => $"Plane of existence: {Name}";
     }
-};
+}

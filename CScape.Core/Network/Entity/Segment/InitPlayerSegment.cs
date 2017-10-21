@@ -1,5 +1,6 @@
-using CScape.Core.Data;
-using CScape.Core.Game.Entities.Component;
+using CScape.Models.Data;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Segment
@@ -12,7 +13,7 @@ namespace CScape.Core.Network.Entity.Segment
         private readonly int _ydelta;
 
         public InitPlayerSegment(
-            [NotNull] PlayerComponent newPlayer, [NotNull] PlayerComponent localPlayer,
+            [NotNull] IPlayerComponent newPlayer, [NotNull] IPlayerComponent localPlayer,
             bool needsUpdate)
         {
             _pid = newPlayer.PlayerId;

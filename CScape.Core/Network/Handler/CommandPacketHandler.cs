@@ -1,6 +1,9 @@
 using System;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
+using CScape.Models.Game.Command;
+using CScape.Models.Game.Entity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Core.Network.Handler
@@ -9,7 +12,7 @@ namespace CScape.Core.Network.Handler
     {
         private readonly IServiceProvider _services;
         public byte[] Handles { get; } = { 103 };
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
             if (packet.Data.TryReadString(out string cmd))
             {

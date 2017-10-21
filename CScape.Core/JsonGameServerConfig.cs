@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
-using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
+using CScape.Models;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -34,8 +33,7 @@ namespace CScape.Basic.Model
         public int TickRate { get; }
         public int AutoSaveIntervalMs { get; }
         public int EntityGcInternalMs { get; }
-        public ChatMessage.TextEffect DefaultChatEffect { get; }
-        public ChatMessage.TextColor DefaultChatColor { get; }
+
         public string PrivateLoginKeyDir { get; }
         public string Greeting { get; }
         public int MaxPlayers { get; }
@@ -49,7 +47,6 @@ namespace CScape.Basic.Model
             [NotNull] string privateLoginKeyDir, int maxPlayers,
             [NotNull] EndPoint listenEndPoint, int backlog, string greeting, int tickRate, 
             int socketReceiveTimeout, int socketSendTimeout, int autoSaveIntervalMs, 
-            ChatMessage.TextEffect defaultChatEffect, ChatMessage.TextColor defaultChatColor, 
             int entityGcInternalMs)
         {
             if (backlog <= 0) throw new ArgumentOutOfRangeException(nameof(backlog));
@@ -71,8 +68,6 @@ namespace CScape.Basic.Model
             SocketReceiveTimeout = socketReceiveTimeout;
             SocketSendTimeout = socketSendTimeout;
             AutoSaveIntervalMs = autoSaveIntervalMs;
-            DefaultChatEffect = defaultChatEffect;
-            DefaultChatColor = defaultChatColor;
             EntityGcInternalMs = entityGcInternalMs;
         }
     }

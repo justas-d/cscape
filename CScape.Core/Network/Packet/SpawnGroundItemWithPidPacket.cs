@@ -1,4 +1,5 @@
-﻿using CScape.Core.Data;
+﻿using CScape.Models.Data;
+using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Packet
 {
@@ -14,9 +15,10 @@ namespace CScape.Core.Network.Packet
         public const int Id = 215;
 
         public SpawnGroundItemWithPidPacket(
-            (int id, int amount) item,
-            byte offX, byte offY, short pid)
-            : base(item, (int) offX, (int) offY)
+            ItemStack item,
+            (int x, int y) off,
+            short pid)
+            : base(item, off.x, off.y)
         {
             _pid = pid;
         }
@@ -25,10 +27,10 @@ namespace CScape.Core.Network.Packet
         {
             stream.BeginPacket(Id);
 
-            stream.Write16(ItemId);
+            stream.Write16((short)Item.Id.ItemId);
             stream.Write(PackedPos);
             stream.Write16(_pid);
-            stream.Write16(Amount);
+            stream.Write16((short)Item.Amount.Clamp(0, short.MaxValue));
 
             stream.EndPacket();
         }

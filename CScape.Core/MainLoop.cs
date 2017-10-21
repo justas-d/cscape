@@ -3,9 +3,11 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
 using CScape.Core.Network;
 using CScape.Models;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Basic.Server
@@ -16,7 +18,7 @@ namespace CScape.Basic.Server
 
         private readonly ILogger _log;
         private readonly IGameServerConfig _config;
-        private SocketAndPlayerDatabaseDispatch _dispatch;
+        private readonly SocketAndPlayerDatabaseDispatch _dispatch;
 
         private int _waitTimeCarry;
         public IGameServer Server { get; }
@@ -32,7 +34,7 @@ namespace CScape.Basic.Server
             Server = services.ThrowOrGet<IGameServer>();
             _log = services.ThrowOrGet<ILogger>();
             _config = services.ThrowOrGet<IGameServerConfig>();
-            _dispatch = new SocketAndPlayerDatabaseDispatch(services);
+            _dispatch = services.ThrowOrGet<SocketAndPlayerDatabaseDispatch>();
         
             TickRate = _config.TickRate;
         }
@@ -51,7 +53,7 @@ namespace CScape.Basic.Server
             {
                 _tickWatch.Restart();
 
-                void SendMessage(GameMessage msg)
+                void SendMessage(IGameMessage msg)
                 {
                     foreach (var ent in Server.Entities.All.Values)
                         ent.SendMessage(msg);
@@ -69,7 +71,7 @@ namespace CScape.Basic.Server
                 if ((timeSinceGc += DeltaTime) >= _config.AutoSaveIntervalMs)
                 {
                     _log.Normal(this, "Sending Entity GC message");
-                    SendMessage(GameMessage.GC);
+                    SendMessage(NotificationMessage.GC);
                     _log.Normal(this, "Performing world GC");
                     Server.Overworld.GC();
                     // TODO : PoE factory, iterate over all PoE's when it's time for entity GC
@@ -80,16 +82,16 @@ namespace CScape.Basic.Server
 
                 // handle new logins
                 IPlayerLogin next;
-                while ((next = _login.TryGetNext()) != null)
+                while ((next = _dispatch.TryGetNext()) != null)
                     next.Transfer(this);
 
                 //================================================
 
 
-                SendMessage(GameMessage.FrameUpdate);
-                SendMessage(GameMessage.DatabaseUpdate);
-                SendMessage(GameMessage.NetworkUpdate);
-                SendMessage(GameMessage.FrameEnd);
+                SendMessage(NotificationMessage.FrameUpdate);
+                SendMessage(NotificationMessage.DatabaseUpdate);
+                SendMessage(NotificationMessage.NetworkUpdate);
+                SendMessage(NotificationMessage.FrameEnd);
 
                 //================================================
 

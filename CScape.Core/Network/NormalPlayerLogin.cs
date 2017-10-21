@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
 using CScape.Core.Network;
+using CScape.Models;
 using JetBrains.Annotations;
 
 namespace CScape.Core

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Data;
-using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Interface;
+using CScape.Models.Data;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Packet
 {

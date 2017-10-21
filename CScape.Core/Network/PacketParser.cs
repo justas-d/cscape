@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core;
-using CScape.Core.Data;
 using CScape.Core.Injection;
 using CScape.Core.Network;
+using CScape.Models.Data;
 
 namespace CScape.Basic.Server
 {

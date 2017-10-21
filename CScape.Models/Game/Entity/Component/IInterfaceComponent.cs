@@ -12,7 +12,7 @@ namespace CScape.Models.Game.Entity.Component
         /// <summary>
         /// All of this entity's open interfaces.
         /// </summary>
-        [CanBeNull]
+        [NotNull]
         IReadOnlyDictionary<int, InterfaceMetadata> All { get; }
 
         /// <summary>

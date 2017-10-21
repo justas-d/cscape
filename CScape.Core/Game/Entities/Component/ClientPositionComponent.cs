@@ -1,40 +1,43 @@
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
+using CScape.Models;
+using CScape.Models.Extensions;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Message;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class ClientPositionComponent : IClientPositionComponent
+    public sealed class ClientPositionComponent : EntityComponent, IClientPositionComponent
     {
-        private (int x, int y) _local;
-        private (int x, int y) _clientRegion;
+        private MutableIntVec3 _local = new MutableIntVec3();
+        private MutableIntVec3 _clientRegion = new MutableIntVec3();
+        private ImmIntVec3 _base = new ImmIntVec3();
+        
         public const int MinRegionBorder = 16;
         public const int MaxRegionBorder = 88;
 
-        public (int x, int y) Base { get; private set; }
+        public IPosition Base => _base;
+        public IPosition ClientRegion => _clientRegion;
+        public IPosition Local => _local;
 
-        public (int x, int y) ClientRegion => _clientRegion;
-        public (int x, int y) Local => _local;
+        public override int Priority { get; }
 
-        public Entities.Entity Parent { get; }
-        public int Priority { get; }
-
-        public ClientPositionComponent(Entities.Entity parent)
-        {
-            Parent = parent;
-        }
-
-        public void Update(IMainLoop loop)
+        public ClientPositionComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 
-        public void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.Teleport:
+                case (int)MessageId.Teleport:
                     UpdatePosition();
                     break;
 
-                case GameMessage.Type.Move:
+                case (int)MessageId.Move:
                     UpdateOnMove(msg.AsMove().SumMovements());
                     break;
             }
@@ -44,16 +47,21 @@ namespace CScape.Core.Game.Entities.Component
         {
             var t = Parent.GetTransform();
 
-            _clientRegion = ((t.X >> 3) - 6, (t.Y >> 3) - 6);
-            _local = (t.X - (8 * ClientRegion.x), t.Y - (8 * ClientRegion.y));
+            _clientRegion.X = (t.X >> 3) - 6;
+            _clientRegion.Y = (t.Y >> 3) - 6;
+            _clientRegion.Z = t.Z;
+
+            _local.X = (t.X - (8 * _clientRegion.Z));
+            _local.Y = (t.Y - (8 * _clientRegion.Y));
+            _local.Z = t.Z;
 
             Recalc();
         }
 
         private void UpdateOnMove((int x, int y) delta)
         {
-            _local.x += delta.x;
-            _local.y += delta.y;
+            _local.X += delta.x;
+            _local.Y += delta.y;
 
             Recalc();
         }
@@ -63,37 +71,34 @@ namespace CScape.Core.Game.Entities.Component
             var oldRegion = _clientRegion;
 
             // update locals and client region
-            if (Local.x < MinRegionBorder)
+            if (Local.X < MinRegionBorder)
             {
-                _local.x += 32;
-                _clientRegion.x -= 4;
+                _local.X += 32;
+                _clientRegion.X -= 4;
             }
-            else if (Local.x >= MaxRegionBorder)
+            else if (Local.X >= MaxRegionBorder)
             {
-                _local.x -= 32;
-                _clientRegion.x += 4;
+                _local.X -= 32;
+                _clientRegion.X += 4;
             }
 
-            if (Local.y < MinRegionBorder)
+            if (Local.Y < MinRegionBorder)
             {
-                _local.y += 32;
-                _clientRegion.y -= 4;
+                _local.Y += 32;
+                _clientRegion.Y -= 4;
             }
-            else if (Local.y >= MaxRegionBorder)
+            else if (Local.Y >= MaxRegionBorder)
             {
-                _local.y -= 32;
-                _clientRegion.y += 4;
+                _local.Y -= 32;
+                _clientRegion.Y += 4;
             }
 
             if (!oldRegion.Equals(_clientRegion))
             {
-                Parent.SendMessage(
-                    new GameMessage(
-                        this, GameMessage.Type.ClientRegionChanged, 
-                        _clientRegion));                
+                Parent.SendMessage(NotificationMessage.ClientRegionChanged);
             }
 
-            Base = (_clientRegion.x * 8, _clientRegion.y * 8);
+            _base = new ImmIntVec3(_clientRegion.X * 8, _clientRegion.Y * 8, Parent.GetTransform().Z);
 
             Parent.GetTransform().SyncLocalsToGlobals(this);
         }

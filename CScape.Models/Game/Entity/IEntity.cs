@@ -1,9 +1,10 @@
-﻿using CScape.Models.Game.Message;
+﻿using System;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Entity
 {
-    public interface IEntity
+    public interface IEntity : IEquatable<IEntity>, IEquatable<IEntityHandle>
     {
         /// <summary>
         /// The components of this entity.
@@ -38,7 +39,8 @@ namespace CScape.Models.Game.Entity
         /// <summary>
         /// Returns whether all the components have their RequireComponent attribute(s) satisfied.
         /// </summary>
-        bool AreComponentRequirementsSatisfied();
+        /// <param name="message">The error message to be set.</param>
+        bool AreComponentRequirementsSatisfied(out string message);
 
         /// <summary>
         /// Sends a <see cref="IGameMessage"/> to this entity.

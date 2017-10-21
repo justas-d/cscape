@@ -1,5 +1,5 @@
 using System;
-using CScape.Core.Data;
+using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Flag

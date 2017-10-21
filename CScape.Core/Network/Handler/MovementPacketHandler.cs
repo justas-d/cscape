@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using CScape.Core.Data;
 using CScape.Core.Game.Entity;
+using CScape.Models.Data;
 
 namespace CScape.Core.Network.Handler
 {

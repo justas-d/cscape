@@ -1,5 +1,8 @@
-﻿using CScape.Core.Game.Entities;
+﻿using System;
+using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
+using CScape.Core.Network.Entity.Component;
 using CScape.Models.Game.Entity;
 using JetBrains.Annotations;
 
@@ -7,6 +10,16 @@ namespace CScape.Core.Extensions
 {
     public static class EntityExtensions
     {
+        [CanBeNull]
+        public static MovementActionComponent GetMovementAction(this IEntity ent) => ent.Components.Get<MovementActionComponent>();
+        [NotNull]
+        public static MovementActionComponent AssertGetMovementAction(this IEntity ent) => ent.Components.AssertGet<MovementActionComponent>();
+
+        [CanBeNull]
+        public static NetworkingComponent GetNetwork(this IEntity ent) => ent.Components.Get<NetworkingComponent>();
+        [NotNull]
+        public static NetworkingComponent AssertGetNetwork(this IEntity ent) => ent.Components.AssertGet<NetworkingComponent>();
+
         /// <summary>
         /// Sends a system message to the entity.
         /// </summary>
@@ -14,10 +27,13 @@ namespace CScape.Core.Extensions
         {
             if (string.IsNullOrEmpty(msg)) return;
 
-            ent.SendMessage(
-                new GameMessage(
-                    null, GameMessage.Type.NewSystemMessage, new SystemMessage(msg, flags)));
+            ent.SendMessage(new SystemMessage(msg, flags));
         }
 
+        public static void ShowParticleEffect(this IEntity ent, [NotNull] ParticleEffect eff)
+        {
+            if (eff == null) throw new ArgumentNullException(nameof(eff));
+            ent.SendMessage(new ParticleEffectMessage(eff));
+        }
     }
 }

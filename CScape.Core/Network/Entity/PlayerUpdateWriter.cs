@@ -1,5 +1,5 @@
-using CScape.Core.Data;
 using CScape.Core.Game.Entities.Component;
+using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity
@@ -57,6 +57,12 @@ namespace CScape.Core.Network.Entity
             {
                 GetFlag(FlagType.Damage).Write(stream);
             }
+        }
+
+        public override bool NeedsUpate()
+        {
+            var header = (PlayerFlag)GetHeader(f => (int)f.ToPlayer());
+            return header != 0;
         }
     }
 }

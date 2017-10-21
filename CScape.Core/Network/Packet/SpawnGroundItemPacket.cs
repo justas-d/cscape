@@ -1,7 +1,5 @@
-using CScape.Core.Data;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entity;
-using CScape.Core.Game.Items;
+using CScape.Models.Data;
+using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Packet
 {

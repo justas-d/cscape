@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Interface;
@@ -8,6 +9,10 @@ using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entities.Skill;
 using CScape.Core.Game.Interfaces;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Skill;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -46,7 +51,7 @@ namespace CScape.Core.Network.Entity.Component
             Parent.ShowParticleEffect(ParticleEffect.LevelUp);
 
             // level up dialog
-            var interf = Parent.Components.Get<InterfaceComponent>();
+            var interf = Parent.GetInterfaces();
             interf?.Show(
                 InterfaceMetadata.Chat(
                     new LevelUpChatInterface(

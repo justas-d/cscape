@@ -5,6 +5,7 @@ using System.Reflection;
 using CScape.Core;
 using CScape.Core.Injection;
 using CScape.Core.Network.Handler;
+using CScape.Models;
 using JetBrains.Annotations;
 
 namespace CScape.Basic.Server
@@ -20,7 +21,7 @@ namespace CScape.Basic.Server
             _services = services;
             _log = _services.ThrowOrGet<ILogger>();
 
-            RegisterAssembly(typeof(CScape.Core.Constant).GetTypeInfo().Assembly);
+            RegisterAssembly(GetType().GetTypeInfo().Assembly);
         }
 
         public IPacketHandler GetHandler(byte opcode)

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Network;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Game.Interfaces
 {
@@ -13,6 +13,29 @@ namespace CScape.Core.Game.Interfaces
         private readonly int _newLevel;
         public int Id { get; }
 
+        public void ShowForEntity(IEntity entity)
+        {
+            entity.SendMessage(InterfaceMessage.Close(this,
+                new SetDialogInterfacePacket((short) Id),
+                new SetInterfaceTextPacket(Id + 1, $"Congratulations, you just advanced a {_skillName} level."),
+                new SetInterfaceTextPacket(Id + 2, $"Your {_skillName} level is now {_newLevel}")));
+        }
+
+        public void CloseForEntity(IEntity entity)
+        {
+            entity.SendMessage(InterfaceMessage.Close(this, SetDialogInterfacePacket.Close));
+        }
+
+        public void UpdateForEntity(IEntity entity)
+        {
+
+        }
+
+        public void ReceiveMessage(IEntity entity, IGameMessage msg)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public LevelUpChatInterface(int id,
             string skillName, int newLevel)
         {
@@ -21,24 +44,6 @@ namespace CScape.Core.Game.Interfaces
             Id = id;
         }
 
-        public IEnumerable<IPacket> GetShowPackets()
-        {
-            yield return new SetDialogInterfacePacket((short)Id);
-            yield return new SetInterfaceTextPacket(Id + 1, $"Congratulations, you just advanced a {_skillName} level.");
-            yield return new SetInterfaceTextPacket(Id + 2, $"Your {_skillName} level is now {_newLevel}");
-        }
-
-        public IEnumerable<IPacket> GetClosePackets()
-        {
-            yield return SetDialogInterfacePacket.Close;
-        }
-
-        public IEnumerable<IPacket> GetUpdatePackets() => Enumerable.Empty<IPacket>();
-        
-        public void ReceiveMessage(GameMessage msg)
-        {
-            
-        }
 
         public bool Equals(IGameInterface other)
             => Id == other.Id;

@@ -12,8 +12,8 @@ namespace CScape.Core.Game.Entities.Message
         [NotNull]
         public IPosition Position { get; }
 
-        public static PositionMessage ClientRegionChange([NotNull]IPosition pos, int id)
-            => new PositionMessage(pos, MessageId.ClientRegionChanged);
+        public static PositionMessage ClientRegionChange([NotNull]IPosition pos)
+            => new PositionMessage(pos, (int)MessageId.ClientRegionChanged);
 
         private PositionMessage([NotNull] IPosition pos, int id)
         {

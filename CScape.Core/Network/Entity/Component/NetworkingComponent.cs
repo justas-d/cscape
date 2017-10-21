@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using CScape.Core.Data;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -21,7 +22,7 @@ namespace CScape.Core.Network.Entity.Component
         private IPacketParser PacketParser { get; }
 
         [NotNull]
-        private ISocketContext Socket { get; }
+        private SocketContext Socket { get; }
 
         public override int Priority { get; } = -1;
 
@@ -35,7 +36,7 @@ namespace CScape.Core.Network.Entity.Component
 
         public NetworkingComponent(
             [NotNull] Game.Entities.Entity parent, 
-            [NotNull] ISocketContext socket, [NotNull] IPacketParser packetParser)
+            [NotNull] SocketContext socket, [NotNull] IPacketParser packetParser)
             : base(parent)
         {
             PacketParser = packetParser ?? throw new ArgumentNullException(nameof(packetParser));
@@ -66,16 +67,14 @@ namespace CScape.Core.Network.Entity.Component
             }
 
             // update the socket
-            if (Socket.Update(Loop.DeltaTime + Loop.ElapsedMilliseconds))
+            if (Socket.Update(Loop.GetDeltaTime()))
             {
                 foreach (var packet in PacketParser.Parse(Socket.InStream))
                 {
                     if(packet.Status == PacketMessage.ParseStatus.UndefinedPacket)
                         DropConnection();
 
-                    Parent.SendMessage(
-                        new GameMessage(
-                            this, GameMessage.Type.NewPacket, packet));
+                    Parent.SendMessage(packet);
                 }
             }
         }
@@ -100,30 +99,28 @@ namespace CScape.Core.Network.Entity.Component
             
             // reinitialize was successful
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, GameMessage.Type.NetworkReinitialize, null));
+            Parent.SendMessage(NotificationMessage.NetworkReinitialize);
 
             return true;
         }
 
         public void SendPacket(IPacket packet) => _queuedPackets.Add(packet);
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.DestroyEntity:
+                case SysMessage.DestroyEntity:
                 {
                     DropConnection();
                     break;
                 }
-                case GameMessage.Type.FrameUpdate:
+                case SysMessage.FrameUpdate:
                 {
                     FrameUpdate();
                     break;
                 }
-                case GameMessage.Type.FrameEnd:
+                case SysMessage.FrameEnd:
                 {
                     FlushPackets();
                     break;

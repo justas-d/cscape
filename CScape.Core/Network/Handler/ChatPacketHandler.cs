@@ -1,22 +1,24 @@
 using System;
-using CScape.Core.Data;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Network.Handler
 {
     public sealed class ChatPacketHandler : IPacketHandler
     {
         public byte[] Handles { get; } = {4};
-
+        
         public int MinimumSize { get; } = 2;
 
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
-            var player = entity.Components.Get<PlayerComponent>();
+            var player = entity.GetPlayer();
             if (player == null)
                 return;
 
@@ -42,9 +44,7 @@ namespace CScape.Core.Network.Handler
             if (packet.Data.TryReadString(out var msg))
             {
                 entity.SendMessage(
-                    new GameMessage(
-                        null, GameMessage.Type.ChatMessage,
-                            new ChatMessage(msg, player.TitleIcon, color, effect, false)));
+                    new ChatMessageMessage(new ChatMessage(msg, player.TitleIcon, color, effect, false)));
             }
             else
             {

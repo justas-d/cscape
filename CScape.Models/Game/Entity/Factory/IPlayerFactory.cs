@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Reflection.Metadata;
 using CScape.Models.Game.Entity.Exceptions;
 using JetBrains.Annotations;
 
@@ -11,12 +10,15 @@ namespace CScape.Models.Game.Entity.Factory
     public interface IPlayerFactory
     {
         IEntitySystem EntitySystem { get; }
-        IReadOnlyList<EntityHandle> All { get; }
+        IReadOnlyList<IEntityHandle> All { get; }
 
         // TODO : define IPlayerFactory
 
         [CanBeNull]
-        EntityHandle Get(int id);
+        IEntityHandle Get(int id);
+        
+        [CanBeNull]
+        IEntityHandle Get(string username);
 
         /// <summary>
         /// Creates a player entity.
@@ -25,6 +27,6 @@ namespace CScape.Models.Game.Entity.Factory
         /// <returns>An <see cref="EntityHandle"/> pointing to the new player entity or null if the player list is full.</returns>
         /// <exception cref="EntityComponentNotSatisfied">One of the components of the entity is not satisfied</exception>
         [CanBeNull]
-        EntityHandle Create([NotNull] IPlayerModel model);
+        IEntityHandle Create([NotNull] IPlayerModel model);
     }
 }

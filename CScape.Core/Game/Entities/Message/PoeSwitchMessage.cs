@@ -1,6 +1,7 @@
 using System;
 using CScape.Core.Game.World;
 using CScape.Models.Game.Message;
+using CScape.Models.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Message
@@ -8,12 +9,12 @@ namespace CScape.Core.Game.Entities.Message
     public sealed class PoeSwitchMessage : IGameMessage
     {
         [CanBeNull]
-        public PlaneOfExistence OldPoe { get; }
+        public IPlaneOfExistence OldPoe { get; }
 
         [NotNull]
-        public PlaneOfExistence NewPoe { get; }
+        public IPlaneOfExistence NewPoe { get; }
 
-        public PoeSwitchMessage([CanBeNull] PlaneOfExistence oldPoe, [NotNull] PlaneOfExistence newPoe)
+        public PoeSwitchMessage([CanBeNull] IPlaneOfExistence oldPoe, [NotNull] IPlaneOfExistence newPoe)
         {
             OldPoe = oldPoe;
             NewPoe = newPoe ?? throw new ArgumentNullException(nameof(newPoe));

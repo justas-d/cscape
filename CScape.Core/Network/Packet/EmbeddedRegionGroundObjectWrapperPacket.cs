@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Data;
+using CScape.Models.Data;
 
 namespace CScape.Core.Network.Packet
 {

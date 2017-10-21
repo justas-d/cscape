@@ -1,14 +1,17 @@
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 
 namespace CScape.Core.Game.Entities.MovementAction
 {
     public class PickupItemAction : IMovementDoneAction
     {
-        private readonly EntityHandle _who;
-        private readonly EntityHandle _item;
+        private readonly IEntityHandle _who;
+        private readonly IEntityHandle _item;
 
-        public PickupItemAction(EntityHandle who, EntityHandle item)
+        public PickupItemAction(IEntityHandle who, IEntityHandle item)
         {
             _who = who;
             _item = item;

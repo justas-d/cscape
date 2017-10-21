@@ -9,14 +9,19 @@ namespace CScape.Models.Game.Entity
     /// </summary>
     public interface IEntitySystem
     {
+        [NotNull]
+        IGameServer Server { get; }
+
         /// <summary>
         /// The dictionary of all the entities and their handles available to the system. Limited to only living entities.
         /// </summary>
+        [NotNull]
         IReadOnlyDictionary<IEntityHandle, IEntity> All { get; }
 
         /// <summary>
         /// Creates an entity with nothing but an ITransform component and gives is the name <see cref="name"/>.
         /// </summary>
+        [NotNull]
         IEntityHandle Create([NotNull] string name);
 
         /// <summary>

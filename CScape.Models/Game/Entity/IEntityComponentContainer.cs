@@ -13,7 +13,8 @@ namespace CScape.Models.Game.Entity
         /// </summary>
         /// <typeparam name="T">The <see cref="IEntityComponent"/> type which the <see cref="component"/> will be mapped to.</typeparam>
         /// <param name="component">The instance of the component to be added to this entity component container and mapped to type <see cref="T"/>.</param>
-        void Add<T>([NotNull] T component) where T : class, IEntityComponent;
+        /// <returns>True if succesfully added, false otherwise. (component exists or something).</returns>
+        bool Add<T>([NotNull] T component) where T : class, IEntityComponent;
 
         /// <summary>
         /// Gets a component mapped to <see cref="T"/> and asserts that it is not null.

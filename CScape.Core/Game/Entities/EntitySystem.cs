@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Prefab;
-using CScape.Core.Injection;
+using CScape.Core.Game.Entities.Message;
+using CScape.Models;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Exceptions;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
 {
     public sealed class EntitySystem : IEntitySystem
-    {
-        public const int IdBits = sizeof(int) - GenerationBits;
+    { 
         public const int GenerationBits = 8;
         public int IdThreshold { get; }
 
@@ -21,9 +20,10 @@ namespace CScape.Core.Game.Entities
         private readonly List<int> _idQueue;
         private readonly Dictionary<int, int> _generationTracker = new Dictionary<int, int>(); // id  -> generation
 
-        private readonly Dictionary<EntityHandle, Entity> _entities = new Dictionary<EntityHandle, Entity>();
+        private readonly Dictionary<IEntityHandle, IEntity> _entities 
+            = new Dictionary<IEntityHandle, IEntity>();
 
-        public IReadOnlyDictionary<EntityHandle, Entity> All => _entities;
+        public IReadOnlyDictionary<IEntityHandle, IEntity> All => _entities;
 
         [NotNull]
         public IGameServer Server { get; }
@@ -38,7 +38,7 @@ namespace CScape.Core.Game.Entities
             _idQueue = new List<int>(IdThreshold);
         }
 
-        public bool IsDead(EntityHandle handle)
+        public bool IsDead(IEntityHandle handle)
         {
             if (_generationTracker.ContainsKey(handle.Id))
             {
@@ -48,7 +48,7 @@ namespace CScape.Core.Game.Entities
                 return true;
         }
 
-        public EntityHandle Create([NotNull] string name)
+        public IEntityHandle Create(string name)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
 
@@ -69,94 +69,35 @@ namespace CScape.Core.Game.Entities
             var handle = new EntityHandle(this, _generationTracker[id], id);
             var entity = new Entity(name, handle);
 
-            entity.Components.Add(new ServerTransform(entity));
+            entity.Components.Add(new Transform(entity));
 
             Debug.Assert(!_entities.ContainsKey(handle));
             _entities.Add(handle, entity);
 
             return handle;
         }
-
-        public EntityHandle Create([NotNull] EntityPrefab prefab)
-        {
-            if (prefab == null) throw new ArgumentNullException(nameof(prefab));
-
-            var entHandle = Create(prefab.Name);
-
-            // initialize prefabs
-            if (prefab.ComponentPrefabs != null)
-            {
-                foreach (var componentPrefab in prefab.ComponentPrefabs)
-                {
-                    if (componentPrefab.CachedConstructor == null)
-                    {
-                        // construct ctor param list
-                        var types = componentPrefab.CtorParams
-                            .Select(c => c.GetMethodInfo().ReturnType).ToArray();
-                        
-                        // find ctor
-                        var ctor = componentPrefab.InstanceType.GetConstructor(types);
-                        if (ctor == null)
-                        {
-                            var typeStr = new StringBuilder();
-
-                            foreach (var t in types)
-                            {
-                                typeStr.Append($"{t.Name} ");
-                            }
-
-                            // we couldn't find it.
-                            throw new EntityPrefabInstantiationFailure(prefab, componentPrefab,
-                                $"Couldn't find constructor for type {componentPrefab.InstanceType.Name} with arguments of type: {typeStr}");
-
-                        }
-
-                        componentPrefab.CachedConstructor = ctor;
-                    }
-
-                    // construct
-                    var component = componentPrefab.CachedConstructor.Invoke(
-                        entHandle.Get(), componentPrefab.CtorParams.Select(c => c()).ToArray());
-                    
-                    // initialize
-                    foreach (var setup in componentPrefab.Setups)
-                        setup(component);
-                    
-                }
-            }
-
-            // initialize entity
-            foreach (var setup in prefab.Setups)
-                setup(entHandle.Get());
-
-            Server.Services.ThrowOrGet<ILogger>()
-                .Normal(this, $"Instantiated prefab {prefab.Name}");
-            
-            return entHandle;
-        }
-
-        public void Destroy([NotNull] EntityHandle handle)
+   
+        public bool Destroy([NotNull] IEntityHandle handle)
         {
             if (handle == null) throw new ArgumentNullException(nameof(handle));
-            if (IsDead(handle)) return;
+            if (IsDead(handle)) return false;
 
             Debug.Assert(_generationTracker.ContainsKey(handle.Id));
 
             if (!_entities.TryGetValue(handle, out var ent))
-                return;
+                return false;
 
-            ent.SendMessage(
-                new GameMessage(null, GameMessage.Type.DestroyEntity, true));
+            ent.SendMessage(NotificationMessage.DestroyEntity);
 
             // advance the generation for this id
             _generationTracker[handle.Id] += 1;
 
             _entities.Remove(handle);
 
-
+            return true;
         }
 
-        public Entity Get([NotNull] EntityHandle entityHandle)
+        public IEntity Get(IEntityHandle entityHandle)
         {
             if (entityHandle == null) throw new ArgumentNullException(nameof(entityHandle));
             if(IsDead(entityHandle)) throw new DestroyedEntityDereference(entityHandle);

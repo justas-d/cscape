@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Models.Extensions
 {
-    public static class EntityExtensionszz
+    public static class EntityExtensions
     {
         [CanBeNull]
         public static IVisionComponent GetVision(this IEntity ent) => ent.Components.Get<IVisionComponent>();
@@ -57,15 +57,17 @@ namespace CScape.Models.Extensions
         [NotNull]
         public static IVisionComponent AssertGetSkills(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
 
-        [CanBeNull]
-        public static ITransform GetTransform(this IEntity ent) => ent.Components.Get<ITransform>();
         [NotNull]
-        public static IVisionComponent AssertGetTransform(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static ITransform GetTransform(this IEntity ent) => ent.Components.AssertGet<ITransform>();
 
         [CanBeNull]
         public static IVisionResolver GetVisionResolver(this IEntity ent) => ent.Components.Get<IVisionResolver>();
         [NotNull]
         public static IVisionComponent AssertGetVisionResolver(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+
+        public static bool IsDead(this IEntityHandle handle) => handle.System.IsDead(handle);
+        public static IEntity Get(this IEntityHandle handle) => handle.System.Get(handle);
+        public static bool Destroy(this IEntityHandle handle) => handle.System.Destroy(handle);
 
         /// <summary>
         /// Resolves vision between two entities, where the main entity (<see cref="main"/>) is the entity trying to see the other entity <see cref="oth"/>.'

@@ -3,6 +3,10 @@ using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Entity
 {
+    /// <summary>
+    /// Defines a handle of an entity.
+    /// GetHashCode needs to be implemented.
+    /// </summary>
     public interface IEntityHandle : IEquatable<IEntityHandle>
     {
         /// <summary>

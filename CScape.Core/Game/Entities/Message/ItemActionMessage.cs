@@ -29,6 +29,6 @@ namespace CScape.Core.Game.Entities.Message
             Index = index;
         }
 
-        public int EventId => MessageId.ItemAction;
+        public int EventId => (int)MessageId.ItemAction;
     }
 }

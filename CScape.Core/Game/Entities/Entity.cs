@@ -1,108 +1,62 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
+using CScape.Models;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
 {
-    public sealed class Entity : IEquatable<Entity>, IEnumerable<IEntityComponent>, IEntity
+    public sealed class Entity : IEntity
     {
-
-
-        [NotNull]
         public string Name { get; }
 
-        [NotNull]
-        public EntityHandle Handle { get; }
+        public IEntityHandle Handle { get; }
 
-        [NotNull]
         public IGameServer Server => Handle.System.Server;
 
         public ILogger Log => Handle.System.Server.Services.ThrowOrGet<ILogger>();
 
-        public ServerTransform GetTransform() => Components.Get<ServerTransform>();
-
-        public EntityComponentContainer<IEntityComponent> Components { get; }
+        public IEntityComponentContainer Components { get; }
 
         public Entity([NotNull] string name, [NotNull] EntityHandle handle)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Handle = handle ?? throw new ArgumentNullException(nameof(handle));
 
-            Components = new EntityComponentContainer<IEntityComponent>(this);
+            Components = new EntityComponentContainer();
         }
 
-        public bool Equals(Entity other)
+        public void SendMessage([NotNull] IGameMessage message)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Handle.Equals(other.Handle);
-        }
-
-        public IEnumerator<IEntityComponent> GetEnumerator()
-        {
-            return Components.GetEnumerator();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj is Entity && Equals((Entity) obj);
-        }
-
-        /// <summary>
-        /// Sends out an <see cref="GameMessage"/> to each and every component
-        /// of this entity. The sender of the message will not receive the message.
-        /// </summary>
-        /// <param name="message">The message to be sent.</param>
-        public void SendMessage([NotNull] GameMessage message)
-        {
-            foreach (var frag in this)
+            foreach (var frag in Components)
             {
                 frag.ReceiveMessage(message);
             }
         }
 
-        /// <summary>
-        /// Sends a system message to the entity.
-        /// </summary>
-        public void SystemMessage([NotNull] string msg, SystemMessageFlags flags = SystemMessageFlags.None)
+        public bool AreComponentRequirementsSatisfied(out string message)
         {
-            if (string.IsNullOrEmpty(msg)) return;
-
-            SendMessage(
-                new GameMessage(
-                    null, GameMessage.Type.NewSystemMessage, new SystemMessage(msg, flags)));
-        }
-
-        /// <summary>
-        /// Asserts that are component dependencies are satisfied.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="EntityComponentNotSatisfied">Thrown, when a component is not satisfied.</exception>
-        public void AssertComponentRequirementsSatisfied()
-        {
-            foreach (var frag in this)
+            message = null;
+            foreach (var comp in Components)
             {
                 foreach (var attrib in
-                    frag.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
+                    comp.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
                 {
                     // look for required attrib
 
-                    var match = this.FirstOrDefault(c => c.GetType() == attrib.FragmentType);
+                    var match = Components.FirstOrDefault(c => c.GetType() == attrib.FragmentType);
                     if (match == null)
                     {
-                        throw new EntityComponentNotSatisfied
-                            (frag.GetType(), $"Requires fragment of type {attrib.FragmentType.Name} to be attached to the entity but it is not.");
+                        message =
+                            $"{comp.GetType().Name} requires component of type {attrib.FragmentType.Name} to be attached to the entity but it is not.";
+                        return false;
                     }
                 }
             }
+            return true;
         }
 
         public override int GetHashCode()
@@ -115,9 +69,25 @@ namespace CScape.Core.Game.Entities
             return $"Entity \"{Name}\" {Handle}";
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public bool Equals(IEntity other)
         {
-            return GetEnumerator();
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Handle.Equals(other.Handle);
+        }
+
+        public bool Equals(IEntityHandle other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Handle.Equals(other);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is Entity && Equals((Entity)obj);
         }
     }
 }

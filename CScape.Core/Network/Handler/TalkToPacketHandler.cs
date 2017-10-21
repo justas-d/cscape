@@ -1,8 +1,10 @@
 ﻿using System;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entities.MovementAction;
 using CScape.Core.Injection;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Factory;
 
 namespace CScape.Core.Network.Handler
 {
@@ -17,7 +19,7 @@ namespace CScape.Core.Network.Handler
             _npcs = services.ThrowOrGet<INpcFactory>();
         }
 
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
             var npcId = packet.Data.ReadInt16();
             var npc = _npcs.Get(npcId);
@@ -27,7 +29,7 @@ namespace CScape.Core.Network.Handler
                 return;
             }
 
-            var action = entity.Components.Get<MovementActionComponent>();
+            var action = entity.GetMovementAction();
             if (action == null) return;
 
             action.CurrentAction = new TalkToNpcAction(entity.Handle, npc);

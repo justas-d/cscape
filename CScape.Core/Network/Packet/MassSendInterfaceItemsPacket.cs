@@ -1,5 +1,6 @@
-using CScape.Core.Data;
-using CScape.Core.Game.Interface;
+using CScape.Models.Data;
+using CScape.Models.Game.Item;
+
 namespace CScape.Core.Network.Packet
 {
     public sealed class MassSendInterfaceItemsPacket : IPacket

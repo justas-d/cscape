@@ -1,9 +1,10 @@
-﻿using CScape.Core.Data;
-using CScape.Core.Game.Entities.Component;
+﻿using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interfaces;
 using CScape.Core.Injection;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Handler
 {
@@ -11,7 +12,7 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = { 214 };
 
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
             var interfaceIdx = packet.Data.ReadInt16();
             var magic = packet.Data.ReadByte();
@@ -24,7 +25,7 @@ namespace CScape.Core.Network.Handler
             entity.SystemMessage($"Swap {fromIdx} -> {toIdx} (magic: {magic} )", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
             
             // get inventory
-            var interfaces = entity.Components.Get<InterfaceComponent>();
+            var interfaces = entity.GetInterfaces();
             if (interfaces == null)
                 return;
 

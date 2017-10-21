@@ -1,6 +1,6 @@
 using System;
-using CScape.Core.Data;
-using CScape.Core.Game.Entities.InteractingEntity;
+using CScape.Models.Data;
+using CScape.Models.Game.Entity.InteractingEntity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Flag

@@ -1,19 +1,19 @@
 ﻿using System.Linq;
-using CScape.Core.Data;
-using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.MovementAction;
-using CScape.Core.Game.Entity;
 using CScape.Core.Injection;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 
 namespace CScape.Core.Network.Handler
 {
     public class PickupGroundItemPacketHandler : IPacketHandler
     {
         public byte[] Handles { get; } = {236};
-        public void Handle(Game.Entities.Entity entity, PacketMessage packet)
+        public void Handle(IEntity entity, PacketMessage packet)
         {
-            var actionComponent = entity.Components.Get<MovementActionComponent>();
+            var actionComponent = entity.GetMovementAction();
             if (actionComponent == null)
                 return;
 

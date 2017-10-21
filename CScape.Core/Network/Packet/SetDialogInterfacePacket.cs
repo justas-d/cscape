@@ -1,4 +1,4 @@
-using CScape.Core.Data;
+using CScape.Models.Data;
 
 namespace CScape.Core.Network.Packet
 {

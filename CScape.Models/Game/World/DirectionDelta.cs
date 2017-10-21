@@ -197,7 +197,7 @@ namespace CScape.Models.Game.World
 
         public static IPosition operator+(DirectionDelta delta, IPosition pos)
         {
-            return new IntVec3(
+            return new ImmIntVec3(
                 pos.X + delta.X, 
                 pos.Y + delta.Y, 
                 pos.Z);

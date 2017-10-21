@@ -1,5 +1,6 @@
 using System;
 using CScape.Core.Data;
+using CScape.Models.Data;
 
 namespace CScape.Core.Network.Entity.Flag
 {

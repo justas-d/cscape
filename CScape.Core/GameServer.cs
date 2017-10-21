@@ -4,7 +4,10 @@ using CScape.Core;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
-using CScape.Core.Injection;
+using CScape.Models;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Factory;
+using CScape.Models.Game.World;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,14 +16,14 @@ namespace CScape.Basic.Server
     public sealed class GameServer : IGameServer
     {
         public IServiceProvider Services { get; }
-        public PlaneOfExistence Overworld { get; }
+        public IPlaneOfExistence Overworld { get; }
         public IEntitySystem Entities { get; }
 
         public bool IsDisposed { get; private set; }
-        public DateTime StartTime { get; private set; }
+        public DateTime UTCStartTime { get; private set; }
 
         private ILogger Log { get; }
-        private IMainLoop Loop { get; }
+        public IMainLoop Loop { get; }
 
         private IPlayerFactory Players { get; }
 
@@ -28,6 +31,7 @@ namespace CScape.Basic.Server
         {
             // register internal dependencies
             services.AddSingleton<IGameServer>(_ => this);
+            services.AddSingleton(s => new SocketAndPlayerDatabaseDispatch(s.ThrowOrGet<IGameServer>().Services));
 
             // build service provider
             Services = services?.BuildServiceProvider() ?? throw new ArgumentNullException(nameof(services));
@@ -47,7 +51,7 @@ namespace CScape.Basic.Server
             if (Players.All.Count >= Services.GetService<IGameServerConfig>().MaxPlayers)
                 ret |= ServerStateFlags.PlayersFull;
 
-            if (!Services.GetService<ILoginService>().IsEnabled)
+            if (!Services.GetService<SocketAndPlayerDatabaseDispatch>().IsEnabled)
                 ret |= ServerStateFlags.LoginDisabled;
 
             return ret;
@@ -55,7 +59,7 @@ namespace CScape.Basic.Server
 
         public async Task Start()
         {
-            StartTime = DateTime.Now;
+            UTCStartTime = DateTime.UtcNow;
 
             Log.Normal(this, "Starting server...");
 

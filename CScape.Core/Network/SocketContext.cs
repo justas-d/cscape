@@ -1,14 +1,13 @@
 using System;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using CScape.Core.Data;
-using CScape.Core.Injection;
-using CScape.Core.Network.Sync;
+using CScape.Models;
+using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network
 {
-    public class SocketContext : ISocketContext
+    public class SocketContext
     {
         public const int OutStreamSize = 5000;
         public const int InBufferStreamSize = 1024;
@@ -34,8 +33,6 @@ namespace CScape.Core.Network
         private readonly byte[] _inBufferStream;
         private Socket _socket; // only null when IsDisposed
         private readonly ILogger _log;
-
-        private MessageSyncMachine _msg;
 
         public SocketContext([NotNull] IServiceProvider services,
             [NotNull] Socket socket, int signlinkId)
@@ -73,8 +70,6 @@ namespace CScape.Core.Network
             // reset streams
             OutStream.ResetHeads();
             InStream = new CircularBlob(InStreamSize);
-
-            _msg = (MessageSyncMachine)SyncMachines[SyncMachineConstants.Message];
 
             return true;
         }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Data;
 using CScape.Core.Network.Entity.Segment;
+using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Packet

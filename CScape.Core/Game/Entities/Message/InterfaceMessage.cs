@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CScape.Core.Network;
 using CScape.Models.Game.Interface;
 using CScape.Models.Game.Message;
@@ -8,29 +9,28 @@ namespace CScape.Core.Game.Entities.Message
 {
     public sealed class InterfaceMessage : IGameMessage
     {
-        public InterfaceMetadata Interf { get; }
+        public IGameInterface Interf { get; }
         [CanBeNull]
         public IEnumerable<IPacket> Packets { get; }
         public int EventId { get; }
 
-        public static InterfaceMessage Show(InterfaceMetadata interf,
-            [CanBeNull] IEnumerable<IPacket> packets)
+        public static InterfaceMessage Show(IGameInterface interf,
+            [CanBeNull] params IPacket[] packets)
             => new InterfaceMessage(interf, packets, MessageId.NewInterfaceShown);
 
-        public static InterfaceMessage Close(InterfaceMetadata interf,
-            [CanBeNull] IEnumerable<IPacket> packets)
+        public static InterfaceMessage Close(IGameInterface interf,
+            [CanBeNull] params IPacket[] packets)
             => new InterfaceMessage(interf, packets, MessageId.InterfaceClosed);
 
-        public static InterfaceMessage Update(InterfaceMetadata interf,
-            [CanBeNull] IEnumerable<IPacket> packets)
+        public static InterfaceMessage Update(IGameInterface interf,
+            [CanBeNull] params IPacket[] packets)
             => new InterfaceMessage(interf, packets, MessageId.InterfaceUpdate);
 
-        private InterfaceMessage(InterfaceMetadata interf, 
-            [CanBeNull] IEnumerable<IPacket> packets, int id)
+        private InterfaceMessage([NotNull] IGameInterface interf, IEnumerable<IPacket> packets, MessageId id)
         {
-            Interf = interf;
-            Packets = packets;
-            EventId = id;
+            Interf = interf ?? throw new ArgumentNullException(nameof(interf));
+            Packets = packets
+            EventId = (int)id;
         }
     }
 }

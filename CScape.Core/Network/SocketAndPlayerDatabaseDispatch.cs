@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
-using CScape.Basic.Model;
 using CScape.Core;
-using CScape.Core.Data;
-using CScape.Core.Injection;
 using CScape.Core.Network;
+using CScape.Models;
+using CScape.Models.Data;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity.Factory;
 using JetBrains.Annotations;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -71,12 +70,13 @@ namespace CScape.Basic.Server
     /// <summary>
     /// Handles incoming connections and sets them up for the game loop.
     /// </summary>
-    public class SocketAndPlayerDatabaseDispatch : ILoginService, IDisposable
+    public class SocketAndPlayerDatabaseDispatch : IDisposable
     {
         [NotNull] private readonly IServiceProvider _services;
         [NotNull] private readonly IGameServer _server;
         [NotNull] private readonly IGameServerConfig _config;
         [NotNull] private readonly IPlayerDatabase _db;
+        private readonly IPlayerFactory _players;
         [NotNull] private readonly Random _rng;
         [NotNull] private readonly Socket _socket;
         [NotNull] private readonly IAsymmetricBlockCipher _crypto;
@@ -91,6 +91,7 @@ namespace CScape.Basic.Server
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
+            _players = services.ThrowOrGet<IPlayerFactory>();
             _db = services.ThrowOrGet<IPlayerDatabase>();
             _server = services.ThrowOrGet<IGameServer>();
             _config = services.ThrowOrGet<IGameServerConfig>();
@@ -283,8 +284,7 @@ namespace CScape.Basic.Server
                 username = username.ToLowerInvariant();
 
                 // check if user is logged in
-                var loggedInPlayer = _server.Players.All.Values.FirstOrDefault(
-                    p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+                var loggedInPlayer = _players.Get(username);
 
                 if (isReconnecting)
                 {

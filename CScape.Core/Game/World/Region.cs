@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entity;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.World
 {
     public class Region : IRegion
     {
-        [NotNull] public PlaneOfExistence Poe { get; }
+        [NotNull] public IPlaneOfExistence Poe { get; }
 
         public int X { get; }
         public int Y { get; }
@@ -19,11 +21,11 @@ namespace CScape.Core.Game.World
 
         private readonly HashSet<EntityHandle> _entities = new HashSet<EntityHandle>();
 
-        public IReadOnlyCollection<EntityHandle> Entities => _entities;
+        public IReadOnlyCollection<IEntityHandle> Entities => _entities;
         
-        private IEnumerable<Region> _nearbyRegions;
+        private IEnumerable<IRegion> _nearbyRegions;
 
-        public Region([NotNull] PlaneOfExistence poe, int x, int y)
+        public Region([NotNull] IPlaneOfExistence poe, int x, int y)
         {
             Poe = poe ?? throw new ArgumentNullException(nameof(poe));
             X = x;
@@ -35,7 +37,8 @@ namespace CScape.Core.Game.World
             _entities.RemoveWhere(e => e.IsDead());
         }
 
-        public void AddEntity([NotNull] ServerTransform owningTransform)
+
+        public void AddEntity(ITransform owningTransform)
         {
             if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
@@ -49,31 +52,31 @@ namespace CScape.Core.Game.World
             _entities.Add(ent.Handle);
         }
 
-        public void RemoveEntity([NotNull] ServerTransform ent)
+        public void RemoveEntity(ITransform owningTransform)
         {
-            if (ent == null) throw new ArgumentNullException(nameof(ent));
+            if (owningTransform == null) throw new ArgumentNullException(nameof(owningTransform));
 
-            _entities.Remove(ent.Parent.Handle);
+            _entities.Remove(owningTransform.Parent.Handle);
         }
 
         /// <summary>
         /// Returns the nearby regions that surround this one as well as this region itself.
         /// </summary>
-        public IEnumerable<Region> GetNearbyInclusive()
+        public IEnumerable<IRegion> GetNearbyInclusive()
         {
             return _nearbyRegions ?? (_nearbyRegions = new[]
             {
-                Poe.GetRegion((X + 1, Y)),
-                Poe.GetRegion((X + 1, Y + 1)),
-                Poe.GetRegion((X + 1, Y - 1)),
+                Poe.GetRegion(X + 1, Y),
+                Poe.GetRegion(X + 1, Y + 1),
+                Poe.GetRegion(X + 1, Y - 1),
 
-                Poe.GetRegion((X - 1, Y)),
-                Poe.GetRegion((X - 1, Y + 1)),
-                Poe.GetRegion((X - 1, Y - 1)),
+                Poe.GetRegion(X - 1, Y),
+                Poe.GetRegion(X - 1, Y + 1),
+                Poe.GetRegion(X - 1, Y - 1),
 
                 this,
-                Poe.GetRegion((X, Y + 1)),
-                Poe.GetRegion((X, Y - 1))
+                Poe.GetRegion(X, Y + 1),
+                Poe.GetRegion(X, Y - 1)
             });
         }
     }

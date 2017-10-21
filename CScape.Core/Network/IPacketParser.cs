@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using CScape.Core.Data;
+using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Injection
