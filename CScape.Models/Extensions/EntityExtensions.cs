@@ -1,6 +1,8 @@
-﻿using CScape.Core.Game.Entities;
+﻿using System.Linq;
+using CScape.Core.Game.Entities;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Models.Extensions
@@ -20,42 +22,42 @@ namespace CScape.Models.Extensions
         [CanBeNull]
         public static ICombatStatComponent GetCombatStats(this IEntity ent) => ent.Components.Get<ICombatStatComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetCombatStats(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static ICombatStatComponent AssertGetCombatStats(this IEntity ent) => ent.Components.AssertGet<ICombatStatComponent>();
 
         [CanBeNull]
         public static IGroundItemComponent GetGroundItem(this IEntity ent) => ent.Components.Get<IGroundItemComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetGroundItem(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static IGroundItemComponent AssertGetGroundItem(this IEntity ent) => ent.Components.AssertGet<IGroundItemComponent>();
 
         [CanBeNull]
         public static IHealthComponent GetHealth(this IEntity ent) => ent.Components.Get<IHealthComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetHealth(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static IHealthComponent AssertGetHealth(this IEntity ent) => ent.Components.AssertGet<IHealthComponent>();
 
         [CanBeNull]
         public static IInterfaceComponent GetInterfaces(this IEntity ent) => ent.Components.Get<IInterfaceComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetInterfaces(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static IInterfaceComponent AssertGetInterfaces(this IEntity ent) => ent.Components.AssertGet<IInterfaceComponent>();
 
         [CanBeNull]
         public static IInventoryComponent GetInventory(this IEntity ent) => ent.Components.Get<IInventoryComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetInventory(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static IInventoryComponent AssertGetInventory(this IEntity ent) => ent.Components.AssertGet<IInventoryComponent>();
 
         [CanBeNull]
         public static INpcComponent GetNpc(this IEntity ent) => ent.Components.Get<INpcComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetNpc(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static INpcComponent AssertGetNpc(this IEntity ent) => ent.Components.AssertGet<INpcComponent>();
 
         [CanBeNull]
         public static IPlayerComponent GetPlayer(this IEntity ent) => ent.Components.Get<IPlayerComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetPlayer(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static IPlayerComponent AssertGetPlayer(this IEntity ent) => ent.Components.AssertGet<IPlayerComponent>();
 
         [CanBeNull]
         public static ISkillComponent GetSkills(this IEntity ent) => ent.Components.Get<ISkillComponent>();
         [NotNull]
-        public static IVisionComponent AssertGetSkills(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static ISkillComponent AssertGetSkills(this IEntity ent) => ent.Components.AssertGet<ISkillComponent>();
 
         [NotNull]
         public static ITransform GetTransform(this IEntity ent) => ent.Components.AssertGet<ITransform>();
@@ -63,7 +65,16 @@ namespace CScape.Models.Extensions
         [CanBeNull]
         public static IVisionResolver GetVisionResolver(this IEntity ent) => ent.Components.Get<IVisionResolver>();
         [NotNull]
-        public static IVisionComponent AssertGetVisionResolver(this IEntity ent) => ent.Components.AssertGet<IVisionComponent>();
+        public static IVisionResolver AssertGetVisionResolver(this IEntity ent) => ent.Components.AssertGet<IVisionResolver>();
+
+        /// <summary>
+        /// Sends a message to each visible not dead entity this entity can see.
+        /// </summary>
+        public static void Broadcast(this IVisionComponent vision, IGameMessage msg)
+        {
+            foreach (var ent in vision.GetVisibleEntities().Select(e =>e.Get()))
+                ent.SendMessage(msg);
+        }
 
         public static bool IsDead(this IEntityHandle handle) => handle.System.IsDead(handle);
         public static IEntity Get(this IEntityHandle handle) => handle.System.Get(handle);

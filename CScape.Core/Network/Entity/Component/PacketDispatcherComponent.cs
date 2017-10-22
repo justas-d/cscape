@@ -1,8 +1,11 @@
 using System;
 using System.Diagnostics;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Injection;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -57,11 +60,11 @@ namespace CScape.Core.Network.Entity.Component
             }
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.NewPacket:
+                case (int)MessageId.NewPacket:
                 {
                     HandlePacket(msg.AsNewPacket());
                     break;

@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -21,21 +26,20 @@ namespace CScape.Core.Network.Entity.Component
         private readonly Dictionary<(int x, int y), List<BaseGroundObjectPacket>> _buckets
             = new Dictionary<(int x, int y), List<BaseGroundObjectPacket>>();
 
-
-        public GroundItemNetworkSync([NotNull] Game.Entities.Entity parent) : base(parent)
+        public GroundItemNetworkSync([NotNull] IEntity parent) : base(parent)
         {
         }
 
         private ((int x, int y) regionGrid, (int x, int y) offset) GetLocalCoords(
-            GroundItemComponent item)
+            IGroundItemComponent item)
         {
             var t = item.Parent.GetTransform();
             var client = ClientPos;
 
             // get item local coords from the perspective of the player's client transform
             var itemLocal =
-                (t.X - client.Base.x,
-                t.Y - client.Base.y);
+                (t.X - client.Base.X,
+                t.Y - client.Base.Y);
 
             // calc the offset of the item in the 8x8 region it belongs to 
             var offset = (
@@ -63,19 +67,19 @@ namespace CScape.Core.Network.Entity.Component
                 Parent.SystemMessage($"Invalid spawn ground item packet at offsets: ({regionGrid.x} {regionGrid.y})", SystemMessageFlags.Debug | SystemMessageFlags.Network);
         }
 
-        private void RemoveItem(GroundItemComponent item)
+        private void RemoveItem(IGroundItemComponent item)
         {
             var coords = GetLocalCoords(item);
             AddPacket(new DeleteGroundItemPacket(item.Item.Id.ItemId, coords.offset), coords.regionGrid);
         }
 
-        private void NewItem(GroundItemComponent item)
+        private void NewItem(IGroundItemComponent item)
         {
             var coords = GetLocalCoords(item);
             AddPacket(new SpawnGroundItemPacket(item.Item, coords.offset), coords.regionGrid);
         }
 
-        private void UpdateItemAmount(GroundItemChangeMetadata item)
+        private void UpdateItemAmount(GroundItemMessage item)
         {
             var coords = GetLocalCoords(item.Item);
             AddPacket(new UpdateGroundItemAmountPacket(item.After, item.Before.Amount, coords.offset), coords.regionGrid);
@@ -97,42 +101,41 @@ namespace CScape.Core.Network.Entity.Component
             }
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            GroundItemComponent GetItem(EntityHandle h)
+            IGroundItemComponent GetItem(IEntityHandle h)
             {
                 if (h.IsDead()) return null;
-                return h.Get().Components.Get<GroundItemComponent>();
+                return h.Get().GetGroundItem();
             }
 
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.NetworkUpdate:
+                case (int)MessageId.NetworkUpdate:
                 {
                     Sync();
                     break;
                 }
-                case GameMessage.Type.GroundItemAmountUpdate:
+                case (int)MessageId.GroundItemAmountUpdate:
                 {
                     UpdateItemAmount(msg.AsGroundItemAmountUpdate());
                     break;
                 }
 
-                case GameMessage.Type.EntityEnteredViewRange:
+                case (int)MessageId.EntityEnteredViewRange:
                 {
-                    var i = GetItem(msg.AsEntityEnteredViewRange());
+                    var i = GetItem(msg.AsEntityEnteredViewRange().Entity);
                     if (i == null) break;
                     NewItem(i);
                     break;
                 }
-                case GameMessage.Type.EntityLeftViewRange:
+                case (int)MessageId.EntityLeftViewRange:
                 {
-                    var i = GetItem(msg.AsEntityLeftViewRange());
+                    var i = GetItem(msg.AsEntityLeftViewRange().Entity);
                     if (i == null) break;
                     RemoveItem(i);
                     break;
                 }
-
             }
         }
     }

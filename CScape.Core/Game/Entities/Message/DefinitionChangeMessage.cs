@@ -4,10 +4,10 @@ namespace CScape.Core.Game.Entities
 {
     public sealed class DefinitionChangeMessage : IGameMessage
     {
-        public int EventId => MessageId.DefinitionChange;
-        public int Definition { get; }
+        public int EventId => (int)MessageId.DefinitionChange;
+        public short Definition { get; }
 
-        public DefinitionChangeMessage(int def)
+        public DefinitionChangeMessage(short def)
         {
             Definition = def;
         }

@@ -2,6 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entities.Message;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -38,10 +43,11 @@ namespace CScape.Core.Game.Entities.Component
         {
         }
 
-        public void Close(int id)
+        public bool Close(int id)
         {
-            Debug.Assert(_interfaces.ContainsKey(id));
-
+            if (!_interfaces.ContainsKey(id))
+                return false;
+                
             var meta = _interfaces[id];
 
             switch (meta.Type)
@@ -66,29 +72,30 @@ namespace CScape.Core.Game.Entities.Component
                     throw new ArgumentOutOfRangeException();
             }
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, GameMessage.Type.InterfaceClosed, meta));
+            meta.Interface.CloseForEntity(Parent);
+            return true;
         }
 
-        public void Show(InterfaceMetadata meta)
+        public bool Show(InterfaceMetadata meta)
         {
             // make sure sidebar idx is in range
             if (meta.Type == InterfaceType.Sidebar)
             {
                 if (!meta.Index.InRange(0, MaxSidebarInterfaces))
-                    return;
+                    return false;
             }
 
             /* multiple checks to not allow duplicate interfaces to be queued up */
             if (_interfaceIdsInQueue.Contains(meta.Interface.Id))
-                return;
+                return false;
 
             if (_interfaces.ContainsKey(meta.Interface.Id))
-                return;
+                return false;
             
             _interfaceIdsInQueue.Add(meta.Interface.Id);
             _queue.Add(meta);
+
+            return true;
         }
 
         public bool CanShow(InterfaceMetadata meta)
@@ -145,9 +152,7 @@ namespace CScape.Core.Game.Entities.Component
                     throw new ArgumentOutOfRangeException();
             }
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, GameMessage.Type.NewInterfaceShown, meta));
+            meta.Interface.ShowForEntity(Parent);
         }
 
         private void Update()
@@ -185,32 +190,33 @@ namespace CScape.Core.Game.Entities.Component
             _interfaceIdsInQueue.Clear();
         }
 
-        private void PropogateMsgToInterfaces(GameMessage msg)
+        private void PropogateMsgToInterfaces(IGameMessage msg)
         {
             foreach (var interf in _interfaces.Values)
             {
-                interf.Interface.ReceiveMessage(msg);
+                interf.Interface.ReceiveMessage(Parent, msg);
             }
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.ForcedMovement:
-                case GameMessage.Type.HealedHealth:
-                case GameMessage.Type.TookDamage:
-                case GameMessage.Type.JustDied:
-                case GameMessage.Type.Move:
-                case GameMessage.Type.Teleport:
+                case (int)MessageId.ForcedMovement:
+                case (int)MessageId.HealthChanged:
+                case (int)MessageId.TookDamageLostHealth:
+                case (int)MessageId.EatHealedHealth:
+                case (int)MessageId.JustDied:
+                case (int)MessageId.Move:
+                case (int)MessageId.Teleport:
                     OnActionOccurred();
                     break;
 
-                case GameMessage.Type.FrameUpdate:
+                case SysMessage.FrameUpdate:
                     Update();
                     break;
 
-                case GameMessage.Type.ButtonClicked:
+                case (int)MessageId.ButtonClicked:
                 {
                     /*
                      * we handle button click data separately in order to filter out duplicate
@@ -230,7 +236,7 @@ namespace CScape.Core.Game.Entities.Component
             }
 
             // we handle ButtonClicked events separately in OnButtonClicked
-            if (msg.Event != GameMessage.Type.ButtonClicked)
+            if (msg.EventId != (int)MessageId.ButtonClicked)
                 PropogateMsgToInterfaces(msg);
         }
     }

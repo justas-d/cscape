@@ -1,11 +1,14 @@
 ﻿using System;
+using CScape.Core.Extensions;
 using CScape.Core.Network.Entity.Component;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
-    public sealed class PlayerComponent :
-        EntityComponent, , IPlayerComponent
+    public sealed class PlayerComponent : EntityComponent, IPlayerComponent
     {
         public enum Title : byte
         {
@@ -16,7 +19,7 @@ namespace CScape.Core.Game.Entities.Component
 
         // TODO : fill player component with data from DB
 
-        public Title TitleIcon { get; }
+        public int TitleId { get; } = (int)Title.Normal;
 
         [CanBeNull] private readonly Action<PlayerComponent> _destroyCallback;
 
@@ -39,17 +42,17 @@ namespace CScape.Core.Game.Entities.Component
             Username = username ?? throw new ArgumentNullException(nameof(username));
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.DestroyEntity:
+                case SysMessage.DestroyEntity:
                 {
                     _destroyCallback?.Invoke(this);
                     break;
                 }
 
-                case GameMessage.Type.JustDied:
+                case (int)MessageId.JustDied:
                 {
                     // TODO : handle death in PlayerComponent
                     break;
@@ -77,11 +80,10 @@ namespace CScape.Core.Game.Entities.Component
         /// </summary>
         public void ForcedLogout()
         {
-            var net = Parent.Components.Get<NetworkingComponent>();
-            net?.DropConnection();
+            Parent.GetNetwork()?.DropConnection();
         }
 
-        public bool Equals(PlayerComponent other)
+        public bool Equals(IPlayerComponent other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;

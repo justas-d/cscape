@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using CScape.Core.Data;
-using CScape.Core.Game.World;
+using CScape.Models.Data;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Network.Entity.Segment
 {

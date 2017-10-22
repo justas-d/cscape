@@ -34,6 +34,6 @@ namespace CScape.Core.Injection
         public static PacketMessage Undefined(byte opcode)
             => new PacketMessage(opcode, null, ParseStatus.UndefinedPacket);
 
-        public int EventId => MessageId.NewPacket;
+        public int EventId => (int)MessageId.NewPacket;
     }
 }

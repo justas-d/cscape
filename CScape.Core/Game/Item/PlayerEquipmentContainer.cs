@@ -2,8 +2,9 @@
 using System.Linq;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Item;
 
 namespace CScape.Core.Game.Items
 {
@@ -82,14 +83,8 @@ namespace CScape.Core.Game.Items
 
             Provider[info.Index] = info.NewItem;
 
-            var msg = new ItemChangeMessage(this, info);
-            Parent.SendMessage(
-                new GameMessage(
-                    null, GameMessage.Type.ItemChange, msg));
-
-            Parent.SendMessage(
-                new GameMessage(
-                    null, GameMessage.Type.EquipmentChange, msg));
+            Parent.SendMessage(ItemChangeMessage.InventoryChange(this, info));
+            Parent.SendMessage(ItemChangeMessage.EquipmentChange(this, info));
 
             return true;
         }

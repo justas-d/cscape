@@ -1,5 +1,9 @@
 using CScape.Core.Game.Entities.Directions;
 using CScape.Core.Game.Entities.Message;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Directions;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -43,8 +47,7 @@ namespace CScape.Core.Game.Entities.Component
         {
             Directions = null;
 
-            Parent.SendMessage(new GameMessage(
-                this, GameMessage.Type.StopMovingAlongMovePath, null));
+            Parent.SendMessage(NotificationMessage.StopMovingAlongMovePath);
         }
 
         private void ProcessMovement()
@@ -62,11 +65,7 @@ namespace CScape.Core.Game.Entities.Component
             // TODO : check collision (with size) and then clamp movement
 
             // notify entity of movement.
-            Parent.SendMessage(
-                new GameMessage(
-                    this,
-                    GameMessage.Type.Move,
-                    new MovementMetadata(data.Walk, data.Run)));
+            Parent.SendMessage(new MoveMessage(data.Walk, data.Run));
         }
 
         private void Update()
@@ -74,8 +73,7 @@ namespace CScape.Core.Game.Entities.Component
             if (_isDirectionProviderNew)
             {
                 // we just received a new direction provider, let's send a begin move path message.
-                Parent.SendMessage(
-                    new GameMessage(this, GameMessage.Type.BeginMovePath, null));
+                Parent.SendMessage(NotificationMessage.BeginMovePath);
 
                 _isDirectionProviderNew = false;
             }
@@ -86,8 +84,7 @@ namespace CScape.Core.Game.Entities.Component
                 if (Directions.IsDone(Parent))
                 {
                     // we're done moving. send the message
-                    Parent.SendMessage(
-                        new GameMessage(this, GameMessage.Type.ArrivedAtDestination, null));
+                    Parent.SendMessage(NotificationMessage.ArrivedAtDestination);
 
                     // we're done with the Directions provider, dispose it.
                     Directions = null;
@@ -100,29 +97,29 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        private void SetNewFollowTarget(EntityHandle ent)
+        private void SetNewFollowTarget(IEntityHandle ent)
         {
             if (ent.IsDead()) return;
             Directions = new FollowDirectionProvider(ent);
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.FrameUpdate:
+                case SysMessage.FrameUpdate:
                 {
                     Update();
                     break;
                 }
-                case GameMessage.Type.Teleport:
+                case (int)MessageId.Teleport:
                 {
                     CancelMovingAlongPath();
                     break;
                 }
-                case GameMessage.Type.NewPlayerFollowTarget:
+                case (int)MessageId.NewPlayerFollowTarget:
                 {
-                    SetNewFollowTarget(msg.AsNewFollowTarget().Parent.Handle);
+                    SetNewFollowTarget(msg.AsNewPlayerFollowTarget().Entity);
                     break;
                 }
             }

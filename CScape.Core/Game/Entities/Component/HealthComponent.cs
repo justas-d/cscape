@@ -1,4 +1,8 @@
 using System.Linq;
+using CScape.Core.Game.Entities.Message;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Game.Entities.Component
 {
@@ -7,64 +11,72 @@ namespace CScape.Core.Game.Entities.Component
         private int _health;
         private int _maxHealth;
 
+        public int Health => _health;
+        public int MaxHealth => _maxHealth;
+
         public override int Priority { get; }
 
-        public int Health
+        public HealthComponent(IEntity parent, int maxHealth = 1, int health = 1)
+            : base(parent)
         {
-            get => _health;
-            set
+            _health = maxHealth;
+            _maxHealth = health;
+        }
+
+        public override void ReceiveMessage(IGameMessage msg)
+        {
+            switch (msg.EventId)
             {
-                _health = value;
-                CheckForDeath();
+                case (int)MessageId.TookDamageLostHealth:
+                {
+                    var dmg = msg.AsTookDamangeLostHealth();
+                    _health -= dmg.Damage;
+                    CheckForDeath();
+                    
+                    break;
+                }
+                case (int)MessageId.EatHealedHealth:
+                {
+                    var hp = msg.AsEatHealed();
+                    _health += hp.HealedAmount;
+                    CheckForDeath();
+                    
+                    break;
+                }
             }
         }
 
-        public int MaxHealth
+        public void SetNewMaxHealth(int val)
         {
-            get => _maxHealth;
-            set
-            {
-                _maxHealth = value;
-                CheckForDeath();
-            }
+            if (MaxHealth == val)
+                return;
+
+            var old = _maxHealth;
+            _maxHealth = val;
+
+            Parent.SendMessage(new MaxHealthChangedMessage(old, val));
+
+            CheckForDeath();
         }
 
-        public HealthComponent(Entity parent, int maxHealth = 1, int health = 1)
-            :base(parent)
+        public void SetNewHealth(int val)
         {
-            MaxHealth = maxHealth;
-            Health = health;
+            if (Health == val)
+                return;
+
+            var old = _health;
+
+            Parent.SendMessage(new HealthUpdateMessage(old, val));
+
+            _health = val;
+            CheckForDeath();
         }
-        
+
         private void CheckForDeath()
         {
             if (0 >= Health)
-            {
-                Parent.SendMessage(
-                    new GameMessage(
-                        this,
-                        GameMessage.Type.JustDied,
-                        null));
-            }
+                Parent.SendMessage(NotificationMessage.JustDied);
         }
         
-        public override void ReceiveMessage(GameMessage msg)
-        {
-            switch (msg.Event)
-            {
-                case GameMessage.Type.TookDamage:
-                {
-                    var dmg = msg.AsTookDamage();
-                    Health -= dmg.Damage;
-                    break;
-                }
-                case GameMessage.Type.HealedHealth:
-                {
-                    var hp = msg.AsHealedHealth();
-                    Health += hp;
-                    break;
-                }
-            }
-        }
     }
 }

@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Database.Entity;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Injection;
 using CScape.Core.Network.Entity.Component;
+using CScape.Models;
+using CScape.Models.Extensions;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Entity.Factory;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
@@ -16,10 +21,12 @@ namespace CScape.Core.Game.Entities
         [NotNull]
         public IEntitySystem EntitySystem { get; }
 
-        private readonly EntityHandle[] _players;
+        // username lookup
+        private Dictionary<string, IEntityHandle> _usernameLookup;
+        // instance id lookup
+        private readonly IEntityHandle[] _players;
 
-        [NotNull]
-        public IReadOnlyList<EntityHandle> All => _players;
+        public IReadOnlyList<IEntityHandle> All => _players;
 
         private ILogger Log => EntitySystem.Server.Services.ThrowOrGet<ILogger>();
 
@@ -29,7 +36,14 @@ namespace CScape.Core.Game.Entities
 
             // create an array of entity handles which will be all initialized to null
             // then let a list wrap around that array.
-            _players = new EntityHandle[entitySystem.Server.Services.ThrowOrGet<IGameServerConfig>().MaxPlayers]);
+            _players = new IEntityHandle[entitySystem.Server.Services.ThrowOrGet<IGameServerConfig>().MaxPlayers];
+        }
+
+        public IEntityHandle Get(string username)
+        {
+            if (_usernameLookup.ContainsKey(username))
+                return _usernameLookup[username];
+            return null;
         }
 
         /// <summary>
@@ -46,7 +60,7 @@ namespace CScape.Core.Game.Entities
             return InvalidPlayerId;
         }
 
-        public EntityHandle Get(int id)
+        public IEntityHandle Get(int id)
         {
             // check if id is in range.
             if (0 >= id && _players.Length > id)
@@ -56,10 +70,9 @@ namespace CScape.Core.Game.Entities
             return null;
         }
 
-        public EntityHandle Create(IPlayerModel model, ISocketContext ctx)
+        public IEntityHandle Create(IPlayerModel model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
-            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
 
             var id = GetPlayerId();
             if (id == InvalidPlayerId)
@@ -94,9 +107,12 @@ namespace CScape.Core.Game.Entities
                 id,
                 DestroyCallback));
 
-            ent.AssertComponentRequirementsSatisfied();
-
+            var check = ent.AreComponentRequirementsSatisfied(out var msg);
+            if (!check)
+                Debug.Fail(msg);
+            
             _players[id] = entHandle;
+            _usernameLookup.Add(msg, entHandle);
 
             return entHandle;
         }

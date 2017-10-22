@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Message;
+using CScape.Core.Injection;
 using CScape.Models.Game.Message;
 namespace CScape.Core.Game.Entities
 {
@@ -15,6 +16,9 @@ namespace CScape.Core.Game.Entities
         }
 
         public static bool Is(this IGameMessage msg, MessageId id) => msg.EventId == (int)id;
+
+        public static PacketMessage AsNewPacket(this IGameMessage msg) =>
+            AssertCast<PacketMessage>(msg, MessageId.NewPacket);
 
         public static SystemMessage AsSystemMessage(this IGameMessage msg) =>
             AssertCast<SystemMessage>(msg, MessageId.NewSystemMessage);
@@ -55,11 +59,14 @@ namespace CScape.Core.Game.Entities
         public static EntityMessage AsEntityLeftViewRange(this IGameMessage msg) =>
             AssertCast<EntityMessage>(msg, MessageId.EntityLeftViewRange);
 
-        public static TakeDamageMessage AsTookDamage(this IGameMessage msg) =>
-            AssertCast<TakeDamageMessage>(msg, MessageId.TookDamage);
+        public static HealthUpdateMessage AsHealthChange(this IGameMessage msg) =>
+            AssertCast<HealthUpdateMessage>(msg, MessageId.HealthChanged);
 
-        public static HealthUpdateMessage AsHealthUpdate(this IGameMessage msg) =>
-            AssertCast<HealthUpdateMessage>(msg, MessageId.HealthUpdate);
+        public static TakeDamageMessage AsTookDamangeLostHealth(this IGameMessage msg) =>
+            AssertCast<TakeDamageMessage>(msg, MessageId.TookDamageLostHealth);
+
+        public static EatHealedHealthMessage AsEatHealed(this IGameMessage msg) =>
+            AssertCast<EatHealedHealthMessage>(msg, MessageId.EatHealedHealth);
 
         public static ForcedMovementMessage AsForcedMovement(this IGameMessage msg) =>
             AssertCast<ForcedMovementMessage>(msg, MessageId.ForcedMovement);

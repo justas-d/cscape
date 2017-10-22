@@ -1,4 +1,6 @@
 using System;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
@@ -9,12 +11,12 @@ namespace CScape.Core.Game.Entities
         public override int Priority { get; }
 
         public short DefinitionId { get; private set; }
-        public int NpcId { get; }
+        public short NpcId { get; }
 
         public NpcComponent(
-            Entities.Entity parent,
+            IEntity parent,
             short defId,
-            int npcId,
+            short npcId,
             [NotNull] Action<NpcComponent> destroyCallback)
             :base(parent)
         {
@@ -26,21 +28,14 @@ namespace CScape.Core.Game.Entities
         public void ChangeDefinitionId(short newId)
         {
             DefinitionId = newId;
-            Parent.SendMessage(
-                new GameMessage(
-                    this, GameMessage.Type.DefinitionChange, newId));
+            Parent.SendMessage(new DefinitionChangeMessage(newId));
         }
 
-        public void Say(string text)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-           throw new NotImplementedException();
-        }
-
-        public override void ReceiveMessage(GameMessage msg)
-        {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.DestroyEntity:
+                case SysMessage.DestroyEntity:
                 {
                     _destroyCallback(this);
                     break;

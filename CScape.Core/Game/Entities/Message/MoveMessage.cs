@@ -11,7 +11,7 @@ namespace CScape.Core.Game.Entities.Message
     /// </summary>
     public sealed class MoveMessage : IGameMessage
     {
-        public int EventId => MessageId.Move;
+        public int EventId => (int)MessageId.Move;
 
         public bool IsWalking { get; }
 

@@ -8,7 +8,7 @@ namespace CScape.Core.Game.Entities.Message
     {
         [NotNull]
         public ForcedMovement Movement { get; }
-        public int EventId => MessageId.ForcedMovement;
+        public int EventId => (int)MessageId.ForcedMovement;
 
         public ForcedMovementMessage([NotNull] ForcedMovement movement)
         {

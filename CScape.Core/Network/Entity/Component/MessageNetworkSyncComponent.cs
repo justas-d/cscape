@@ -3,6 +3,8 @@ using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -34,11 +36,11 @@ namespace CScape.Core.Network.Entity.Component
 #endif
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            if (msg.Event == GameMessage.Type.NewSystemMessage)
+            if (msg.EventId == (int)MessageId.NewSystemMessage)
             {
-                var msgStr = msg.AsNewSystemMessage();
+                var msgStr = msg.AsSystemMessage();
                 var isDebugBitSet = (msgStr.Flags & SystemMessageFlags.Debug) != 0;
 
                 if (!isDebugBitSet || SyncDebugMessages)

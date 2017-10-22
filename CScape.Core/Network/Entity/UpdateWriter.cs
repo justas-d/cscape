@@ -54,7 +54,7 @@ namespace CScape.Core.Network.Entity
             return retval;
         }
 
-        public abstract bool NeedsUpate();
+        public abstract bool NeedsUpdate();
 
         public void SetFlag(IUpdateFlag flag)
         {

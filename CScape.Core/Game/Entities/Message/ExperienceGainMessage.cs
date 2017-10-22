@@ -17,6 +17,6 @@ namespace CScape.Core.Game.Entities.Message
             Skill = skill ?? throw new ArgumentNullException(nameof(skill));
         }
 
-        public int EventId => MessageId.ExperienceGain;
+        public int EventId => (int)MessageId.GainExperience;
     }
 }

@@ -8,11 +8,14 @@
         /// <summary>
         /// The current health of the entity.
         /// </summary>
-        int Health { get; set; }
+        int Health { get; }
 
         /// <summary>
         /// The max health of the entity.
         /// </summary>
-        int MaxHealth { get; set; }
+        int MaxHealth { get; }
+
+        void SetNewMaxHealth(int val);
+        void SetNewHealth(int val);
     }
 }

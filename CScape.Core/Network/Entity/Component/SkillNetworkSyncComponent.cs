@@ -4,7 +4,6 @@ using System.Linq;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Interface;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entities.Skill;
 using CScape.Core.Game.Interfaces;
@@ -12,6 +11,7 @@ using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Interface;
+using CScape.Models.Game.Message;
 using CScape.Models.Game.Skill;
 using JetBrains.Annotations;
 
@@ -60,7 +60,7 @@ namespace CScape.Core.Network.Entity.Component
                         skill.Level)));
         }
 
-        private void GainExp(ExperienceGainMetadata gains) => _dirty.Add(gains.Skill);
+        private void GainExp(ExperienceGainMessage gains) => _dirty.Add(gains.Skill);
         
         private void Sync()
         {
@@ -77,18 +77,18 @@ namespace CScape.Core.Network.Entity.Component
             _dirty.Clear();
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventIdId)
             {
-                case GameMessage.Type.NetworkUpdate:
+                case (int)MessageId.NetworkUpdate:
                     Sync();
                     break;
-                case GameMessage.Type.LevelUp:
-                    Levelup(msg.AsLevelUp());
+                case (int)MessageId.LevelUp:
+                    Levelup(msg.AsLevelUp().Skill);
                     break;
-                case GameMessage.Type.GainExperience:
-                    GainExp(msg.AsGainExperience());
+                case (int)MessageId.GainExperience:
+                    GainExp(msg.AsExperienceGain());
                     break;
             }
         }

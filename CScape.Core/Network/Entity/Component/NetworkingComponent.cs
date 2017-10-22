@@ -108,7 +108,7 @@ namespace CScape.Core.Network.Entity.Component
 
         public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.EventId)
+            switch (msg.EventIdId)
             {
                 case SysMessage.DestroyEntity:
                 {

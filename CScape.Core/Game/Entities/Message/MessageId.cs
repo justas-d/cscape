@@ -31,14 +31,16 @@ namespace CScape.Core.Game.Entities
 
         // health
         JustDied,
-        HealthUpdate,
-        HealedHealth,
-        ForcedMovement,
+        HealthChanged,
+        EatHealedHealth,
+        TookDamageLostHealth,
+        MaxHealthChanged,
 
         // entity
         ParticleEffect,
         NewAnimation,
         NewOverheadText,
+        ForcedMovement,
 
         // npc
         DefinitionChange,

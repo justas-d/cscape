@@ -4,6 +4,9 @@ using System.Linq;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Network.Entity.Segment;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -12,28 +15,26 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public abstract class EntityNetworkSyncComponent : EntityComponent
     {
-        private List<EntityHandle> SyncEntities { get; }
-            = new List<EntityHandle>();
+        private List<IEntityHandle> SyncEntities { get; }
+            = new List<IEntityHandle>();
 
-        private List<EntityHandle> InitEntities { get; }
-            = new List<EntityHandle>();
-
-        protected NetworkingComponent Network => Parent.Components.AssertGet<NetworkingComponent>();
+        private List<IEntityHandle> InitEntities { get; }
+            = new List<IEntityHandle>();
         
         protected EntityNetworkSyncComponent(
-            [NotNull] Game.Entities.Entity parent) : base(parent)
+            [NotNull] IEntity parent) : base(parent)
         {
 
         }
 
-        private void AddEntity([NotNull] EntityHandle ent)
+        private void AddEntity([NotNull] IEntityHandle ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
             InitEntities.Add(ent);
         }
 
-        private void RemoveEntity([NotNull] EntityHandle ent)
+        private void RemoveEntity([NotNull] IEntityHandle ent)
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
@@ -41,7 +42,7 @@ namespace CScape.Core.Network.Entity.Component
             InitEntities.Add(ent);
         }
 
-        protected abstract bool IsHandleableEntity(EntityHandle h);
+        protected abstract bool IsHandleableEntity(IEntityHandle h);
 
         protected IUpdateSegment CommonSegmentResolve(
             FlagAccumulatorComponent flags, bool needsUpdate)
@@ -73,7 +74,7 @@ namespace CScape.Core.Network.Entity.Component
             IList<IUpdateWriter> updateSegments,
             Func<FlagAccumulatorComponent, IUpdateWriter> updateWriterFactory)
         {
-            var removeList = new List<EntityHandle>();
+            var removeList = new List<IEntityHandle>();
             var syncSegments = new List<IUpdateSegment>();
 
             foreach (var handle in SyncEntities)
@@ -117,7 +118,7 @@ namespace CScape.Core.Network.Entity.Component
             return syncSegments;
         }
 
-        protected abstract void SetInitialFlags(IUpdateWriter writer, Game.Entities.Entity ent);
+        protected abstract void SetInitialFlags(IUpdateWriter writer, IEntity ent);
 
         protected IEnumerable<IUpdateSegment> GetInitSegments(
             IList<IUpdateWriter> updateSegments,
@@ -138,10 +139,7 @@ namespace CScape.Core.Network.Entity.Component
 
                 var needsUpd = updater.NeedsUpdate();
 
-                init.Add(new InitPlayerSegment(
-                    entity.Components.AssertGet<PlayerComponent>(),
-                    Parent.Components.AssertGet<PlayerComponent>(),
-                    needsUpd));
+                init.Add(new InitPlayerSegment(entity.AssertGetPlayer(), Parent.AssertGetPlayer(), needsUpd);
 
                 if (needsUpd)
                 {
@@ -153,35 +151,35 @@ namespace CScape.Core.Network.Entity.Component
             return init;
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.NetworkReinitialize:
+                case (int)MessageId.NetworkReinitialize:
                 {
                     // todo : maybe send remove entity segments when resetting?
                     SyncEntities.Clear();
                     InitEntities.Clear();
                     break;
                 }
-                case GameMessage.Type.NetworkUpdate:
+                case (int)MessageId.NetworkUpdate:
                 {
                     Sync();
                     break;
                 }
-                case GameMessage.Type.EntityEnteredViewRange:
+                case (int)MessageId.EntityEnteredViewRange:
                 {
                     var h = msg.AsEntityEnteredViewRange();
-                    if (IsHandleableEntity(h))
-                        AddEntity(h);
+                    if (IsHandleableEntity(h.Entity))
+                        AddEntity(h.Entity);
 
                     break;
                 }
-                case GameMessage.Type.EntityLeftViewRange:
+                case (int)MessageId.EntityLeftViewRange:
                 {
                     var h = msg.AsEntityLeftViewRange();
-                    if (IsHandleableEntity(h))
-                        RemoveEntity(h);
+                    if (IsHandleableEntity(h.Entity))
+                        RemoveEntity(h.Entity);
 
                     break;
                 }

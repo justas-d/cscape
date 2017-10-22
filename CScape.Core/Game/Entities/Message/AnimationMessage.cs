@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entities
     {
         [NotNull]
         public Animation Animation { get; }
-        public int EventId => MessageId.NewAnimation;
+        public int EventId => (int)MessageId.NewAnimation;
 
         public AnimationMessage([NotNull] Animation animation)
         {

@@ -52,7 +52,7 @@ namespace CScape.Core.Network.Entity
             }
         }
 
-        public override bool NeedsUpate()
+        public override bool NeedsUpdate()
         {
             var header = (NpcFlag)GetHeader(f => (int)f.ToNpc());
             return header != 0;

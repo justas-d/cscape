@@ -28,6 +28,6 @@ namespace CScape.Core.Game.Entities.Message
             MaxHealth = maxHealth;
         }
 
-        public int EventId => MessageId.TookDamage;
+        public int EventId => (int)MessageId.TookDamageLostHealth;
     }
 }

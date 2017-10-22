@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Interface;
-using CScape.Core.Network;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
+using CScape.Models.Game.Item;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Interfaces
@@ -13,6 +15,8 @@ namespace CScape.Core.Game.Interfaces
     public class InventoryInterface : IItemGameInterface
     {
         public int Id { get; }
+
+
         [NotNull]
         public IItemContainer Container { get; }
 
@@ -27,22 +31,22 @@ namespace CScape.Core.Game.Interfaces
 
         public bool Equals(IGameInterface other) => Id == other.Id;
 
-        public IEnumerable<IPacket> GetShowPackets()
+        public void ShowForEntity(IEntity entity)
         {
-            yield return new MassSendInterfaceItemsPacket(Id, Container);
+            entity.SendMessage(InterfaceMessage.Show(this, new MassSendInterfaceItemsPacket(Id, Container)));
         }
 
-        public IEnumerable<IPacket> GetClosePackets()
+        public void CloseForEntity(IEntity entity)
         {
-            yield return new ClearItemInterfacePacket(Id);
+            entity.SendMessage(InterfaceMessage.Close(this, new ClearItemInterfacePacket(Id)));
         }
-        
-        public IEnumerable<IPacket> GetUpdatePackets()
+
+        public void UpdateForEntity(IEntity entity)
         {
             // only update dirty items if we have any
             if (_dirtyBuffer.Any())
             {
-                yield return new UpdateInterfaceItemPacket(this, Container, _dirtyBuffer);
+                entity.SendMessage(InterfaceMessage.Update(this, new UpdateInterfaceItemPacket(this, Container, _dirtyBuffer)));
                 _dirtyBuffer.Clear();
             }
         }
@@ -55,11 +59,11 @@ namespace CScape.Core.Game.Interfaces
         private bool IsOurContainer(IItemContainer other)
             => ReferenceEquals(other, Container);
 
-        public void ReceiveMessage(GameMessage msg)
+        public void ReceiveMessage(IEntity entity, IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.ItemChange:
+                case (int)MessageId.ItemChange:
                 {
                     var data = msg.AsItemChange();
                     if (IsOurContainer(data.Container))
@@ -68,7 +72,6 @@ namespace CScape.Core.Game.Interfaces
                     break;
                 }
             }
-
         }
     }
 }

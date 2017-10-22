@@ -5,7 +5,7 @@ namespace CScape.Core.Network.Entity
 {
     public interface IUpdateWriter : IUpdateSegment
     {
-        bool NeedsUpate();
+        bool NeedsUpdate();
         void SetFlag(IUpdateFlag flag);
     }
 }

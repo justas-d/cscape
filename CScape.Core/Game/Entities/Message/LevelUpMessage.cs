@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entities
     {
         [NotNull]
         public ISkillModel Skill { get; }
-        public int EventId => MessageId.LevelUp;
+        public int EventId => (int)MessageId.LevelUp;
 
         public LevelUpMessage([NotNull] ISkillModel skill)
         {

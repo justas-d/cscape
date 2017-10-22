@@ -13,6 +13,6 @@ namespace CScape.Core.Game.Entities.Message
             InterfaceId = interfaceId;
         }
 
-        public int EventId => MessageId.ButtonClicked;
+        public int EventId => (int)MessageId.ButtonClicked;
     }
 }

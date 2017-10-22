@@ -4,6 +4,8 @@ using CScape.Core.Game.Entities.Component;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Entity.Segment;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Network.Entity.Component
 {
@@ -23,15 +25,15 @@ namespace CScape.Core.Network.Entity.Component
             
         }
 
-        protected override bool IsHandleableEntity(EntityHandle h)
+        protected override bool IsHandleableEntity(IEntityHandle h)
         {
             if (h.IsDead())
                 return false;
 
-            return h.Get().Components.Get<PlayerComponent>() != null;
+            return h.Get().GetPlayer() != null;
         }
 
-        protected override void SetInitialFlags(IUpdateWriter writer, Game.Entities.Entity ent)
+        protected override void SetInitialFlags(IUpdateWriter writer, IEntity ent)
         {
             writer.SetFlag(new PlayerAppearanceUpdateFlag());
             writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingData));
@@ -51,9 +53,7 @@ namespace CScape.Core.Network.Entity.Component
 
                 if (flags.Reinitialize)
                 {
-                    local = new LocalPlayerInitSegment(
-                        Parent.Components.AssertGet<PlayerComponent>(),
-                        needsUpdate);
+                    local = new LocalPlayerInitSegment(Parent.AssertGetPlayer(), needsUpdate);
                 }
                 else
                     local = CommonSegmentResolve(flags, needsUpdate);

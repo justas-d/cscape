@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Entity;
 using CScape.Core.Network.Entity.Flag;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Game.Entities.Component
 {
@@ -12,7 +14,7 @@ namespace CScape.Core.Game.Entities.Component
 
         public IReadOnlyDictionary<FlagType, IUpdateFlag> Flags => _flags;
 
-        public MovementMetadata Movement { get; private set; }
+        public MoveMessage Movement { get; private set; }
         public bool Reinitialize { get; private set; }
 
         public override int Priority { get; }
@@ -31,71 +33,71 @@ namespace CScape.Core.Game.Entities.Component
                 _flags.Add(flag.Type, flag);
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.NewOverheadText:
+                case (int)MessageId.NewOverheadText:
                 {
-                    SetFlag(new OverheadForcedTextUpdateFlag(msg.AsNewOverheadText()));
+                    SetFlag(new OverheadForcedTextUpdateFlag(msg.AsNewOverheadText().Message));
                     break;
                 }
-                case GameMessage.Type.NewAnimation:
+                case (int)MessageId.NewAnimation:
                 {
-                    SetFlag(new AnimationUpdateFlag(msg.AsNewAnimation()));
+                    SetFlag(new AnimationUpdateFlag(msg.AsNewAnimation().Animation));
                     break;
                 }
-                case GameMessage.Type.ParticleEffect:
+                case (int)MessageId.ParticleEffect:
                 {
-                    SetFlag(new ParticleEffectUpdateFlag(msg.AsParticleEffect()));
+                    SetFlag(new ParticleEffectUpdateFlag(msg.AsParticleEffect().Effect));
                     break;
                 }
-                case GameMessage.Type.ForcedMovement:
+                case (int)MessageId.ForcedMovement:
                 {
-                    SetFlag(new ForcedMovementUpdateFlag(msg.AsForcedMovement()));
+                    SetFlag(new ForcedMovementUpdateFlag(msg.AsForcedMovement().Movement));
                     break;
                 }
-                case GameMessage.Type.ChatMessage:
+                case (int)MessageId.ChatMessage:
                 {
-                    SetFlag(new PlayerChatUpdateFlag(msg.AsChatMessage()));
+                    SetFlag(new PlayerChatUpdateFlag(msg.AsChatMessage().Chat));
                     break;
                 }
-                case GameMessage.Type.AppearanceChanged:
+                case (int)MessageId.AppearanceChanged:
                 {
                     SetFlag(new PlayerAppearanceUpdateFlag());
                     break;
                 }
-                case GameMessage.Type.TookDamage:
+                case (int)MessageId.TookDamageLostHealth:
                 {
-                    SetFlag(new DamageUpdateFlag(msg.AsTookDamage()));
+                    SetFlag(new DamageUpdateFlag(msg.AsTookDamangeLostHealth()));
                     break;
                 }
-                case GameMessage.Type.NewFacingDirection:
+                case (int)MessageId.NewFacingDirection:
                 {
-                    SetFlag(new FacingCoordinateUpdateFlag(msg.AsNewFacingDirection()));
+                    SetFlag(new FacingCoordinateUpdateFlag(msg.AsNewFacingDirection().FacingData));
                     break;
                 }
-                case GameMessage.Type.NewInteractingEntity:
+                case (int)MessageId.NewInteractingEntity:
                 {
-                    SetFlag(new InteractingEntityUpdateFlag(msg.AsNewInteractingEntity()));
+                    SetFlag(new InteractingEntityUpdateFlag(msg.AsNewInteractingEntity().Interacting));
                     break;
                 }
-                case GameMessage.Type.DefinitionChange:
+                case (int)MessageId.DefinitionChange:
                 {
-                    SetFlag(new DefinitionChangeUpdateFlag(msg.AsDefinitionChange()));
+                    SetFlag(new DefinitionChangeUpdateFlag(msg.AsDefinitionChange().Definition));
                     break;
                 }
-                case GameMessage.Type.Move:
+                case (int)MessageId.Move:
                 {
                     Movement = msg.AsMove();
                     break;
                 }
-                case GameMessage.Type.Teleport:
+                case (int)MessageId.Teleport:
                 {
                     Reinitialize = true;
                     break;
                 }
-                case GameMessage.Type.FrameEnd:
+                case SysMessage.FrameEnd:
                 {
                     _flags.Clear();
                     Reinitialize = false;

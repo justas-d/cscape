@@ -1,4 +1,7 @@
 using CScape.Core.Game.World;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Directions;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Game.Entities.Directions
 {
@@ -24,9 +27,9 @@ namespace CScape.Core.Game.Entities.Directions
             new DirectionDelta(Direction.NorthWest),
         };
         
-        public GeneratedDirections GetNextDirections(Entity ent) 
+        public GeneratedDirections GetNextDirections(IEntity ent) 
             => new GeneratedDirections(_directions[_idx++ % _directions.Length], _directions[_idx++ % _directions.Length]);
         
-        public bool IsDone(Entity entity) => _isDone;
+        public bool IsDone(IEntity entity) => _isDone;
     }
 }

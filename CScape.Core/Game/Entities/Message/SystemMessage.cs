@@ -29,7 +29,7 @@ namespace CScape.Core.Game.Entities.Message
         public string Msg { get; }
         public SystemMessageFlags Flags { get; }
 
-        public int EventId => MessageId.NewSystemMessage;
+        public int EventId => (int)MessageId.NewSystemMessage;
 
         public SystemMessage([NotNull] string msg, SystemMessageFlags flags = SystemMessageFlags.None)
         {

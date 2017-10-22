@@ -59,7 +59,7 @@ namespace CScape.Core.Network.Entity
             }
         }
 
-        public override bool NeedsUpate()
+        public override bool NeedsUpdate()
         {
             var header = (PlayerFlag)GetHeader(f => (int)f.ToPlayer());
             return header != 0;

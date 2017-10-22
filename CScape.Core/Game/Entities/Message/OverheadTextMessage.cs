@@ -5,7 +5,7 @@ namespace CScape.Core.Game.Entities
 {
     public sealed class OverheadTextMessage : IGameMessage
     {
-        public int EventId => MessageId.NewOverheadText;
+        public int EventId => (int)MessageId.NewOverheadText;
         [NotNull]
         public string Message { get; }
 

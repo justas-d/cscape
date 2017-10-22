@@ -21,6 +21,6 @@ namespace CScape.Core.Game.Entities.Message
             NewPos = newPos.Copy();
         }
 
-        public int EventId => MessageId.Teleport;
+        public int EventId => (int)MessageId.Teleport;
     }
 }

@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entities.Message
     {
         [NotNull]
         public IInteractingEntity Interacting { get; }
-        public int EventId => MessageId.NewInteractingEntity;
+        public int EventId => (int)MessageId.NewInteractingEntity;
 
         public InteractingEntityMessage([NotNull] IInteractingEntity interacting)
         {

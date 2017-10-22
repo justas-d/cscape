@@ -1,6 +1,11 @@
 ﻿using System.Collections.Generic;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entities.Skill;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Message;
+using CScape.Models.Game.Skill;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -35,19 +40,15 @@ namespace CScape.Core.Game.Entities.Component
                 return;
             }
 
-            Parent.SendMessage(
-                new GameMessage(
-                    this, GameMessage.Type.GainExperience, new ExperienceGainMetadata(exp, model)));
+            Parent.SendMessage(new ExperienceGainMessage(exp, model));
 
             if (model.GainExperience(exp))
             {
-                Parent.SendMessage(
-                    new GameMessage(
-                        this, GameMessage.Type.LevelUp, model));
+                Parent.SendMessage(new LevelUpMessage(model));
             }
         }
         
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
             
         }

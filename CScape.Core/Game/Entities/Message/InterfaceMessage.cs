@@ -29,7 +29,7 @@ namespace CScape.Core.Game.Entities.Message
         private InterfaceMessage([NotNull] IGameInterface interf, IEnumerable<IPacket> packets, MessageId id)
         {
             Interf = interf ?? throw new ArgumentNullException(nameof(interf));
-            Packets = packets
+            Packets = packets;
             EventId = (int)id;
         }
     }

@@ -1,6 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Game.Entities.InteractingEntity;
+using CScape.Core.Game.Entities.Message;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Entity.InteractingEntity;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Game.Entities.Component
 {
@@ -15,21 +21,20 @@ namespace CScape.Core.Game.Entities.Component
 
         public override int Priority { get; }
 
-        private HashSet<EntityHandle> _seeableEntities { get; }
-            = new HashSet<EntityHandle>();
+        private readonly HashSet<IEntityHandle> _seeableEntities= new HashSet<IEntityHandle>();
 
         /// <summary>
         /// "Can see up to n tiles".
         /// </summary>
-        public int ViewRange { get; } = DefaultViewRange;
+        public int ViewRange { get; set; } = DefaultViewRange;
 
-        public VisionComponent(Entity parent)
+        public VisionComponent(IEntity parent)
             :base(parent)
         {
             
         }
         
-        public bool CanSee(Entity ent)
+        public bool CanSee(IEntity ent)
         {
             var us = Parent.GetTransform();
             var oth = ent.GetTransform();
@@ -57,18 +62,7 @@ namespace CScape.Core.Game.Entities.Component
             _seeableEntities.Clear();
         }
 
-        /// <summary>
-        /// Broadcasts a message to all visible entities.
-        /// </summary>
-        public void Broadcast(GameMessage msg)
-        {
-            foreach (var ent in GetVisibleEntities().Where(e => !e.IsDead()).Select(e => e.Get()))
-            {
-                ent.SendMessage(msg);
-            }
-        }
-
-        public IEnumerable<EntityHandle> GetVisibleEntities()
+        public IEnumerable<IEntityHandle> GetVisibleEntities()
         {
             return Parent.GetTransform().Region.GetNearbyInclusive().SelectMany(e => e.Entities)
                 .Where(handle => !handle.IsDead())
@@ -92,11 +86,9 @@ namespace CScape.Core.Game.Entities.Component
             // HACK : send message inside of predicate might not be a good design choice.
             _seeableEntities.RemoveWhere(e =>
             {
-                void SendDeleteMsg(EntityHandle ent)
+                void SendDeleteMsg(IEntityHandle ent)
                 {
-                    Parent.SendMessage(
-                        new GameMessage(
-                            this, GameMessage.Type.EntityLeftViewRange, ent));
+                    Parent.SendMessage(EntityMessage.LeftViewRange(ent));
                 }
 
                 if (e.IsDead())
@@ -120,9 +112,7 @@ namespace CScape.Core.Game.Entities.Component
                 if (!_seeableEntities.Contains(handle))
                 {
                     _seeableEntities.Add(handle);
-                    Parent.SendMessage(
-                        new GameMessage(
-                            this, GameMessage.Type.EntityEnteredViewRange, handle));
+                    Parent.SendMessage(EntityMessage.EnteredViewRange(handle));
                 }
             }
         }
@@ -132,21 +122,21 @@ namespace CScape.Core.Game.Entities.Component
             _seeableEntities.RemoveWhere(e => e.IsDead());
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.NetworkReinitialize:
+                case (int)MessageId.NetworkReinitialize:
                 {
                     Reset();
                     break;
                 }
-                case GameMessage.Type.FrameUpdate:
+                case SysMessage.FrameUpdate:
                 {
                     Update();
                     break;
                 }
-                case GameMessage.Type.GC:
+                case SysMessage.GC:
                 {
                     GC();
                     break;

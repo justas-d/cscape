@@ -1,6 +1,10 @@
-﻿using CScape.Core.Game.Entities;
+﻿using CScape.Core.Extensions;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -10,9 +14,6 @@ namespace CScape.Core.Network.Entity.Component
     public sealed class CombatStatNetworkSyncComponent : EntityComponent
     {
         public override int Priority { get; }
-
-        private NetworkingComponent Network => Parent.Components.AssertGet<NetworkingComponent>();
-        private CombatStatComponent Stats => Parent.Components.AssertGet<CombatStatComponent>();
 
         private bool _isDirty = false;
 
@@ -29,33 +30,34 @@ namespace CScape.Core.Network.Entity.Component
             _isDirty = false;
 
             string Format(int num) => num >= 0 ? $"+{num}" : num.ToString();
-            var net = Network;
+            var net = Parent.AssertGetNetwork();
+            var stats = Parent.AssertGetCombatStats();
 
-            net.SendPacket(new SetInterfaceTextPacket(1675, $"Stab: {Format(Stats.Attack.Stab)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1676, $"Slash: {Format(Stats.Attack.Slash)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1677, $"Crush: {Format(Stats.Attack.Crush)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1678, $"Magic: {Format(Stats.Attack.Magic)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1679, $"Range: {Format(Stats.Attack.Ranged)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1675, $"Stab: {Format(stats.Attack.Stab)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1676, $"Slash: {Format(stats.Attack.Slash)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1677, $"Crush: {Format(stats.Attack.Crush)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1678, $"Magic: {Format(stats.Attack.Magic)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1679, $"Range: {Format(stats.Attack.Ranged)}"));
 
-            net.SendPacket(new SetInterfaceTextPacket(1680, $"Stab: {Format(Stats.Defense.Stab)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1681, $"Slash: {Format(Stats.Defense.Slash)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1682, $"Crush: {Format(Stats.Defense.Crush)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1683, $"Magic: {Format(Stats.Defense.Magic)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1684, $"Range: {Format(Stats.Defense.Ranged)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1680, $"Stab: {Format(stats.Defense.Stab)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1681, $"Slash: {Format(stats.Defense.Slash)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1682, $"Crush: {Format(stats.Defense.Crush)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1683, $"Magic: {Format(stats.Defense.Magic)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1684, $"Range: {Format(stats.Defense.Ranged)}"));
 
-            net.SendPacket(new SetInterfaceTextPacket(1685, $"Strength: {Format(Stats.StrengthBonus)}     Range: {Format(Stats.RangedBonus)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1686, $"Magic: {Format(Stats.MagicBonus)}"));
-            net.SendPacket(new SetInterfaceTextPacket(1687, $"Prayer: {Format(Stats.PrayerBonus)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1685, $"Strength: {Format(stats.StrengthBonus)}     Range: {Format(stats.RangedBonus)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1686, $"Magic: {Format(stats.MagicBonus)}"));
+            net.SendPacket(new SetInterfaceTextPacket(1687, $"Prayer: {Format(stats.PrayerBonus)}"));
         }
         
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.EquipmentChange:
+                case (int)MessageId.EquipmentChange:
                     _isDirty = true;
                     break;
-                case GameMessage.Type.NetworkUpdate:
+                case (int)MessageId.NetworkUpdate:
                     Sync();
                     break;
             }

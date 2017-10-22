@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entities.Message
     {
         [NotNull]
         public IFacingData FacingData { get; }
-        public int EventId => MessageId.NewFacingDirection;
+        public int EventId => (int)MessageId.NewFacingDirection;
 
         public FacingDirectionMessage([NotNull] IFacingData facingData)
         {

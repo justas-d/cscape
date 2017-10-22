@@ -20,6 +20,6 @@ namespace CScape.Core.Game.Entities.Message
             NewPoe = newPoe ?? throw new ArgumentNullException(nameof(newPoe));
         }
 
-        public int EventId => MessageId.PoeSwitch;
+        public int EventId => (int)MessageId.PoeSwitch;
     }
 }

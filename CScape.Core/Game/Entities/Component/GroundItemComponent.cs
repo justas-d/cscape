@@ -2,6 +2,11 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Items;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Item;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -15,8 +20,6 @@ namespace CScape.Core.Game.Entities.Component
 
         public ItemStack Item { get; private set; }
 
-        private VisionComponent Vision => Parent.Components.AssertGet<VisionComponent>();
-
         /// <summary>
         /// How many milliseconds need to pass for the item to despawn.
         /// </summary>
@@ -25,7 +28,7 @@ namespace CScape.Core.Game.Entities.Component
         public long DroppedForMs { get; private set; }
 
         public GroundItemComponent(
-            [NotNull] Entity parent,
+            [NotNull] IEntity parent,
             ItemStack item,
             [CanBeNull] Action<GroundItemComponent> destroyCallback) : base(parent)
         {
@@ -46,11 +49,11 @@ namespace CScape.Core.Game.Entities.Component
                 
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventId)
             {
-                case GameMessage.Type.FrameUpdate:
+                case SysMessage.FrameUpdate:
                     Update();
                     break;
             }
@@ -64,10 +67,7 @@ namespace CScape.Core.Game.Entities.Component
             var old = Item;
             Item = new ItemStack(Item.Id, newAmount);
 
-            Vision.Broadcast(
-                new GameMessage(
-                    this, GameMessage.Type.GroundItemAmountUpdate, 
-                    new GroundItemChangeMetadata(old, Item, this)));
+            Parent.AssertGetVision().Broadcast(GroundItemMessage.AmountChange(old, Item, this));
         }
     }
 }

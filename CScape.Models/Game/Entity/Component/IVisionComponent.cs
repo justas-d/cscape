@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Reflection.Metadata;
 
 namespace CScape.Models.Game.Entity.Component
 {
@@ -21,8 +20,8 @@ namespace CScape.Models.Game.Entity.Component
         bool CanSee(IEntity ent);
 
         /// <summary>
-        /// Returns all visible entities. The handles can be dead.
+        /// Returns all visible entities. The handles cannot be dead.
         /// </summary>
-        IEnumerable<EntityHandle> GetVisibleEntities();
+        IEnumerable<IEntityHandle> GetVisibleEntities();
     }
 }

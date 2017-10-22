@@ -1,8 +1,13 @@
 ﻿using System.Diagnostics;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -19,60 +24,37 @@ namespace CScape.Core.Network.Entity.Component
 
         public bool ShouldSendSystemMessageWhenSyncing { get; set; }
 
-        [NotNull]
-        private ClientPositionComponent Pos
-        {
-            get
-            {
-                var val = Parent.Components.Get<ClientPositionComponent>();
-                Debug.Assert(val != null);
-                return val;
-            }
-        }
-
-        [NotNull]
-        private NetworkingComponent Net
-        {
-            get
-            {
-                var val = Parent.Components.Get<NetworkingComponent>();
-                Debug.Assert(val != null);
-                return val;
-            }
-        }
-
         public RegionNetworkSyncComponent(Game.Entities.Entity parent)
             :base(parent)
         {
             
         }
 
-        private void SyncRegion((int x, int y) pos)
+        private void SyncRegion(IPosition pos)
         {
             if (ShouldSendSystemMessageWhenSyncing)
             {
-                Parent.SystemMessage($"Sync region: {pos.x} + 6 {pos.y} + 6", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+                Parent.SystemMessage($"Sync region: {pos.X} + 6 {pos.Y} + 6", SystemMessageFlags.Debug | SystemMessageFlags.Network);
             }
 
-            Net.SendPacket(
+            Parent.AssertGetNetwork().SendPacket(
                 new SetRegionCoordinate(
-                    (short)(pos.x + 6),
-                    (short)(pos.y + 6)));
+                    (short)(pos.X + 6),
+                    (short)(pos.Y + 6)));
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.Event)
+            switch (msg.EventIdId)
             {
-                case GameMessage.Type.ClientRegionChanged:
+                case (int)MessageId.ClientRegionChanged:
                 {
-                    SyncRegion(msg.AsClientRegionChanged());
+                    SyncRegion(msg.AsClientRegionChange().Position);
                     break;
                 }
-                case GameMessage.Type.NetworkReinitialize:
+                case (int)MessageId.NetworkReinitialize:
                 {
-
-                    SyncRegion(Pos.ClientRegion);
+                    SyncRegion(Parent.AssertGetClientPosition().ClientRegion);
                     break;
                 }
             }

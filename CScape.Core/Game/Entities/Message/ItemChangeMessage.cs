@@ -17,11 +17,11 @@ namespace CScape.Core.Game.Entities.Message
         public static ItemChangeMessage InventoryChange([NotNull] IItemContainer container, ItemChangeInfo info)
             => new ItemChangeMessage(container, info, MessageId.ItemChange);
 
-        private ItemChangeMessage([NotNull] IItemContainer container, ItemChangeInfo info, int id)
+        private ItemChangeMessage([NotNull] IItemContainer container, ItemChangeInfo info, MessageId id)
         {
             Container = container ?? throw new ArgumentNullException(nameof(container));
             Info = info;
-            EventId = id;
+            EventId = (int)id;
         }
 
         public int EventId { get; }

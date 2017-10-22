@@ -2,8 +2,11 @@
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Interface;
+using CScape.Core.Game.Entities.Message;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Network.Entity.Component
 {
@@ -16,60 +19,50 @@ namespace CScape.Core.Network.Entity.Component
         [NotNull]
         private readonly List<IPacket> _packetQueue = new List<IPacket>();
 
-        [NotNull]
-        private InterfaceComponent Interfaces => Parent.Components.AssertGet<InterfaceComponent>();
-
-        [NotNull]
-        private NetworkingComponent Network => Parent.Components.AssertGet<NetworkingComponent>();
-
         public InterfaceNetworkSyncComponent([NotNull] Game.Entities.Entity parent) : base(parent)
         {
         }
 
         private void Sync()
         {
+            var net = Parent.AssertGetNetwork();
+
             if (_packetQueue.Any())
             {
                 // sync queue
                 foreach (var packet in _packetQueue)
-                    Network.SendPacket(packet);
+                    net.SendPacket(packet);
 
                 _packetQueue.Clear();
             }
+        }
 
-            // sync interfaces
-            foreach (var meta in Interfaces.All.Values)
+        private void InterfaceUpdate(InterfaceMessage meta)
+        {
+            if(meta.Packets != null)
+                _packetQueue.AddRange(meta.Packets);
+        }
+
+        public override void ReceiveMessage(IGameMessage msg)
+        {
+            switch (msg.EventId)
             {
-                foreach(var packet in meta.Interface.GetUpdatePackets())
-                    Network.SendPacket(packet);
-            }
-        }
-
-        private void InterfaceShown(InterfaceMetadata meta)
-        {
-            _packetQueue.AddRange(meta.Interface.GetShowPackets());
-        }
-
-        private void InterfaceClosed(InterfaceMetadata meta)
-        {
-            _packetQueue.AddRange(meta.Interface.GetClosePackets());
-        }
-
-        public override void ReceiveMessage(GameMessage msg)
-        {
-            switch (msg.Event)
-            {
-                case GameMessage.Type.NetworkUpdate:
+                case (int)MessageId.NetworkUpdate:
                     Sync();
                     break;
-                case GameMessage.Type.InterfaceClosed:
+                case (int)MessageId.InterfaceClosed:
                 {
-                    InterfaceClosed(msg.AsInterfaceClosed());
+                    InterfaceUpdate(msg.AsInterfaceClosed());
                     break;
                 }
-                case GameMessage.Type.NewInterfaceShown:
+                case (int)MessageId.NewInterfaceShown:
                 {
-                    InterfaceShown(msg.AsNewInterfaceShown());
+                    InterfaceUpdate(msg.AsNewInterfaceShown());
+                    break;
+                }
+                case (int)MessageId.InterfaceUpdate:
+                {
+                    InterfaceUpdate(msg.AsInterfaceUpdate());
                     break;
                 }
             }

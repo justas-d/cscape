@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 using CScape.Core.Game.World;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Directions;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Game.Entities.Directions
 {
@@ -10,21 +13,21 @@ namespace CScape.Core.Game.Entities.Directions
     /// </summary>
     public sealed class BufferedDirectionProvider : IDirectionsProvider
     {
-        private readonly Queue<World.Direction> _buffer = new Queue<World.Direction>();
+        private readonly Queue<Direction> _buffer = new Queue<Direction>();
         private bool _isDone;
 
         public void SetDone() => _isDone = true;
 
-        public void Add(World.Direction dir) => _buffer.Enqueue(dir);
+        public void Add(Direction dir) => _buffer.Enqueue(dir);
 
         private DirectionDelta GetDirection()
         {
-            return new DirectionDelta(_buffer.Count > 0 ? _buffer.Dequeue() : World.Direction.None);
+            return new DirectionDelta(_buffer.Count > 0 ? _buffer.Dequeue() : Direction.None);
         }
 
-        public GeneratedDirections GetNextDirections(Entity ent) 
+        public GeneratedDirections GetNextDirections(IEntity ent) 
             => new GeneratedDirections(GetDirection(), GetDirection());
         
-        public bool IsDone(Entity entity) => _isDone;
+        public bool IsDone(IEntity entity) => _isDone;
     }
 }

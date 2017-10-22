@@ -1,4 +1,7 @@
-﻿namespace CScape.Core.Game.Entities.Component
+﻿using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
+
+namespace CScape.Core.Game.Entities.Component
 {
     /// <summary>
     /// Logs system messages to ILogger
@@ -14,11 +17,11 @@
             
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
-            if (msg.Event == GameMessage.Type.NewSystemMessage)
+            if (msg.EventId == (int)MessageId.NewSystemMessage)
             {
-                var strMSg = msg.AsNewSystemMessage();
+                var strMSg = msg.AsSystemMessage();
                 Log.Normal(this, $"({strMSg.Flags}) ({Parent}): {strMSg.Msg}");
             }
         }

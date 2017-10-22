@@ -9,7 +9,7 @@ namespace CScape.Core.Game.Entities
     {
         [NotNull]
         public ParticleEffect Effect { get; }
-        public int EventId => MessageId.ParticleEffect;
+        public int EventId => (int)MessageId.ParticleEffect;
 
         public ParticleEffectMessage([NotNull] ParticleEffect effect)
         {

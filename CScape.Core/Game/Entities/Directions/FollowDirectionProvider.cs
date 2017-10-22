@@ -1,18 +1,21 @@
 using System.Linq;
 using CScape.Core.Game.Entities.Component;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Directions;
 
 namespace CScape.Core.Game.Entities.Directions
 {
     public sealed class FollowDirectionProvider : IDirectionsProvider
     {
-        public EntityHandle Target { get; }
+        public IEntityHandle Target { get; }
 
-        public FollowDirectionProvider(EntityHandle target)
+        public FollowDirectionProvider(IEntityHandle target)
         {
             Target = target;
         }
 
-        public GeneratedDirections GetNextDirections(Entity ent)
+        public GeneratedDirections GetNextDirections(IEntity ent)
         {
             if(Target.IsDead())
                 return GeneratedDirections.Noop;
@@ -32,14 +35,14 @@ namespace CScape.Core.Game.Entities.Directions
             return new GeneratedDirections(data[0], data[1]);
         }
 
-        public bool IsDone(Entity entity)
+        public bool IsDone(IEntity entity)
         {
             // don't walk toward a dead entity
             if (Target.IsDead())
                 return true;
 
             // use the vision component to resolve vision
-            var vision = entity.Components.Get<VisionComponent>();
+            var vision = entity.GetVision();
             if (vision == null)
                 return true; // no vision component? bail.
 

@@ -1,4 +1,7 @@
-﻿using CScape.Core.Game.Interface;
+﻿using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Item;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -21,7 +24,7 @@ namespace CScape.Core.Game.Entities.Component
         {
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
             
         }

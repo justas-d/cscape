@@ -6,7 +6,7 @@ namespace CScape.Core.Game.Entities
 {
     public sealed class ChatMessageMessage : IGameMessage
     {
-        public int EventId => MessageId.ChatMessage;
+        public int EventId => (int)MessageId.ChatMessage;
         [NotNull]
         public ChatMessage Chat { get; }
 

@@ -1,5 +1,9 @@
 ﻿using System;
 using CScape.Core.Game.Items;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Item;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
@@ -25,7 +29,7 @@ namespace CScape.Core.Game.Entities.Component
         public bool IsPublic { get; set; }
 
         public PlayerDroppedItemComponent(
-            [NotNull] Entity parent,
+            [NotNull] IEntity parent,
             ItemStack item,
             [CanBeNull] Action<GroundItemComponent> destroyCallback,
             [NotNull] string droppedBy) : base(parent, item, destroyCallback)
@@ -43,12 +47,12 @@ namespace CScape.Core.Game.Entities.Component
             }
         }
 
-        public bool CanBeSeenBy(Entity ent, bool inRange)
+        public bool CanBeSeenBy(IEntity ent, bool inRange)
         {
             if (!inRange) return false;
             if (IsPublic) return true;
 
-            var player = ent.Components.Get<PlayerComponent>();
+            var player = ent.GetPlayer();
             if (player == null) return false;
 
             return player.Equals(DroppedBy);

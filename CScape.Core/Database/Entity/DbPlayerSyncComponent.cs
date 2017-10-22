@@ -1,5 +1,7 @@
 using System;
 using CScape.Core.Game.Entities;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Database.Entity
 {
@@ -10,13 +12,13 @@ namespace CScape.Core.Database.Entity
     {
         public override int Priority { get; }
         
-        public DbPlayerSyncComponent(Game.Entities.Entity parent)
+        public DbPlayerSyncComponent(IEntity parent)
             :base(parent)
         {
             
         }
 
-        public override void ReceiveMessage(GameMessage msg)
+        public override void ReceiveMessage(IGameMessage msg)
         {
             throw new NotImplementedException();
         }

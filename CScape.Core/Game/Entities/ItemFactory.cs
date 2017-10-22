@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Items;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
+using CScape.Models.Game.Item;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities
@@ -14,7 +19,7 @@ namespace CScape.Core.Game.Entities
             System = system ?? throw new ArgumentNullException(nameof(system));
         }
 
-        public EntityHandle CreatePlayerDrop(ItemStack stack, PlayerComponent player, string name)
+        public IEntityHandle CreatePlayerDrop(ItemStack stack, IPlayerComponent player, string name)
         {
             var handle = System.Create($"Player dropped item: {name} ({stack.Id.Name}: {stack.Amount}");
             var ent = handle.Get();
@@ -26,7 +31,7 @@ namespace CScape.Core.Game.Entities
             return handle;
         }
 
-        public EntityHandle Create(ItemStack stack, string name)
+        public IEntityHandle Create(ItemStack stack, string name)
         {
             var handle = System.Create($"Ground item: {name} ({stack.Id.Name}: {stack.Amount}");
             var ent = handle.Get();
@@ -34,7 +39,8 @@ namespace CScape.Core.Game.Entities
             ent.Components.Add(new VisionComponent(ent));
             ent.Components.Add<IGroundItemComponent>(new GroundItemComponent(ent, stack, null));
             
-            ent.AssertComponentRequirementsSatisfied();
+            var status = ent.AreComponentRequirementsSatisfied(out var msg);
+            Debug.Assert(status, msg);
 
             return handle;
         }

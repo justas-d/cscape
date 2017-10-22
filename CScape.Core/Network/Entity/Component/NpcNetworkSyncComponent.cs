@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
@@ -14,7 +17,7 @@ namespace CScape.Core.Network.Entity.Component
         {
         }
 
-        protected override bool IsHandleableEntity(EntityHandle h)
+        protected override bool IsHandleableEntity(IEntityHandle h)
         {
             if (h.IsDead())
                 return false;
@@ -22,7 +25,7 @@ namespace CScape.Core.Network.Entity.Component
             return h.Get().Components.Get<NpcComponent>() != null;
         }
 
-        protected override void SetInitialFlags(IUpdateWriter writer, Game.Entities.Entity ent)
+        protected override void SetInitialFlags(IUpdateWriter writer, IEntity ent)
         {
             writer.SetFlag(new InteractingEntityUpdateFlag(ent.GetTransform().InteractingEntity));
             writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingData));
@@ -35,7 +38,7 @@ namespace CScape.Core.Network.Entity.Component
             var sync = GetSyncSegments(updates, f => new NpcUpdateWriter(f));
             var init = GetInitSegments(updates, f => new NpcUpdateWriter(f));
 
-            Network.SendPacket(
+            Parent.AssertGetNetwork().SendPacket(
                 new NpcUpdatePacket(
                     sync,
                     init,

@@ -19,7 +19,7 @@ namespace CScape.Core.Game.World
         public const int Size = 16;
         public const int Shift = 4;
 
-        private readonly HashSet<EntityHandle> _entities = new HashSet<EntityHandle>();
+        private readonly HashSet<IEntityHandle> _entities = new HashSet<IEntityHandle>();
 
         public IReadOnlyCollection<IEntityHandle> Entities => _entities;
         
