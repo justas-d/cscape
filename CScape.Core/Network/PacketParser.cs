@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CScape.Core;
-using CScape.Core.Injection;
-using CScape.Core.Network;
+using CScape.Core.Game.Entities.Message;
 using CScape.Models.Data;
 
-namespace CScape.Basic.Server
+namespace CScape.Core.Network
 {
     public sealed class PacketParser : IPacketParser
     {

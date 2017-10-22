@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Basic.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CScape.Dev.Tests.External

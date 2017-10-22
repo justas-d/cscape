@@ -1,7 +1,6 @@
 
 using CScape.Core.Game.Entities.Component;
 using CScape.Models.Data;
-using CScape.Models.Extensions;
 using CScape.Models.Game;
 using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;

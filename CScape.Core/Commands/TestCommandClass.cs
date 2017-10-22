@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using CScape.Core;
+using CScape.Basic.Commands;
+using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
 using CScape.Core.Game.World;
-using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
 
-namespace CScape.Basic.Commands
+namespace CScape.Core.Commands
 {
     [CommandsClass]
     public sealed class TestCommandClass

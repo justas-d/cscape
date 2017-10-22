@@ -3,7 +3,7 @@ using CScape.Models.Game.Message;
 using CScape.Models.Game.Skill;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities
+namespace CScape.Core.Game.Entities.Message
 {
     public sealed class LevelUpMessage : IGameMessage
     {

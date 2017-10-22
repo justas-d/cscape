@@ -1,7 +1,6 @@
-using CScape.Core.Game.Entities.Component;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities.Message
+namespace CScape.Core.Game
 {
     public sealed class ChatMessage
     {
@@ -33,7 +32,7 @@ namespace CScape.Core.Game.Entities.Message
        
         [NotNull]
         public string Message { get; }
-        public PlayerComponent.Title Title { get; }
+        public int Title { get; }
 
         public TextColor Color { get; }
         public TextEffect Effects { get; }
@@ -43,7 +42,7 @@ namespace CScape.Core.Game.Entities.Message
         /// </summary>
         public bool IsForced { get; }
 
-        public ChatMessage([NotNull] string message, PlayerComponent.Title title, TextColor color, TextEffect effects, bool isForced)
+        public ChatMessage([NotNull] string message, int title, TextColor color, TextEffect effects, bool isForced)
         {
             if (string.IsNullOrEmpty(message))
             {

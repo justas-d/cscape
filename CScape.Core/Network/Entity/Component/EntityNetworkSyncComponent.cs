@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Entity.Segment;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
@@ -139,7 +141,7 @@ namespace CScape.Core.Network.Entity.Component
 
                 var needsUpd = updater.NeedsUpdate();
 
-                init.Add(new InitPlayerSegment(entity.AssertGetPlayer(), Parent.AssertGetPlayer(), needsUpd);
+                init.Add(new InitPlayerSegment(entity.AssertGetPlayer(), Parent.AssertGetPlayer(), needsUpd));
 
                 if (needsUpd)
                 {

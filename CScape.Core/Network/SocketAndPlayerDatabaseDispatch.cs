@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using CScape.Core;
-using CScape.Core.Network;
 using CScape.Models;
 using CScape.Models.Data;
 using CScape.Models.Game;
@@ -17,7 +15,7 @@ using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.OpenSsl;
 
-namespace CScape.Basic.Server
+namespace CScape.Core.Network
 {
     public enum InitResponseCode : byte
     {

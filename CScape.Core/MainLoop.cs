@@ -1,16 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using CScape.Core;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
 using CScape.Core.Network;
 using CScape.Models;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
-namespace CScape.Basic.Server
+namespace CScape.Core
 {
     public sealed class MainLoop : IMainLoop, IDisposable
     {

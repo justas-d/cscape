@@ -1,11 +1,5 @@
 using System;
-using CScape.Core.Data;
-using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Directions;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
 using CScape.Models.Game.Message;
-namespace CScape.Core.Game.Entities
+
+namespace CScape.Core.Extensions
 {
     public static class GameMessageExtensions
     {

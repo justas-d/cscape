@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CScape.Models.Game.Entity.Exceptions;
 using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Entity.Factory

@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using CScape.Basic;
-using CScape.Basic.Model;
-using Newtonsoft.Json;
 using Nito.AsyncEx;
 
 namespace PlayerSpammer

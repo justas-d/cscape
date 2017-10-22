@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using CScape.Core.Game.Entities.Directions;
 using CScape.Core.Game.Entity;
 using CScape.Models.Data;
 

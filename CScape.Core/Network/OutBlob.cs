@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using CScape.Core;
-using CScape.Core.Network;
+using CScape.Models.Data;
 
-namespace CScape.Models.Data
+namespace CScape.Core.Network
 {
     public class PacketSizeDoesNotMatchWrittenSizeException : Exception
     {

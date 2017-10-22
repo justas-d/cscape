@@ -2,8 +2,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using CScape.Core.Data;
-using Org.BouncyCastle.Crypto;
 
 namespace CScape.Basic
 {

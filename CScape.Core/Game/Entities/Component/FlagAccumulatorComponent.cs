@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Entity;
 using CScape.Core.Network.Entity.Flag;

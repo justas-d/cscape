@@ -1,6 +1,5 @@
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
-using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game;
 using CScape.Models.Game.Entity;

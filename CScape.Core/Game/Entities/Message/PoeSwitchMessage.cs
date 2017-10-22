@@ -1,5 +1,4 @@
 using System;
-using CScape.Core.Game.World;
 using CScape.Models.Game.Message;
 using CScape.Models.Game.World;
 using JetBrains.Annotations;

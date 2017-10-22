@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Threading.Tasks;
 using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
 using JetBrains.Annotations;
 
 namespace CScape.Dev.Tests.Impl

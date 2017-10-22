@@ -1,11 +1,6 @@
 using System;
 using System.Diagnostics;
-using CScape.Core.Data;
-using CScape.Core.Game.Interface;
-using CScape.Core.Game.Interface.Showable;
-using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
-using CScape.Core.Network.Sync;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity

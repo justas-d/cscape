@@ -1,6 +1,6 @@
 using CScape.Models.Game.Message;
 
-namespace CScape.Core.Game.Entities
+namespace CScape.Core.Game.Entities.Message
 {
     public sealed class DefinitionChangeMessage : IGameMessage
     {

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Linq;
-using CScape.Core.Data;
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

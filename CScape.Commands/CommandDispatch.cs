@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
-using JetBrains.Annotations;
 
 namespace CScape.Basic.Commands
 {

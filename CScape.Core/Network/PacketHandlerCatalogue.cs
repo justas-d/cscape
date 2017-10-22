@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using CScape.Core;
-using CScape.Core.Injection;
 using CScape.Core.Network.Handler;
 using CScape.Models;
 using JetBrains.Annotations;
 
-namespace CScape.Basic.Server
+namespace CScape.Core.Network
 {
     public class PacketHandlerCatalogue : IPacketHandlerCatalogue
     {

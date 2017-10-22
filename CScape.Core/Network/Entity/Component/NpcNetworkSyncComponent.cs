@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entities.Component;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;

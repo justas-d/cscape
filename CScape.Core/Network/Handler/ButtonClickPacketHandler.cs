@@ -1,6 +1,4 @@
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
 using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Network.Handler

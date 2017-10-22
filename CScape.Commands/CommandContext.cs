@@ -1,6 +1,4 @@
 using System;
-using CScape.Core.Game.Entity;
-using JetBrains.Annotations;
 
 namespace CScape.Basic.Commands
 {

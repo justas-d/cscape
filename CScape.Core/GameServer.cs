@@ -1,9 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using CScape.Core;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
+using CScape.Core.Network;
 using CScape.Models;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
@@ -11,7 +10,7 @@ using CScape.Models.Game.World;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CScape.Basic.Server
+namespace CScape.Core
 {
     public sealed class GameServer : IGameServer
     {

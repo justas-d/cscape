@@ -1,6 +1,4 @@
-﻿using CScape.Core.Data;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
+﻿using CScape.Core.Game.Entity;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
 using Microsoft.Extensions.DependencyInjection;

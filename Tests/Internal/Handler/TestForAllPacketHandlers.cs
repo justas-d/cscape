@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CScape.Basic.Server;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

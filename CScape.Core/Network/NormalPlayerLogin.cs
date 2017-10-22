@@ -1,12 +1,11 @@
 using System;
 using System.Net.Sockets;
 using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
-using CScape.Core.Network;
 using CScape.Models;
+using CScape.Models.Game;
 using JetBrains.Annotations;
 
-namespace CScape.Core
+namespace CScape.Core.Network
 {
     public class NormalPlayerLogin : IPlayerLogin
     {
@@ -16,8 +15,10 @@ namespace CScape.Core
         public int SignlinkUid { get; }
         public bool IsHighDetail { get; }
 
-        public NormalPlayerLogin(IServiceProvider service, [NotNull] IPlayerModel model,
-            [NotNull] Socket connection, int signlinkUid, bool isHighDetail)
+        public NormalPlayerLogin(IServiceProvider service, 
+            [NotNull] IPlayerModel model,
+            [NotNull] Socket connection, 
+            int signlinkUid, bool isHighDetail)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));

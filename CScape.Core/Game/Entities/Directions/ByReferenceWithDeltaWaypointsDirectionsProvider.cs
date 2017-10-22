@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using CScape.Core.Game.Entities.Directions;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entities.Directions
 {
     public sealed class ByReferenceWithDeltaWaypointsDirectionsProvider : IDirectionsProvider
     {

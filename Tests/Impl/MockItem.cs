@@ -1,5 +1,4 @@
 using CScape.Core.Game.Entity;
-using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

@@ -1,6 +1,6 @@
 ﻿using CScape.Core.Network.Handler;
 
-namespace CScape.Core.Injection
+namespace CScape.Core.Network
 {
     public interface IPacketHandlerCatalogue
     {

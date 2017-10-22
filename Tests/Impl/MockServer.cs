@@ -2,13 +2,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using CScape.Basic.Database;
-using CScape.Basic.Model;
-using CScape.Basic.Server;
-using CScape.Core;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
-using CScape.Core.Injection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Dev.Tests.Impl

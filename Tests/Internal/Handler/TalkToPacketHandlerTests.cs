@@ -1,5 +1,4 @@
-﻿using CScape.Core.Data;
-using CScape.Core.Network.Handler;
+﻿using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

@@ -3,7 +3,7 @@ using CScape.Models.Game.Combat;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Item;
 
-namespace CScape.Basic.Model
+namespace CScape.Core
 {
     // todo : proper item model
     public class TestItem : IEquippableItem

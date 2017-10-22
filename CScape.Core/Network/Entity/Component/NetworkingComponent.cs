@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Injection;
 using CScape.Core.Network.Packet;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
@@ -108,7 +107,7 @@ namespace CScape.Core.Network.Entity.Component
 
         public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.EventIdId)
+            switch (msg.EventId)
             {
                 case SysMessage.DestroyEntity:
                 {

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using CScape.Core.Game.Interface;
 
 namespace CScape.Dev.Tests.Impl
 {

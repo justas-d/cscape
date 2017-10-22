@@ -1,10 +1,9 @@
 ﻿using System;
-using CScape.Models.Game.Message;
-using CScape.Core.Game.Entities;
 using CScape.Models.Data;
+using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Injection
+namespace CScape.Core.Game.Entities.Message
 {
     public sealed class PacketMessage : IGameMessage
     {

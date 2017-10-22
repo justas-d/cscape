@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Item;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Item;
 
-namespace CScape.Core.Game.Items
+namespace CScape.Core.Game.Item
 {
     public sealed class PlayerEquipmentContainer : IItemContainer
     {

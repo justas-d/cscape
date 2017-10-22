@@ -1,4 +1,4 @@
-﻿using CScape.Core.Data;
+﻿using CScape.Core.Game.Entities.Directions;
 using CScape.Core.Game.Entity;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;

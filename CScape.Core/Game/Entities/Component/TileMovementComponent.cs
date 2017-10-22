@@ -1,3 +1,4 @@
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Directions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Models.Extensions;

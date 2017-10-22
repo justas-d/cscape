@@ -1,6 +1,3 @@
-using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entity;
-
 namespace CScape.Dev.Tests.Impl
 {
     public struct Position : IPosition

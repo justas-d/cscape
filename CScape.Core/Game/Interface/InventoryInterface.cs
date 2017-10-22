@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Game.Entities;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
 using CScape.Models.Game.Entity;
@@ -10,7 +10,7 @@ using CScape.Models.Game.Item;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Interfaces
+namespace CScape.Core.Game.Interface
 {
     public class InventoryInterface : IItemGameInterface
     {

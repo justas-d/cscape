@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using CScape.Core.Game.World;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Directions;
 using CScape.Models.Game.World;

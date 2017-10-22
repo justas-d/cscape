@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using CScape.Core.Extensions;
+using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entities.MovementAction;
-using CScape.Core.Injection;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;

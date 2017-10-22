@@ -1,7 +1,7 @@
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entities
+namespace CScape.Core.Game.Entities.Message
 {
     public sealed class OverheadTextMessage : IGameMessage
     {

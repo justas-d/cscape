@@ -1,6 +1,6 @@
 using CScape.Models.Game.Skill;
 
-namespace CScape.Core.Game.Entities.Skill
+namespace CScape.Core.Game
 {
     public static class Skills
     {

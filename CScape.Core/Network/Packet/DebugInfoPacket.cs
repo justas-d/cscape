@@ -1,6 +1,4 @@
-﻿using CScape.Models.Data;
-
-namespace CScape.Core.Network
+﻿namespace CScape.Core.Network.Packet
 {
     public sealed class DebugInfoPacket : IPacket
     {

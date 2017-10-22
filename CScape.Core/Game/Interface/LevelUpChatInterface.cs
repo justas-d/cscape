@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using CScape.Core.Game.Entities.Message;
+﻿using CScape.Core.Game.Entities.Message;
 using CScape.Core.Network.Packet;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Interface;
 using CScape.Models.Game.Message;
 
-namespace CScape.Core.Game.Interfaces
+namespace CScape.Core.Game.Interface
 {
     public sealed class LevelUpChatInterface : IGameInterface
     {

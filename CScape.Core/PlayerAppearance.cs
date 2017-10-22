@@ -1,7 +1,7 @@
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 
-namespace CScape.Basic.Model
+namespace CScape.Core
 {
     /// <summary>
     /// Mutable appearance model. Changing values here will not sync.

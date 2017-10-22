@@ -1,4 +1,4 @@
-using CScape.Core.Injection;
+using CScape.Core.Game.Entities.Message;
 using CScape.Models.Game.Entity;
 using JetBrains.Annotations;
 

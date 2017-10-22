@@ -1,4 +1,5 @@
 using System;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entities.InteractingEntity;
 using CScape.Core.Game.Entities.Message;

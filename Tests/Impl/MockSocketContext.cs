@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
-using CScape.Core.Data;
-using CScape.Core.Injection;
 using CScape.Core.Network;
-using CScape.Core.Network.Sync;
 
 namespace CScape.Dev.Tests.Impl
 {

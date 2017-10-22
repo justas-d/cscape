@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entities.Skill;
-using CScape.Core.Game.Interfaces;
+using CScape.Core.Game.Interface;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
@@ -79,7 +77,7 @@ namespace CScape.Core.Network.Entity.Component
 
         public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.EventIdId)
+            switch (msg.EventId)
             {
                 case (int)MessageId.NetworkUpdate:
                     Sync();

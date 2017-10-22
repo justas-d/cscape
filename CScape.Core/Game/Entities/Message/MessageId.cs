@@ -1,6 +1,4 @@
-using System.Reflection;
-
-namespace CScape.Core.Game.Entities
+namespace CScape.Core.Game.Entities.Message
 {
     public enum MessageId : int
     {

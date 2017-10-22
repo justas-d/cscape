@@ -1,5 +1,3 @@
-using CScape.Core.Game.Entities.Interface;
-using CScape.Core.Game.Interface;
 using JetBrains.Annotations;
 
 namespace CScape.Dev.Tests.Impl

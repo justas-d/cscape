@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace CScape.Models.Game.Skill
 {
     /// <summary>

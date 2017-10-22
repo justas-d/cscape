@@ -1,5 +1,4 @@
 using System;
-using CScape.Core.Game.Entity;
 
 namespace CScape.Basic.Commands
 {

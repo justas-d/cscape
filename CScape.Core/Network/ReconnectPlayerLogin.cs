@@ -1,18 +1,12 @@
 using System;
 using System.Net.Sockets;
-using CScape.Core;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
-using CScape.Core.Network;
-using CScape.Core.Network.Entity.Component;
 using CScape.Models;
 using CScape.Models.Extensions;
 using JetBrains.Annotations;
 
-namespace CScape.Basic.Server
+namespace CScape.Core.Network
 {
     public class ReconnectPlayerLogin : IPlayerLogin
     {

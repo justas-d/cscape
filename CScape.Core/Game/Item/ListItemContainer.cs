@@ -6,7 +6,7 @@ using CScape.Models.Extensions;
 using CScape.Models.Game.Item;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Items
+namespace CScape.Core.Game.Item
 {
     /// <summary>
     /// Defines an item container which holds items in a list fashion.

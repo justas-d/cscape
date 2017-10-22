@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using CScape.Core.Injection;
 
 namespace CScape.Dev.Tests.Impl
 {

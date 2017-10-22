@@ -1,5 +1,4 @@
 ﻿using System;
-using CScape.Core.Game.World;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CScape.Dev.Tests.External

@@ -1,10 +1,8 @@
 using System;
 using CScape.Core.Extensions;
+using CScape.Core.Game;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
-using CScape.Core.Game.Entity;
-using CScape.Core.Injection;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 
@@ -44,7 +42,7 @@ namespace CScape.Core.Network.Handler
             if (packet.Data.TryReadString(out var msg))
             {
                 entity.SendMessage(
-                    new ChatMessageMessage(new ChatMessage(msg, player.TitleIcon, color, effect, false)));
+                    new ChatMessageMessage(new ChatMessage(msg, player.TitleId, color, effect, false)));
             }
             else
             {

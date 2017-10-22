@@ -1,6 +1,6 @@
 using CScape.Models.Game.World;
 
-namespace CScape.Core.Game.Entities.Message
+namespace CScape.Core.Game.Entities
 {
     public class ForcedMovement
     {

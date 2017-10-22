@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using CScape.Core.Extensions;
+﻿using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entities.Component;
 using CScape.Core.Game.Entities.Message;
@@ -8,7 +7,6 @@ using CScape.Models.Extensions;
 using CScape.Models.Game;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
-using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
 {
@@ -45,7 +43,7 @@ namespace CScape.Core.Network.Entity.Component
 
         public override void ReceiveMessage(IGameMessage msg)
         {
-            switch (msg.EventIdId)
+            switch (msg.EventId)
             {
                 case (int)MessageId.ClientRegionChanged:
                 {

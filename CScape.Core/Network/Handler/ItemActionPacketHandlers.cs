@@ -2,7 +2,6 @@
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Item;
-using CScape.Core.Injection;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Interface;
@@ -79,7 +78,7 @@ namespace CScape.Core.Network.Handler
             // determine action type by opcode
             var action = OpcodeToActionMap[packet.Opcode];
 
-            entity.SendMessage(new ItemActionMessage(action, itemInterface.Container, interfaceMetadata, idx);
+            entity.SendMessage(new ItemActionMessage(action, itemInterface.Container, interfaceMetadata, idx));
 
             // execute action
             def.OnAction(player, container, idx, action);

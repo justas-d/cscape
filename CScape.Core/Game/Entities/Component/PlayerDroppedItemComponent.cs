@@ -1,5 +1,4 @@
 ﻿using System;
-using CScape.Core.Game.Items;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;

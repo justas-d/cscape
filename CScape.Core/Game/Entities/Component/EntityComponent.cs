@@ -1,9 +1,10 @@
 ﻿using System;
-using CScape.Core;
+using CScape.Models;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
-namespace CScape.Models.Game.Entity
+namespace CScape.Core.Game.Entities.Component
 {
     public abstract class EntityComponent : IEntityComponent
     {
