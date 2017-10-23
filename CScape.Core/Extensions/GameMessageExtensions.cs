@@ -17,6 +17,9 @@ namespace CScape.Core.Extensions
 
         public static bool Is(this IGameMessage msg, MessageId id) => msg.EventId == (int)id;
 
+        public static NewPlayerAppearanceMessage AsPlayerAppearance(this IGameMessage msg) =>
+            AssertCast<NewPlayerAppearanceMessage>(msg, MessageId.AppearanceChanged);
+
         public static PacketMessage AsNewPacket(this IGameMessage msg) =>
             AssertCast<PacketMessage>(msg, MessageId.NewPacket);
 

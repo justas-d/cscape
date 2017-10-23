@@ -23,6 +23,8 @@ namespace CScape.Core.Game.Entities.Component
 
         [CanBeNull] private readonly Action<PlayerComponent> _destroyCallback;
 
+        public PlayerAppearance Apperance { get; private set; }
+
         public int PlayerId { get; }
 
         public override int Priority { get; } = 1;
@@ -31,7 +33,7 @@ namespace CScape.Core.Game.Entities.Component
         public string Username { get; }
 
         public PlayerComponent(
-            [NotNull] Entity parent,
+            [NotNull] IEntity parent,
             [NotNull] string username,
             int playerId,
             [CanBeNull] Action<PlayerComponent> destroyCallback)
@@ -40,6 +42,12 @@ namespace CScape.Core.Game.Entities.Component
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
             PlayerId = playerId;
             Username = username ?? throw new ArgumentNullException(nameof(username));
+        }
+
+        public void SetAppearance(PlayerAppearance appearance)
+        {
+            Apperance = appearance;
+            Parent.SendMessage(new NewPlayerAppearanceMessage(appearance));
         }
 
         public override void ReceiveMessage(IGameMessage msg)

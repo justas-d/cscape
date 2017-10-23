@@ -17,27 +17,6 @@ namespace CScape.Core.Game.Entity
 
       
 
-        [NotNull] public IPlayerAppearance Appearance
-        {
-            get => _model.Appearance;
-            set
-            {
-                var val = value ?? throw new InvalidOperationException("Player appearance cannot be null.");
-                _model.Appearance = val;
-
-                TickFlags |= UpdateFlags.Appearance;
-                IsAppearanceDirty = true;
-            }
-        }
-
-
-
-        public const int MaxAppearanceUpdateSize = 64;
-        public Blob AppearanceUpdateCache { get; set; } = new Blob(MaxAppearanceUpdateSize);
-
-        public bool IsAppearanceDirty { get; set; }
-
-
         public bool IsMember => _model.IsMember;
 
 
@@ -127,10 +106,6 @@ namespace CScape.Core.Game.Entity
          //   var skillSync = new SkillSyncMachine(model.Skills.Experience.Length);
          //   Connection.SyncMachines.Add(skillSync);
          //   Skills = new PlayerSkills(services, this, model, skillSync);
-
-            // set update flags
-            TickFlags |= UpdateFlags.Appearance;
-            IsAppearanceDirty = true;
 
         }
 

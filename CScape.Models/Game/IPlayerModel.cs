@@ -15,7 +15,7 @@
 
         int X { get; set; }
         int Y { get; set; }
-        byte Z { get; set; }
+        byte Z { get; set; }1
 
         byte Health { get; set; }
     }
