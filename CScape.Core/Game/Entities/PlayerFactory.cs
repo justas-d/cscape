@@ -111,6 +111,8 @@ namespace CScape.Core.Game.Entities
             if (!check)
                 Debug.Fail(msg);
             
+            // TODO : add skills to SkillComponent for players
+
             _players[id] = entHandle;
             _usernameLookup.Add(msg, entHandle);
 

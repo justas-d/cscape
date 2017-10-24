@@ -1,17 +1,14 @@
-using CScape.Models.Data;
-using CScape.Models.Game.Interface;
-
 namespace CScape.Core.Network.Packet
 {
     public sealed class ShowSidebarInterfacePacket : IPacket
     {
-        private readonly IGameInterface _interf;
+        private readonly short _id;
         private readonly byte _sidebarIndex;
         public const int Id = 71;
 
-        public ShowSidebarInterfacePacket(IGameInterface interf, byte sidebarIndex)
+        public ShowSidebarInterfacePacket(short id, byte sidebarIndex)
         {
-            _interf = interf;
+            _id = id;
             _sidebarIndex = sidebarIndex;
         }
 
@@ -19,7 +16,7 @@ namespace CScape.Core.Network.Packet
         {
             stream.BeginPacket(Id);
 
-            stream.Write16((short)_interf.Id);
+            stream.Write16(_id);
             stream.Write(_sidebarIndex);
 
             stream.EndPacket();
