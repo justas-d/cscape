@@ -1,6 +1,9 @@
 ﻿using System;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity;
+using CScape.Core.Game.Item;
+using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Message;
@@ -8,6 +11,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entities.Component
 {
+    [RequiresComponent(typeof(PlayerEquipmentContainer))]
     public sealed class PlayerComponent : EntityComponent, IPlayerComponent
     {
         public enum Title : byte
@@ -47,7 +51,7 @@ namespace CScape.Core.Game.Entities.Component
         public void SetAppearance(PlayerAppearance appearance)
         {
             Apperance = appearance;
-            Parent.SendMessage(new NewPlayerAppearanceMessage(appearance));
+            Parent.SendMessage(new PlayerAppearanceMessage(Username, appearance, Parent.AssertGetPlayerContainers().Equipment));
         }
 
         public override void ReceiveMessage(IGameMessage msg)
@@ -65,10 +69,17 @@ namespace CScape.Core.Game.Entities.Component
                     // TODO : handle death in PlayerComponent
                     break;
                 }
-
+                case (int) MessageId.EquipmentChange:
+                {
+                    Parent.SendMessage(new PlayerAppearanceMessage(
+                        Username,
+                        Apperance,
+                        Parent.AssertGetPlayerContainers().Equipment));
+                    break;
+                }
             }
         }
-
+       
         /// <summary>
         /// Logs out (destroys) the entity only if it's safe for the player to log out.
         /// </summary>
@@ -77,7 +88,7 @@ namespace CScape.Core.Game.Entities.Component
         {
             // TODO : check if the player can log out. (in combat or something)
 
-            Parent.Handle.System.Destroy(Parent.Handle);
+            Parent.Handle.Destroy();
             return true;
         }
 
@@ -88,7 +99,11 @@ namespace CScape.Core.Game.Entities.Component
         /// </summary>
         public void ForcedLogout()
         {
-            Parent.GetNetwork()?.DropConnection();
+            var net = Parent.GetNetwork();
+            if (net != null)
+                net.DropConnection();
+            else
+                Parent.Handle.Destroy();
         }
 
         public bool Equals(IPlayerComponent other)
@@ -107,7 +122,7 @@ namespace CScape.Core.Game.Entities.Component
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is PlayerComponent && Equals((PlayerComponent) obj);
+            return obj is IPlayerComponent && Equals((IPlayerComponent)obj);
         }
 
         public override string ToString()

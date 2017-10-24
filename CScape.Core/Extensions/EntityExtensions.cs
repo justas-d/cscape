@@ -11,6 +11,12 @@ namespace CScape.Core.Extensions
     public static class EntityExtensions
     {
         [CanBeNull]
+        public static PlayerInventoryComponent GetPlayerContainers(this IEntity ent) => ent.Components.Get<PlayerInventoryComponent>();
+        [NotNull]
+        public static PlayerInventoryComponent AssertGetPlayerContainers(this IEntity ent) => ent.Components.AssertGet<PlayerInventoryComponent>();
+
+
+        [CanBeNull]
         public static MovementActionComponent GetMovementAction(this IEntity ent) => ent.Components.Get<MovementActionComponent>();
         [NotNull]
         public static MovementActionComponent AssertGetMovementAction(this IEntity ent) => ent.Components.AssertGet<MovementActionComponent>();

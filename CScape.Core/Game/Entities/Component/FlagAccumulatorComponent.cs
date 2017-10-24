@@ -40,16 +40,12 @@ namespace CScape.Core.Game.Entities.Component
                 _flags.Add(flag.Type, flag);
         }
 
-        public void HandleAppearanceMessage(NewPlayerAppearanceMessage msg)
+        public void HandleAppearanceMessage(PlayerAppearanceMessage msg)
         {
             var cache = _appearanceCache;
             var app = msg.Appearance;
 
             const int equipSlotSize = 12;
-
-            const int plrObjMagic = 0x100;
-            const int itemMagic = 0x200;
-
 
             Parent.SystemMessage("Invalidating and rewriting appearance cache.");
 
@@ -59,7 +55,7 @@ namespace CScape.Core.Game.Entities.Component
 
             cache.Write((byte)app.Gender);
             // TODO : overheads
-            cache.Write((byte)app.Overhead);
+            cache.Write(0);
 
             /* 
              * todo : some equipped items conflict with body parts 
@@ -68,26 +64,50 @@ namespace CScape.Core.Game.Entities.Component
              * write beard model if head item doesn't fully conceal the head.
              */
 
-
-            void Write(short value)
-            {
-                    
-            }
-
             for (var i = 0; i < equipSlotSize; i++)
             {
-                // todo : write equipment
-                if (upd.Player.Appearance[i] != null)
-                    cache.Write16((short) (upd.Player.Appearance[i].Value + plrObjMagic));
+                const short plrObjMagic = 0x100;
+                const short itemMagic = 0x200;
+
+                if (!msg.Equipment.Provider[i].IsEmpty())
+                    cache.Write16((short)(msg.Equipment.Provider[i].Id.ItemId + itemMagic));
                 else
-                    cache.Write(0);
+                {
+                    switch (i)
+                    {
+                        case 4:
+                            cache.Write16((short)(app.Chest + plrObjMagic));
+                            break;
+                        case 6:
+                            cache.Write16((short)(app.Arms + plrObjMagic));
+                            break;
+                        case 7:
+                            cache.Write16((short)(app.Legs + plrObjMagic));
+                            break;
+                        case 8:
+                            cache.Write16((short)(app.Head + plrObjMagic));
+                            break;
+                        case 9:
+                            cache.Write16((short)(app.Hands + plrObjMagic));
+                            break;
+                        case 10:
+                            cache.Write16((short)(app.Feet + plrObjMagic));
+                            break;
+                        case 11:
+                            cache.Write16((short)(app.Beard + plrObjMagic));
+                            break;
+                        default:
+                            cache.Write(0);
+                            break;
+                    }
+                }
             }
 
-            cache.Write(upd.Player.Appearance.HairColor);
-            cache.Write(upd.Player.Appearance.TorsoColor);
-            cache.Write(upd.Player.Appearance.LegColor);
-            cache.Write(upd.Player.Appearance.FeetColor);
-            cache.Write(upd.Player.Appearance.SkinColor);
+            cache.Write(app.HairColor);
+            cache.Write(app.TorsoColor);
+            cache.Write(app.LegColor);
+            cache.Write(app.FeetColor);
+            cache.Write(app.SkinColor);
 
             // upd.Player animation indices
             cache.Write16(0x328); // standAnimIndex
@@ -98,11 +118,13 @@ namespace CScape.Core.Game.Entities.Component
             cache.Write16(0x336); // turn90CCWAnimIndex
             cache.Write16(0x338); // runAnimIndex
 
-            cache.Write64(Utils.StringToLong(upd.Player.Username));
+            cache.Write64(Utils.StringToLong(msg.Username));
             cache.Write(3); // todo : cmb
             cache.Write16(0); // ...skill???
 
             sizePh.WriteSize();
+
+            SetFlag(new PlayerAppearanceUpdateFlag(cache));
         }
 
         public override void ReceiveMessage(IGameMessage msg)
@@ -134,7 +156,7 @@ namespace CScape.Core.Game.Entities.Component
                     SetFlag(new PlayerChatUpdateFlag(msg.AsChatMessage().Chat));
                     break;
                 }
-                case (int)MessageId.AppearanceChanged:
+                case (int)MessageId.UpdatePlayerAppearance:
                 {
                     HandleAppearanceMessage(msg.AsPlayerAppearance());
                     break;

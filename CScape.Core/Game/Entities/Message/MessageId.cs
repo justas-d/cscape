@@ -46,8 +46,9 @@ namespace CScape.Core.Game.Entities.Message
 
         // player
         ChatMessage,
-        AppearanceChanged,
+        UpdatePlayerAppearance,
         ClientRegionChanged,
+        PlayerInitialize, // signals to entities that this player needs to be initialized.
 
         // transform messages
         NewInteractingEntity,

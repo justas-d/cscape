@@ -1,4 +1,4 @@
-﻿using CScape.Models.Game.Entity;
+﻿using CScape.Core.Game.Item;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Item;
 using CScape.Models.Game.Message;
@@ -12,12 +12,14 @@ namespace CScape.Core.Game.Entities.Component
 
         // TODO : PlayerInventoryComponent load from DB
 
+        IItemContainer IInventoryComponent.Inventory => Backpack;
+
         [NotNull]
-        public IItemContainer Inventory { get; }
+        public ListItemContainer Backpack { get; }
         [NotNull]
-        public IItemContainer Equipment { get; }
+        public PlayerEquipmentContainer Equipment { get; }
         [NotNull]
-        public IItemContainer Bank { get; }
+        public ListItemContainer Bank { get; }
 
 
         public PlayerInventoryComponent([NotNull] Entity parent) : base(parent)
