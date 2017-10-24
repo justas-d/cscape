@@ -1,5 +1,5 @@
 using System;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entity.Component;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 

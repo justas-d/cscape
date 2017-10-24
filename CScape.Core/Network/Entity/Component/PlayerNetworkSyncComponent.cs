@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entity.Component;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Entity.Segment;
 using CScape.Core.Network.Packet;
@@ -18,7 +18,7 @@ namespace CScape.Core.Network.Entity.Component
         public override int Priority { get; } = ComponentConstants.PriorityPlayerUpdate;
 
         public PlayerNetworkSyncComponent(
-            Game.Entities.Entity parent)
+            Game.Entity.Entity parent)
             :base(parent)
         {
             

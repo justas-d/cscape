@@ -1,6 +1,6 @@
 using System;
 using CScape.Core.Extensions;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Command;
 using CScape.Models.Game.Entity;
 using Microsoft.Extensions.DependencyInjection;

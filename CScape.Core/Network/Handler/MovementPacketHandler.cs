@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using CScape.Core.Game.Entities.Directions;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Directions;
 using CScape.Models.Data;
 
 namespace CScape.Core.Network.Handler

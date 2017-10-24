@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Item;
 using JetBrains.Annotations;
@@ -16,11 +16,11 @@ namespace CScape.Core.Game.Item
     public sealed class ListItemContainer : ISwappableItemContainer
     {
         [NotNull]
-        public Entities.Entity Parent { get; }
+        public Entity.Entity Parent { get; }
         public IList<ItemStack> Provider { get; }
 
         public ListItemContainer(
-            [NotNull] Entities.Entity parent, [NotNull] IList<ItemStack> provider)
+            [NotNull] Entity.Entity parent, [NotNull] IList<ItemStack> provider)
         {
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));

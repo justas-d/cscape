@@ -1,5 +1,5 @@
 using System;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entity.Component;
 using CScape.Core.Network.Entity.Flag;
 
 namespace CScape.Core.Network.Entity

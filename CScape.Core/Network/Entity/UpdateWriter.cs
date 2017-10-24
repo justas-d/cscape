@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entity.Component;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Models.Data;
 using JetBrains.Annotations;

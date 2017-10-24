@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Network;
 using CScape.Models;

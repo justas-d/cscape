@@ -1,4 +1,4 @@
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Network.Handler

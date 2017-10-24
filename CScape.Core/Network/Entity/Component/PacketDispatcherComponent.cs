@@ -2,8 +2,8 @@ using System;
 using System.Diagnostics;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Entity.Component
         public bool ShouldNotifyAboutUnhandledPackets { get; set; } = true;
         public bool ShouldNotifyAboutPacketsBeingHandled { get; set; } = true;
 
-        public PacketDispatcherComponent(Game.Entities.Entity parent, [NotNull] IPacketHandlerCatalogue handlers)
+        public PacketDispatcherComponent(Game.Entity.Entity parent, [NotNull] IPacketHandlerCatalogue handlers)
             :base(parent)
         {
             _handlers = handlers ?? throw new ArgumentNullException(nameof(handlers));

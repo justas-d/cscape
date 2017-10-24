@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Data;
 
 namespace CScape.Core.Network

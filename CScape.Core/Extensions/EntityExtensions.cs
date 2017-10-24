@@ -1,7 +1,8 @@
 ﻿using System;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Entity.Component;
 using CScape.Models.Game.Entity;
 using JetBrains.Annotations;

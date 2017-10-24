@@ -3,8 +3,8 @@ using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Extensions;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 
@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Entity.Component
         [NotNull]
         private readonly List<IPacket> _packetQueue = new List<IPacket>();
 
-        public InterfaceNetworkSyncComponent([NotNull] Game.Entities.Entity parent) : base(parent)
+        public InterfaceNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
         {
         }
 

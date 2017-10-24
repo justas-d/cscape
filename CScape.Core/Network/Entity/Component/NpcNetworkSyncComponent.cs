@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
+using CScape.Core.Game.Entity.Component;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     {
         public override int Priority { get; }
 
-        public NpcNetworkSyncComponent([NotNull] Game.Entities.Entity parent) : base(parent)
+        public NpcNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
         {
         }
 

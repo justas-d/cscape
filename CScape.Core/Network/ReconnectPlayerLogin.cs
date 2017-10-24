@@ -2,6 +2,7 @@ using System;
 using System.Net.Sockets;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
+using CScape.Core.Game.Entity;
 using CScape.Models;
 using CScape.Models.Extensions;
 using JetBrains.Annotations;

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Item;
 
@@ -12,9 +12,9 @@ namespace CScape.Core.Game.Item
 
         public IList<ItemStack> Provider { get; }
 
-        public Entities.Entity Parent { get; }
+        public Entity.Entity Parent { get; }
 
-        public PlayerEquipmentContainer(Entities.Entity parent)
+        public PlayerEquipmentContainer(Entity.Entity parent)
         {
             Parent = parent;
             Provider = new ItemStack[EquipmentMaxSize];

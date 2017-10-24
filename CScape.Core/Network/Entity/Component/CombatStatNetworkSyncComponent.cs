@@ -1,7 +1,7 @@
 ﻿using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
@@ -18,7 +18,7 @@ namespace CScape.Core.Network.Entity.Component
 
         private bool _isDirty = false;
 
-        public CombatStatNetworkSyncComponent([NotNull] Game.Entities.Entity parent) : base(parent)
+        public CombatStatNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
         {
         }
 

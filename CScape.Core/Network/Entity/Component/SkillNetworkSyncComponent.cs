@@ -2,8 +2,9 @@
 using System.Linq;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Game.Interface;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
@@ -38,7 +39,7 @@ namespace CScape.Core.Network.Entity.Component
         private readonly HashSet<ISkillModel> _dirty 
             = new HashSet<ISkillModel>(SkillModelComparer.Instance);
 
-        public SkillNetworkSyncComponent([NotNull] Game.Entities.Entity parent) : base(parent)
+        public SkillNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
         {
 
         }

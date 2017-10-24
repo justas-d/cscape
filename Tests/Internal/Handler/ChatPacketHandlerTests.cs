@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using CScape.Core.Game;
-using CScape.Core.Game.Entities.Message;
 using CScape.Core.Game.Entity;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;

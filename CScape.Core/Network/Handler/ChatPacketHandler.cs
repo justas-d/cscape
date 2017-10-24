@@ -2,7 +2,7 @@ using System;
 using CScape.Core.Extensions;
 using CScape.Core.Game;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 

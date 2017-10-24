@@ -1,6 +1,6 @@
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Component;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Packet;
 using CScape.Models;
 using CScape.Models.Game.Entity;
@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     {
         public override int Priority { get; }
 
-        public DebugStatNetworkSyncComponent([NotNull] Game.Entities.Entity parent) : base(parent)
+        public DebugStatNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
         {
         }        
 

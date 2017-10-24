@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using CScape.Basic.Commands;
 using CScape.Core.Game.Entities;
-using CScape.Core.Game.Entities.Message;
+using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Game.World;
 using CScape.Core.Network.Packet;
 
