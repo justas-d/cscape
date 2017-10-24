@@ -26,11 +26,12 @@ namespace CScape.Core.Game.Entities.Component
             Admin = 2
         }
 
+        public int PlayerId { get; }
+
         // TODO : fill player component with data from DB
 
         public PlayerAppearance Apperance { get; private set; }
-        public int TitleId { get; } = (int)Title.Normal;
-        public int PlayerId { get; }
+        public int TitleId { get; }
         public bool IsMember { get; }
 
         [NotNull]
@@ -41,14 +42,18 @@ namespace CScape.Core.Game.Entities.Component
 
         public PlayerComponent(
             [NotNull] IEntity parent,
-            [NotNull] string username,
+            [NotNull] PlayerModel model,
             int playerId,
             [CanBeNull] Action<PlayerComponent> destroyCallback)
             :base(parent)
         {
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
             PlayerId = playerId;
-            Username = username ?? throw new ArgumentNullException(nameof(username));
+
+            SetAppearance(model.Apperance);
+            TitleId = (int)model.Title;
+            IsMember = model.IsMember;
+            Username = model.Username;
         }
 
         public void SetAppearance(PlayerAppearance appearance)
@@ -87,7 +92,10 @@ namespace CScape.Core.Game.Entities.Component
                     interf.ShowSidebar(new UnimplementedSidebarInterface(db.OptionsHighDetailSidebar, db.OptionsSidebarIdx), db.OptionsSidebarIdx);
                     interf.ShowSidebar(new UnimplementedSidebarInterface(db.ControlsSidebar, db.ControlsSidebarIdx), db.ControlsSidebarIdx);
 
-                    // todo : show equipment and inventory interfaces
+                    var items = Parent.AssertGetPlayerContainers();
+
+                    interf.Show(InterfaceMetadata.Register(new InventoryInterface(db.BackpackContainer, items.Backpack)));
+                    interf.Show(InterfaceMetadata.Register(new InventoryInterface(db.EquipmentContainer, items.Equipment)));
                 }
                 else
                 {
@@ -106,7 +114,7 @@ namespace CScape.Core.Game.Entities.Component
                     break;
                 }
 
-                case (int)MessageId.JustDied:
+                case (int) MessageId.JustDied:
                 {
                     // TODO : handle death in PlayerComponent
                     break;
@@ -126,7 +134,7 @@ namespace CScape.Core.Game.Entities.Component
                 }
             }
         }
-       
+
         /// <summary>
         /// Logs out (destroys) the entity only if it's safe for the player to log out.
         /// </summary>

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.Message;
-using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Interface;
 using CScape.Models.Game.Message;
@@ -21,17 +21,10 @@ namespace CScape.Core.Game.Entities.Component
 
         private readonly IGameInterface[] _sidebars = new IGameInterface[MaxSidebarInterfaces];
 
-        [CanBeNull]
         public IGameInterface Main { get; private set; }
-        [CanBeNull]
         public IGameInterface Chat { get; private set; }
-        [CanBeNull]
         public IGameInterface Input { get; private set; }
-
-        [NotNull]
         public IList<IGameInterface> Sidebar => _sidebars;
-
-        [NotNull]
         public IReadOnlyDictionary<int, InterfaceMetadata> All => _interfaces;
 
         private readonly HashSet<int> _interfaceIdsInQueue = new HashSet<int>();
@@ -67,11 +60,14 @@ namespace CScape.Core.Game.Entities.Component
                     Input = null;
                     break;
 
+                case InterfaceType.None: break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
+            Debug.Assert(_interfaces.Remove(id));
             meta.Interface.CloseForEntity(Parent);
+
             return true;
         }
 
@@ -113,6 +109,9 @@ namespace CScape.Core.Game.Entities.Component
                     
                 case InterfaceType.Input:
                     return Input == null;
+
+                case InterfaceType.None:
+                    return !_interfaces.ContainsKey(meta.Interface.Id);
                     
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -147,9 +146,14 @@ namespace CScape.Core.Game.Entities.Component
                     Input = meta.Interface;
 
                     break;
+                case InterfaceType.None:
+                    _interfaces[meta.Interface.Id] = meta;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            _interfaces[meta.Interface.Id] = meta;
 
             meta.Interface.ShowForEntity(Parent);
         }

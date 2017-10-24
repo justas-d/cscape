@@ -24,6 +24,13 @@ namespace CScape.Models.Game.Interface
             Index = index;
         }
 
+        /// <summary>
+        /// Creates metadata for interface which cannot be categorized under and of the interface types.
+        /// This should simply add the interface to the interface component and allow it to be updated.
+        /// </summary>
+        public static InterfaceMetadata Register(IGameInterface i)
+            => new InterfaceMetadata(InterfaceType.None, i, -1);
+
         public static InterfaceMetadata Main(IGameInterface i) 
             => new InterfaceMetadata(InterfaceType.Main, i, -1);
 

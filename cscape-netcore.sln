@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CScape.Models", "CScape.Mod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CScape.Commands", "CScape.Commands\CScape.Commands.csproj", "{69C13955-1287-48BC-A312-FDAE6D9402E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CScape.JsonEntitySerialization", "CScape.JsonEntitySerialization\CScape.JsonEntitySerialization.csproj", "{A4720271-F3CD-4D27-9146-5D1B9633899A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,10 +45,6 @@ Global
 		{69C13955-1287-48BC-A312-FDAE6D9402E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69C13955-1287-48BC-A312-FDAE6D9402E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69C13955-1287-48BC-A312-FDAE6D9402E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4720271-F3CD-4D27-9146-5D1B9633899A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A4720271-F3CD-4D27-9146-5D1B9633899A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4720271-F3CD-4D27-9146-5D1B9633899A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A4720271-F3CD-4D27-9146-5D1B9633899A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
