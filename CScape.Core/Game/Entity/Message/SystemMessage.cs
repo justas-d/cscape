@@ -1,37 +1,32 @@
 ﻿using System;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Message
 {
     [Flags]
-    public enum SystemMessageFlags
+    public enum CoreSystemMessageFlags : ulong
     {
-        None = 0,
-
-        // debug messages
-        /// <summary>
-        /// Should not be printed to a player, only print when debugging.
-        /// </summary>
-        Debug,
+        None = SystemMessageFlags.None,
+        Normal = SystemMessageFlags.Normal,
+        Debug = SystemMessageFlags.Debug,
         Skill,
         Item,
         Network,
         Interface,
-        Entity,
-        Command
+        Entity
     }
-
 
     public sealed class SystemMessage : IGameMessage
     {
         [NotNull]
         public string Msg { get; }
-        public SystemMessageFlags Flags { get; }
+        public ulong Flags { get; }
 
         public int EventId => (int)MessageId.NewSystemMessage;
 
-        public SystemMessage([NotNull] string msg, SystemMessageFlags flags = SystemMessageFlags.None)
+        public SystemMessage([NotNull] string msg, ulong flags = SystemMessageFlags.Normal)
         {
             if (string.IsNullOrEmpty(msg))
             {

@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
+using JetBrains.Annotations;
 
-namespace CScape.Basic.Commands
+namespace CScape.Commands
 {
     public class ParamaterLexer
     {

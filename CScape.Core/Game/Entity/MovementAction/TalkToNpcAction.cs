@@ -29,8 +29,8 @@ namespace CScape.Core.Game.Entity.MovementAction
                 return;
 
             // todo : talk-to logic
-            Requestee.Get().SystemMessage($"Talks to {TalkTarget}", SystemMessageFlags.Debug);
-            TalkTarget.Get().SystemMessage($"Talks to {Requestee}", SystemMessageFlags.Debug);
+            Requestee.Get().SystemMessage($"Talks to {TalkTarget}", CoreSystemMessageFlags.Debug);
+            TalkTarget.Get().SystemMessage($"Talks to {Requestee}", CoreSystemMessageFlags.Debug);
         }
     }
 }

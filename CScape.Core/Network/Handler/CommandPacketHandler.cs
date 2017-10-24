@@ -24,7 +24,7 @@ namespace CScape.Core.Network.Handler
                 }
 
                 if (allFailed)
-                    entity.SystemMessage($"Unknown command: \"{cmd}\"", SystemMessageFlags.Command);
+                    entity.SystemMessage($"Unknown command: \"{cmd}\"", CoreSystemMessageFlags.Normal);
             }
         }
 

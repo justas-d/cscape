@@ -20,8 +20,6 @@ namespace CScape.Core.Network.Entity.Component
     {
         public override int Priority { get; } = ComponentConstants.PriorityRegion;
 
-        public bool ShouldSendSystemMessageWhenSyncing { get; set; }
-
         public RegionNetworkSyncComponent(Game.Entity.Entity parent)
             :base(parent)
         {
@@ -30,15 +28,14 @@ namespace CScape.Core.Network.Entity.Component
 
         private void SyncRegion(IPosition pos)
         {
-            if (ShouldSendSystemMessageWhenSyncing)
-            {
-                Parent.SystemMessage($"Sync region: {pos.X} + 6 {pos.Y} + 6", SystemMessageFlags.Debug | SystemMessageFlags.Network);
-            }
+
+            Parent.SystemMessage($"Sync region: {pos.X} + 6 {pos.Y} + 6",
+                CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
 
             Parent.AssertGetNetwork().SendPacket(
                 new SetRegionCoordinate(
-                    (short)(pos.X + 6),
-                    (short)(pos.Y + 6)));
+                    (short) (pos.X + 6),
+                    (short) (pos.Y + 6)));
         }
 
         public override void ReceiveMessage(IGameMessage msg)

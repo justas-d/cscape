@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
@@ -35,6 +36,12 @@ namespace CScape.Core.Game.Entity
             {
                 frag.ReceiveMessage(message);
             }
+        }
+
+        public void SystemMessage(string msg, ulong flags = SystemMessageFlags.Normal)
+        {
+            if (string.IsNullOrEmpty(msg)) return;
+            SendMessage(new SystemMessage(msg, flags));
         }
 
         public bool AreComponentRequirementsSatisfied(out string message)

@@ -98,7 +98,8 @@ namespace CScape.Core.Game.Entity.Component
                 }
                 else
                 {
-                    Parent.SystemMessage("Cannot intialize player sidebars due to there not being a InterfaceIdDatabase in the server's IServerProvider.");
+                    Parent.SystemMessage("Cannot intialize player sidebars due to there not being a InterfaceIdDatabase in the server's IServerProvider.",
+                        CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
                 }
             }
         }

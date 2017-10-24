@@ -34,7 +34,7 @@ namespace CScape.Core.Network.Handler
             {
                 if (!interfaces.All.TryGetValue(id, out var meta))
                 {
-                    entity.SystemMessage($"Unregistered Item on Item interface: {id}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
+                    entity.SystemMessage($"Unregistered Item on Item interface: {id}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Interface);
                     SendNIH();
                     return null;
                 }
@@ -54,7 +54,7 @@ namespace CScape.Core.Network.Handler
             {
                 if (0 > idx || idx >= max)
                 {
-                    entity.SystemMessage($"Out of range item index on Item on Item: {idx}, max: {max}", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
+                    entity.SystemMessage($"Out of range item index on Item on Item: {idx}, max: {max}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Interface);
                     SendNIH();
                     return false;
                 }

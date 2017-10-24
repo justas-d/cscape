@@ -24,7 +24,7 @@ namespace CScape.Core.Network.Handler
             var npc = _npcs.Get(npcId);
             if (npc == null)
             {
-                entity.SystemMessage($"Attempted to talk to unregistered npc id {npcId}", SystemMessageFlags.Debug | SystemMessageFlags.Entity);
+                entity.SystemMessage($"Attempted to talk to unregistered npc id {npcId}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
                 return;
             }
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace CScape.Basic.Commands
+namespace CScape.Commands
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class CommandMethodAttribute : Attribute

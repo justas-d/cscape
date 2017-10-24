@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CScape.Models.Game.Command;
+using CScape.Models.Game.Entity;
+using JetBrains.Annotations;
 
-namespace CScape.Basic.Commands
+namespace CScape.Commands
 {
     public sealed class CommandDispatch  : ICommandHandler
     {
@@ -72,7 +75,7 @@ namespace CScape.Basic.Commands
             return _cmds[id];
         }
 
-        public bool Push([NotNull] Player callee, [NotNull] string input)
+        public bool Push(IEntity callee, string input)
         {
             if (callee == null) throw new ArgumentNullException(nameof(callee));
             if (input == null) throw new ArgumentNullException(nameof(input));
@@ -117,22 +120,18 @@ namespace CScape.Basic.Commands
                     }
                     catch (Exception)
                     {
-                        if (callee.DebugCommands)
-                            throw;
-
-                        callee.SendSystemChatMessage($"Command error. Make sure inputs are valid.");
+                        callee.SystemMessage("Command error. Make sure inputs are valid.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
                     }
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                if (callee.DebugCommands)
-                    callee.SendSystemChatMessage($"cmd fail: {ex.Message} ({ex.GetType().Name})");
-                else
-                    callee.SendSystemChatMessage($"Command parse error.");
+                callee.SystemMessage($"cmd fail: callee: data: {input} ex: {ex}",
+                    SystemMessageFlags.Debug | CommandSystemMessageType.Id);
 
-                callee.SendSystemChatMessage($"Dispatch fail: callee: {callee} data: {input} ex: {ex}");
+                callee.SystemMessage("Command parse error.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+
                 return true;
             }
 

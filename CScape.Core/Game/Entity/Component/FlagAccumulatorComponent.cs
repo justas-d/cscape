@@ -48,7 +48,7 @@ namespace CScape.Core.Game.Entity.Component
 
             const int equipSlotSize = 12;
 
-            Parent.SystemMessage("Invalidating and rewriting appearance cache.");
+            Parent.SystemMessage("Invalidating and rewriting appearance cache.", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
 
             cache.ResetWrite();
 

@@ -21,7 +21,7 @@ namespace CScape.Core.Network.Handler
             // swapping item A with item A is a no-op, skip.
             if (fromIdx == toIdx) return;
 
-            entity.SystemMessage($"Swap {fromIdx} -> {toIdx} (magic: {magic} )", SystemMessageFlags.Debug | SystemMessageFlags.Interface);
+            entity.SystemMessage($"Swap {fromIdx} -> {toIdx} (magic: {magic} )", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Interface);
             
             // get inventory
             var interfaces = entity.GetInterfaces();

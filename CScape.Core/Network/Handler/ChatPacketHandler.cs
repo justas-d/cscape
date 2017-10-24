@@ -29,13 +29,13 @@ namespace CScape.Core.Network.Handler
             // verify enum values
             if (!Enum.IsDefined(typeof(ChatMessage.TextColor), color))
             {
-                entity.SystemMessage($"Invalid color: {color}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+                entity.SystemMessage($"Invalid color: {color}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
                 color = ChatMessage.TextColor.Yellow;
             }
 
             if (!Enum.IsDefined(typeof(ChatMessage.TextEffect), effect))
             {
-                entity.SystemMessage($"Invalid effect: {effect}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+                entity.SystemMessage($"Invalid effect: {effect}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
                 effect = ChatMessage.TextEffect.None;
             }
 
@@ -46,7 +46,7 @@ namespace CScape.Core.Network.Handler
             }
             else
             {
-                entity.SystemMessage("Couldn't read chat message.", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+                entity.SystemMessage("Couldn't read chat message.", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
             }
                 
         }

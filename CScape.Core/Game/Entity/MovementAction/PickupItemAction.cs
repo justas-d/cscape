@@ -40,7 +40,7 @@ namespace CScape.Core.Game.Entity.MovementAction
             // don't allow pickup if inv is full
             if (!info.IsValid || info.OverflowAmount != 0)
             {
-                whoEnt.SystemMessage("Your inventory is full.", SystemMessageFlags.Item);
+                whoEnt.SystemMessage("Your inventory is full.", CoreSystemMessageFlags.Normal | CoreSystemMessageFlags.Item);
                 return;
             }
 

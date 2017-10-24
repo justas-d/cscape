@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
-namespace CScape.Basic.Commands
+namespace CScape.Commands
 {
     public sealed class Command : IEquatable<Command>
     {
-        public Command([NotNull] string identifier, [CanBeNull] Action noArgExecTarg, [CanBeNull] Action<CommandContext> execTarg,
+        public Command(
+            [NotNull] string identifier, 
+            [CanBeNull] Action noArgExecTarg, 
+            [CanBeNull] Action<CommandContext> execTarg,
             [NotNull] IEnumerable<PredicateAttribute> predicates)
         {
             if(noArgExecTarg == null && execTarg == null) throw new ArgumentException("No valid exec target");

@@ -1,6 +1,7 @@
 using System;
+using CScape.Models.Game.Entity;
 
-namespace CScape.Basic.Commands
+namespace CScape.Commands
 {
     public static class Paramaters
     {
@@ -15,11 +16,11 @@ namespace CScape.Basic.Commands
                 {
                     if (lexer.FailParamExpected != null)
                     {
-                        ctx.Callee.SendSystemChatMessage(
-                            $"Invalid type for argument {lexer.FailedOnParam}. Expected: {lexer.FailParamExpected.Name}.");
+                        ctx.Callee.SystemMessage(
+                            $"Invalid type for argument {lexer.FailedOnParam}. Expected: {lexer.FailParamExpected.Name}.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
                     }
                     else
-                        ctx.Callee.SendSystemChatMessage($"Missing argument: {lexer.FailedOnParam}.");
+                        ctx.Callee.SystemMessage($"Missing argument: {lexer.FailedOnParam}.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
 
                     return false;
                 }
@@ -28,10 +29,8 @@ namespace CScape.Basic.Commands
             }
             catch (Exception ex)
             {
-                if (ctx.Callee.DebugCommands)
-                    ctx.Callee.SendSystemChatMessage($"Paramaters.Read exception: {ex}");
-                else
-                    ctx.Callee.SendSystemChatMessage($"Command paramater error.");
+                ctx.Callee.SystemMessage("Command paramater error.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+                ctx.Callee.SystemMessage($"Paramaters.Read exception: {ex}", SystemMessageFlags.Debug | CommandSystemMessageType.Id);
             }
             return false;
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
@@ -27,16 +26,9 @@ namespace CScape.Core.Extensions
         [NotNull]
         public static NetworkingComponent AssertGetNetwork(this IEntity ent) => ent.Components.AssertGet<NetworkingComponent>();
 
-        /// <summary>
-        /// Sends a system message to the entity.
-        /// </summary>
-        public static void SystemMessage(this IEntity ent, [NotNull] string msg, SystemMessageFlags flags = SystemMessageFlags.None)
-        {
-            if (string.IsNullOrEmpty(msg)) return;
-
-            ent.SendMessage(new SystemMessage(msg, flags));
-        }
-
+        public static void SystemMessage(this IEntity ent, string msg, CoreSystemMessageFlags flags = CoreSystemMessageFlags.Normal)
+            => ent.SystemMessage(msg, (ulong)flags);
+        
         public static void ShowParticleEffect(this IEntity ent, [NotNull] ParticleEffect eff)
         {
             if (eff == null) throw new ArgumentNullException(nameof(eff));

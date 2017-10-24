@@ -42,7 +42,7 @@ namespace CScape.Core.Network.Entity.Component
             if (msg.EventId == (int)MessageId.NewSystemMessage)
             {
                 var msgStr = msg.AsSystemMessage();
-                var isDebugBitSet = (msgStr.Flags & SystemMessageFlags.Debug) != 0;
+                var isDebugBitSet = (msgStr.Flags & (ulong)CoreSystemMessageFlags.Debug) != 0;
 
                 if (!isDebugBitSet || SyncDebugMessages)
                     Network.SendPacket(new SystemChatMessagePacket(msgStr.Msg));

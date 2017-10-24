@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using CScape.Basic.Commands;
+using CScape.Commands;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Message;

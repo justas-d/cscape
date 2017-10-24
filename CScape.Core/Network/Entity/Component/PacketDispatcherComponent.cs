@@ -38,10 +38,10 @@ namespace CScape.Core.Network.Entity.Component
                         handler.Handle(Parent, packet);
 
                         if(ShouldNotifyAboutPacketsBeingHandled)
-                            Parent.SystemMessage($"Packet: {packet.Opcode:000} -> {handler.GetType().Name}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+                            Parent.SystemMessage($"Packet: {packet.Opcode:000} -> {handler.GetType().Name}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
                     }
                     else if(ShouldNotifyAboutUnhandledPackets)
-                        Parent.SystemMessage($"Unhandled packet opcode: {packet.Opcode:000}", SystemMessageFlags.Debug | SystemMessageFlags.Network);
+                        Parent.SystemMessage($"Unhandled packet opcode: {packet.Opcode:000}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
                     
                     break;
                 }

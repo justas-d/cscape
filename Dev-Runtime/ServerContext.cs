@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using CScape.Basic;
-using CScape.Basic.Commands;
+using CScape.Commands;
 using CScape.Core;
 using CScape.Core.Database;
 using CScape.Core.Log;

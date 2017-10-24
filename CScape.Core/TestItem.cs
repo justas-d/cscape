@@ -2,6 +2,7 @@ using CScape.Core.Extensions;
 using CScape.Models.Game.Combat;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Item;
+using CoreSystemMessageFlags = CScape.Core.Game.Entity.Message.CoreSystemMessageFlags;
 
 namespace CScape.Core
 {
@@ -47,19 +48,19 @@ namespace CScape.Core
          
         public void UseWith(IEntity entity, ItemStack other)
         {
-            entity.SystemMessage($"Use {Name}:{ItemId} with {other.Id.Name}{other.Id.ItemId}");
+            entity.SystemMessage($"Use {Name}:{ItemId} with {other.Id.Name}{other.Id.ItemId}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Item);
         }
 
         public void OnAction(IEntity entity, int actionId)
         {
-            entity.SystemMessage($"On action {Name}:{ItemId} action: {actionId}");
+            entity.SystemMessage($"On action {Name}:{ItemId} action: {actionId}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Item);
         }
 
         public bool CanEquip(IEntity entity) => true;
         
         public void OnEquip(IEntity entity)
         {
-            entity.SystemMessage($"Equipped {Name}:{ItemId}");
+            entity.SystemMessage($"Equipped {Name}:{ItemId}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Item);
         }
 
     }

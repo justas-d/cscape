@@ -45,7 +45,7 @@ namespace CScape.Core.Game.Interface
             if (button.InterfaceId != Id) return;
 
             entity.SystemMessage($"UnimplementedSidebarInterface: received button message, ID: {button.ButtonId}",
-                SystemMessageFlags.Debug | SystemMessageFlags.Interface);
+                CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Interface);
         }
 
         public bool Equals(IGameInterface other) => other?.Id == Id;

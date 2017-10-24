@@ -46,5 +46,11 @@ namespace CScape.Models.Game.Entity
         /// Sends a <see cref="IGameMessage"/> to this entity.
         /// </summary>
         void SendMessage([NotNull] IGameMessage message);
+
+        /// <summary>
+        /// Sends a system message.
+        /// <param name="msg">The message string to be sent.</param>
+        /// </summary>
+        void SystemMessage([NotNull] string msg, ulong flags = SystemMessageFlags.Normal);
     }
 }
