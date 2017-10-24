@@ -1,6 +1,7 @@
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Combat;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Item;
 using CScape.Models.Game.Message;
@@ -35,7 +36,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public override int Priority { get; }
 
-        public CombatStatComponent([NotNull] Entity parent) : base(parent)
+        public CombatStatComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 

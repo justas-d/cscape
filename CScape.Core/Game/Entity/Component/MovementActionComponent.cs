@@ -1,4 +1,5 @@
 using CScape.Core.Game.Entity.Message;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
@@ -12,7 +13,7 @@ namespace CScape.Core.Game.Entity.Component
         [CanBeNull]
         public IMovementDoneAction CurrentAction { get; set; }
 
-        public MovementActionComponent(Entity parent)
+        public MovementActionComponent(IEntity parent)
             : base(parent)
         {
 

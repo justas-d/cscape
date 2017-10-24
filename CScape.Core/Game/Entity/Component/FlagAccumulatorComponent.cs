@@ -4,6 +4,7 @@ using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Entity;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Models.Data;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
@@ -26,7 +27,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public override int Priority { get; }
 
-        public FlagAccumulatorComponent(Entity parent)
+        public FlagAccumulatorComponent(IEntity parent)
             :base(parent)
         {
         

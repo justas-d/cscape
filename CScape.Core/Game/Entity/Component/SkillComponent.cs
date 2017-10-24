@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Message;
 using CScape.Models.Game.Skill;
@@ -15,7 +16,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public override int Priority { get; }
 
-        public SkillComponent([NotNull] Entity parent) : base(parent)
+        public SkillComponent([NotNull] IEntity parent) : base(parent)
         {
             
         }

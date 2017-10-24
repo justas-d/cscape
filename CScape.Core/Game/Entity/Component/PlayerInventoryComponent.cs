@@ -1,4 +1,6 @@
-﻿using CScape.Core.Game.Item;
+﻿using System;
+using CScape.Core.Game.Item;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Item;
 using CScape.Models.Game.Message;
@@ -10,8 +12,6 @@ namespace CScape.Core.Game.Entity.Component
     {
         public override int Priority { get; }
 
-        // TODO : PlayerInventoryComponent load from DB
-
         IItemContainer IInventoryComponent.Inventory => Backpack;
 
         [NotNull]
@@ -22,8 +22,15 @@ namespace CScape.Core.Game.Entity.Component
         public ListItemContainer Bank { get; }
 
 
-        public PlayerInventoryComponent([NotNull] Entity parent) : base(parent)
+        public PlayerInventoryComponent(
+            [NotNull] IEntity parent, 
+            [NotNull] ListItemContainer backpack, 
+            [NotNull] PlayerEquipmentContainer equipment, 
+            [NotNull] ListItemContainer bank) : base(parent)
         {
+            Backpack = backpack ?? throw new ArgumentNullException(nameof(backpack));
+            Equipment = equipment ?? throw new ArgumentNullException(nameof(equipment));
+            Bank = bank ?? throw new ArgumentNullException(nameof(bank));
         }
 
         public override void ReceiveMessage(IGameMessage msg)

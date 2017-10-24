@@ -1,5 +1,6 @@
 ﻿using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 
 namespace CScape.Core.Game.Entity.Component
@@ -12,7 +13,7 @@ namespace CScape.Core.Game.Entity.Component
         public override int Priority { get; }
 
 
-        public MessageLogComponent(Entity parent)
+        public MessageLogComponent(IEntity parent)
             :base(parent)
         {
             

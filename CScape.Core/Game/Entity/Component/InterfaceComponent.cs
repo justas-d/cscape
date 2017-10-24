@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Interface;
 using CScape.Models.Game.Message;
@@ -31,7 +32,7 @@ namespace CScape.Core.Game.Entity.Component
         private readonly HashSet<int> _pressedButtonIds = new HashSet<int>();
         private readonly List<InterfaceMetadata> _queue = new List<InterfaceMetadata>();
 
-        public InterfaceComponent([NotNull] Entity parent) : base(parent)
+        public InterfaceComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 

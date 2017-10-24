@@ -39,7 +39,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public bool IsRunning { get; set; }
 
-        public TileMovementComponent(Entity parent)
+        public TileMovementComponent(IEntity parent)
             : base(parent)
         {
         }
