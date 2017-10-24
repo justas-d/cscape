@@ -42,10 +42,29 @@ namespace CScape.Core.Game.Entity
             return true;
         }
 
+        public bool Add(Type type, IEntityComponent component)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (component == null) throw new ArgumentNullException(nameof(component));
+
+            if (Contains(type))
+                return false;
+
+            _lookup.Add(type, component);
+            Sort();
+            return true;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains<T>()
             where T : class, IEntityComponent
             => _lookup.ContainsKey(typeof(T));
+
+        public bool Contains(Type type)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            return _lookup.ContainsKey(type);
+        }
 
         public T Get<T>()
             where T : class, IEntityComponent
@@ -56,6 +75,13 @@ namespace CScape.Core.Game.Entity
                 return null;
 
             return (T)_lookup[type];
+        }
+
+        public IEntityComponent Get(Type type)
+        {
+            if (!Contains(type))
+                return null;
+            return _lookup[type];
         }
 
         public T AssertGet<T>()
@@ -85,9 +111,17 @@ namespace CScape.Core.Game.Entity
                 return false;
 
             var statusLookup = _lookup.Remove(type);
-
             Debug.Assert(statusLookup);
+            return true;
+        }
 
+        public bool Remove(Type type)
+        {
+            if (!Contains(type))
+                return false;
+
+            var statusLookup = _lookup.Remove(type);
+            Debug.Assert(statusLookup);
             return true;
         }
 

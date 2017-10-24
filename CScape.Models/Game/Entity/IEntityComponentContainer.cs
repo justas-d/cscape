@@ -16,7 +16,7 @@ namespace CScape.Models.Game.Entity
         /// <param name="component">The instance of the component to be added to this entity component container and mapped to type <see cref="T"/>.</param>
         /// <returns>True if succesfully added, false otherwise. (component exists or something).</returns>
         bool Add<T>([NotNull] T component) where T : class, IEntityComponent;
-        bool Add(Type type, [NotNull] IEntityComponent component);
+        bool Add([NotNull] Type type, [NotNull] IEntityComponent component);
 
         /// <summary>
         /// Gets a component mapped to <see cref="T"/> and asserts that it is not null.
@@ -30,7 +30,7 @@ namespace CScape.Models.Game.Entity
         /// </summary>        
         bool Contains<T>() where T : class, IEntityComponent;
 
-        bool Contains(Type type);
+        bool Contains([NotNull] Type type);
 
         /// <summary>
         /// Gets and returns a component mapped to <see cref="T"/>
@@ -39,7 +39,7 @@ namespace CScape.Models.Game.Entity
         [CanBeNull]
         T Get<T>() where T : class, IEntityComponent;
 
-        IEntityComponent Get(Type type);
+        IEntityComponent Get([NotNull] Type type);
 
         /// <summary>
         /// If it exists, removes the component mapped to <see cref="T"/>.
@@ -47,6 +47,6 @@ namespace CScape.Models.Game.Entity
         /// <returns>True if the component was succesfully removed, false otherwise.</returns>
         bool Remove<T>() where T : class, IEntityComponent;
 
-        bool Remove(Type type);
+        bool Remove([NotNull] Type type);
     }
 }
