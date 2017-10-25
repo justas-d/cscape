@@ -34,7 +34,7 @@ namespace CScape.Core.Network.Entity.Component
         public long ReapTimeMs { get; set; } = 1000 * 60;
 
         public NetworkingComponent(
-            [NotNull] Game.Entity.Entity parent, 
+            [NotNull] IEntity parent, 
             [NotNull] SocketContext socket, [NotNull] IPacketParser packetParser)
             : base(parent)
         {

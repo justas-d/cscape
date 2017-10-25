@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Entity.Component
         [NotNull]
         private readonly List<IPacket> _packetQueue = new List<IPacket>();
 
-        public InterfaceNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
+        public InterfaceNetworkSyncComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 

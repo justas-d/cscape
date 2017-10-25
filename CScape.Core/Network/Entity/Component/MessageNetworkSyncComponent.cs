@@ -29,7 +29,7 @@ namespace CScape.Core.Network.Entity.Component
             }
         }
 
-        public MessageNetworkSyncComponent(Game.Entity.Entity parent)
+        public MessageNetworkSyncComponent(IEntity parent)
             :base(parent)
         {
 #if DEBUG

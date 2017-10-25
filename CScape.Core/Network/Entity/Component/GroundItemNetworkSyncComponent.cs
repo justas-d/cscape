@@ -15,7 +15,7 @@ namespace CScape.Core.Network.Entity.Component
 {
     [RequiresComponent(typeof(NetworkingComponent))]
     [RequiresComponent(typeof(ClientPositionComponent))]
-    public sealed class GroundItemNetworkSync : EntityComponent
+    public sealed class GroundItemNetworkSyncComponent : EntityComponent
     {
         public override int Priority { get; }
 
@@ -26,7 +26,7 @@ namespace CScape.Core.Network.Entity.Component
         private readonly Dictionary<(int x, int y), List<BaseGroundObjectPacket>> _buckets
             = new Dictionary<(int x, int y), List<BaseGroundObjectPacket>>();
 
-        public GroundItemNetworkSync([NotNull] IEntity parent) : base(parent)
+        public GroundItemNetworkSyncComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 

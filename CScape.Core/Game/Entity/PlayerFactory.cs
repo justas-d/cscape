@@ -21,7 +21,7 @@ namespace CScape.Core.Game.Entity
         public IEntitySystem EntitySystem { get; }
 
         // username lookup
-        private Dictionary<string, IEntityHandle> _usernameLookup;
+        private readonly Dictionary<string, IEntityHandle> _usernameLookup = new Dictionary<string, IEntityHandle>();
         // instance id lookup
         private readonly IEntityHandle[] _players;
 
@@ -81,30 +81,44 @@ namespace CScape.Core.Game.Entity
 
             var entHandle = EntitySystem.Create($"Entity for player {model.Id}");
             var ent = entHandle.Get();
-            
+
+            ent.Components.Add(new MessageLogComponent(ent));
+            ent.Components.Add(new MessageNetworkSyncComponent(ent));
+
+            ent.Components.Add(new DebugStatNetworkSyncComponent(ent));
+
+            ent.Components.Add(new NetworkingComponent(ent));
+            ent.Components.Add(new PacketDispatcherComponent(ent));
+            ent.Components.Add(new FlagAccumulatorComponent(ent));
+
             ent.Components.Add(new ClientPositionComponent(ent));
+            ent.Components.Add(new RegionNetworkSyncComponent(ent));
+
+            ent.Components.Add(new HealthComponent(ent));
+
+            ent.Components.Add(new CombatStatComponent(ent));
+            ent.Components.Add(new CombatStatNetworkSyncComponent(ent));
+
+            ent.Components.Add(new InterfaceComponent(ent));
+            ent.Components.Add(new InterfaceNetworkSyncComponent(ent));
+
+            ent.Components.Add(new SkillComponent(ent));
+            ent.Components.Add(new SkillNetworkSyncComponent(ent));
+
+            ent.Components.Add(new VisionComponent(ent));
+
+            ent.Components.Add(new NpcNetworkSyncComponent(ent));
+            ent.Components.Add(new PlayerNetworkSyncComponent(ent));
+            ent.Components.Add(new GroundItemNetworkSyncComponent(ent));
+
+            ent.Components.Add(new TileMovementComponent(ent));
+            ent.Components.Add(new MovementActionComponent(ent));
+            
+            ent.Components.Add(new PlayerInventoryComponent(ent));
+            ent.Components.Add(new PlayerComponent(ent));
 
             // TODO : apply hitpoints skill to HealthComponent when constructing player
-            
-            ent.Components.Add(new DbPlayerSyncComponent(ent));
 
-            ent.Components.Add(new PacketDispatcherComponent(ent,));
-            ent.Components.Add(new NetworkingComponent(ent, ctx,));
-            ent.Components.Add(new MessageNetworkSyncComponent(ent));
-            ent.Components.Add(new RegionNetworkSyncComponent(ent));
-            
-            // todo : finish adding player components
-            ent.Components.Add(new MovementActionComponent(ent));
-            ent.Components.Add(new HealthComponent(ent, 10, model.Health));
-            ent.Components.Add(new MessageLogComponent(ent));
-            ent.Components.Add(new TileMovementComponent(ent));
-            ent.Components.Add<IInventoryComponent>(new PlayerInventoryComponent(ent));
-            ent.Components.Add(new InterfaceComponent(ent));
-            ent.Components.Add(new PlayerComponent(
-                ent, 
-                model.Id,
-                id,
-                DestroyCallback));
 
             var check = ent.AreComponentRequirementsSatisfied(out var msg);
             if (!check)

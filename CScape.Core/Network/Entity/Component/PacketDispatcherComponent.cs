@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Entity.Component
         public bool ShouldNotifyAboutUnhandledPackets { get; set; } = true;
         public bool ShouldNotifyAboutPacketsBeingHandled { get; set; } = true;
 
-        public PacketDispatcherComponent(Game.Entity.Entity parent, [NotNull] IPacketHandlerCatalogue handlers)
+        public PacketDispatcherComponent(IEntity parent, [NotNull] IPacketHandlerCatalogue handlers)
             :base(parent)
         {
             _handlers = handlers ?? throw new ArgumentNullException(nameof(handlers));

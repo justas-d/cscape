@@ -16,9 +16,9 @@ namespace CScape.Core.Network.Entity.Component
     public sealed class PlayerNetworkSyncComponent: EntityNetworkSyncComponent
     {
         public override int Priority { get; } = ComponentConstants.PriorityPlayerUpdate;
-
+        
         public PlayerNetworkSyncComponent(
-            Game.Entity.Entity parent)
+            IEntity parent)
             :base(parent)
         {
             

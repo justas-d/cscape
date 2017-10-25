@@ -20,7 +20,7 @@ namespace CScape.Core.Network.Entity.Component
     {
         public override int Priority { get; } = ComponentConstants.PriorityRegion;
 
-        public RegionNetworkSyncComponent(Game.Entity.Entity parent)
+        public RegionNetworkSyncComponent(IEntity parent)
             :base(parent)
         {
             

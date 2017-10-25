@@ -18,7 +18,7 @@ namespace CScape.Core.Network.Entity.Component
 
         private bool _isDirty = false;
 
-        public CombatStatNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
+        public CombatStatNetworkSyncComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 

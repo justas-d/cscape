@@ -39,7 +39,7 @@ namespace CScape.Core.Network.Entity.Component
         private readonly HashSet<ISkillModel> _dirty 
             = new HashSet<ISkillModel>(SkillModelComparer.Instance);
 
-        public SkillNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
+        public SkillNetworkSyncComponent([NotNull] IEntity parent) : base(parent)
         {
 
         }

@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     {
         public override int Priority { get; }
 
-        public DebugStatNetworkSyncComponent([NotNull] Game.Entity.Entity parent) : base(parent)
+        public DebugStatNetworkSyncComponent([NotNull]IEntity parent) : base(parent)
         {
         }        
 
