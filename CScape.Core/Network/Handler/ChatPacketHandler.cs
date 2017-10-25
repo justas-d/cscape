@@ -42,7 +42,7 @@ namespace CScape.Core.Network.Handler
             if (packet.Data.TryReadString(out var msg))
             {
                 entity.SendMessage(
-                    new ChatMessageMessage(new ChatMessage(msg, player.TitleId, color, effect, false)));
+                    new ChatMessageMessage(ChatMessage.Say(msg, player, color, effect)));
             }
             else
             {
