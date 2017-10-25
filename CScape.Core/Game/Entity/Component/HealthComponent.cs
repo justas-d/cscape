@@ -72,6 +72,12 @@ namespace CScape.Core.Game.Entity.Component
             CheckForDeath();
         }
 
+        public void TakeDamage(int damage, int type)
+        {
+            byte ClampCast(int val) => (byte) val.Clamp(0, byte.MaxValue);
+            Parent.SendMessage(new TakeDamageMessage(ClampCast(damage), ClampCast(Health), (HitType)type, ClampCast(MaxHealth)));
+        }
+
         private void CheckForDeath()
         {
             if (0 >= Health)

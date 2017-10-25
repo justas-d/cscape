@@ -17,5 +17,7 @@
 
         void SetNewMaxHealth(int val);
         void SetNewHealth(int val);
+
+        void TakeDamage(int damage, int type);
     }
 }

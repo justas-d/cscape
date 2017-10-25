@@ -7,6 +7,9 @@ namespace CScape.Core.Game
 {
     public sealed class PlayerModel
     {
+        public const int MaxUsernameChars = 12;
+        public const int MaxPasswordChars = 64;
+
         [NotNull]
         public string Username { get; }
         public bool IsMember { get; }

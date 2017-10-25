@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CScape.Models.Extensions;
 using CScape.Models.Game.Command;
 using CScape.Models.Game.Entity;
 using JetBrains.Annotations;
@@ -80,6 +81,11 @@ namespace CScape.Commands
             if (callee == null) throw new ArgumentNullException(nameof(callee));
             if (input == null) throw new ArgumentNullException(nameof(input));
 
+            var player = callee.GetPlayer();
+
+            if (player == null)
+                return false;
+
             try
             {
                 // find command in input
@@ -114,7 +120,7 @@ namespace CScape.Commands
                         if (cmd.NoArgExecTarg != null)
                             cmd.NoArgExecTarg();
                         else if (cmd.ExecTarg != null)
-                            cmd.ExecTarg(new CommandContext(callee, cmd, data, input));
+                            cmd.ExecTarg(new CommandContext(player, cmd, data, input));
                         else
                             throw new NotSupportedException("Cmd has no exec target.");
                     }

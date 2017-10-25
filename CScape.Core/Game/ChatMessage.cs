@@ -1,3 +1,4 @@
+using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game
@@ -42,7 +43,13 @@ namespace CScape.Core.Game
         /// </summary>
         public bool IsForced { get; }
 
-        public ChatMessage([NotNull] string message, int title, TextColor color, TextEffect effects, bool isForced)
+        public static ChatMessage Say([NotNull] string message, IPlayerComponent player, TextColor color = TextColor.Yellow, TextEffect eff = TextEffect.None)
+            => new ChatMessage(message, player.TitleId, color, eff, false);
+        
+        public static ChatMessage ForceSay([NotNull] string message, IPlayerComponent player, TextColor color = TextColor.Yellow, TextEffect eff = TextEffect.None)
+            => new ChatMessage(message, player.TitleId, color, eff, true);
+        
+        private ChatMessage([NotNull] string message, int title, TextColor color, TextEffect effects, bool isForced)
         {
             if (string.IsNullOrEmpty(message))
             {

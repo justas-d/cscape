@@ -19,7 +19,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public const int MaxAppearanceUpdateSize = 64;
 
-        private readonly Blob _appearanceCache = new Blob(MaxAppearanceUpdateSize);
+        public Blob AppearanceCache { get; }= new Blob(MaxAppearanceUpdateSize);
 
         [CanBeNull]
         public MoveMessage Movement { get; private set; }
@@ -43,7 +43,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public void HandleAppearanceMessage(PlayerAppearanceMessage msg)
         {
-            var cache = _appearanceCache;
+            var cache =AppearanceCache;
             var app = msg.Appearance;
 
             const int equipSlotSize = 12;

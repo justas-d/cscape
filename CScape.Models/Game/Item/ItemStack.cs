@@ -1,4 +1,5 @@
 ﻿using System;
+using CScape.Models.Game.Entity;
 
 namespace CScape.Models.Game.Item
 {
@@ -15,16 +16,12 @@ namespace CScape.Models.Game.Item
             public float Weight => 0;
             public bool IsNoted => false;
             public int NoteSwitchId => 0;
-
-            public void UseWith(Player player, IContainerInterface ourContainers, int ourIdx, IContainerInterface otherContainer,
-                int otherIdx)
-            {
-                throw new NotImplementedException();
+            public void UseWith(IEntity entity, ItemStack other)
+            { 
             }
 
-            public void OnAction(Player player, IContainerInterface container, int index, ItemActionType type)
+            public void OnAction(IEntity entity, int actionId)
             {
-                throw new NotImplementedException();
             }
         }
 
