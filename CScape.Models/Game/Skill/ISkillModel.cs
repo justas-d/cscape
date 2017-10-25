@@ -12,16 +12,6 @@ namespace CScape.Models.Game.Skill
         SkillID Id { get; }
 
         /// <summary>
-        /// The name of the skill
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// The chat interface which will be displayed when this a level up event is caught for this model.
-        /// </summary>
-        int LevelupInterfaceId { get; }
-
-        /// <summary>
         /// The extra levels given by the boost.
         /// </summary>
         int Boost { get; set; }

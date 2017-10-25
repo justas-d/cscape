@@ -1,6 +1,4 @@
-﻿using CScape.Core.Game.Entities;
-
-namespace CScape.Core.Game.Entity
+﻿namespace CScape.Core.Game.Entity
 {
     public  struct PlayerAppearance
     {

@@ -5,12 +5,19 @@ namespace CScape.Models.Game.Skill
     public struct SkillID : IEquatable<SkillID>
     {
         public string Name { get; }
+
         public byte ClientIndex { get; }
 
-        public SkillID(string name, byte clientIndex)
+        /// <summary>
+        /// The chat interface which will be displayed when this a level up event is caught for this model.
+        /// </summary>
+        public int LevelupInterfaceId { get; }
+
+        public SkillID(string name, byte clientIndex, int levelupInterfaceId)
         {
             Name = name;
             ClientIndex = clientIndex;
+            LevelupInterfaceId = levelupInterfaceId;
         }
 
         public bool Equals(SkillID other)
