@@ -25,6 +25,9 @@ namespace CScape.Core.Game.Entity.Component
             Admin = 2
         }
 
+        public const int MaxUsernameChars = 12;
+        public const int MaxPasswordChars = 64;
+
         public int PlayerId { get; }
 
         // TODO : fill player component with data from DB
@@ -41,7 +44,10 @@ namespace CScape.Core.Game.Entity.Component
 
         public PlayerComponent(
             [NotNull] IEntity parent,
-            [NotNull] PlayerModel model,
+            string username,
+            PlayerAppearance appearance,
+            bool isMember,
+            int titleId,
             int playerId,
             [CanBeNull] Action<PlayerComponent> destroyCallback)
             :base(parent)
@@ -49,10 +55,10 @@ namespace CScape.Core.Game.Entity.Component
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
             PlayerId = playerId;
 
-            SetAppearance(model.Apperance);
-            TitleId = (int)model.Title;
-            IsMember = model.IsMember;
-            Username = model.Username;
+            SetAppearance(appearance);
+            TitleId = titleId;
+            IsMember = isMember;
+            Username = username;
         }
 
         public void SetAppearance(PlayerAppearance appearance)

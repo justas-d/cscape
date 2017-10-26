@@ -41,7 +41,7 @@ namespace CScape.Core.Game.Entity.Component
 
             Parent.SendMessage(new ExperienceGainMessage(exp, model));
 
-            if (model.GainExperience(exp))
+            if (model.GainExperience(Parent, exp))
             {
                 Parent.SendMessage(new LevelUpMessage(model));
             }

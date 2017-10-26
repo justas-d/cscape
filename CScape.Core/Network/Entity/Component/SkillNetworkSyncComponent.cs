@@ -54,7 +54,7 @@ namespace CScape.Core.Network.Entity.Component
             interf?.Show(
                 InterfaceMetadata.Chat(
                     new LevelUpChatInterface(
-                        skill.LevelupInterfaceId, 
+                        skill.Id.LevelupInterfaceId,
                         skill.Id.Name, 
                         skill.Level)));
         }
@@ -71,7 +71,7 @@ namespace CScape.Core.Network.Entity.Component
                 net.SendPacket(new SetSkillDataPacket(
                     skill.Id.ClientIndex, 
                     (int)skill.Experience,
-                    skill.Level));
+                    (byte)skill.Level.Clamp(0, byte.MaxValue)));
             }
             _dirty.Clear();
         }

@@ -34,6 +34,7 @@ namespace CScape.Core.Database
             var compTransform = entity.GetTransform();
             var compSkills = entity.AssertGetSkills();
             var compInv = entity.AssertGetPlayerContainers();
+            var health = entity.AssertGetHealth();
 
             var model = new SerializablePlayerModel(
                 compTransform.X,
@@ -45,7 +46,8 @@ namespace CScape.Core.Database
                 compInv.Equipment.Provider,
                 player.Username,
                 player.TitleId,
-                player.Apperance);
+                player.Apperance,
+                health.Health);
 
             return JsonConvert.SerializeObject(model, Formatting.Indented, _converters);
         }

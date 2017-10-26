@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Item;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Item
 {
@@ -12,11 +16,19 @@ namespace CScape.Core.Game.Item
 
         public IList<ItemStack> Provider { get; }
 
-        public Entity.Entity Parent { get; }
+        public IEntity Parent { get; }
 
-        public PlayerEquipmentContainer(Entity.Entity parent)
+        public PlayerEquipmentContainer([NotNull] IEntity parent, [NotNull] IList<ItemStack> items)
         {
-            Parent = parent;
+            if (items == null) throw new ArgumentNullException(nameof(items));
+            Debug.Assert(items.Count == EquipmentMaxSize);
+            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            Provider = items;
+        }
+
+        public PlayerEquipmentContainer([NotNull] IEntity parent)
+        {
+            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             Provider = new ItemStack[EquipmentMaxSize];
         }
 

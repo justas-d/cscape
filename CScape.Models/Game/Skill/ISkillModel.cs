@@ -1,3 +1,6 @@
+using CScape.Models.Game.Entity;
+using JetBrains.Annotations;
+
 namespace CScape.Models.Game.Skill
 {
     /// <summary>
@@ -19,7 +22,7 @@ namespace CScape.Models.Game.Skill
         /// <summary>
         /// Experience defined level.
         /// </summary>
-        byte Level { get; set; }
+        int Level { get; set; }
 
         /// <summary>
         /// Raw experience
@@ -30,6 +33,6 @@ namespace CScape.Models.Game.Skill
         /// Handles gaining experience points. Assumes positive exp value.
         /// </summary>
         /// <return>True if leveled up, false otherwise</return>
-        bool GainExperience(float exp);
+        bool GainExperience([NotNull] IEntity ent, float exp);
     }
 }

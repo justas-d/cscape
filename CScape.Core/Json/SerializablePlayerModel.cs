@@ -7,7 +7,9 @@ namespace CScape.Core.Database
 {
     public class SerializablePlayerModel
     {
-        public SerializablePlayerModel(int posX, int posY, int posZ, Dictionary<SkillID, ISkillModel> skils, IList<ItemStack> backpack, IList<ItemStack> bank, IList<ItemStack> equipment, string username, int titleId, PlayerAppearance apperance)
+        public SerializablePlayerModel(int posX, int posY, int posZ,
+            Dictionary<SkillID, ISkillModel> skils, IList<ItemStack> backpack, IList<ItemStack> bank, 
+            IList<ItemStack> equipment, string username, int titleId, PlayerAppearance apperance, int health)
         {
             PosX = posX;
             PosY = posY;
@@ -19,7 +21,10 @@ namespace CScape.Core.Database
             Username = username;
             TitleId = titleId;
             Apperance = apperance;
+            Health = health;
         }
+        
+        public int Health { get; }
 
         public string Username { get; }
         public int TitleId { get; }

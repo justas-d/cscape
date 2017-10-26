@@ -30,7 +30,8 @@ namespace CScape.Core.Commands
             })) return;
 
             var skills = ctx.Callee.Parent.AssertGetSkills();
-            skills.GainExperience(Skills.Agility, amount);
+            var db = ctx.Callee.Parent.Server.Services.ThrowOrGet<SkillDb>();
+            skills.GainExperience(db.Agility, amount);
         }
 
         [CommandMethod("ftext")]
