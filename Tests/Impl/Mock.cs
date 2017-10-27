@@ -3,9 +3,16 @@ using System.IO;
 using System.Reflection;
 using CScape.Core;
 using CScape.Core.Database;
+using CScape.Core.Game;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network;
 using CScape.Core.Network.Handler;
+using CScape.Models;
+using CScape.Models.Data;
+using CScape.Models.Extensions;
+using CScape.Models.Game;
+using CScape.Models.Game.Entity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -40,7 +47,7 @@ namespace CScape.Dev.Tests.Impl
 
         private static JsonPacketDatabase PacketDb { get; set; }
 
-        public static void SpamTrash(this IPacketHandler h)
+        public static void SpamTrash(this IPacketHandler h, IEntity ent)
         {
             const int defaultShortSize = 1024; // size used for short size opcodes
 
@@ -57,7 +64,7 @@ namespace CScape.Dev.Tests.Impl
                         ? RandomData(Rng.Next(0, size + 1))
                         : RandomData(size);
 
-                    h.Handle(p, op, b);
+                    h.Handle(ent, PacketMessage.Success((byte)op, b));
                 }
             }
 
@@ -91,12 +98,11 @@ namespace CScape.Dev.Tests.Impl
             }
         }
 
-        public static void HandleAll(this IPacketHandler h, Player p, Blob b, Action action = null)
+        public static void HandleAll(this IPacketHandler h, IEntity p, Func<int, PacketMessage> translate, Action action = null)
         {
             foreach (var op in h.Handles)
             {
-                b.ResetHeads();
-                h.Handle(p, op, b);
+                h.Handle(p, translate(op));
                 action?.Invoke();
             }
         }
@@ -110,23 +116,30 @@ namespace CScape.Dev.Tests.Impl
             return b;
         }
 
-        public static readonly IPosition Invariant = new Position(3220, 3218, 0);
+        public static readonly IPosition Invariant = new ImmIntVec3(3220, 3218, 0);
 
         public static MockServer Server(IServiceCollection c) => new MockServer(c);
         public static MockServer Server() => new MockServer();
 
-        public static Player Player(IGameServer server, IPosition pos) => Player("mock player", server, pos);
-        public static Player Player(IGameServer server) => Player("mock player", server);
+        public static IEntityHandle Player(IGameServer server, IPosition pos) => Player("mock player", server, pos);
+        public static IEntityHandle Player(IGameServer server) => Player("mock player", server);
 
-        public static Player Player(string name, IGameServer server, IPosition pos)
+        public static IEntityHandle Player(string name, IGameServer server, IPosition pos)
         {
-            var model = new PlayerModel(name, "1");
-            model.SyncPosition(pos);
-            return new Player(model, new MockSocketContext(), server.Services, true);
+            var players = server.Services.ThrowOrGet<PlayerFactory>();
+            var p = players.Create(SerializablePlayerModel.Default(name, server.Services.ThrowOrGet<SkillDb>()), MockSocketContext.Instance, MockPacketParser.Instance, MockPacketHandlerCatalogue.Instance);
+            p.Get().GetTransform().Teleport(pos);
+            return p;
         }
 
-        public static Player Player(string name, IGameServer server) => Player(name, server, Invariant);
+        public static IEntityHandle Player(string name, IGameServer server) => Player(name, server, Invariant);
 
-        public static Npc Npc(IGameServer server, short id) => new Npc(server.Services, id, Invariant);
+        public static IEntityHandle Npc(IGameServer server, IPosition pos, short id, string name)
+        {
+            var npcs = server.Services.ThrowOrGet<NpcFactory>();
+            var p = npcs.Create(name, id);
+            p.Get().GetTransform().Teleport(pos);
+            return p;
+        }
     }
 }

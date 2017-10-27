@@ -21,7 +21,7 @@ namespace CScape.Core.Network.Entity.Component
         private IPacketParser PacketParser { get; }
 
         [NotNull]
-        private SocketContext Socket { get; }
+        private ISocketContext Socket { get; }
 
         public override int Priority { get; } = -1;
 
@@ -35,7 +35,8 @@ namespace CScape.Core.Network.Entity.Component
 
         public NetworkingComponent(
             [NotNull] IEntity parent, 
-            [NotNull] SocketContext socket, [NotNull] IPacketParser packetParser)
+            [NotNull] ISocketContext socket, 
+            [NotNull] IPacketParser packetParser)
             : base(parent)
         {
             PacketParser = packetParser ?? throw new ArgumentNullException(nameof(packetParser));

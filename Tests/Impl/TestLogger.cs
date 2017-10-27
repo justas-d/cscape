@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using CScape.Models;
 
 namespace CScape.Dev.Tests.Impl
 {

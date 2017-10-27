@@ -1,11 +1,12 @@
 ﻿using System.Net;
-using CScape.Core.Game;
+using CScape.Models;
 
 namespace CScape.Dev.Tests.Impl
 {
     public class MockConfig : IGameServerConfig
     {
-        public int MaxPlayers { get; } 
+        public int MaxPlayers { get; }
+        public int MaxNpcs { get; }
         public int Revision { get; } 
         public string Version { get; }
         public EndPoint ListenEndPoint { get; }
@@ -13,9 +14,7 @@ namespace CScape.Dev.Tests.Impl
         public int SocketSendTimeout { get; }
         public int SocketReceiveTimeout { get; }
         public int TickRate { get; }
-        public int AutoSaveIntervalMs { get; }
-        public ChatMessage.TextEffect DefaultChatEffect { get; } = ChatMessage.TextEffect.None;
-        public ChatMessage.TextColor DefaultChatColor { get; } = ChatMessage.TextColor.Yellow;
+        public int EntityGcInternalMs { get; }
         public string PrivateLoginKeyDir { get; }
         public string Greeting { get; }
     }

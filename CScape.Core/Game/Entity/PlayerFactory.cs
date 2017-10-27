@@ -54,7 +54,7 @@ namespace CScape.Core.Game.Entity
         [CanBeNull]
         public IEntityHandle Create(
             [NotNull] SerializablePlayerModel model, 
-            [NotNull] SocketContext socket,
+            [NotNull] ISocketContext socket,
             [NotNull] IPacketParser packetParser,
             [NotNull] IPacketHandlerCatalogue packets)
         {

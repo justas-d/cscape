@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Network
 {
-    public class SocketContext
+    public class SocketContext : ISocketContext
     {
         public const int OutStreamSize = 5000;
         public const int InBufferStreamSize = 1024;
@@ -21,7 +21,6 @@ namespace CScape.Core.Network
         public const int MaxNoDataInternal = 5 * 1000;
 
         private long _msSinceData; // how many ms have passed since we've received data.
-
 
         public OutBlob OutStream { get; }
         public CircularBlob InStream { get; private set; }

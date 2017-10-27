@@ -1,32 +1,36 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using CScape.Core.Network;
+using CScape.Models.Data;
 
 namespace CScape.Dev.Tests.Impl
 {
     public class MockSocketContext : ISocketContext
     {
+        public static MockSocketContext Instance { get; } = new MockSocketContext();
+
+        private MockSocketContext()
+        {
+            
+        }
+
         public void Dispose() { }
 
-        public OutBlob OutStream { get; }
-        public CircularBlob InStream { get; }
-        public int SignlinkId { get; }
-        public long DeadForMs { get; }
-        public bool IsDisposed { get; }
-        public IList<ISyncMachine> SyncMachines { get; } = new List<ISyncMachine>();
+        public OutBlob OutStream => throw new NotImplementedException();
+        public CircularBlob InStream => throw new NotImplementedException();
+        public int SignlinkId => throw new NotImplementedException();
+        public long DeadForMs => throw new NotImplementedException();
+        public bool IsDisposed => throw new NotImplementedException();
 
-        public bool TryReinitialize(Socket socket, int signlinkId) => false;
+        public bool TryReinitialize(Socket socket, int signlinkId) => throw new NotImplementedException();
 
-        public bool CanReinitialize(int signlinkId) => false;
+        public bool CanReinitialize(int signlinkId) => throw new NotImplementedException();
 
-        public bool Update(long deltaTime) => true;
+        public bool Update(long deltaTime) => throw new NotImplementedException();
 
-        public bool FlushOutputStream() => true;
+        public bool FlushOutputStream() => throw new NotImplementedException();
 
-        public bool IsConnected() => true;
-
-        public void SendPacket(IPacket packet)
-        {
-        }
+        public bool IsConnected() => throw new NotImplementedException();
     }
 }
