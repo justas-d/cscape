@@ -79,9 +79,6 @@ namespace CScape.Core.Network.Handler
             var action = OpcodeToActionMap[packet.Opcode];
 
             entity.SendMessage(new ItemActionMessage(action, itemInterface.Container, interfaceMetadata, idx));
-
-            // execute action
-            def.OnAction(player, container, idx, action);
         }
     }
 }

@@ -4,6 +4,7 @@ using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Interface;
+using System.Diagnostics;
 
 namespace CScape.Core.Network.Handler
 {
@@ -30,24 +31,26 @@ namespace CScape.Core.Network.Handler
             if (idxA == idxB) return;
 
             // try getting interfaces
-            IItemGameInterface GetContainer(int id)
+            (InterfaceMetadata?, IItemGameInterface) GetContainer(int id)
             {
                 if (!interfaces.All.TryGetValue(id, out var meta))
                 {
                     entity.SystemMessage($"Unregistered Item on Item interface: {id}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Interface);
                     SendNIH();
-                    return null;
+                    return (null, null);
                 }
 
                 var ret = meta.Interface as IItemGameInterface;
-                return ret;
+                return (meta, ret);
             }
 
-            var containerA = GetContainer(interfaceIdA);
-            var containerB = GetContainer(interfaceIdB);
+            var (metaA, containerA) = GetContainer(interfaceIdA);
+            var (metaB, containerB) = GetContainer(interfaceIdB);
 
             // verify we got all containers
             if (containerA == null || containerB == null) return;
+
+            Debug.Assert(metaA != null && metaB != null);
 
             // validate indicies
             bool IsNotValidIdx(int idx, int max)
@@ -65,11 +68,9 @@ namespace CScape.Core.Network.Handler
             if (IsNotValidIdx(idxA, containerA.Container.Provider.Count)) return;
             if (IsNotValidIdx(idxB, containerB.Container.Provider.Count)) return;
 
-            // TODO : when do we handle item interaction?
-
-            // data's valid, pass it on
-            player.Interfaces.OnActionOccurred();
-            defA.UseWith(player, containerA, idxA, containerB, idxB);
+            entity.SendMessage(new ItemOnItemMessage(
+                metaA.Value, containerA.Container, idxA, 
+                metaB.Value, containerB.Container, idxB));
         }
     }
 }

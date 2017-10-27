@@ -124,6 +124,8 @@ namespace CScape.Core.Game.Entity
 
             ent.Components.Add(new TileMovementComponent(ent));
             ent.Components.Add(new MovementActionComponent(ent));
+
+            ent.Components.Add(new ItemActionDispatchComponent(ent));
             
             ent.Components.Add(new PlayerInventoryComponent(ent, 
                 new ListItemContainer(ent, model.Backpack), 

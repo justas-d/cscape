@@ -15,6 +15,7 @@ namespace CScape.Core.Game.Entity.Message
         ItemChange,
         EquipmentChange,
         ItemAction,
+        ItemOnItemAction,
         GroundItemAmountUpdate,
 
         // interface

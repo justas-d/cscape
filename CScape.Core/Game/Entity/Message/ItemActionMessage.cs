@@ -23,6 +23,7 @@ namespace CScape.Core.Game.Entity.Message
             InterfaceMetadata @interface, 
             int index)
         {
+            if (0 > index || container.Provider.Count >= index) throw new ArgumentOutOfRangeException(nameof(index));
             Type = type;
             Container = container ?? throw new ArgumentNullException(nameof(container));
             Interface = @interface;
@@ -30,5 +31,7 @@ namespace CScape.Core.Game.Entity.Message
         }
 
         public int EventId => (int)MessageId.ItemAction;
+
+        public ItemStack GetItem() => Container.Provider[Index];
     }
 }

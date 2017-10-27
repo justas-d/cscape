@@ -41,6 +41,9 @@ namespace CScape.Core.Extensions
         public static ItemActionMessage AsItemAction(this IGameMessage msg) =>
             AssertCast<ItemActionMessage>(msg, MessageId.ItemAction);
 
+        public static ItemOnItemMessage AsItemOnItemAction(this IGameMessage msg) =>
+            AssertCast<ItemOnItemMessage>(msg, MessageId.ItemOnItemAction);
+
         public static GroundItemMessage AsGroundItemAmountUpdate(this IGameMessage msg) =>
             AssertCast<GroundItemMessage>(msg, MessageId.GroundItemAmountUpdate);
 
