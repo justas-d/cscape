@@ -4,10 +4,16 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
+using CScape.Commands;
 using CScape.Core;
 using CScape.Core.Database;
+using CScape.Core.Game;
+using CScape.Core.Game.Entity;
 using CScape.Core.Log;
 using CScape.Core.Network;
+using CScape.Models;
+using CScape.Models.Game.Command;
+using CScape.Models.Game.Entity.Factory;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
@@ -45,32 +51,22 @@ namespace CScape.Dev.Runtime
             // set up servicess
             var services = new ServiceCollection();
 
-            services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
-            services.AddSingleton<IMainLoop>(s => new MainLoop(s));
-            services.AddSingleton<ILoginService>(s => new SocketAndPlayerDatabaseDispatch(s.ThrowOrGet<IGameServer>().Services));
-            services.AddSingleton<IPacketParser>(s => new PacketParser(s.ThrowOrGet<IGameServer>().Services));
-
-            services.AddSingleton<IPlayerDatabase>(s =>
-            {
-                var db = new PlayerDatabase();
-                db.Database.EnsureCreated();
-                return db;
-            });
-
             var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(
                 File.ReadAllText(
                     Path.Combine(dirBuild, "config.json")));
 
-            services.AddSingleton<IItemDefinitionDatabase>(s => new ItemDefinitionDatabase());
-            services.AddSingleton<IPacketHandlerCatalogue>(s => new PacketHandlerCatalogue(s));
-            services.AddSingleton<IPacketParser>(s => new PacketParser(s));
-            services.AddSingleton<IIdPool>(s => new IdPool());
-            services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
-
-            services.AddSingleton<IInterfaceIdDatabase>(
-                s => InterfaceDb.FromJson(Path.Combine(dirBuild, "interface-ids.json")));
-
+            services.AddSingleton<SkillDb>(s => new SkillDb(s));
+            services.AddSingleton<IPlayerFactory>(s => new PlayerFactory(s.ThrowOrGet<IGameServer>().Entities));
+            services.AddSingleton<INpcFactory>(s => new NpcFactory(s.ThrowOrGet<IGameServer>().Entities));
+            services.AddSingleton<ItemDatabase>(s => new ItemDatabase());
+            services.AddSingleton<IMainLoop>(s => new MainLoop(s));
+            services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
             services.AddSingleton<IGameServerConfig>(s => cfg);
+            services.AddSingleton<InterfaceIdDatabase>(s => JsonConvert.DeserializeObject<InterfaceIdDatabase>("interface-ids.json"));
+            services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
+            services.AddSingleton<IPacketParser>(s => new PacketParser(s.ThrowOrGet<IGameServer>().Services));
+            services.AddSingleton<IPacketHandlerCatalogue>(s => new PacketHandlerCatalogue(s));
+            services.AddSingleton<PlayerJsonDatabase>(s => new PlayerJsonDatabase(s));
 
             services.AddSingleton<IPacketDatabase>(s => 
                 JsonConvert.DeserializeObject<JsonPacketDatabase>(

@@ -10,12 +10,13 @@ using CScape.Core.Network.Entity.Component;
 using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.Factory;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
-    public sealed class PlayerFactory : IPlayerFactory
+    public sealed class PlayerFactory : InstanceFactory, IPlayerFactory
     {
         public const int InvalidPlayerId = -1;
 
@@ -24,20 +25,14 @@ namespace CScape.Core.Game.Entity
 
         // username lookup
         private readonly Dictionary<string, IEntityHandle> _usernameLookup = new Dictionary<string, IEntityHandle>();
-        // instance id lookup
-        private readonly IEntityHandle[] _players;
 
-        public IReadOnlyList<IEntityHandle> All => _players;
+        public IReadOnlyList<IEntityHandle> All => InstanceLookup;
 
         private ILogger Log => EntitySystem.Server.Services.ThrowOrGet<ILogger>();
 
-        public PlayerFactory([NotNull] IEntitySystem entitySystem)
+        public PlayerFactory([NotNull] IEntitySystem entitySystem) : base(entitySystem.Server.Services.ThrowOrGet<IGameServerConfig>().MaxPlayers)
         {
             EntitySystem = entitySystem ?? throw new ArgumentNullException(nameof(entitySystem));
-
-            // create an array of entity handles which will be all initialized to null
-            // then let a list wrap around that array.
-            _players = new IEntityHandle[entitySystem.Server.Services.ThrowOrGet<IGameServerConfig>().MaxPlayers];
         }
 
         public IEntityHandle Get(string username)
@@ -47,30 +42,16 @@ namespace CScape.Core.Game.Entity
             return null;
         }
 
-        /// <summary>
-        /// Finds and returns the next free player id.
-        /// </summary>
-        private int GetPlayerId()
-        {
-            for (int i = 0; i < _players.Length; i++)
-            {
-                if (_players[i] == null)
-                    return i;
-            }
-
-            return InvalidPlayerId;
-        }
-
         public IEntityHandle Get(int id)
         {
-            // check if id is in range.
-            if (0 >= id && _players.Length > id)
-            {
-                return _players[id];
-            }
-            return null;
+            if (0 > id && InstanceLookup.Length >= id)
+                return null;
+
+            return InstanceLookup[id];
         }
 
+        // TODO : return value PlayerFactory.Create null checks
+        [CanBeNull]
         public IEntityHandle Create(
             [NotNull] SerializablePlayerModel model, 
             [NotNull] SocketContext socket,
@@ -82,11 +63,11 @@ namespace CScape.Core.Game.Entity
             if (packetParser == null) throw new ArgumentNullException(nameof(packetParser));
             if (packets == null) throw new ArgumentNullException(nameof(packets));
 
-            var id = GetPlayerId();
+            var id = GetId();
             if (id == InvalidPlayerId)
                 return null;
             
-            Debug.Assert(_players[id] == null);
+            Debug.Assert(InstanceLookup[id] == null);
 
             var entHandle = EntitySystem.Create($"Entity for player {model.Username}");
             var ent = entHandle.Get();
@@ -105,18 +86,26 @@ namespace CScape.Core.Game.Entity
 
             var health = new HealthComponent(ent);
             ent.Components.Add(health);
+            ent.Components.Add<IHealthComponent>(health);
 
-            ent.Components.Add(new CombatStatComponent(ent));
+            var cmb = new CombatStatComponent(ent);
+            ent.Components.Add(cmb);
+            ent.Components.Add<ICombatStatComponent>(cmb);
             ent.Components.Add(new CombatStatNetworkSyncComponent(ent));
 
-            ent.Components.Add(new InterfaceComponent(ent));
+            var interf = new InterfaceComponent(ent);
+            ent.Components.Add(interf);
+            ent.Components.Add<IInterfaceComponent>(interf);
             ent.Components.Add(new InterfaceNetworkSyncComponent(ent));
 
             var skills = new SkillComponent(ent);
             ent.Components.Add(skills);
+            ent.Components.Add<ISkillComponent>(skills);
             ent.Components.Add(new SkillNetworkSyncComponent(ent));
 
-            ent.Components.Add(new VisionComponent(ent));
+            var vision = new VisionComponent(ent);
+            ent.Components.Add(vision);
+            ent.Components.Add<IVisionComponent>(vision);
 
             ent.Components.Add(new NpcNetworkSyncComponent(ent));
             ent.Components.Add(new PlayerNetworkSyncComponent(ent));
@@ -126,18 +115,25 @@ namespace CScape.Core.Game.Entity
             ent.Components.Add(new MovementActionComponent(ent));
 
             ent.Components.Add(new ItemActionDispatchComponent(ent));
-            
-            ent.Components.Add(new PlayerInventoryComponent(ent, 
-                new ListItemContainer(ent, model.Backpack), 
-                new PlayerEquipmentContainer(ent, model.Equipment), 
-                new ListItemContainer(ent, model.Bank)));
-            ent.Components.Add(new PlayerComponent(ent, 
+
+            var inv = new PlayerInventoryComponent(ent,
+                new ListItemContainer(ent, model.Backpack),
+                new PlayerEquipmentContainer(ent, model.Equipment),
+                new ListItemContainer(ent, model.Bank));
+
+            ent.Components.Add(inv);
+            ent.Components.Add<IInventoryComponent>(inv);
+
+            var player = new PlayerComponent(ent, 
                 model.Username,
                 model.Apperance,
                 true,
                 model.TitleId,
                 id,
-                DestroyCallback));
+                DestroyCallback);
+
+            ent.Components.Add(player);
+            ent.Components.Add<IPlayerComponent>(player);
 
             var check = ent.AreComponentRequirementsSatisfied(out var msg);
             if (!check) throw new InvalidOperationException(msg);
@@ -151,7 +147,7 @@ namespace CScape.Core.Game.Entity
             health.SetNewMaxHealth(skills.All[skillDb.Hitpoints].Level);
             health.SetNewHealth(model.Health);
           
-            _players[id] = entHandle;
+            InstanceLookup[id] = entHandle;
             _usernameLookup.Add(msg, entHandle);
 
             return entHandle;
@@ -162,7 +158,9 @@ namespace CScape.Core.Game.Entity
             if (component == null) throw new ArgumentNullException(nameof(component));
 
             Log.Normal(this, $"Freeing player slot {component.PlayerId} {component.Username}");
-            _players[component.PlayerId] = null;
+
+            InstanceLookup[component.PlayerId] = null;
+            _usernameLookup.Remove(component.Username);
         }
     }
 }

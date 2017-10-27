@@ -6,6 +6,8 @@ namespace CScape.Models
     public interface IGameServerConfig
     {
         int MaxPlayers { get; }
+        int MaxNpcs { get; }
+
         int Revision { get; }
         [NotNull]
         string Version { get; }

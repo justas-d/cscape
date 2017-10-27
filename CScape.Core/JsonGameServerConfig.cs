@@ -28,6 +28,7 @@ namespace CScape.Core
         }
 
         public string Version { get; }
+        public int MaxNpcs { get; }
         public int Revision { get; }
         public int SocketReceiveTimeout { get; }
         public int TickRate { get; }
@@ -45,7 +46,7 @@ namespace CScape.Core
         private JsonGameServerConfig([NotNull] string version, int revision,
             [NotNull] string privateLoginKeyDir, int maxPlayers,
             [NotNull] EndPoint listenEndPoint, int backlog, string greeting, int tickRate, 
-            int socketReceiveTimeout, int socketSendTimeout, int entityGcInternalMs)
+            int socketReceiveTimeout, int socketSendTimeout, int entityGcInternalMs, int maxNpcs)
         {
             if (backlog <= 0) throw new ArgumentOutOfRangeException(nameof(backlog));
             if (maxPlayers <= 0) throw new ArgumentOutOfRangeException(nameof(maxPlayers));
@@ -65,6 +66,7 @@ namespace CScape.Core
             SocketReceiveTimeout = socketReceiveTimeout;
             SocketSendTimeout = socketSendTimeout;
             EntityGcInternalMs = entityGcInternalMs;
+            MaxNpcs = maxNpcs;
         }
     }
 }

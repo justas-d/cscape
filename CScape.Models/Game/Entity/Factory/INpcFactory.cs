@@ -13,7 +13,7 @@ namespace CScape.Models.Game.Entity.Factory
 
         // TODO : maybe replace definition id with an INpcDefinition interface?
         // TODO : define  INpcFactory.Create
-        [NotNull]
+        [CanBeNull]
         IEntityHandle Create(string name, int definitionId);
 
         /// <summary>
