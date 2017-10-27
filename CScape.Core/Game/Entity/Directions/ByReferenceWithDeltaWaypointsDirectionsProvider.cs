@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CScape.Core.Game.Entity.Directions
 {
-    public sealed class ByReferenceWithDeltaWaypointsDirectionsProvider : IDirectionsProvider
+    public sealed class ByReferenceWithDeltaWaypointsDirectionsProvider //: IDirectionsProvider
     {
         private (int x, int y) _local;
         private readonly (int x, int y) _reference;

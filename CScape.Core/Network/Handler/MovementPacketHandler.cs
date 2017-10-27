@@ -5,7 +5,7 @@ using CScape.Models.Data;
 
 namespace CScape.Core.Network.Handler
 {
-    public sealed class MovementPacketHandler : IPacketHandler
+    public sealed class MovementPacketHandler //: IPacketHandler
     {
         public byte[] Handles { get; } =
         {
@@ -17,6 +17,7 @@ namespace CScape.Core.Network.Handler
 
         public int MaxTiles { get;  } =25;
 
+        /*
         public void Handle(Player player, int opcode, Blob packet)
         {
             // TODO : rewrite movement packet handling. preferably when we have collision data.
@@ -67,5 +68,6 @@ namespace CScape.Core.Network.Handler
             player.Movement.Directions = new ByReferenceWithDeltaWaypointsDirectionsProvider(
                 player.ClientTransform.Local, reference, deltaWaypoints);
         }
+        */
     }
 }
