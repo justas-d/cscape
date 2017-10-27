@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using CScape.Core.Database;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Core.Network;
 using CScape.Models;
+using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
 using CScape.Models.Game.World;
@@ -34,7 +37,7 @@ namespace CScape.Core
             services.AddSingleton(s => new SocketAndPlayerDatabaseDispatch(s.ThrowOrGet<IGameServer>().Services));
 
             // build service provider
-            Services = services?.BuildServiceProvider() ?? throw new ArgumentNullException(nameof(services));
+            Services = services.BuildServiceProvider() ?? throw new ArgumentNullException(nameof(services));
 
             Overworld = new PlaneOfExistence(this, "Overworld");
 
@@ -66,6 +69,17 @@ namespace CScape.Core
             await Loop.Run();
         }
 
+        public void SaveAllPlayers()
+        {
+            var players = Services.ThrowOrGet<PlayerFactory>();
+            var db = Services.ThrowOrGet<PlayerJsonDatabase>();
+
+            Log.Normal(this, $"Saving {players.All.Count} players.");
+
+            foreach (var p in players.All.Where(p => !p.IsDead()).Select(p => p.Get()))
+                db.Save(p.AssertGetPlayer());
+        }
+    
         public void Dispose()
         {
             if (!IsDisposed)
@@ -76,9 +90,8 @@ namespace CScape.Core
                 foreach(var ent in Entities.All.Keys)
                     Entities.Destroy(ent);
                     
-                // block as we're saving.
-                Services.GetService<IPlayerDatabase>().Save().GetAwaiter().GetResult();
-
+                SaveAllPlayers();
+            
                 (Services as IDisposable)?.Dispose();
             }
         }

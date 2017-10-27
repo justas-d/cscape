@@ -1,5 +1,5 @@
 {
-  "Version": "0.0.1",
+  "Version": "0.1.0",
   "Revision": 317,
 
   "Packet": "packet-lengths.json",
@@ -9,7 +9,6 @@
   "MaxPlayers": 2000,
   "ListenEndPoint": "127.0.0.1:43594",
   "TickRate": 600,
-  "AutoSaveIntervalMs": 300000,
   "EntityGcInternalMs": 120000,
   "SocketReceiveTimeout": 5000,
   "SocketSendTimeout": 5000,

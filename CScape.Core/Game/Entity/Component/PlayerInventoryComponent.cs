@@ -12,6 +12,9 @@ namespace CScape.Core.Game.Entity.Component
     {
         public override int Priority { get; }
 
+        public const int BackpackSize = 28;
+        public const int BankSize = 500;
+
         IItemContainer IInventoryComponent.Inventory => Backpack;
 
         [NotNull]

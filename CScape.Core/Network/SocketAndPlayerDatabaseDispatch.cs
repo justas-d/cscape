@@ -4,9 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using CScape.Core.Database;
+using CScape.Core.Extensions;
 using CScape.Core.Game;
+using CScape.Core.Game.Entity.Component;
 using CScape.Models;
 using CScape.Models.Data;
+using CScape.Models.Extensions;
 using CScape.Models.Game;
 using CScape.Models.Game.Entity.Factory;
 using JetBrains.Annotations;
@@ -74,8 +78,9 @@ namespace CScape.Core.Network
         [NotNull] private readonly IServiceProvider _services;
         [NotNull] private readonly IGameServer _server;
         [NotNull] private readonly IGameServerConfig _config;
-        [NotNull] private readonly IPlayerDatabase _db;
-        private readonly IPlayerFactory _players;
+        [NotNull] private readonly PlayerJsonDatabase _db;
+        [NotNull] private readonly IPlayerFactory _players;
+        [NotNull] private readonly SkillDb _skills;
         [NotNull] private readonly Random _rng;
         [NotNull] private readonly Socket _socket;
         [NotNull] private readonly IAsymmetricBlockCipher _crypto;
@@ -91,10 +96,11 @@ namespace CScape.Core.Network
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
             _players = services.ThrowOrGet<IPlayerFactory>();
-            _db = services.ThrowOrGet<IPlayerDatabase>();
+            _db = services.ThrowOrGet<PlayerJsonDatabase>();
             _server = services.ThrowOrGet<IGameServer>();
             _config = services.ThrowOrGet<IGameServerConfig>();
             _log = services.ThrowOrGet<ILogger>();
+            _skills = services.ThrowOrGet<SkillDb>();
 
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp)
             {
@@ -266,14 +272,14 @@ namespace CScape.Core.Network
                 // try read user/pass
                 string username;
                 string password;
-                if (!blob.TryReadString(out username, PlayerModel.MaxUsernameChars))
+                if (!blob.TryReadString(out username, PlayerComponent.MaxUsernameChars))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading username.");
                     return;
                 }
 
-                if (!blob.TryReadString(out password, PlayerModel.MaxPasswordChars))
+                if (!blob.TryReadString(out password, PlayerComponent.MaxPasswordChars))
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                         "Overflow detected when reading password.");
@@ -295,9 +301,17 @@ namespace CScape.Core.Network
                         return;
                     }
 
-                    // check if we can reconnect
-                    if (!loggedInPlayer.Connection.CanReinitialize(signlinkUid))
+                    var net = loggedInPlayer.Get().GetNetwork();
+                    var player = loggedInPlayer.Get().AssertGetPlayer();
+                    if (net == null)
+                    {
+                        await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
+                            "Reconnect player target exists with no network component.");
+                        return;
+                    }
 
+                    // check if we can reconnect
+                    if (!net.CanReinitialize(signlinkUid))
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure,
                             "Tried to reconnect but player is not available for reconnecting.");
@@ -305,7 +319,7 @@ namespace CScape.Core.Network
                     }
 
                     // check if the password matches
-                    if (!await _db.IsValidPassword(loggedInPlayer.Password, password))
+                    if (!_db.IsValidPassword(player.Username, password))
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
                         return;
@@ -323,28 +337,34 @@ namespace CScape.Core.Network
                         return;
                     }
 
-                    IPlayerModel model;
-
-                    // todo : less calls to _db.GetPlayer() in basic ILoginService
-                    if (await _db.GetPlayer(username) == null)
-                    {
-                        model = await _db.CreatePlayer(username, password);
-                    }
-                    else
-                    {
-                        model = await _db.GetPlayer(username, password);
-                    }
-
-                    if (model == null)
+                    // check pw
+                    if (!_db.IsValidPassword(username, password))
                     {
                         await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
                         return;
                     }
 
-                    blob.Write((byte) InitResponseCode.LoginDone);
+                    // figure out whether we need to serialize the acc or make anew one.
+                    SerializablePlayerModel model = null;
+                    if (_db.PlayerExists(username))
+                    {
+                        model = _db.Load(username);
+                        if (model == null)
+                        {
+                            _log.Warning(this, $"Failed loading player for {username}");
+                            await KillBadConnection(socket, blob, InitResponseCode.GeneralFailure);
+                            return;
+
+                        }
+                    }
+                    else
+                        model = SerializablePlayerModel.Default(username, _skills);
+                    
+                    blob.Write((byte)InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
-                    blob.Write(model.TitleIcon);
-                    _loginQueue.Enqueue(new NormalPlayerLogin(_services, model, socket, signlinkUid, !isLowMem));
+                    blob.Write((byte)model.TitleId);
+
+                    _loginQueue.Enqueue(new NormalPlayerLogin(_services, model, socket, signlinkUid));
                 }
 
                 await SocketSend(socket, blob);

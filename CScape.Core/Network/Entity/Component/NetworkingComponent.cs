@@ -91,6 +91,8 @@ namespace CScape.Core.Network.Entity.Component
             }
         }
 
+        public bool CanReinitialize(int signlink) => Socket.CanReinitialize(signlink);
+
         public bool TryReinitializeUsing([NotNull] Socket socket, int signlink)
         {
             if (!Socket.TryReinitialize(socket, signlink))

@@ -31,7 +31,6 @@ namespace CScape.Core
         public int Revision { get; }
         public int SocketReceiveTimeout { get; }
         public int TickRate { get; }
-        public int AutoSaveIntervalMs { get; }
         public int EntityGcInternalMs { get; }
 
         public string PrivateLoginKeyDir { get; }
@@ -46,8 +45,7 @@ namespace CScape.Core
         private JsonGameServerConfig([NotNull] string version, int revision,
             [NotNull] string privateLoginKeyDir, int maxPlayers,
             [NotNull] EndPoint listenEndPoint, int backlog, string greeting, int tickRate, 
-            int socketReceiveTimeout, int socketSendTimeout, int autoSaveIntervalMs, 
-            int entityGcInternalMs)
+            int socketReceiveTimeout, int socketSendTimeout, int entityGcInternalMs)
         {
             if (backlog <= 0) throw new ArgumentOutOfRangeException(nameof(backlog));
             if (maxPlayers <= 0) throw new ArgumentOutOfRangeException(nameof(maxPlayers));
@@ -55,7 +53,6 @@ namespace CScape.Core
             if (tickRate <= 0) throw new ArgumentOutOfRangeException(nameof(tickRate));
             if (socketSendTimeout < 0) throw new ArgumentOutOfRangeException(nameof(socketSendTimeout));
             if (socketReceiveTimeout < 0) throw new ArgumentOutOfRangeException(nameof(socketReceiveTimeout));
-            if (autoSaveIntervalMs <= 0) throw new ArgumentOutOfRangeException(nameof(autoSaveIntervalMs));
             if (entityGcInternalMs <= 0) throw new ArgumentOutOfRangeException(nameof(entityGcInternalMs));
             Version = version ?? throw new ArgumentNullException(nameof(version));
             Revision = revision;
@@ -67,7 +64,6 @@ namespace CScape.Core
             TickRate = tickRate;
             SocketReceiveTimeout = socketReceiveTimeout;
             SocketSendTimeout = socketSendTimeout;
-            AutoSaveIntervalMs = autoSaveIntervalMs;
             EntityGcInternalMs = entityGcInternalMs;
         }
     }

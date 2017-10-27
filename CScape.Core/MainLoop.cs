@@ -40,7 +40,6 @@ namespace CScape.Core
 
         public async Task Run()
         {
-            var timeSinceLastSave = 0L;
             var timeSinceGc = 0L;
 
             _log.Normal(this, "Starting main loop...");
@@ -56,16 +55,8 @@ namespace CScape.Core
                         ent.SendMessage(msg);
                 }
 
-                /* Try autosave */
-                if ((timeSinceLastSave += DeltaTime) >= _config.AutoSaveIntervalMs)
-                {
-                    _log.Normal(this, "Autosaving...");
-                    await _db.Save();
-                    timeSinceLastSave = 0;
-                }
-
                 /* Entity gc */
-                if ((timeSinceGc += DeltaTime) >= _config.AutoSaveIntervalMs)
+                if ((timeSinceGc += DeltaTime) >= _config.EntityGcInternalMs)
                 {
                     _log.Normal(this, "Sending Entity GC message");
                     SendMessage(NotificationMessage.GC);

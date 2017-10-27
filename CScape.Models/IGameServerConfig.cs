@@ -17,7 +17,6 @@ namespace CScape.Models
         int SocketReceiveTimeout { get; }
 
         int TickRate { get; }
-        int AutoSaveIntervalMs { get; }
         int EntityGcInternalMs { get; }
 
         [NotNull]
