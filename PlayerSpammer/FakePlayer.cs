@@ -2,8 +2,10 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using CScape.Models.Data;
+using Org.BouncyCastle.Crypto;
 
-namespace CScape.Basic
+namespace PlayerSpammer
 {
     public class FakePlayer
     {

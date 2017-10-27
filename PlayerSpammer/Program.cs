@@ -4,7 +4,8 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using CScape.Basic;
+using CScape.Core;
+using Newtonsoft.Json;
 using Nito.AsyncEx;
 
 namespace PlayerSpammer
@@ -41,7 +42,7 @@ namespace PlayerSpammer
                 File.ReadAllText(
                     Path.Combine(dirBuild, "config.json")));
 
-            var crypto = CScape.Basic.Server.Utils.GetCrypto(cfg, true);
+            var crypto = CScape.Core.Network.Utils.GetCrypto(cfg, true);
             var idx = 0;
 
             // dispatch a thread to run the server
