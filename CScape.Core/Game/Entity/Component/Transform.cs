@@ -111,8 +111,8 @@ namespace CScape.Core.Game.Entity.Component
 
         public void SyncLocalsToGlobals(IClientPositionComponent client)
         {
-            X = client.Base.X + client.Local.Y;
-            X = client.Base.Y + client.Local.Y;
+            X = client.Base.X + client.Local.X;
+            Y = client.Base.Y + client.Local.Y;
 
             UpdateRegion();
 

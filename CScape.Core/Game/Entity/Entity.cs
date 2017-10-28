@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CScape.Core.Game.Entity.Component;
@@ -32,9 +33,18 @@ namespace CScape.Core.Game.Entity
 
         public void SendMessage([NotNull] IGameMessage message)
         {
+            var handled = new HashSet<Type>();
+            
             foreach (var frag in Components)
             {
+                var t = frag.GetType();
+
+                if (handled.Contains(t))
+                    continue;
+                    
+
                 frag.ReceiveMessage(message);
+                handled.Add(frag.GetType());
             }
         }
 

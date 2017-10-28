@@ -41,18 +41,13 @@ namespace CScape.Core.Network.Entity.Component
         public override void ReceiveMessage(IGameMessage msg)
         {
             switch (msg.EventId)
-            
+            {
                 case (int)MessageId.ClientRegionChanged:
-                {
-                    SyncRegion(msg.AsClientRegionChange().Position);
-                    break;
-                }
-                case (int)MessageId.NetworkReinitialize:
                 {
                     SyncRegion(Parent.AssertGetClientPosition().ClientRegion);
                     break;
                 }
-                case (int) MessageId.PlayerInitialize:
+                case (int)MessageId.NetworkReinitialize:
                 {
                     SyncRegion(Parent.AssertGetClientPosition().ClientRegion);
                     break;

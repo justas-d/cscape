@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Entity.Segment
             _pid = newPlayer.PlayerId;
             _needsUpdate = needsUpdate;
             _xdelta = newPlayer.Parent.GetTransform().X - localPlayer.Parent.GetTransform().X;
-            _xdelta = newPlayer.Parent.GetTransform().Y - localPlayer.Parent.GetTransform().Y;
+            _ydelta = newPlayer.Parent.GetTransform().Y - localPlayer.Parent.GetTransform().Y;
         }
 
         public InitPlayerSegment(int pid, bool needsUpdate, int xdelta, int ydelta)
@@ -32,7 +32,7 @@ namespace CScape.Core.Network.Entity.Segment
 
         public void Write(OutBlob stream)
         {
-            stream.WriteBits(11, _pid); // id
+            stream.WriteBits(11, _pid+1); // id
             stream.WriteBits(1, _needsUpdate ? 1 : 0); // needs update?
             stream.WriteBits(1, 1); // todo :  setpos flag
             stream.WriteBits(5, _ydelta); // ydelta

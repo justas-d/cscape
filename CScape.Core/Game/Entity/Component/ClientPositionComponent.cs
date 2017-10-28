@@ -45,6 +45,7 @@ namespace CScape.Core.Game.Entity.Component
         private void UpdatePosition()
         {
             var t = Parent.GetTransform();
+            var oldRegion = _clientRegion.Copy();
 
             _clientRegion.X = (t.X >> 3) - 6;
             _clientRegion.Y = (t.Y >> 3) - 6;
@@ -54,7 +55,7 @@ namespace CScape.Core.Game.Entity.Component
             _local.Y = (t.Y - (8 * _clientRegion.Y));
             _local.Z = t.Z;
 
-            Recalc();
+            Recalc(oldRegion);
         }
 
         private void UpdateOnMove((int x, int y) delta)
@@ -62,13 +63,11 @@ namespace CScape.Core.Game.Entity.Component
             _local.X += delta.x;
             _local.Y += delta.y;
 
-            Recalc();
+            Recalc(_clientRegion.Copy());
         }
 
-        private void Recalc()
+        private void Recalc(IPosition oldRegion)
         {
-            var oldRegion = _clientRegion;
-
             // update locals and client region
             if (Local.X < MinRegionBorder)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities;
@@ -22,6 +23,9 @@ namespace CScape.Core.Network.Entity.Component
 
         private List<IEntityHandle> InitEntities { get; }
             = new List<IEntityHandle>();
+
+        private HashSet<IEntityHandle> LeaveEntities { get; }
+            = new HashSet<IEntityHandle>();
         
         protected EntityNetworkSyncComponent(
             [NotNull] IEntity parent) : base(parent)
@@ -33,6 +37,9 @@ namespace CScape.Core.Network.Entity.Component
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
+            Debug.Assert(!SyncEntities.Contains(ent));
+            Debug.Assert(!LeaveEntities.Contains(ent));
+
             InitEntities.Add(ent);
         }
 
@@ -40,8 +47,10 @@ namespace CScape.Core.Network.Entity.Component
         {
             if (ent == null) throw new ArgumentNullException(nameof(ent));
 
-            SyncEntities.Add(ent);
-            InitEntities.Add(ent);
+            Debug.Assert(SyncEntities.Contains(ent));
+            Debug.Assert(!InitEntities.Contains(ent));
+
+            LeaveEntities.Add(ent);
         }
 
         protected abstract bool IsHandleableEntity(IEntityHandle h);
@@ -81,8 +90,11 @@ namespace CScape.Core.Network.Entity.Component
 
             foreach (var handle in SyncEntities)
             {
-
-                if (handle.IsDead())
+                // remove entity if
+                // it's dead
+                // or its in the leave list
+                if (handle.IsDead() ||
+                    LeaveEntities.Contains(handle))
                 {
                     syncSegments.Add(RemoveEntitySegment.Instance);
                     removeList.Add(handle);
@@ -111,6 +123,9 @@ namespace CScape.Core.Network.Entity.Component
                     }
                 }
             }
+            
+            // cleanup
+            LeaveEntities.Clear();
 
             foreach (var handle in removeList)
             {

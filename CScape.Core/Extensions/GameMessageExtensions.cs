@@ -92,8 +92,8 @@ namespace CScape.Core.Extensions
         public static ChatMessageMessage AsChatMessage(this IGameMessage msg) =>
             AssertCast<ChatMessageMessage>(msg, MessageId.ChatMessage);
 
-        public static PositionMessage AsClientRegionChange(this IGameMessage msg) =>
-            AssertCast<PositionMessage>(msg, MessageId.ClientRegionChanged);
+        public static NotificationMessage AsClientRegionChange(this IGameMessage msg) =>
+            AssertCast<NotificationMessage>(msg, MessageId.ClientRegionChanged);
 
         public static InteractingEntityMessage AsNewInteractingEntity(this IGameMessage msg) =>
             AssertCast<InteractingEntityMessage>(msg, MessageId.NewInteractingEntity);

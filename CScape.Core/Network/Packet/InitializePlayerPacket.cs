@@ -21,7 +21,7 @@ namespace CScape.Core.Network.Packet
             stream.BeginPacket(249);
 
             stream.Write((byte)(_isMember ? 1 : 0));
-            stream.Write16((short)_pid);
+            stream.Write16((short)(_pid+1));
 
             stream.EndPacket();
         }

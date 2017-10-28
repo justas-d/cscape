@@ -38,13 +38,13 @@ namespace CScape.Core.Game.Entity.Component
             var us = Parent.GetTransform();
             var oth = ent.GetTransform();
 
-            if (us.PoE.ContainsEntity(ent.Handle))
+            if (!us.PoE.ContainsEntity(ent.Handle))
                 return false;
 
             if (us.Z != oth.Z)
                 return false;
 
-            var inRange = Parent.GetTransform().ChebyshevDistanceTo(ent.GetTransform()) <= ViewRange;
+            var inRange = us.ChebyshevDistanceTo(oth) <= ViewRange;
             
             // use resolver if the other entity has one
             var resolver = ent.Components.Get<IVisionResolver>();
@@ -108,6 +108,9 @@ namespace CScape.Core.Game.Entity.Component
             // add new entities
             foreach (var handle in GetVisibleEntities())
             {
+                if (Parent.Equals(handle))
+                    continue;
+
                 if (!_seeableEntities.Contains(handle))
                 {
                     _seeableEntities.Add(handle);
