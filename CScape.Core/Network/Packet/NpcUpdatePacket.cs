@@ -46,6 +46,8 @@ namespace CScape.Core.Network.Packet
                 foreach (var flag in _flagSegments)
                     flag.Write(stream);
             }
+            else
+                stream.EndBitAccess();
 
             stream.EndPacket();
         }

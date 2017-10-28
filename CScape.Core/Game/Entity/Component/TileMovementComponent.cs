@@ -35,7 +35,7 @@ namespace CScape.Core.Game.Entity.Component
             }
         }
 
-        public override int Priority { get; }
+        public override int Priority => (int) ComponentPriority.TileMovement;        
 
         public bool IsRunning { get; set; }
 

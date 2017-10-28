@@ -7,8 +7,7 @@ namespace CScape.Core.Game.Entity.Component
 {
     public sealed class MovementActionComponent : EntityComponent
     {
-        // TODO : MovementActionComponent  priority
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.MovementActionComponent;
 
         [CanBeNull]
         public IMovementDoneAction CurrentAction { get; set; }

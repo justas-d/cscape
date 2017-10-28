@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     public sealed class MessageNetworkSyncComponent : EntityComponent
     {
         // TODO : MessageNetworkSyncComponent priority
-        public override int Priority { get; }
+        public override int Priority => (int)SyncComponentPriority.Message;
 
         public bool SyncDebugMessages { get; }
 

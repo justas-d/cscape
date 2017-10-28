@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class CombatStatNetworkSyncComponent : EntityComponent
     {
-        public override int Priority { get; }
+        public override int Priority => (int)SyncComponentPriority.Invariant;
 
         private bool _isDirty = false;
 

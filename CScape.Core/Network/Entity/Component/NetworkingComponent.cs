@@ -23,7 +23,7 @@ namespace CScape.Core.Network.Entity.Component
         [NotNull]
         private ISocketContext Socket { get; }
 
-        public override int Priority { get; } = -1;
+        public override int Priority => (int)ComponentPriority.Networking;
 
         private readonly List<IPacket> _queuedPackets = new List<IPacket>();
 
@@ -31,7 +31,9 @@ namespace CScape.Core.Network.Entity.Component
         /// In milliseconds, the delay between a socket dying and its entity being removed
         /// from the world.
         /// </summary>
-        public long ReapTimeMs { get; set; } = 1000 * 60;
+#if DEBUG
+        public long ReapTimeMs { get; set; } = 1000/* * 60*/;   
+#endif
 
         public NetworkingComponent(
             [NotNull] IEntity parent, 
@@ -51,6 +53,8 @@ namespace CScape.Core.Network.Entity.Component
 
             foreach (var packet in _queuedPackets)
                 packet.Send(Socket.OutStream);
+
+            _queuedPackets.Clear();
 
             // send our data
             Socket.FlushOutputStream();

@@ -16,7 +16,8 @@ namespace CScape.Core.Game.Entity.Component
     {
         [CanBeNull]
         private readonly Action<GroundItemComponent> _destroyCallback;
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.GroundItemComponent;
+    
 
         public ItemStack Item { get; private set; }
 

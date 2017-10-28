@@ -42,5 +42,10 @@ namespace CScape.Models.Game.Entity
         /// </summary>
         /// <returns>True if dead, false otherwise.</returns>
         bool IsDead(IEntityHandle handle);
+
+        /// <summary>
+        /// Called after FrameEnd messages.
+        /// </summary>
+        void PostFrame();
     }
 }

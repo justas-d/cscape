@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Entity.Segment;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Message;
 
 namespace CScape.Core.Network.Entity.Component
 {
@@ -15,7 +17,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(PlayerComponent))]
     public sealed class PlayerNetworkSyncComponent: EntityNetworkSyncComponent
     {
-        public override int Priority { get; } = ComponentConstants.PriorityPlayerUpdate;
+        public override int Priority => (int)SyncComponentPriority.Player;
         
         public PlayerNetworkSyncComponent(
             IEntity parent)

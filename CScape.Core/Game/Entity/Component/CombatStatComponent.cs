@@ -34,7 +34,7 @@ namespace CScape.Core.Game.Entity.Component
         public int RangedBonus { get; private set; }
         public int PrayerBonus { get; private set; }
 
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.CombatStatComponent;
 
         public CombatStatComponent([NotNull] IEntity parent) : base(parent)
         {

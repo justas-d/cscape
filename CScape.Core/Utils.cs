@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using CScape.Models.Data;
 
@@ -15,6 +17,11 @@ namespace CScape.Core
 
     public static class Utils
     {
+        public static string GetExeDir()
+        {
+            return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        }
+
         /// <summary>
         /// Checks if val is in range [begin, end)
         /// </summary>

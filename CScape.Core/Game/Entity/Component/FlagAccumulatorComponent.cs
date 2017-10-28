@@ -25,7 +25,7 @@ namespace CScape.Core.Game.Entity.Component
         public MoveMessage Movement { get; private set; }
         public bool Reinitialize { get; private set; }
 
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.FlagAccumulatorComponent;
 
         public FlagAccumulatorComponent(IEntity parent)
             :base(parent)

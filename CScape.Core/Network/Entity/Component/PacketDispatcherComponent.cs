@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     {
         private readonly IPacketHandlerCatalogue _handlers;
 
-        public override int Priority { get; }
+        public override int Priority => (int) ComponentPriority.PacketDispatcher;
 
         public bool ShouldNotifyAboutUnhandledPackets { get; set; } = true;
         public bool ShouldNotifyAboutPacketsBeingHandled { get; set; } = true;

@@ -12,8 +12,6 @@ namespace CScape.Core.Game.Entity.Component
     /// </summary>
     public class PlayerDroppedItemComponent : GroundItemComponent, IVisionResolver
     {
-        public override int Priority { get; }
-
         [NotNull]
         public string DroppedBy { get; }
 

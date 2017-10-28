@@ -20,6 +20,8 @@ namespace CScape.Models.Data
         public int BitReadCaret { get; set; }
         public int BitWriteCaret { get; set; }
 
+        public static Blob Empty { get; } = new Blob(0);
+
         public Blob(int size) : this(new byte[size])
         {
         }

@@ -17,7 +17,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(ClientPositionComponent))]
     public sealed class GroundItemNetworkSyncComponent : EntityComponent
     {
-        public override int Priority { get; }
+        public override int Priority => (int)SyncComponentPriority.GroundItem;
 
         private NetworkingComponent Network => Parent.Components.AssertGet<NetworkingComponent>();
         private ClientPositionComponent ClientPos => Parent.Components.AssertGet<ClientPositionComponent>();

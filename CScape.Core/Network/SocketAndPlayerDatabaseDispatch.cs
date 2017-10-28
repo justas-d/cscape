@@ -337,17 +337,17 @@ namespace CScape.Core.Network
                         return;
                     }
 
-                    // check pw
-                    if (!_db.IsValidPassword(username, password))
-                    {
-                        await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
-                        return;
-                    }
-
-                    // figure out whether we need to serialize the acc or make anew one.
                     SerializablePlayerModel model = null;
+                    // figure out whether we need to serialize the acc or make anew one.
                     if (_db.PlayerExists(username))
                     {
+                        // check pw
+                        if (!_db.IsValidPassword(username, password))
+                        {
+                            await KillBadConnection(socket, blob, InitResponseCode.InvalidCredentials);
+                            return;
+                        }
+
                         model = _db.Load(username);
                         if (model == null)
                         {
@@ -360,6 +360,7 @@ namespace CScape.Core.Network
                     else
                         model = SerializablePlayerModel.Default(username, _skills);
                     
+
                     blob.Write((byte)InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged
                     blob.Write((byte)model.TitleId);

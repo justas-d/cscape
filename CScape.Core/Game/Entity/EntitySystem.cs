@@ -26,6 +26,8 @@ namespace CScape.Core.Game.Entity
 
         public IReadOnlyDictionary<IEntityHandle, IEntity> All => _entities;
 
+        private readonly HashSet<IEntityHandle> _deleteQueue = new HashSet<IEntityHandle>();
+
         [NotNull]
         public IGameServer Server { get; }
 
@@ -95,9 +97,16 @@ namespace CScape.Core.Game.Entity
             // advance the generation for this id
             _generationTracker[handle.Id] += 1;
 
-            _entities.Remove(handle);
+            _deleteQueue.Add(handle);
 
             return true;
+        }
+
+        public void PostFrame()
+        {
+            // process delete queue
+            foreach (var ent in _deleteQueue)
+                _entities.Remove(ent);
         }
 
         public IEntity Get(IEntityHandle entityHandle)

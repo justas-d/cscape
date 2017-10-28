@@ -14,7 +14,7 @@ namespace CScape.Core.Game.Entity.Component
         public Dictionary<SkillID, ISkillModel> All { get; }
             = new Dictionary<SkillID, ISkillModel>();
 
-        public override int Priority { get; }
+        public override int Priority => (int) ComponentPriority.Invariant;
 
         public SkillComponent([NotNull] IEntity parent) : base(parent)
         {

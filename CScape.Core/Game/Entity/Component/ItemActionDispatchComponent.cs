@@ -8,7 +8,7 @@ namespace CScape.Core.Game.Entity.Component
 {
     public sealed class ItemActionDispatchComponent : EntityComponent
     {
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.ItemActionDispatchComponent;
 
         public ItemActionDispatchComponent([NotNull] IEntity parent) : base(parent)
         {

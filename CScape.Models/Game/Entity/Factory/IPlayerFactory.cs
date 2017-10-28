@@ -13,6 +13,8 @@ namespace CScape.Models.Game.Entity.Factory
 
         // TODO : define IPlayerFactory
 
+        int NumAlivePlayers { get; }
+
         [CanBeNull]
         IEntityHandle Get(int id);
         

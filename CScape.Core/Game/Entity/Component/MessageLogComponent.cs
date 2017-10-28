@@ -10,8 +10,7 @@ namespace CScape.Core.Game.Entity.Component
     /// </summary>
     public sealed class MessageLogComponent : EntityComponent
     {
-        public override int Priority { get; }
-
+        public override int Priority => (int)ComponentPriority.MessageLogComponent;
 
         public MessageLogComponent(IEntity parent)
             :base(parent)

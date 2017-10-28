@@ -16,6 +16,7 @@ using CScape.Models.Game.Command;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
 
@@ -73,9 +74,15 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<ItemDatabase>(s => new ItemDatabase());
             services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
             services.AddSingleton<IGameServerConfig>(s => cfg);
+            services.AddSingleton<ICommandHandler>(s =>
+            {
+                var a =new CommandDispatch();
+                a.RegisterAssembly(typeof(Entity).GetTypeInfo().Assembly);
+                return a;
+            });
 
 
-            services.AddSingleton(s => JsonConvert.DeserializeObject<InterfaceIdDatabase>("interface-ids.json"));
+            services.AddSingleton(s => InterfaceIdDatabase.FromJson(Path.Combine(Core.Utils.GetExeDir(), "interface-ids.json")));
             services.AddSingleton<IInterfaceIdDatabase>(s => s.ThrowOrGet<InterfaceIdDatabase>());
 
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
@@ -86,7 +93,7 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IPacketDatabase>(s => 
                 JsonConvert.DeserializeObject<JsonPacketDatabase>(
                         File.ReadAllText(
-                            Path.Combine(dirBuild, "packet-lengths.json"))));
+                            Path.Combine(dirBuild, Path.Combine(Core.Utils.GetExeDir(), "packet-lengths.json")))));
 
 
             Server = new GameServer(services);

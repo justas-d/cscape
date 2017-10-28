@@ -39,7 +39,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public IPlaneOfExistence PoE { get; private set; }
 
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.Transform;
 
         public Transform([NotNull] IEntity parent)
             :base(parent)
@@ -74,7 +74,7 @@ namespace CScape.Core.Game.Entity.Component
         {
             if (z > MaxZ) throw new ArgumentOutOfRangeException($"{nameof(z)} cannot be larger than {MaxZ}.");
 
-            var oldPos = new ImmIntVec3(x, y, z);
+            var oldPos = new ImmIntVec3(X, Y, Z);
 
             X = x;
             Y = y;

@@ -15,7 +15,7 @@ namespace CScape.Core.Game.Entity.Component
     {
         public const int MaxSidebarInterfaces = 15;
 
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.InterfaceComponent;
 
         private readonly Dictionary<int, InterfaceMetadata> _interfaces 
             = new Dictionary<int, InterfaceMetadata>();
@@ -127,7 +127,7 @@ namespace CScape.Core.Game.Entity.Component
         /// </summary>
         private void InternalShow(InterfaceMetadata meta)
         {
-            _interfaces.Add(meta.Index, meta);
+            _interfaces.Add(meta.Interface.Id, meta);
 
             switch (meta.Type)
             {

@@ -18,7 +18,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class RegionNetworkSyncComponent : EntityComponent
     {
-        public override int Priority { get; } = ComponentConstants.PriorityRegion;
+        public override int Priority => (int) SyncComponentPriority.Region;
 
         public RegionNetworkSyncComponent(IEntity parent)
             :base(parent)
@@ -41,13 +41,18 @@ namespace CScape.Core.Network.Entity.Component
         public override void ReceiveMessage(IGameMessage msg)
         {
             switch (msg.EventId)
-            {
+            
                 case (int)MessageId.ClientRegionChanged:
                 {
                     SyncRegion(msg.AsClientRegionChange().Position);
                     break;
                 }
                 case (int)MessageId.NetworkReinitialize:
+                {
+                    SyncRegion(Parent.AssertGetClientPosition().ClientRegion);
+                    break;
+                }
+                case (int) MessageId.PlayerInitialize:
                 {
                     SyncRegion(Parent.AssertGetClientPosition().ClientRegion);
                     break;

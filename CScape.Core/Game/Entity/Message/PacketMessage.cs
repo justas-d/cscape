@@ -31,7 +31,7 @@ namespace CScape.Core.Game.Entity.Message
             => new PacketMessage(opcode, data, ParseStatus.Success);
 
         public static PacketMessage Undefined(byte opcode)
-            => new PacketMessage(opcode, null, ParseStatus.UndefinedPacket);
+            => new PacketMessage(opcode, Blob.Empty, ParseStatus.UndefinedPacket);
 
         public int EventId => (int)MessageId.NewPacket;
     }

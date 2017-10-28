@@ -18,7 +18,7 @@ namespace CScape.Core.Game.Entity.Component
     {
         public const int DefaultViewRange = 15;
 
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.VisionComponent;
 
         private readonly HashSet<IEntityHandle> _seeableEntities= new HashSet<IEntityHandle>();
 

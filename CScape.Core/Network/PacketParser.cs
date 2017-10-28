@@ -82,7 +82,7 @@ namespace CScape.Core.Network
                 // don't bother creating a new Blob if we're storing nothing.
                 if (lenPayload == 0)
                 {
-                    yield return PacketMessage.Success(opcode, null);
+                    yield return PacketMessage.Success(opcode, Blob.Empty);
                 }
                 else
                 {

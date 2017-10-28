@@ -19,7 +19,6 @@ namespace CScape.Core
         private readonly IEntitySystem _sys;
         private readonly SocketAndPlayerDatabaseDispatch _dispatch;
 
-        private int _waitTimeCarry;
         public IGameServer Server { get; }
 
         private long DeltaTime { get; set; }
@@ -39,13 +38,13 @@ namespace CScape.Core
             TickRate = _config.TickRate;
         }
 
-        public long GetDeltaTime() => DeltaTime + _tickWatch.ElapsedMilliseconds;
+        public long GetDeltaTime() => DeltaTime + _tickWatch.ElapsedMilliseconds; // last frame + how much into this frame
 
         public async Task Run()
         {
             var timeSinceGc = 0L;
 
-            _log.Normal(this, "Starting main loop...");
+            _log.Normal(this, "Main loop is live.");
 
             // todo : exception handle all over the main loop
             while (IsRunning)
@@ -78,7 +77,6 @@ namespace CScape.Core
 
                 //================================================
 
-
                 SendMessage(NotificationMessage.FrameUpdate);
                 SendMessage(NotificationMessage.DatabaseUpdate);
                 SendMessage(NotificationMessage.NetworkUpdate);
@@ -86,20 +84,21 @@ namespace CScape.Core
 
                 //================================================
 
+                _sys.PostFrame();
+
                 // handle tick delays
                 TickProcessTime = _tickWatch.ElapsedMilliseconds;
-                var waitTime = TickRate - Convert.ToInt32(TickProcessTime) + _waitTimeCarry;
+                var waitTime = TickRate - Convert.ToInt32(TickProcessTime);
 
                 // tick process time took more then tickrate
                 if (0 > waitTime)
                 {
-                    _waitTimeCarry = waitTime;
+                    waitTime = 0;
                     _log.Warning(this,
-                        $"Cannot keep up! Tick rate is {TickRate}ms but wait time is {waitTime}ms which makes us carry {_waitTimeCarry}ms to next tick");
+                        $"Cannot keep up! Tick rate is {TickRate}ms but wait time is {waitTime}ms.");
                 }
                 else // valid waitTime, wait it out
                 {
-                    _waitTimeCarry = 0;
                     await Task.Delay(waitTime);
                 }
 

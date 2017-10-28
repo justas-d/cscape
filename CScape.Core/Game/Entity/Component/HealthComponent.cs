@@ -14,7 +14,7 @@ namespace CScape.Core.Game.Entity.Component
         public int Health => _health;
         public int MaxHealth => _maxHealth;
 
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.HealthComponent;
 
         public HealthComponent(IEntity parent, int maxHealth = 1, int health = 1)
             : base(parent)

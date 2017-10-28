@@ -11,7 +11,6 @@ namespace CScape.Core.Game.Entity.Component
         public abstract int Priority { get; }
         public abstract void ReceiveMessage(IGameMessage msg);
 
-
         [NotNull]
         public IEntity Parent { get; }
 

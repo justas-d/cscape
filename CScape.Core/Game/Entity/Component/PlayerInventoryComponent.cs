@@ -10,8 +10,7 @@ namespace CScape.Core.Game.Entity.Component
 {
     public sealed class PlayerInventoryComponent : EntityComponent, IInventoryComponent
     {
-        public override int Priority { get; }
-
+        public override int Priority => (int)ComponentPriority.Invariant;
         public const int BackpackSize = 28;
         public const int BankSize = 500;
 

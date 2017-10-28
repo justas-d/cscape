@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using CScape.Core.Database;
 using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Game.Item;
 using CScape.Core.Game.Skill;
 using CScape.Core.Network;
@@ -27,6 +28,7 @@ namespace CScape.Core.Game.Entity
         private readonly Dictionary<string, IEntityHandle> _usernameLookup = new Dictionary<string, IEntityHandle>();
 
         public IReadOnlyList<IEntityHandle> All => InstanceLookup;
+        public int NumAlivePlayers { get; private set; }
 
         private ILogger Log { get; }
 
@@ -72,13 +74,16 @@ namespace CScape.Core.Game.Entity
             ent.Components.Add(new MessageLogComponent(ent));
             ent.Components.Add(new MessageNetworkSyncComponent(ent));
 
-            ent.Components.Add(new DebugStatNetworkSyncComponent(ent));
+            //ent.Components.Add(new DebugStatNetworkSyncComponent(ent));
 
             ent.Components.Add(new NetworkingComponent(ent, socket, packetParser));
             ent.Components.Add(new PacketDispatcherComponent(ent, packets));
             ent.Components.Add(new FlagAccumulatorComponent(ent));
 
-            ent.Components.Add(new ClientPositionComponent(ent));
+            var client = new ClientPositionComponent(ent);
+            ent.Components.Add(client);
+            ent.Components.Add<IClientPositionComponent>(client);
+
             ent.Components.Add(new RegionNetworkSyncComponent(ent));
 
             var health = new HealthComponent(ent);
@@ -146,6 +151,13 @@ namespace CScape.Core.Game.Entity
           
             InstanceLookup[id] = entHandle;
             _usernameLookup.Add(model.Username, entHandle);
+            NumAlivePlayers++;
+
+            // teleport player to pos
+            ent.GetTransform().Teleport(model.PosX, model.PosY, model.PosZ);
+
+            // init components
+            ent.SendMessage(NotificationMessage.PlayerInitialize);
 
             return entHandle;
         }
@@ -158,6 +170,7 @@ namespace CScape.Core.Game.Entity
 
             InstanceLookup[component.PlayerId] = null;
             _usernameLookup.Remove(component.Username);
+            NumAlivePlayers--;
         }
     }
 }

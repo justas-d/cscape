@@ -17,6 +17,7 @@ using CScape.Models.Game.Item;
 
 namespace CScape.Core.Commands
 {
+
     [CommandsClass]
     public sealed class TestCommandClass
     {

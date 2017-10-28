@@ -10,7 +10,7 @@ namespace CScape.Core.Game.Entity.Component
     public class NpcComponent : EntityComponent, INpcComponent
     {
         private readonly Action<NpcComponent> _destroyCallback;
-        public override int Priority { get; }
+        public override int Priority => (int)ComponentPriority.Npc;
 
         public short DefinitionId { get; private set; }
         public short NpcId { get; }

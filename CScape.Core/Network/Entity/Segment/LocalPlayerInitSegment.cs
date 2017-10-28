@@ -34,7 +34,7 @@ namespace CScape.Core.Network.Entity.Segment
             stream.WriteBits(1, _needsUpdate ? 1 : 0); // add to needs updating list
 
             stream.WriteBits(7, _local.Y); // local y
-            stream.WriteBits(7, _local.Z); // local x
+            stream.WriteBits(7, _local.X); // local x
         }
     }
 }

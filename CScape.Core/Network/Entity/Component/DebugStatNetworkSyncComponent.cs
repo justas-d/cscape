@@ -12,7 +12,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class DebugStatNetworkSyncComponent : EntityComponent
     {
-        public override int Priority { get; }
+        public override int Priority => (int)SyncComponentPriority.DebugStat;
 
         public DebugStatNetworkSyncComponent([NotNull]IEntity parent) : base(parent)
         {

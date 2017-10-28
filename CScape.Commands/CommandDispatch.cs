@@ -15,7 +15,6 @@ namespace CScape.Commands
 
         public CommandDispatch()
         {
-            RegisterAssembly(GetType().GetTypeInfo().Assembly);
         }
 
         public void RegisterAssembly(Assembly asm)

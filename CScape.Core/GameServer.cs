@@ -52,7 +52,7 @@ namespace CScape.Core
         {
             ServerStateFlags ret = 0;
 
-            if (Players.All.Count >= Services.GetService<IGameServerConfig>().MaxPlayers)
+            if (Players.NumAlivePlayers >= Services.GetService<IGameServerConfig>().MaxPlayers)
                 ret |= ServerStateFlags.PlayersFull;
 
             if (!Services.GetService<SocketAndPlayerDatabaseDispatch>().IsEnabled)

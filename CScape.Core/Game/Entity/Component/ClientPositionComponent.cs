@@ -22,7 +22,7 @@ namespace CScape.Core.Game.Entity.Component
         public IPosition ClientRegion => _clientRegion;
         public IPosition Local => _local;
 
-        public override int Priority { get; }
+        public override int Priority => (int) ComponentPriority.ClientPositionComponent;
 
         public ClientPositionComponent([NotNull] IEntity parent) : base(parent)
         {
@@ -50,7 +50,7 @@ namespace CScape.Core.Game.Entity.Component
             _clientRegion.Y = (t.Y >> 3) - 6;
             _clientRegion.Z = t.Z;
 
-            _local.X = (t.X - (8 * _clientRegion.Z));
+            _local.X = (t.X - (8 * _clientRegion.X));
             _local.Y = (t.Y - (8 * _clientRegion.Y));
             _local.Z = t.Z;
 

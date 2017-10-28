@@ -43,7 +43,7 @@ namespace CScape.Core.Network
             var player = _factory.Create(
                 Model,
                 socket,
-                Services.ThrowOrGet<PacketParser>(),
+                Services.ThrowOrGet<IPacketParser>(),
                 Services.ThrowOrGet<IPacketHandlerCatalogue>());
             
             if (!string.IsNullOrEmpty(_greeting))

@@ -41,7 +41,8 @@ namespace CScape.Core.Game.Entity.Component
         [NotNull]
         public string Username { get; }
 
-        public override int Priority { get; } = 1;
+        public override int Priority => (int)ComponentPriority.Player;
+
         [CanBeNull] private readonly Action<PlayerComponent> _destroyCallback;
 
         public PlayerComponent(
