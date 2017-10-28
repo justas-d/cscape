@@ -41,6 +41,9 @@ namespace CScape.Core.Network.Handler
 
             if (packet.Data.TryReadString(out var msg))
             {
+                if (string.IsNullOrEmpty(msg))
+                    return;
+
                 entity.SendMessage(
                     new ChatMessageMessage(ChatMessage.Say(msg, player, color, effect)));
             }

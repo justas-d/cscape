@@ -13,6 +13,7 @@ using CScape.Core.Log;
 using CScape.Core.Network;
 using CScape.Models;
 using CScape.Models.Game.Command;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -56,13 +57,27 @@ namespace CScape.Dev.Runtime
                     Path.Combine(dirBuild, "config.json")));
 
             services.AddSingleton<SkillDb>(s => new SkillDb(s));
-            services.AddSingleton<IPlayerFactory>(s => new PlayerFactory(s.ThrowOrGet<IGameServer>().Entities));
-            services.AddSingleton<INpcFactory>(s => new NpcFactory(s.ThrowOrGet<IGameServer>().Entities));
+
+            services.AddSingleton(s => new PlayerFactory(s));
+            services.AddSingleton<IPlayerFactory>(s => s.ThrowOrGet<PlayerFactory>());
+
+            services.AddSingleton(s => new NpcFactory(s));
+            services.AddSingleton<INpcFactory>(s => s.ThrowOrGet<NpcFactory>());
+
+            services.AddSingleton(s => new MainLoop(s));
+            services.AddSingleton<IMainLoop>(s => s.ThrowOrGet<MainLoop>());
+
+            services.AddSingleton(s => new EntitySystem(s.ThrowOrGet<IGameServer>()));
+            services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());
+
             services.AddSingleton<ItemDatabase>(s => new ItemDatabase());
-            services.AddSingleton<IMainLoop>(s => new MainLoop(s));
             services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
             services.AddSingleton<IGameServerConfig>(s => cfg);
-            services.AddSingleton<InterfaceIdDatabase>(s => JsonConvert.DeserializeObject<InterfaceIdDatabase>("interface-ids.json"));
+
+
+            services.AddSingleton(s => JsonConvert.DeserializeObject<InterfaceIdDatabase>("interface-ids.json"));
+            services.AddSingleton<IInterfaceIdDatabase>(s => s.ThrowOrGet<InterfaceIdDatabase>());
+
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
             services.AddSingleton<IPacketParser>(s => new PacketParser(s.ThrowOrGet<IGameServer>().Services));
             services.AddSingleton<IPacketHandlerCatalogue>(s => new PacketHandlerCatalogue(s));

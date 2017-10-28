@@ -72,12 +72,23 @@ namespace CScape.Dev.Tests.Internal.Handler
             }
         }
 
+        private (ChatPacketHandler, IEntity) Data(string msg, ChatMessage.TextEffect eff, ChatMessage.TextColor col, bool forced, int title)
+        {
+            var d = Data();
+            d.Item2.AssertGetPlayer().TitleId = title;
+            d.Item2.Components.AssertGet<MessageListener>().SetExpected(msg, eff, col, forced, title);
+            return d;
+        }
+
+
         private (ChatPacketHandler, IEntity) Data()
         {
             var server = Mock.Server();
             var player = Mock.Player("a", server).Get();
-            player.Components.Add(new MessageListener(player));
-            
+            var l = new MessageListener(player);
+            player.Components.Add(l);
+
+
             var handler = new ChatPacketHandler();
             return (handler, player);
         }
@@ -114,12 +125,16 @@ namespace CScape.Dev.Tests.Internal.Handler
             for (var i = 0; i < len; i++)
                 b.Append("a");
 
-            var (h, p) = Data();
+            var (h, p) = Data(b.ToString(), ChatMessage.TextEffect.None, ChatMessage.TextColor.Yellow, false, 0);
             Exec(h, p, ChatMessage.TextEffect.None, ChatMessage.TextColor.Yellow, b.ToString());
             return p;
         }
 
-        private void TestForSuccess(IEntity p) => Assert.IsTrue(p.Components.AssertGet<MessageListener>().Received);
+        private void TestForSuccess(IEntity p)
+        {
+            var msg = p.Components.AssertGet<MessageListener>();
+            Assert.IsTrue(msg.Received);
+        }
         private void TestForFail(IEntity p) => Assert.IsFalse(p.Components.AssertGet<MessageListener>().Received);
 
         private void TestForFailAll(ChatPacketHandler h, Blob b, IEntity p)
@@ -128,7 +143,12 @@ namespace CScape.Dev.Tests.Internal.Handler
         }
 
         [TestMethod]
-        public void TrashSpam() => new ChatPacketHandler().SpamTrash(new MockEntity());
+        public void TrashSpam()
+        {
+            var s = Mock.Server();
+            var p = Mock.Player(s).Get();
+            new ChatPacketHandler().SpamTrash(p);
+        }
 
         [TestMethod]
         public void DoNothingOnInvalidPacketSize()
@@ -193,7 +213,7 @@ namespace CScape.Dev.Tests.Internal.Handler
             var c = (ChatMessage.TextColor) Enum.GetValues(typeof(ChatMessage.TextColor)).Length + 1;
             var msg = "Hello world";
 
-            var (h, p) = Data();
+            var (h, p) = Data(msg, ChatMessage.TextEffect.None, ChatMessage.TextColor.Yellow, false, 0);
             Exec(h, p, e, c, msg);
 
             var cfg = p.Server.Services.ThrowOrGet<IGameServerConfig>();

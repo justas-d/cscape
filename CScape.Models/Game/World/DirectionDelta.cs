@@ -95,13 +95,15 @@ namespace CScape.Models.Game.World
         {
             X = x;
             Y = y;
+            Direction = Direction.None;
 
             if (x == 0 && y == 0)
-                Direction = Direction.None;
+                return;
 
-            else switch (x)
-                {
-                    case 1:
+            switch (x)
+            {
+                case 1:
+                    {
                         switch (y)
                         {
                             case 1:
@@ -115,7 +117,9 @@ namespace CScape.Models.Game.World
                                 break;
                         }
                         break;
-                    case -1:
+                    }
+                case -1:
+                    {
                         switch (y)
                         {
                             case 1:
@@ -129,7 +133,10 @@ namespace CScape.Models.Game.World
                                 break;
                         }
                         break;
-                    case 0:
+                    }
+
+                case 0:
+                    {
                         switch (y)
                         {
                             case 1:
@@ -143,9 +150,11 @@ namespace CScape.Models.Game.World
                                 break;
                         }
                         break;
-                }
+                    }
 
-            throw new ArgumentOutOfRangeException(nameof(x), $"got undefined args: ({x} {y})");
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(x), $"got undefined args: ({x} {y})");
+            }
         }
 
         public DirectionDelta Invert()

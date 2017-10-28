@@ -11,17 +11,16 @@ namespace CScape.Dev.Tests.ModelTests
         [TestMethod]
         public void TestCtorConsistency()
         {
-            // DirectionDelta(dir) == DirectionDelta(x y)
             foreach (var dir in Enum.GetValues(typeof(Direction)).Cast<Direction>())
             {
                 var dirFromDir = new DirectionDelta(dir);
                 var dirFromDelta = new DirectionDelta(dirFromDir.X, dirFromDir.Y);
 
-                Assert.Equals(dirFromDir.Direction, dir);
-                Assert.Equals(dirFromDelta.Direction, dir);
+                Assert.AreEqual(dirFromDir.Direction, dir);
+                Assert.AreEqual(dirFromDelta.Direction, dir);
 
-                Assert.Equals(dirFromDir.X, dirFromDelta.X);
-                Assert.Equals(dirFromDir.Y, dirFromDelta.Y);
+                Assert.AreEqual(dirFromDir.X, dirFromDelta.X);
+                Assert.AreEqual(dirFromDir.Y, dirFromDelta.Y);
             }
         }
 

@@ -20,31 +20,6 @@ namespace CScape.Dev.Tests.Impl
 {
     internal static class Mock
     {
-        public static (MockItem, int amount, int idx) SetItem(
-            MockServer s,
-            IContainerInterface interf,
-            int id, int amount, int idx)
-        {
-            var provider = interf.Items.Provider;
-            provider.SetId(idx, id);
-            provider.SetAmount(idx, amount);
-            return (
-                s.Services.ThrowOrGet<IItemDefinitionDatabase>().Get(id) as MockItem,
-                amount,
-                idx);
-        }
-
-        public static IContainerInterface Backpack(Player p) => GetContainer(p, 3214) as IContainerInterface;
-        public static IContainerInterface Equipment(Player p) => GetContainer(p, 1688) as IContainerInterface;
-        public static IBaseInterface NormalInterface(Player p) => GetContainer(p, 3917); // skills
-
-        public static IBaseInterface GetContainer(Player p, int id)
-        {
-            var ret = p.Interfaces.TryGetById(id);
-            Assert.IsNotNull(ret);
-            return ret;
-        }
-
         private static JsonPacketDatabase PacketDb { get; set; }
 
         public static void SpamTrash(this IPacketHandler h, IEntity ent)
@@ -127,7 +102,7 @@ namespace CScape.Dev.Tests.Impl
         public static IEntityHandle Player(string name, IGameServer server, IPosition pos)
         {
             var players = server.Services.ThrowOrGet<PlayerFactory>();
-            var p = players.Create(SerializablePlayerModel.Default(name, server.Services.ThrowOrGet<SkillDb>()), MockSocketContext.Instance, MockPacketParser.Instance, MockPacketHandlerCatalogue.Instance);
+            var p = players.Create(SerializablePlayerModel.Default(name, server.Services.ThrowOrGet<SkillDb>()), MockSocketContext.Instance, MockPacketParser.Instance, new PacketHandlerCatalogue(server.Services));
             p.Get().GetTransform().Teleport(pos);
             return p;
         }

@@ -1,6 +1,11 @@
 ﻿using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
+using CScape.Models.Data;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Command;
+using CScape.Models.Game.Entity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,7 +25,7 @@ namespace CScape.Dev.Tests.Internal.Handler
                 _expectedCmd = expectedCmd;
             }
 
-            public bool Push(Player callee, string input)
+            public bool Push(IEntity callee, string input)
             {
                 WasCalled = true;
                 Assert.AreEqual(input, _expectedCmd);
@@ -28,27 +33,27 @@ namespace CScape.Dev.Tests.Internal.Handler
             }
         }
 
-        private (Player, CommandPacketHandler, MockCommandHandler) Data(string targetStr)
+        private (IEntity, CommandPacketHandler, MockCommandHandler) Data(string targetStr)
         {
             var c = new ServiceCollection();
             var ch = new MockCommandHandler(targetStr);
             c.AddSingleton<ICommandHandler>(_ => ch);
             var s = Mock.Server(c);
 
-            var p = Mock.Player("a", s);
+            var p = Mock.Player("a", s).Get();
             return (p, new CommandPacketHandler(s.Services), ch);
         }
 
         private void TestFail(
-            CommandPacketHandler h, MockCommandHandler ch, Player p, Blob b)
+            CommandPacketHandler h, MockCommandHandler ch, IEntity p, Blob b)
         {
-            h.HandleAll(p, b, () => Assert.IsFalse(ch.WasCalled));
+            h.HandleAll(p, o => PacketMessage.Success((byte)o, b), () => Assert.IsFalse(ch.WasCalled));
         }
 
         private void TestSuccess(
-            CommandPacketHandler h, MockCommandHandler ch, Player p, Blob b)
+            CommandPacketHandler h, MockCommandHandler ch, IEntity p, Blob b)
         {
-            h.HandleAll(p, b, () => Assert.IsTrue(ch.WasCalled));
+            h.HandleAll(p, o => PacketMessage.Success((byte)o, b), () => Assert.IsTrue(ch.WasCalled));
         }
 
         [TestMethod]

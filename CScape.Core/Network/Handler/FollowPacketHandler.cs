@@ -29,11 +29,11 @@ namespace CScape.Core.Network.Handler
             if (target.IsDead())
                 return;
 
-            var player = target.Get().GetPlayer();
+            if (target.Equals(entity.Handle))
+                return;
 
             // target handle is good, make dir provider
-            entity.SendMessage(EntityMessage.PlayerFollowTarget(entity.Handle));
-
+            entity.SendMessage(EntityMessage.PlayerFollowTarget(target));
         }
     }
 }

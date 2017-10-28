@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace CScape.Core.Database
 {
-    public sealed class InterfaceIdDatabase
+    public sealed class InterfaceIdDatabase : IInterfaceIdDatabase
     {
         public int AttackLevelUpDialog { get; }
         public int DefenceLevelUpDialog { get; }

@@ -1,5 +1,10 @@
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+using CScape.Core;
+using CScape.Core.Database;
+using CScape.Core.Game;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.World;
 using CScape.Models;
@@ -20,22 +25,23 @@ namespace CScape.Dev.Tests.Impl
         {
             UTCStartTime = DateTime.UtcNow;
 
-            //var dirBuild = Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
+            services.AddSingleton(s => new EntitySystem(this));
+            services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());
 
-            Entities = new EntitySystem(this);
+            services.AddSingleton(s => new PlayerFactory(s));
+            services.AddSingleton<IPlayerFactory>(s => s.ThrowOrGet<PlayerFactory>());
 
-            var playerFactory = new PlayerFactory(Entities);
-            services.AddSingleton(playerFactory);
-            services.AddSingleton<IPlayerFactory>(playerFactory);
+            services.AddSingleton(s => new NpcFactory(s));
+            services.AddSingleton<INpcFactory>(s => s.ThrowOrGet<NpcFactory>());
 
             services.AddSingleton<IGameServerConfig>(_ => new MockConfig());
             services.AddSingleton<ILogger>(_ => new TestLogger());
             services.AddSingleton<IGameServer>(_ => this);
-            Loop = new MockLoop(this);
-            services.AddSingleton<IMainLoop>(s => Loop);
-            
+            services.AddSingleton<IInterfaceIdDatabase>(new MockInterfaceDb());
+            services.AddSingleton<SkillDb>();
+            services.AddSingleton<IMainLoop>(s => new MockLoop(this));
+        
             Services = services.BuildServiceProvider();
-
 
             Overworld = new PlaneOfExistence(this, "Mock overworld");
         }
@@ -47,8 +53,6 @@ namespace CScape.Dev.Tests.Impl
 
         public IServiceProvider Services { get; }
         public IPlaneOfExistence Overworld { get; }
-        public IMainLoop Loop { get; }
-        public IEntitySystem Entities { get; }
 
         public bool IsDisposed => false;
         public DateTime UTCStartTime { get; }

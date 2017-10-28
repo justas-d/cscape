@@ -22,6 +22,8 @@ namespace CScape.Core.Network
             RegisterAssembly(GetType().GetTypeInfo().Assembly);
         }
 
+        public IEnumerable<IPacketHandler> All => _handlers.Values;
+
         public IPacketHandler GetHandler(byte opcode)
         {
             if (_handlers.ContainsKey(opcode))

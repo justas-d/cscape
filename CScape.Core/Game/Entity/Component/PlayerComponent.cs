@@ -15,7 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Core.Game.Entity.Component
 {
-    [RequiresComponent(typeof(PlayerEquipmentContainer))]
+    [RequiresComponent(typeof(PlayerInventoryComponent))]
+    [RequiresComponent(typeof(HealthComponent))]
     public sealed class PlayerComponent : EntityComponent, IPlayerComponent
     {
         public enum Title : byte
@@ -33,7 +34,8 @@ namespace CScape.Core.Game.Entity.Component
         // TODO : fill player component with data from DB
 
         public PlayerAppearance Apperance { get; private set; }
-        public int TitleId { get; }
+        
+        public int TitleId { get; set; }
         public bool IsMember { get; }
 
         [NotNull]
@@ -44,7 +46,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public PlayerComponent(
             [NotNull] IEntity parent,
-            string username,
+            [NotNull] string username,
             PlayerAppearance appearance,
             bool isMember,
             int titleId,
@@ -52,13 +54,20 @@ namespace CScape.Core.Game.Entity.Component
             [CanBeNull] Action<PlayerComponent> destroyCallback)
             :base(parent)
         {
+            if (parent == null) throw new ArgumentNullException(nameof(parent));
+
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException("message", nameof(username));
+            }
+
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
             PlayerId = playerId;
-
-            SetAppearance(appearance);
             TitleId = titleId;
             IsMember = isMember;
             Username = username;
+
+            SetAppearance(appearance);
         }
 
         public void SetAppearance(PlayerAppearance appearance)
@@ -82,7 +91,7 @@ namespace CScape.Core.Game.Entity.Component
             var interf = Parent.GetInterfaces();
             if (interf != null)
             {
-                var db = Parent.Server.Services.GetService<InterfaceIdDatabase>();
+                var db = Parent.Server.Services.GetService<IInterfaceIdDatabase>();
                 if (db != null)
                 {
                     interf.ShowSidebar(new UnimplementedSidebarInterface(db.SkillSidebar, db.SkillSidebarIdx), db.SkillSidebarIdx);

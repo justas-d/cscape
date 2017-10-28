@@ -1,4 +1,5 @@
 ﻿using CScape.Models.Game.Entity;
+using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
@@ -30,6 +31,15 @@ namespace CScape.Core.Game.Entity
             }
 
             return InvalidId;
+        }
+
+        [CanBeNull]
+        protected IEntityHandle GetById(int id)
+        {
+            if (0 > id || id >= InstanceNum)
+                return null;
+
+            return InstanceLookup[id];
         }
     }
 }

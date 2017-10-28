@@ -30,7 +30,7 @@ namespace CScape.Core.Game
 
         public SkillDb(IServiceProvider services)
         {
-            var db = services.ThrowOrGet<InterfaceIdDatabase>();
+            var db = services.ThrowOrGet<IInterfaceIdDatabase>();
             Attack = new SkillID("Attack", 0, db.AttackLevelUpDialog);
             Defense = new SkillID("Defense", 1, db.DefenceLevelUpDialog);
             Strength = new SkillID("Strength", 2, db.StrengthLevelUpDialog);

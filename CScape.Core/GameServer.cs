@@ -20,14 +20,15 @@ namespace CScape.Core
     {
         public IServiceProvider Services { get; }
         public IPlaneOfExistence Overworld { get; }
-        public IEntitySystem Entities { get; }
+
 
         public bool IsDisposed { get; private set; }
         public DateTime UTCStartTime { get; private set; }
 
-        private ILogger Log { get; }
-        public IMainLoop Loop { get; }
 
+        private ILogger Log { get; }
+        private IMainLoop Loop { get; }
+        private IEntitySystem Entities { get; }
         private IPlayerFactory Players { get; }
 
         public GameServer([NotNull] IServiceCollection services)

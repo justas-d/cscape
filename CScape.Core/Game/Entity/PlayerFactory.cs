@@ -28,13 +28,16 @@ namespace CScape.Core.Game.Entity
 
         public IReadOnlyList<IEntityHandle> All => InstanceLookup;
 
-        private ILogger Log => EntitySystem.Server.Services.ThrowOrGet<ILogger>();
+        private ILogger Log { get; }
 
-        public PlayerFactory([NotNull] IEntitySystem entitySystem) : base(entitySystem.Server.Services.ThrowOrGet<IGameServerConfig>().MaxPlayers)
+        public PlayerFactory(IServiceProvider services) : base(services.ThrowOrGet<IGameServerConfig>().MaxPlayers)
         {
-            EntitySystem = entitySystem ?? throw new ArgumentNullException(nameof(entitySystem));
+            EntitySystem = services.ThrowOrGet<IEntitySystem>();
+            Log = services.ThrowOrGet<ILogger>();
         }
 
+        public IEntityHandle Get(int id) => GetById(id);
+        
         public IEntityHandle Get(string username)
         {
             if (_usernameLookup.ContainsKey(username))
@@ -42,13 +45,7 @@ namespace CScape.Core.Game.Entity
             return null;
         }
 
-        public IEntityHandle Get(int id)
-        {
-            if (0 > id && InstanceLookup.Length >= id)
-                return null;
 
-            return InstanceLookup[id];
-        }
 
         // TODO : return value PlayerFactory.Create null checks
         [CanBeNull]
@@ -148,7 +145,7 @@ namespace CScape.Core.Game.Entity
             health.SetNewHealth(model.Health);
           
             InstanceLookup[id] = entHandle;
-            _usernameLookup.Add(msg, entHandle);
+            _usernameLookup.Add(model.Username, entHandle);
 
             return entHandle;
         }

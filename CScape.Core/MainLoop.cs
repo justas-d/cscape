@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network;
 using CScape.Models;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
@@ -15,6 +16,7 @@ namespace CScape.Core
 
         private readonly ILogger _log;
         private readonly IGameServerConfig _config;
+        private readonly IEntitySystem _sys;
         private readonly SocketAndPlayerDatabaseDispatch _dispatch;
 
         private int _waitTimeCarry;
@@ -31,6 +33,7 @@ namespace CScape.Core
             Server = services.ThrowOrGet<IGameServer>();
             _log = services.ThrowOrGet<ILogger>();
             _config = services.ThrowOrGet<IGameServerConfig>();
+            _sys = services.ThrowOrGet<IEntitySystem>();
             _dispatch = services.ThrowOrGet<SocketAndPlayerDatabaseDispatch>();
         
             TickRate = _config.TickRate;
@@ -51,7 +54,7 @@ namespace CScape.Core
 
                 void SendMessage(IGameMessage msg)
                 {
-                    foreach (var ent in Server.Entities.All.Values)
+                    foreach (var ent in _sys.All.Values)
                         ent.SendMessage(msg);
                 }
 

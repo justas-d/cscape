@@ -6,6 +6,7 @@ using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.Exceptions;
 using JetBrains.Annotations;
 
@@ -69,7 +70,9 @@ namespace CScape.Core.Game.Entity
             var handle = new EntityHandle(this, _generationTracker[id], id);
             var entity = new Entity(name, handle);
 
-            entity.Components.Add(new Transform(entity));
+            var t = new Transform(entity);
+            entity.Components.Add(t);
+            entity.Components.Add<ITransform>(t);
 
             Debug.Assert(!_entities.ContainsKey(handle));
             _entities.Add(handle, entity);

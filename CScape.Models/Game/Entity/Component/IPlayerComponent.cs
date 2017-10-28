@@ -12,7 +12,7 @@ namespace CScape.Models.Game.Entity.Component
         /// <summary>
         /// The implementation specific id of the player's title.
         /// </summary>
-        int TitleId { get; }
+        int TitleId { get; set; }
 
         /// <summary>
         /// The player's username.

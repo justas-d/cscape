@@ -20,10 +20,10 @@ namespace CScape.Core.Game.Entity
 
         private ILogger _log;
 
-        public NpcFactory([NotNull] IEntitySystem entities) : base(entities.Server.Services.ThrowOrGet<IGameServerConfig>().MaxNpcs)
+        public NpcFactory(IServiceProvider services) : base(services.ThrowOrGet<IGameServerConfig>().MaxNpcs)
         {
-            Entities = entities ?? throw new ArgumentNullException(nameof(entities));
-            _log = entities.Server.Services.ThrowOrGet<ILogger>();
+            Entities = services.ThrowOrGet<IEntitySystem>();
+            _log = services.ThrowOrGet<ILogger>();
         }
 
         public IEntityHandle Create(string name, int definitionId)
@@ -70,10 +70,6 @@ namespace CScape.Core.Game.Entity
             InstanceLookup[npc.NpcId] = null;
         }
 
-        public IEntityHandle Get(int id)
-        {
-            if (0 > id || InstanceNum >= id) return null;
-            return InstanceLookup[id];
-        }
+        public IEntityHandle Get(int id) => GetById(id);
     }
 }

@@ -83,7 +83,7 @@ namespace CScape.Models.Data
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool CanRead(int lookahead = 0)
-            => ReadCaret + lookahead >= Buffer.Length;
+            => ReadCaret + lookahead < Buffer.Length;
 
         public short ReadInt16()
         {
@@ -105,39 +105,61 @@ namespace CScape.Models.Data
         public bool TryReadString(out string rsString, int maxLength = MaxStringLength)
         {
             var builder = new StringBuilder(maxLength);
-            var retval = true;
+
+            if (!CanRead())
+            {
+                rsString = null;
+                return false;
+            }
 
             try
             {
+                var c = (char)ReadByte();
                 var i = 0;
-                for (; i <= maxLength; i++) // <= due to terminator char
+                var tooBig = false;
+
+                while (c != NullTerminator)
                 {
-                    // don't try to read if we're eof
-                    if (ReadCaret >= Buffer.Length)
+                    // append c
+                    builder.Append(c);
+                    i++;
+
+                    if (i > MaxStringLength)
                     {
+                        tooBig = true;
+                        break;
+                    }
+
+                    // advance c
+                    if (CanRead())
+                        c = (char)ReadByte();
+                    else
+                    {
+                        /*
+                         * At this point we can't go further in the stream
+                         * and we haven't reached a null terminator.
+                         * Therefore the string is malformed.
+                         * 
+                         */
                         rsString = null;
                         return false;
                     }
-
-                    var c = ReadByte();
-                    if (c == NullTerminator)
-                        break;
-
-                    builder.Append(Convert.ToChar(c));
                 }
-                if (i > maxLength)
+
+                if (tooBig)
                 {
-                    // null terminator not found within [0; maxLength], return.
                     rsString = null;
                     return false;
                 }
             }
             catch (ArgumentOutOfRangeException)
             {
-                retval = false;
+                rsString = null;
+                return false;
             }
+
             rsString = builder.ToString();
-            return retval;
+            return true;
         }
 
         public void WriteString(string str)

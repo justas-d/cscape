@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using CScape.Core.Game.Entity.Message;
+using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
@@ -38,7 +39,7 @@ namespace CScape.Core.Game.Entity.Component
 
         protected virtual void Update()
         {
-            DroppedForMs += Parent.Server.Loop.GetDeltaTime();
+            DroppedForMs += Parent.Server.Services.ThrowOrGet<IMainLoop>().GetDeltaTime();
 
             // handle despawning
             if (DroppedForMs >= DespawnsAfterMs)

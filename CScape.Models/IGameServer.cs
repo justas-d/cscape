@@ -19,18 +19,6 @@ namespace CScape.Models
         [NotNull] IPlaneOfExistence Overworld { get; }
 
         /// <summary>
-        /// Returns the main loop used by this server.
-        /// </summary>
-        [NotNull]
-        IMainLoop Loop { get; }
-
-        /// <summary>
-        /// Returns the entity system used by this server.
-        /// </summary>
-        [NotNull]
-        IEntitySystem Entities { get; }
-
-        /// <summary>
         /// Returns whether this server has been disposed or not.
         /// </summary>
         bool IsDisposed { get; }

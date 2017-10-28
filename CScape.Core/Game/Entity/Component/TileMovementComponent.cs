@@ -101,6 +101,8 @@ namespace CScape.Core.Game.Entity.Component
         private void SetNewFollowTarget(IEntityHandle ent)
         {
             if (ent.IsDead()) return;
+            if (ent.Equals(Parent.Handle)) return;
+
             Directions = new FollowDirectionProvider(ent);
         }
 
