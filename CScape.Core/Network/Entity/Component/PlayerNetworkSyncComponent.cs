@@ -17,7 +17,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(PlayerComponent))]
     public sealed class PlayerNetworkSyncComponent: EntityNetworkSyncComponent
     {
-        public override int Priority => (int)SyncComponentPriority.Player;
+        public override int Priority => (int)ComponentPriority.PlayerSync;
         
         public PlayerNetworkSyncComponent(
             IEntity parent)

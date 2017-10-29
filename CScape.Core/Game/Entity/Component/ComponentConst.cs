@@ -6,7 +6,7 @@
         Player,
         Npc,
         Networking,
-        PacketDispatcher,
+        PacketDispatch,
         Transform,
         TileMovement,
         MovementActionComponent,
@@ -22,5 +22,16 @@
         Invariant,
 
         MessageLogComponent,
+
+        RegionSync,
+        PlayerSync,
+        NpcSync,
+        GroundItemSync,
+
+        DebugStatSync,
+
+        InvariantSync,
+
+        MessageSync
     }
 }

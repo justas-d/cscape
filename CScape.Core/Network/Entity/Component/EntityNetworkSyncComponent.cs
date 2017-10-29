@@ -179,7 +179,7 @@ namespace CScape.Core.Network.Entity.Component
                     InitEntities.Clear();
                     break;
                 }
-                case (int)MessageId.NetworkUpdate:
+                case (int)MessageId.NetworkPrepare:
                 {
                     Sync();
                     break;

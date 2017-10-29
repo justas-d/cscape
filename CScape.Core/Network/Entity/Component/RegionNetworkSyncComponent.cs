@@ -18,7 +18,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class RegionNetworkSyncComponent : EntityComponent
     {
-        public override int Priority => (int) SyncComponentPriority.Region;
+        public override int Priority => (int)ComponentPriority.RegionSync;        
 
         public RegionNetworkSyncComponent(IEntity parent)
             :base(parent)

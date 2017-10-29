@@ -17,7 +17,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(ClientPositionComponent))]
     public sealed class GroundItemNetworkSyncComponent : EntityComponent
     {
-        public override int Priority => (int)SyncComponentPriority.GroundItem;
+        public override int Priority => (int)ComponentPriority.GroundItemSync;
 
         private NetworkingComponent Network => Parent.Components.AssertGet<NetworkingComponent>();
         private ClientPositionComponent ClientPos => Parent.Components.AssertGet<ClientPositionComponent>();
@@ -112,7 +112,7 @@ namespace CScape.Core.Network.Entity.Component
 
             switch (msg.EventId)
             {
-                case (int)MessageId.NetworkUpdate:
+                case (int)MessageId.NetworkPrepare:
                 {
                     Sync();
                     break;

@@ -12,7 +12,7 @@ namespace CScape.Core.Network.Entity.Component
 {
     public sealed class NpcNetworkSyncComponent : EntityNetworkSyncComponent
     {
-        public override int Priority => (int)SyncComponentPriority.Npc;
+        public override int Priority => (int)ComponentPriority.NpcSync;
 
         public NpcNetworkSyncComponent([NotNull] IEntity parent) : base(parent)
         {

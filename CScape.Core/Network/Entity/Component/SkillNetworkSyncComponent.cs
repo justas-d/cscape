@@ -80,7 +80,7 @@ namespace CScape.Core.Network.Entity.Component
         {
             switch (msg.EventId)
             {
-                case (int)MessageId.NetworkUpdate:
+                case (int)MessageId.NetworkPrepare:
                     Sync();
                     break;
                 case (int)MessageId.LevelUp:

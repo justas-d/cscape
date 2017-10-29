@@ -9,8 +9,8 @@ namespace CScape.Core.Game.Entity.Message
         public static NotificationMessage GC { get; } = new NotificationMessage(SysMessage.GC);
         public static NotificationMessage DestroyEntity { get; } = new NotificationMessage(SysMessage.DestroyEntity);
 
-        public static NotificationMessage NetworkUpdate { get; } = new NotificationMessage(MessageId.NetworkUpdate);
-        public static NotificationMessage DatabaseUpdate { get; } = new NotificationMessage(MessageId.DatabaseUpdate);
+        public static NotificationMessage NetworkPrepare { get; } = new NotificationMessage(MessageId.NetworkPrepare);
+        public static NotificationMessage NetworkSync { get; } = new NotificationMessage(MessageId.NetworkSync);
         public static NotificationMessage NetworkReinitialize { get; } = new NotificationMessage(MessageId.NetworkReinitialize);
 
         public static NotificationMessage JustDied { get; } = new NotificationMessage(MessageId.JustDied);

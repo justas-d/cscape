@@ -2,9 +2,6 @@ namespace CScape.Core.Game.Entity.Message
 {
     public enum MessageId : int
     {
-        // system messages
-        NetworkUpdate, /* Time to to network sync logic */
-        DatabaseUpdate, /* Time to do database sync logic */
         NewSystemMessage,
 
         // skill
@@ -65,6 +62,8 @@ namespace CScape.Core.Game.Entity.Message
         ArrivedAtDestination, /* Sent whenever a movement controller's direction provider is done */
 
         // network messages
+        NetworkPrepare, /* prepare packets */
+        NetworkSync, /* sync state with clients */
         NewPacket,
         NetworkReinitialize, /* The network connection has been reinitialized */
     }

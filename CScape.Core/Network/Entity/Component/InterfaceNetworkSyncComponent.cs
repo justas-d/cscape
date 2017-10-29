@@ -14,7 +14,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class InterfaceNetworkSyncComponent : EntityComponent
     {
-        public override int Priority => (int)SyncComponentPriority.Invariant;
+        public override int Priority => (int)ComponentPriority.InvariantSync;
 
         [NotNull]
         private readonly List<IPacket> _packetQueue = new List<IPacket>();
@@ -47,7 +47,7 @@ namespace CScape.Core.Network.Entity.Component
         {
             switch (msg.EventId)
             {
-                case (int)MessageId.NetworkUpdate:
+                case (int)MessageId.NetworkPrepare:
                     Sync();
                     break;
                 case (int)MessageId.InterfaceClosed:

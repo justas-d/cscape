@@ -126,7 +126,7 @@ namespace CScape.Core.Network.Entity.Component
                     FrameUpdate();
                     break;
                 }
-                case SysMessage.FrameEnd:
+                case (int)MessageId.NetworkSync:
                 {
                     FlushPackets();
                     break;

@@ -12,7 +12,7 @@ namespace CScape.Core.Network.Entity.Component
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class DebugStatNetworkSyncComponent : EntityComponent
     {
-        public override int Priority => (int)SyncComponentPriority.DebugStat;
+        public override int Priority => (int)ComponentPriority.DebugStatSync;
 
         public DebugStatNetworkSyncComponent([NotNull]IEntity parent) : base(parent)
         {
@@ -28,7 +28,7 @@ namespace CScape.Core.Network.Entity.Component
 
         public override void ReceiveMessage(IGameMessage msg)
         {
-            if (msg.EventId == (int)MessageId.NetworkUpdate)
+            if (msg.EventId == (int)MessageId.NetworkPrepare)
                 Sync();
         }
     }
