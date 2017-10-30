@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace CScape.Core.Database
 {
-    public sealed class PlayerJsonDatabase
+    public sealed class PlayerJsonDatabase : IDisposable
     {
         [NotNull]
         private readonly PlayerJsonIO _serializer;
@@ -29,6 +29,8 @@ namespace CScape.Core.Database
 
         private void LoadPwdLookup()
         {
+            Directory.CreateDirectory(SaveDir);
+
             if (File.Exists(PasswordsDir))
             {
                 _pwdLookup = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(PasswordsDir));
@@ -37,6 +39,11 @@ namespace CScape.Core.Database
             {
                 _pwdLookup = new Dictionary<string, string>();
             }
+        }
+
+        private void SavePwdLookup()
+        {
+            File.WriteAllText(PasswordsDir, JsonConvert.SerializeObject(_pwdLookup));
         }
 
         private string MakeFileDir(string username)
@@ -58,9 +65,15 @@ namespace CScape.Core.Database
         public void Save([NotNull] IPlayerComponent player)
         {
             if (player == null) throw new ArgumentNullException(nameof(player));
-            var data = _serializer.Serialize(player.Parent);
 
-            File.WriteAllText(MakeFileDir(player.Username), data);
+            // serialize player
+            var data = _serializer.Serialize(player.Parent);
+            File.WriteAllText(MakeFileDir(player.Username), data);   
+        }
+
+        public void SetPassword(string username, string password)
+        {
+            _pwdLookup[username] = password;
         }
 
         [CanBeNull]
@@ -71,6 +84,11 @@ namespace CScape.Core.Database
             if (!PlayerExists(username)) return null;
 
             return _serializer.Deserialize(File.ReadAllText(MakeFileDir(username)));
+        }
+
+        public void Dispose()
+        {
+            SavePwdLookup();
         }
     }
 }

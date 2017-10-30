@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CScape.Core.Database;
 using CScape.Core.Game.Entities;
@@ -61,13 +62,13 @@ namespace CScape.Core
             return ret;
         }
 
-        public async Task Start()
+        public async Task Start(CancellationToken ct)
         {
             UTCStartTime = DateTime.UtcNow;
 
             Log.Normal(this, "Starting server...");
 
-            await Loop.Run();
+            await Loop.Run(ct);
         }
 
         public void SaveAllPlayers()
@@ -75,7 +76,7 @@ namespace CScape.Core
             var players = Services.ThrowOrGet<PlayerFactory>();
             var db = Services.ThrowOrGet<PlayerJsonDatabase>();
 
-            Log.Normal(this, $"Saving {players.All.Count} players.");
+            Log.Normal(this, $"Saving players.");
 
             foreach (var p in players.All.Where(p => !p.IsDead()).Select(p => p.Get()))
                 db.Save(p.AssertGetPlayer());
@@ -87,11 +88,11 @@ namespace CScape.Core
             {
                 IsDisposed = true;
 
-                // destroy entities
-                foreach(var ent in Entities.All.Keys)
-                    Entities.Destroy(ent);
-                    
                 SaveAllPlayers();
+
+                // destroy entities
+                foreach (var ent in Entities.All.Keys)
+                    Entities.Destroy(ent);
             
                 (Services as IDisposable)?.Dispose();
             }

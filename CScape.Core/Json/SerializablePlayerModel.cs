@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CScape.Core.Game;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Component;
@@ -40,9 +41,9 @@ namespace CScape.Core.Database
                  {db.Farming, new NormalSkillModel(db.Farming, 0, 0)},
                  {db.Runecrafting, new NormalSkillModel(db.Runecrafting, 0, 0)}
              },
-             new ItemStack[PlayerInventoryComponent.BackpackSize],
-             new ItemStack[PlayerInventoryComponent.BankSize],
-             new ItemStack[PlayerEquipmentContainer.EquipmentMaxSize],
+             Enumerable.Repeat(ItemStack.Empty, PlayerInventoryComponent.BackpackSize).ToArray(),
+             Enumerable.Repeat(ItemStack.Empty, PlayerInventoryComponent.BankSize).ToArray(),
+             Enumerable.Repeat(ItemStack.Empty, PlayerEquipmentContainer.EquipmentMaxSize).ToArray(),
              username,
              (int)PlayerComponent.Title.Normal,
              PlayerAppearance.Default,

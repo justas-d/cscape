@@ -1,9 +1,10 @@
 ﻿using System;
 using CScape.Models.Game.Entity;
+using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Item
 {
-    public struct ItemStack : IEquatable<ItemStack>
+    public class ItemStack : IEquatable<ItemStack>
     {
         private sealed class EmptyItemDefinition : IItemDefinition
         {
@@ -26,20 +27,33 @@ namespace CScape.Models.Game.Item
         }
 
         public static IItemDefinition EmptyItem { get; } = new EmptyItemDefinition();
+        public static ItemStack Empty { get; } = new ItemStack(EmptyItem, EmptyAmount);
 
         public const int EmptyAmount = 0;
 
+        [NotNull]
         public IItemDefinition Id { get; }
         public int Amount { get; }
 
-        public ItemStack(IItemDefinition id, int amount)
+        /// <summary>
+        /// Constructs an empty item stack.
+        /// </summary>
+        public ItemStack()
         {
-            Id = id;
+            Id = EmptyItem;
+            Amount = 0;
+        }
+
+        /// <summary>
+        /// Constructs an item stack.
+        /// </summary>
+        public ItemStack([NotNull] IItemDefinition id, int amount)
+        {
+            Id = id ?? throw new ArgumentNullException(nameof(id));
             Amount = amount;
         }
 
-        public static ItemStack Empty { get; } = new ItemStack(EmptyItem, EmptyAmount);
-
+        public bool IsFull() => Amount >= Id.MaxAmount;
         public bool IsEmpty() => Equals(Empty) || Amount == EmptyAmount;
         
         public bool Equals(ItemStack other)

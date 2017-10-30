@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.World;
@@ -37,6 +38,6 @@ namespace CScape.Models
         /// Initializes the server and returns the infinite tick processing proceedure as a task.
         /// </summary>
         [NotNull]
-        Task Start();
+        Task Start(CancellationToken token);
     }
 }

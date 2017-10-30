@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using CScape.Core.Database;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
@@ -27,15 +28,18 @@ namespace CScape.Core.Game.Entity
         // username lookup
         private readonly Dictionary<string, IEntityHandle> _usernameLookup = new Dictionary<string, IEntityHandle>();
 
-        public IReadOnlyList<IEntityHandle> All => InstanceLookup;
+        public IEnumerable<IEntityHandle> All => InstanceLookup.Where(p => p != null);
         public int NumAlivePlayers { get; private set; }
 
         private ILogger Log { get; }
+
+        private PlayerJsonDatabase _db;
 
         public PlayerFactory(IServiceProvider services) : base(services.ThrowOrGet<IGameServerConfig>().MaxPlayers)
         {
             EntitySystem = services.ThrowOrGet<IEntitySystem>();
             Log = services.ThrowOrGet<ILogger>();
+            _db = services.ThrowOrGet<PlayerJsonDatabase>();
         }
 
         public IEntityHandle Get(int id) => GetById(id);
@@ -170,7 +174,11 @@ namespace CScape.Core.Game.Entity
 
             InstanceLookup[component.PlayerId] = null;
             _usernameLookup.Remove(component.Username);
+
             NumAlivePlayers--;
+
+            // serialize
+            _db.Save(component);
         }
     }
 }

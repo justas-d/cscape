@@ -9,9 +9,7 @@ namespace CScape.Models.Game.Entity.Factory
     public interface IPlayerFactory
     {
         IEntitySystem EntitySystem { get; }
-        IReadOnlyList<IEntityHandle> All { get; }
-
-        // TODO : define IPlayerFactory
+        IEnumerable<IEntityHandle> All { get; }
 
         int NumAlivePlayers { get; }
 

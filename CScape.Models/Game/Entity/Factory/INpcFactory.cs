@@ -9,10 +9,15 @@ namespace CScape.Models.Game.Entity.Factory
         /// Returns all alive NPC entity handles.
         /// </summary>
         [NotNull]
-        IReadOnlyList<IEntityHandle> All { get; }
+        IEnumerable<IEntityHandle> All { get; }
 
-        // TODO : maybe replace definition id with an INpcDefinition interface?
-        // TODO : define  INpcFactory.Create
+        // TODO : replace definition id with an INpcDefinition interface?
+        /// <summary>
+        /// Creates an entity with components:
+        /// * IVisionComponent
+        /// * IHealthComponent
+        /// * INpcComponent
+        /// </summary>
         [CanBeNull]
         IEntityHandle Create(string name, int definitionId);
 

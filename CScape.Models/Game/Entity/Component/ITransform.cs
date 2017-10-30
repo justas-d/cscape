@@ -54,9 +54,6 @@ namespace CScape.Models.Game.Entity.Component
         /// </summary>
         void SwitchPoE([NotNull] IPlaneOfExistence newPoe);
 
-        // todo : get rid of the ITransform.SyncLocalsToGlobals hack
-        void SyncLocalsToGlobals([NotNull] IClientPositionComponent client);
-
         /// <summary>
         /// Teleports the entity to the given coordinates.
         /// </summary>

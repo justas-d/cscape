@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
@@ -34,6 +35,6 @@ namespace CScape.Models
         /// <summary>
         /// Returns a task for the infinite tick loop proceedure.
         /// </summary>
-        [NotNull] Task Run();
+        [NotNull] Task Run(CancellationToken token);
     }
 }

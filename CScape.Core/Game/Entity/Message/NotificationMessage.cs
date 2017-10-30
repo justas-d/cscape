@@ -22,6 +22,8 @@ namespace CScape.Core.Game.Entity.Message
         public static NotificationMessage ClientRegionChanged { get; } = new NotificationMessage(MessageId.ClientRegionChanged);
         public static NotificationMessage PlayerInitialize { get; } = new NotificationMessage(MessageId.PlayerInitialize);
 
+        public static NotificationMessage SyncLocalsToGlobals { get; } = new NotificationMessage(MessageId.SyncLocalsToGlobals);
+
         public int EventId { get; }
 
         public NotificationMessage(MessageId eventId)

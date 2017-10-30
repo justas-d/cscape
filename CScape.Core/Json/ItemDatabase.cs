@@ -36,6 +36,9 @@ namespace CScape.Core.Database
 
         public IItemDefinition Get(int id)
         {
+            if (id == 0)
+                return ItemStack.EmptyItem;
+            
             return new UnimplementedItem(id);
         }
     }

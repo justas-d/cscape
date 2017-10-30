@@ -83,7 +83,6 @@ namespace CScape.Core.Game.Entity.Component
             Parent.SendMessage(new TeleportMessage(oldPos, new ImmIntVec3(X, Y, Z)));
         }
 
-        // TODO : use SetFacingDirection
         public void SetFacingDirection([NotNull]IFacingData data)
         {
             FacingData = data ?? throw new ArgumentNullException(nameof(data));
@@ -166,6 +165,11 @@ namespace CScape.Core.Game.Entity.Component
                         break;
 
                     InteractingEntity = new PlayerInteractingEntity(player);
+                    break;
+                }
+                case (int) MessageId.SyncLocalsToGlobals:
+                {
+                    SyncLocalsToGlobals(Parent.AssertGetClientPosition());
                     break;
                 }
             }

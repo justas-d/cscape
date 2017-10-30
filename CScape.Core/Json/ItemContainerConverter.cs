@@ -51,5 +51,8 @@ namespace CScape.Core.Database
         }
 
         public override bool CanConvert(Type objectType) => typeof(ItemStack).IsAssignableFrom(objectType);
+
+        public override bool CanRead => true;
+        public override bool CanWrite => true;
     }
 }

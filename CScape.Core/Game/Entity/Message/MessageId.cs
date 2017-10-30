@@ -54,6 +54,7 @@ namespace CScape.Core.Game.Entity.Message
         PoeSwitch,
         Teleport, /* Forced movement over an arbitrary size of land */
         NewFacingDirection,
+        SyncLocalsToGlobals,
 
         // pathing messages
         NewPlayerFollowTarget,

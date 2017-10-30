@@ -358,8 +358,10 @@ namespace CScape.Core.Network
                         }
                     }
                     else
+                    {
                         model = SerializablePlayerModel.Default(username, _skills);
-                    
+                        _db.SetPassword(username, password);
+                    }
 
                     blob.Write((byte)InitResponseCode.LoginDone);
                     blob.Write(0); // is flagged

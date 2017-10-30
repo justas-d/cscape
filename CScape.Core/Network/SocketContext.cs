@@ -83,7 +83,6 @@ namespace CScape.Core.Network
             {
                 if (!IsConnected())
                 {
-                    // todo : DeadForMs += deltaTime; resulted in a massive negative dead for ms
                     DeadForMs += deltaTime;
                     return false;
                 }

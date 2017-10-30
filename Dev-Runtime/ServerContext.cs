@@ -3,6 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using System.Runtime.Loader;
+using System.Threading;
 using System.Threading.Tasks;
 using CScape.Commands;
 using CScape.Core;
@@ -22,9 +24,10 @@ using Nito.AsyncEx;
 
 namespace CScape.Dev.Runtime
 {
-    public class ServerContext
+    public class ServerContext : IDisposable
     {
-        public GameServer Server { get; private set; }
+        private GameServer _server;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
 
         private void HandleAggregateException(AggregateException aggEx)
         {
@@ -49,7 +52,7 @@ namespace CScape.Dev.Runtime
                 HandleAggregateException(e.Exception);
                 e.SetObserved();
             };
-            
+
             // set up servicess
             var services = new ServiceCollection();
 
@@ -76,13 +79,14 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IGameServerConfig>(s => cfg);
             services.AddSingleton<ICommandHandler>(s =>
             {
-                var a =new CommandDispatch();
+                var a = new CommandDispatch();
                 a.RegisterAssembly(typeof(Entity).GetTypeInfo().Assembly);
                 return a;
             });
 
 
-            services.AddSingleton(s => InterfaceIdDatabase.FromJson(Path.Combine(Core.Utils.GetExeDir(), "interface-ids.json")));
+            services.AddSingleton(s =>
+                InterfaceIdDatabase.FromJson(Path.Combine(Core.Utils.GetExeDir(), "interface-ids.json")));
             services.AddSingleton<IInterfaceIdDatabase>(s => s.ThrowOrGet<InterfaceIdDatabase>());
 
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
@@ -90,24 +94,56 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IPacketHandlerCatalogue>(s => new PacketHandlerCatalogue(s));
             services.AddSingleton<PlayerJsonDatabase>(s => new PlayerJsonDatabase(s));
 
-            services.AddSingleton<IPacketDatabase>(s => 
+            services.AddSingleton<IPacketDatabase>(s =>
                 JsonConvert.DeserializeObject<JsonPacketDatabase>(
-                        File.ReadAllText(
-                            Path.Combine(dirBuild, Path.Combine(Core.Utils.GetExeDir(), "packet-lengths.json")))));
+                    File.ReadAllText(
+                        Path.Combine(dirBuild, Path.Combine(Core.Utils.GetExeDir(), "packet-lengths.json")))));
 
 
-            Server = new GameServer(services);
 
-            AsyncContext.Run(async () =>
+
+            _server = new GameServer(services);
+
+            // hook the assembly unloading event to signalt the cancellation token
+            AppDomain.CurrentDomain.ProcessExit += (a, b) => Dispose();
+            Console.CancelKeyPress += (a, b) =>
             {
-                await Server.Start().ContinueWith(t =>
+                Dispose();
+                b.Cancel = true;
+            };
+
+            try
+            {
+                AsyncContext.Run(async () =>
                 {
-                    if (t.Exception != null)
+                    await _server.Start(_cts.Token).ContinueWith(t =>
                     {
-                        HandleAggregateException(t.Exception);
-                    }
+                        if (t.Exception != null)
+                        {
+                            HandleAggregateException(t.Exception);
+                        }
+                    }, _cts.Token);
                 });
-            });
+            }
+            catch (TaskCanceledException)
+            {
+                // expected
+            }
+
+            Dispose();
+        }
+
+        private bool _isDisposed = false;
+
+        public void Dispose()
+        {
+            if (!_isDisposed)
+            {
+                _isDisposed = true;
+
+                _server.Dispose();
+                _cts.Dispose();
+            }
         }
     }
 }

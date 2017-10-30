@@ -31,8 +31,6 @@ namespace CScape.Core.Game.Entity.Component
 
         public int PlayerId { get; }
 
-        // TODO : fill player component with data from DB
-
         public PlayerAppearance Apperance { get; private set; }
         
         public int TitleId { get; set; }

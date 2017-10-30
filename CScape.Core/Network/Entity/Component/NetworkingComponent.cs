@@ -91,7 +91,7 @@ namespace CScape.Core.Network.Entity.Component
 
                 SendPacket(LogoffPacket.Static);
                 
-                Socket.FlushOutputStream();
+                FlushPackets();
                 Socket.Dispose();
             }
         }

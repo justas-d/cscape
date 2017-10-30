@@ -37,5 +37,8 @@ namespace CScape.Core.Database
         }
 
         public override bool CanConvert(Type objectType) => objectType == typeof(SkillID);
+
+        public override bool CanRead => true;
+        public override bool CanWrite => true;
     }
 }

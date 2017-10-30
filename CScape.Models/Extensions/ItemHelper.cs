@@ -28,10 +28,12 @@ namespace CScape.Models.Extensions
                 // compare id's
                 if (item.Id.ItemId == id)
                 {
-                    // todo : should we skip items that are fully stacked when looking for items with the same id in BasicItemManager?
-                    // we found an existing item, set the existing item index and gtfo out of the loop.
-                    existingIdx = i;
-                    break;
+                    if (!item.IsFull())
+                    {
+                        // we found an existing item, set the existing item index and gtfo out of the loop.
+                        existingIdx = i;
+                        break;
+                    }
                 }
             }
 

@@ -98,7 +98,7 @@ namespace CScape.Core.Game.Entity.Component
 
             _base = new ImmIntVec3(_clientRegion.X * 8, _clientRegion.Y * 8, Parent.GetTransform().Z);
 
-            Parent.GetTransform().SyncLocalsToGlobals(this);
+            Parent.SendMessage(NotificationMessage.SyncLocalsToGlobals);
         }
     }
 }

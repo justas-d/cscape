@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity.Component;
 using CScape.Models;
@@ -16,7 +17,7 @@ namespace CScape.Core.Game.Entity
     {
         public IEntitySystem Entities { get; }
 
-        public IReadOnlyList<IEntityHandle> All => InstanceLookup;
+        public IEnumerable<IEntityHandle> All => InstanceLookup.Where(p => p != null);
 
         private ILogger _log;
 
@@ -46,10 +47,6 @@ namespace CScape.Core.Game.Entity
             var health = new HealthComponent(ent);
             ent.Components.Add(health);
             ent.Components.Add<IHealthComponent>(health);
-
-            var cmb = new CombatStatComponent(ent);
-            ent.Components.Add(cmb);
-            ent.Components.Add<ICombatStatComponent>(cmb);
 
             var npc = new NpcComponent(ent, (short) definitionId.Clamp(0, short.MaxValue),
                 (short) id.Clamp(0, short.MaxValue), DestroyCallback);
