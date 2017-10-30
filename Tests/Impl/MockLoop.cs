@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CScape.Models;
 
@@ -20,6 +21,6 @@ namespace CScape.Dev.Tests.Impl
 
         public long GetDeltaTime() => _rng.Next(0, (int)TickRate);
 
-        public Task Run() => null;
+        public Task Run(CancellationToken token) => null;
     }
 }

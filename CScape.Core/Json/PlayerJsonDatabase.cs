@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 
 namespace CScape.Core.Database
 {
+    // TODO : proper player serialization
     public sealed class PlayerJsonDatabase : IDisposable
     {
         [NotNull]
@@ -51,6 +52,8 @@ namespace CScape.Core.Database
 
         public bool IsValidPassword(string username, string password)
         {
+            return true;
+
             if (!_pwdLookup.ContainsKey(username))
             {
                 _log.Warning(this, $"Tried to check if pwd is valid for username {username} but the username was not found in pwd lookup.");
@@ -60,7 +63,12 @@ namespace CScape.Core.Database
             return _pwdLookup[username].Equals(password, StringComparison.Ordinal);
         }
 
-        public bool PlayerExists(string username) => File.Exists(MakeFileDir(username));
+        public bool PlayerExists(string username)
+        {
+            return false;
+
+            File.Exists(MakeFileDir(username));
+        }
 
         public void Save([NotNull] IPlayerComponent player)
         {
@@ -79,6 +87,8 @@ namespace CScape.Core.Database
         [CanBeNull]
         public SerializablePlayerModel Load([NotNull] string username)
         {
+            throw new InvalidOperationException();
+
             if (username == null) throw new ArgumentNullException(nameof(username));
 
             if (!PlayerExists(username)) return null;
@@ -88,6 +98,8 @@ namespace CScape.Core.Database
 
         public void Dispose()
         {
+            return;
+
             SavePwdLookup();
         }
     }

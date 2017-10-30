@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Database;
@@ -57,6 +58,6 @@ namespace CScape.Dev.Tests.Impl
         public bool IsDisposed => false;
         public DateTime UTCStartTime { get; }
         public ServerStateFlags GetState() => 0;
-        public Task Start() => null;
+        public Task Start(CancellationToken token) => null;
     }
 }

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using CScape.Core.Game;
 using CScape.Core.Game.Entity;
@@ -11,6 +14,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Database
 {
+
     public class SerializablePlayerModel
     {
         [NotNull]
