@@ -180,6 +180,10 @@ namespace CScape.Core.Game.Entity.Component
             }
 
             _pressedButtonIds.Clear();
+            
+            // update interfaces
+            foreach (var interf in All)
+                interf.Value.Interface.UpdateForEntity(Parent);
         }
 
         private void OnActionOccurred()

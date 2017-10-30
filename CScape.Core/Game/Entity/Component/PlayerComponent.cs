@@ -105,6 +105,9 @@ namespace CScape.Core.Game.Entity.Component
                     interf.ShowSidebar(new UnimplementedSidebarInterface(db.OptionsHighDetailSidebar, db.OptionsSidebarIdx), db.OptionsSidebarIdx);
                     interf.ShowSidebar(new UnimplementedSidebarInterface(db.ControlsSidebar, db.ControlsSidebarIdx), db.ControlsSidebarIdx);
 
+                    interf.ShowSidebar(new UnimplementedSidebarInterface(db.BackpackSidebar, db.BackpackSidebarIdx), db.BackpackSidebarIdx);
+                    interf.ShowSidebar(new UnimplementedSidebarInterface(db.EquipmentSidebar, db.EquipmentSidebarIdx), db.EquipmentSidebarIdx);
+
                     var items = Parent.AssertGetPlayerContainers();
 
                     interf.Show(InterfaceMetadata.Register(new InventoryInterface(db.BackpackContainer, items.Backpack)));
