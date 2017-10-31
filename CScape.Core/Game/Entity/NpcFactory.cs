@@ -28,6 +28,7 @@ namespace CScape.Core.Game.Entity
             _log = services.ThrowOrGet<ILogger>();
         }
 
+        // TODO : replace definition id with an INpcDefinition interface?
         public IEntityHandle Create(string name, int definitionId)
         {
             var handle = Entities.Create($"Npc: {name}");

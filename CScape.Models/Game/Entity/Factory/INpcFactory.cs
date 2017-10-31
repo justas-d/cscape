@@ -11,7 +11,6 @@ namespace CScape.Models.Game.Entity.Factory
         [NotNull]
         IEnumerable<IEntityHandle> All { get; }
 
-        // TODO : replace definition id with an INpcDefinition interface?
         /// <summary>
         /// Creates an entity with components:
         /// * IVisionComponent
