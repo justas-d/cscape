@@ -1,6 +1,7 @@
 using System;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entities.FacingData;
+using CScape.Core.Game.Entity.Directions;
 using CScape.Core.Game.Entity.InteractingEntity;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models;
@@ -119,52 +120,75 @@ namespace CScape.Core.Game.Entity.Component
                 .Debug(this, "Synced client locals to globals.");
         }
 
+        private void OnMove(MoveMessage data)
+        {
+            var delta = data.SumMovements();
+
+            X += delta.x;
+            Y += delta.y;
+
+            UpdateRegion();
+
+            /* 
+             * client implicitly sets the facing direction for the movign entity itself
+             * so there is no need to call SetFacingDirection and send out an entity-wide message
+             * we can just silently change the direction and if we need to ever check it, we
+             * will find good data no matter what.
+             */
+
+            // also we set the last moving direction here
+            if (data.IsWalking)
+            {
+                FacingState = new DirecionFacingState(data.Dir1, this);
+                LastMovedDirection = data.Dir1;
+            }
+            else
+            {
+                LastMovedDirection = data.Dir2;
+                FacingState = new DirecionFacingState(data.Dir2, this);
+            }
+        }
+
+        private void OnNewFollowPlayer(EntityMessage data)
+        {
+            var ent = data.AsNewPlayerFollowTarget().Entity;
+            if (ent.IsDead())
+                return;
+
+            var player = ent.Get().GetPlayer();
+            if (player == null)
+                return;
+
+            SetInteractingEntity(new PlayerInteractingEntity(player));
+        }
+
+        private void OnBeginMovePath(BeginMovePathMessage msgData)
+        {
+            // only reset interacting entity if the new directions provider
+            // is not a follow directions provider.
+            if (!(msgData.Directions is FollowDirectionProvider))
+                SetInteractingEntity(NullInteractingEntity.Instance);
+        }
+
         public override void ReceiveMessage(IGameMessage msg)
         {
-            // TODO : handle ForcedMovement in ServerTransform,
+            // TODO : handle ForcedMovement in Transform,
             // TODO : handle ForcedMovement movement over time in a separate component
             switch (msg.EventId)
             {
+                case (int) MessageId.BeginMovePath:
+                {
+                    OnBeginMovePath(msg.AsBeginMovePath());
+                    break;
+                }
                 case (int) MessageId.Move:
                 {
-                    var data = msg.AsMove();
-                    var delta = data.SumMovements();
-
-                    X += delta.x;
-                    Y += delta.y;
-
-                    UpdateRegion();
-
-                    /* 
-                     * client implicitly sets the facing direction for the movign entity itself
-                     * so there is no need to call SetFacingDirection and send out an entity-wide message
-                     * we can just silently change the direction and if we need to ever check it, we
-                     * will find good data no matter what.
-                     */
-
-                    // also we set the last moving direction here
-                    if (data.IsWalking)
-                    {
-                        FacingState = new DirecionFacingState(data.Dir1, this);
-                        LastMovedDirection = data.Dir1;
-                    }
-                    else
-                    {
-                        LastMovedDirection = data.Dir2;
-                        FacingState = new DirecionFacingState(data.Dir2, this);
-                    }
-                        break;
+                    OnMove(msg.AsMove());
+                    break;
                 }
                 case (int) MessageId.NewPlayerFollowTarget:
                 {
-                    var ent = msg.AsNewPlayerFollowTarget().Entity;
-                    if (ent.IsDead())
-                        break;
-                    var player = ent.Get().GetPlayer();
-                    if (player == null)
-                        break;
-
-                    SetInteractingEntity(new PlayerInteractingEntity(player));
+                    OnNewFollowPlayer(msg.AsNewPlayerFollowTarget());
                     break;
                 }
                 case (int) MessageId.SyncLocalsToGlobals:

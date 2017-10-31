@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Directions;
 using CScape.Core.Game.Entity.Message;
@@ -78,8 +79,10 @@ namespace CScape.Core.Game.Entity.Component
         {
             if (_isDirectionProviderNew)
             {
+                Debug.Assert(_directions != null);
+                
                 // we just received a new direction provider, let's send a begin move path message.
-                Parent.SendMessage(NotificationMessage.BeginMovePath);
+                Parent.SendMessage(new BeginMovePathMessage(_directions));
 
                 _isDirectionProviderNew = false;
             }

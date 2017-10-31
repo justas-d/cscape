@@ -98,6 +98,9 @@ namespace CScape.Core.Extensions
         public static InteractingEntityMessage AsNewInteractingEntity(this IGameMessage msg) =>
             AssertCast<InteractingEntityMessage>(msg, MessageId.NewInteractingEntity);
 
+        public static BeginMovePathMessage AsBeginMovePath(this IGameMessage msg)
+            => AssertCast<BeginMovePathMessage>(msg, MessageId.BeginMovePath);
+
         public static MoveMessage AsMove(this IGameMessage msg) =>
             AssertCast<MoveMessage>(msg, MessageId.Move);
 

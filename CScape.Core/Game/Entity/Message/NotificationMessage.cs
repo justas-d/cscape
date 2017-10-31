@@ -15,7 +15,6 @@ namespace CScape.Core.Game.Entity.Message
 
         public static NotificationMessage JustDied { get; } = new NotificationMessage(MessageId.JustDied);
 
-        public static NotificationMessage BeginMovePath { get; } = new NotificationMessage(MessageId.BeginMovePath);
         public static NotificationMessage StopMovingAlongMovePath { get; } = new NotificationMessage(MessageId.StopMovingAlongMovePath);
         public static NotificationMessage ArrivedAtDestination { get; } = new NotificationMessage(MessageId.ArrivedAtDestination);
 
