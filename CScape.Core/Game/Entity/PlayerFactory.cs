@@ -163,7 +163,7 @@ namespace CScape.Core.Game.Entity
             ent.GetTransform().Teleport(model.PosX, model.PosY, model.PosZ);
 
             // init components
-            ent.SendMessage(NotificationMessage.PlayerInitialize);
+            ent.SendMessage(NotificationMessage.Initialize);
 
             return entHandle;
         }

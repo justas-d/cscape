@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Message;
 using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
@@ -57,6 +58,8 @@ namespace CScape.Core.Game.Entity
             Debug.Assert(InstanceLookup[id] == null);
 
             InstanceLookup[id] = handle;
+
+            ent.SendMessage(NotificationMessage.Initialize);
 
             return handle;
         }
