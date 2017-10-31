@@ -1,8 +1,12 @@
-﻿using CScape.Models.Game.Entity;
+﻿using CScape.Core.Game.Item;
+using CScape.Models.Extensions;
+using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
 using CScape.Models.Game.Item;
 
 namespace CScape.Core.Database
 {
+
     public sealed class ItemDatabase
     {
         private sealed class UnimplementedItem : IItemDefinition
@@ -27,12 +31,23 @@ namespace CScape.Core.Database
                 entity.SystemMessage($"Unimplemented item {ItemId} used with {other.Id.ItemId} {other.Id.ItemId}");
             }
 
-            public void OnAction(IEntity entity, int actionId)
+            public void OnAction(IEntity parentEntity, IItemContainer itemsContainer, int itemIndexInContainer,
+                InterfaceMetadata containerInterfaceMetadata, ItemStack item, int actionId)
             {
-                entity.SystemMessage($"Unimplemented item {ItemId} action {actionId}");
+                // drop logic
+                if (actionId == (int)ItemActionType.Drop)
+                {
+                    var player = parentEntity.GetPlayer();
+                    if (player != null)
+                    {
+                        itemsContainer.PlayerDropItem(itemIndexInContainer, player);
+                        return;
+                    }
+                }
+                
+                parentEntity.SystemMessage($"Unimplemented item {ItemId} action {actionId}");
             }
         }
-
 
         public IItemDefinition Get(int id)
         {

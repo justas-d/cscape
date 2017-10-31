@@ -24,9 +24,13 @@ namespace CScape.Core.Game.Entity
         private readonly Dictionary<IEntityHandle, IEntity> _entities 
             = new Dictionary<IEntityHandle, IEntity>();
 
+        private readonly Dictionary<IEntityHandle, IEntity> _createQueue = new Dictionary<IEntityHandle, IEntity>();
+
         public IReadOnlyDictionary<IEntityHandle, IEntity> All => _entities;
 
         private readonly HashSet<IEntityHandle> _deleteQueue = new HashSet<IEntityHandle>();
+
+        
 
         [NotNull]
         public IGameServer Server { get; }
@@ -39,16 +43,6 @@ namespace CScape.Core.Game.Entity
 
             IdThreshold = idThreshold;
             _idQueue = new List<int>(IdThreshold);
-        }
-
-        public bool IsDead(IEntityHandle handle)
-        {
-            if (_generationTracker.ContainsKey(handle.Id))
-            {
-                return _generationTracker[handle.Id] != handle.Generation;
-            }
-            else
-                return true;
         }
 
         public IEntityHandle Create(string name)
@@ -76,9 +70,11 @@ namespace CScape.Core.Game.Entity
             entity.Components.Add(t);
             entity.Components.Add<ITransform>(t);
 
-            Debug.Assert(!_entities.ContainsKey(handle));
-            _entities.Add(handle, entity);
-
+            // we must delegate the adding of the entity to the entity list to
+            // the end of the frame to allow for the creation of entities during
+            // the iteration of all living entities.
+            _createQueue.Add(entity.Handle, entity);
+            
             return handle;
         }
    
@@ -106,7 +102,18 @@ namespace CScape.Core.Game.Entity
         {
             // process delete queue
             foreach (var ent in _deleteQueue)
+            {
                 _entities.Remove(ent);
+            }
+            _deleteQueue.Clear();
+
+            // flush entities in the create queue to the main entity map
+            foreach (var kvp in _createQueue)
+            {
+                Debug.Assert(!_entities.ContainsKey(kvp.Key));
+                _entities.Add(kvp.Key, kvp.Value);
+            }
+            _createQueue.Clear();
         }
 
         public IEntity Get(IEntityHandle entityHandle)
@@ -114,7 +121,22 @@ namespace CScape.Core.Game.Entity
             if (entityHandle == null) throw new ArgumentNullException(nameof(entityHandle));
             if(IsDead(entityHandle)) throw new DestroyedEntityDereference(entityHandle);
 
-            return _entities[entityHandle];
+            // we've got to check the _entities list and the create queue for this one
+            if (_entities.ContainsKey(entityHandle))
+                return _entities[entityHandle];
+            else
+                return _createQueue[entityHandle];
         }
+
+        public bool IsDead(IEntityHandle handle)
+        {
+            if (_generationTracker.ContainsKey(handle.Id))
+            {
+                return _generationTracker[handle.Id] != handle.Generation;
+            }
+            else
+                return true;
+        }
+
     }
 }

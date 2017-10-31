@@ -23,7 +23,7 @@ namespace CScape.Core.Network.Packet
             stream.BeginPacket(Id);
 
             stream.Write(PackedPos);
-            stream.Write16((short)_id);
+            stream.Write16((short)(_id));
 
             stream.EndPacket();
         }

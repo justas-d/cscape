@@ -17,6 +17,7 @@ using CScape.Models;
 using CScape.Models.Game.Command;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
+using CScape.Models.Game.Item;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
@@ -70,6 +71,9 @@ namespace CScape.Dev.Runtime
 
             services.AddSingleton(s => new MainLoop(s));
             services.AddSingleton<IMainLoop>(s => s.ThrowOrGet<MainLoop>());
+
+            services.AddSingleton(s => new ItemFactory(s.ThrowOrGet<IEntitySystem>()));
+            services.AddSingleton<IItemFactory>(s => s.ThrowOrGet<ItemFactory>());
 
             services.AddSingleton(s => new EntitySystem(s.ThrowOrGet<IGameServer>()));
             services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());

@@ -50,7 +50,7 @@ namespace CScape.Core.Game.Entity.Component
             var resolver = ent.Components.Get<IVisionResolver>();
             if (resolver != null)
             {
-                return resolver.CanBeSeenBy(ent, inRange);
+                return resolver.CanBeSeenBy(Parent, inRange);
             }
 
             return inRange;
@@ -65,6 +65,7 @@ namespace CScape.Core.Game.Entity.Component
         {
             return Parent.GetTransform().Region.GetNearbyInclusive().SelectMany(e => e.Entities)
                 .Where(handle => !handle.IsDead())
+                .Where(handle => !handle.Equals(Parent.Handle))
                 .Where(handle => CanSee(handle.Get()));
         }
 
@@ -108,9 +109,6 @@ namespace CScape.Core.Game.Entity.Component
             // add new entities
             foreach (var handle in GetVisibleEntities())
             {
-                if (Parent.Equals(handle))
-                    continue;
-
                 if (!_seeableEntities.Contains(handle))
                 {
                     _seeableEntities.Add(handle);

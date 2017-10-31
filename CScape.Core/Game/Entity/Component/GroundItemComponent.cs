@@ -15,7 +15,7 @@ namespace CScape.Core.Game.Entity.Component
     public class GroundItemComponent : EntityComponent, IGroundItemComponent
     {
         [CanBeNull]
-        private readonly Action<GroundItemComponent> _destroyCallback;
+        private readonly Action<GroundItemComponent> _onDestroy;
         public override int Priority => (int)ComponentPriority.GroundItemComponent;
     
 
@@ -30,11 +30,13 @@ namespace CScape.Core.Game.Entity.Component
 
         public GroundItemComponent(
             [NotNull] IEntity parent,
-            ItemStack item,
-            [CanBeNull] Action<GroundItemComponent> destroyCallback) : base(parent)
+            [NotNull] ItemStack item,
+            [CanBeNull] Action<GroundItemComponent> onDestroy) : base(parent)
         {
-            Debug.Assert(!Item.IsEmpty());
-            _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            Debug.Assert(!item.IsEmpty());
+
+            _onDestroy = onDestroy;
             Item = item;
         }
 
@@ -44,10 +46,7 @@ namespace CScape.Core.Game.Entity.Component
 
             // handle despawning
             if (DroppedForMs >= DespawnsAfterMs)
-            {
-                _destroyCallback?.Invoke(this);
-            }
-                
+                Parent.Handle.Destroy();
         }
 
         public override void ReceiveMessage(IGameMessage msg)
@@ -55,8 +54,15 @@ namespace CScape.Core.Game.Entity.Component
             switch (msg.EventId)
             {
                 case SysMessage.FrameUpdate:
+                {
                     Update();
                     break;
+                }
+                case SysMessage.DestroyEntity:
+                {
+                    _onDestroy?.Invoke(this);
+                    break;
+                }
             }
         }
 

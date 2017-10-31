@@ -22,7 +22,7 @@ namespace CScape.Core.Network.Packet
         {
             stream.BeginPacket(Id);
 
-            stream.Write16((short)Item.Id.ItemId);
+            stream.Write16((short)(Item.Id.ItemId-1));
             stream.Write16((short)Item.Amount.Clamp(0,short.MaxValue));
             stream.Write(PackedPos);
 

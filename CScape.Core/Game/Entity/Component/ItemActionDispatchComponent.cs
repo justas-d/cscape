@@ -21,7 +21,8 @@ namespace CScape.Core.Game.Entity.Component
                 case (int) MessageId.ItemAction:
                 {
                     var itemMsg = msg.AsItemAction();
-                    itemMsg.GetItem().Id.OnAction(Parent, (int) itemMsg.Type);
+                    var item = itemMsg.GetItem();
+                    item.Id.OnAction(Parent, itemMsg.Container, itemMsg.ItemIndexInContainer, itemMsg.Interface, item, (int)itemMsg.ItemActionType);
                     break;
                 }
 

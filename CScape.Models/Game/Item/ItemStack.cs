@@ -1,5 +1,6 @@
 ﻿using System;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
 using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Item
@@ -21,8 +22,10 @@ namespace CScape.Models.Game.Item
             { 
             }
 
-            public void OnAction(IEntity entity, int actionId)
+            public void OnAction(IEntity parentEntity, IItemContainer itemsContainer, int itemIndexInContainer,
+                InterfaceMetadata containerInterfaceMetadata, ItemStack item, int actionId)
             {
+                
             }
         }
 

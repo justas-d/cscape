@@ -81,6 +81,7 @@ namespace CScape.Core.Game.Entity.Component
             Y = y;
             Z = z;
 
+            UpdateRegion();
             Parent.SendMessage(new TeleportMessage(oldPos, new ImmIntVec3(X, Y, Z)));
         }
 

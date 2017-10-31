@@ -24,7 +24,7 @@ namespace CScape.Core.Network.Packet
         {
             _playerLocalX = Convert.ToByte(local.x);
             _playerLocalY = Convert.ToByte(local.y);
-            _embedded = embedded;
+            _embedded = embedded.ToArray(); // copy
         }
 
 

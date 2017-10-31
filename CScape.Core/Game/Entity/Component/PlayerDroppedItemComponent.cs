@@ -28,8 +28,8 @@ namespace CScape.Core.Game.Entity.Component
         public PlayerDroppedItemComponent(
             [NotNull] IEntity parent,
             ItemStack item,
-            [CanBeNull] Action<GroundItemComponent> destroyCallback,
-            [NotNull] string droppedBy) : base(parent, item, destroyCallback)
+            [CanBeNull] Action<GroundItemComponent> onDestroy,
+            [NotNull] string droppedBy) : base(parent, item, onDestroy)
         {
             DroppedBy = droppedBy ?? throw new ArgumentNullException(nameof(droppedBy));
         }

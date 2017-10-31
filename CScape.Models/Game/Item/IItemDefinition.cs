@@ -1,5 +1,7 @@
 using System;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Interface;
+using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Item
 {
@@ -52,8 +54,18 @@ namespace CScape.Models.Game.Item
         /// <summary>
         /// Called whenever an action occurs on an item with this definition.
         /// </summary>
-        /// <param name="entity">The entity which invoked the action.</param>
+        /// <param name="itemIndexInContainer">The index of the item in the <see cref="itemsContainer"/>.</param>
+        /// <param name="containerInterfaceMetadata">The metadata of the interface that contains the <see cref="itemsContainer"/> container.</param>
+        /// <param name="item">The item stack of this item.</param>
+        /// <param name="parentEntity">The entity which invoked the action.</param>
         /// <param name="actionId">The implementation specific id of the action.</param>
-        void OnAction(IEntity entity, int actionId);
+        /// <param name="itemsContainer">The parent items container in which the <see cref="item"/> is resising.</param>
+        void OnAction(
+            [NotNull] IEntity parentEntity, 
+            [NotNull] IItemContainer itemsContainer,
+            int itemIndexInContainer,
+            InterfaceMetadata containerInterfaceMetadata, 
+            [NotNull] ItemStack item, 
+            int actionId);
     }
 }
