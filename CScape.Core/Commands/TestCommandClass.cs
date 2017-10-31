@@ -4,12 +4,11 @@ using CScape.Commands;
 using CScape.Core.Database;
 using CScape.Core.Extensions;
 using CScape.Core.Game;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Game.World;
-using CScape.Core.Network.Packet;
+using CScape.Core.Network.Entity.Component;
 using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity.Factory;
@@ -21,6 +20,16 @@ namespace CScape.Core.Commands
     [CommandsClass]
     public sealed class TestCommandClass
     {
+        [CommandMethod("debug")]
+        public void ToggleDebug(CommandContext ctx)
+        {
+            var cmp = ctx.Callee.Parent.Components;
+            if (cmp.Contains<DebugStatNetworkSyncComponent>())
+                cmp.Remove<DebugStatNetworkSyncComponent>();
+            else
+                cmp.Add(new DebugStatNetworkSyncComponent(ctx.Callee.Parent));
+        }
+
         [CommandMethod("gain")]
         public void GainExp(CommandContext ctx)
         {

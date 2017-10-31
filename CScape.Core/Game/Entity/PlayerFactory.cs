@@ -78,7 +78,9 @@ namespace CScape.Core.Game.Entity
             ent.Components.Add(new MessageLogComponent(ent));
             ent.Components.Add(new MessageNetworkSyncComponent(ent));
 
-            //ent.Components.Add(new DebugStatNetworkSyncComponent(ent));
+#if DEBUG
+            ent.Components.Add(new DebugStatNetworkSyncComponent(ent));
+#endif
 
             ent.Components.Add(new NetworkingComponent(ent, socket, packetParser));
             ent.Components.Add(new PacketDispatcherComponent(ent, packets));
