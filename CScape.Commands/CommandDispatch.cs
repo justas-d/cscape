@@ -125,7 +125,7 @@ namespace CScape.Commands
                     }
                     catch (Exception)
                     {
-                        callee.SystemMessage("Command error. Make sure inputs are valid.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+                        callee.SystemMessage("Command error. Make sure inputs are valid.", (ulong)SystemMessageFlags.Normal | CommandSystemMessageType.Id);
                     }
                     return true;
                 }
@@ -133,9 +133,9 @@ namespace CScape.Commands
             catch (Exception ex)
             {
                 callee.SystemMessage($"cmd fail: callee: data: {input} ex: {ex}",
-                    SystemMessageFlags.Debug | CommandSystemMessageType.Id);
+                    (ulong)SystemMessageFlags.Debug | CommandSystemMessageType.Id);
 
-                callee.SystemMessage("Command parse error.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+                callee.SystemMessage("Command parse error.", (ulong)SystemMessageFlags.Normal | CommandSystemMessageType.Id);
 
                 return true;
             }

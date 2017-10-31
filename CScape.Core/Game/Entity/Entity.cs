@@ -48,7 +48,7 @@ namespace CScape.Core.Game.Entity
             }
         }
 
-        public void SystemMessage(string msg, ulong flags = SystemMessageFlags.Normal)
+        public void SystemMessage(string msg, ulong flags = (ulong)SystemMessageFlags.Normal)
         {
             if (string.IsNullOrEmpty(msg)) return;
             SendMessage(new SystemMessage(msg, flags));

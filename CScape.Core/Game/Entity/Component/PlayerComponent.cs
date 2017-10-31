@@ -144,7 +144,7 @@ namespace CScape.Core.Game.Entity.Component
                         Parent.AssertGetPlayerContainers().Equipment));
                     break;
                 }
-                case (int) MessageId.PlayerInitialize:
+                case (int) MessageId.Initialize:
                 {
                     InitPlayer();
                     break;

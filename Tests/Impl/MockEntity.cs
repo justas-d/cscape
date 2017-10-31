@@ -29,7 +29,7 @@ namespace CScape.Dev.Tests.Impl
             throw new NotImplementedException();
         }
 
-        public void SystemMessage(string msg, ulong flags = SystemMessageFlags.Normal)
+        public void SystemMessage(string msg, ulong flags = (ulong)SystemMessageFlags.Normal)
         {
             throw new NotImplementedException();
         }

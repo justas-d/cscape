@@ -76,10 +76,24 @@ namespace CScape.Core.Network.Entity.Component
             _dirty.Clear();
         }
 
+        private void MarkAllAsDirty()
+        {
+            var skills = Parent.GetSkills();
+            if (skills == null)
+                return;
+
+            foreach (var skill in skills.All.Values)
+                _dirty.Add(skill);
+        }
+
         public override void ReceiveMessage(IGameMessage msg)
         {
             switch (msg.EventId)
             {
+                case (int)MessageId.NetworkReinitialize:
+                case (int)MessageId.Initialize:
+                    MarkAllAsDirty();
+                    break;
                 case (int)MessageId.NetworkPrepare:
                     Sync();
                     break;

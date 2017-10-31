@@ -26,13 +26,14 @@ namespace CScape.Core.Game.Entity.Message
 
         public int EventId => (int)MessageId.NewSystemMessage;
 
-        public SystemMessage([NotNull] string msg, ulong flags = SystemMessageFlags.Normal)
+        public SystemMessage([NotNull] string msg, ulong flags = (ulong)SystemMessageFlags.Normal)
         {
             if (string.IsNullOrEmpty(msg))
             {
                 throw new ArgumentException("message", nameof(msg));
             }
 
+            Flags = flags;
             Msg = msg;
         }
     }

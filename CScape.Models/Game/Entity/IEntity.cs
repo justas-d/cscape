@@ -51,6 +51,6 @@ namespace CScape.Models.Game.Entity
         /// Sends a system message.
         /// <param name="msg">The message string to be sent.</param>
         /// </summary>
-        void SystemMessage([NotNull] string msg, ulong flags = SystemMessageFlags.Normal);
+        void SystemMessage([NotNull] string msg, ulong flags = (ulong)SystemMessageFlags.Normal);
     }
 }

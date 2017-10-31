@@ -20,7 +20,7 @@ namespace CScape.Core.Game.Entity.Message
         public static NotificationMessage ArrivedAtDestination { get; } = new NotificationMessage(MessageId.ArrivedAtDestination);
 
         public static NotificationMessage ClientRegionChanged { get; } = new NotificationMessage(MessageId.ClientRegionChanged);
-        public static NotificationMessage PlayerInitialize { get; } = new NotificationMessage(MessageId.PlayerInitialize);
+        public static NotificationMessage PlayerInitialize { get; } = new NotificationMessage(MessageId.Initialize);
 
         public static NotificationMessage SyncLocalsToGlobals { get; } = new NotificationMessage(MessageId.SyncLocalsToGlobals);
 

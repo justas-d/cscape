@@ -1,9 +1,12 @@
-﻿namespace CScape.Models.Game.Entity
+﻿using System;
+
+namespace CScape.Models.Game.Entity
 {
-    public static class SystemMessageFlags
+    [Flags]
+    public enum SystemMessageFlags : ulong
     {
-        public const ulong None = 0UL;
-        public const ulong Normal = 0UL;
-        public const ulong Debug = 1UL;
+        None = 0,
+        Normal = 0,
+        Debug = 1,
     }
 }

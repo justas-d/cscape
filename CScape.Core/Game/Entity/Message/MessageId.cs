@@ -3,6 +3,7 @@ namespace CScape.Core.Game.Entity.Message
     public enum MessageId : int
     {
         NewSystemMessage,
+        Initialize,
 
         // skill
         GainExperience,
@@ -46,7 +47,6 @@ namespace CScape.Core.Game.Entity.Message
         ChatMessage,
         UpdatePlayerAppearance,
         ClientRegionChanged,
-        PlayerInitialize, // signals to entities that this player needs to be initialized.
 
         // transform messages
         NewInteractingEntity,

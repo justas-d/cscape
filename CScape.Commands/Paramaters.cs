@@ -17,10 +17,10 @@ namespace CScape.Commands
                     if (lexer.FailParamExpected != null)
                     {
                         ctx.Callee.Parent.SystemMessage(
-                            $"Invalid type for argument {lexer.FailedOnParam}. Expected: {lexer.FailParamExpected.Name}.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+                            $"Invalid type for argument {lexer.FailedOnParam}. Expected: {lexer.FailParamExpected.Name}.", (ulong)SystemMessageFlags.Normal | CommandSystemMessageType.Id);
                     }
                     else
-                        ctx.Callee.Parent.SystemMessage($"Missing argument: {lexer.FailedOnParam}.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+                        ctx.Callee.Parent.SystemMessage($"Missing argument: {lexer.FailedOnParam}.", (ulong)SystemMessageFlags.Normal | CommandSystemMessageType.Id);
 
                     return false;
                 }
@@ -29,8 +29,8 @@ namespace CScape.Commands
             }
             catch (Exception ex)
             {
-                ctx.Callee.Parent.SystemMessage("Command paramater error.", SystemMessageFlags.Normal | CommandSystemMessageType.Id);
-                ctx.Callee.Parent.SystemMessage($"Paramaters.Read exception: {ex}", SystemMessageFlags.Debug | CommandSystemMessageType.Id);
+                ctx.Callee.Parent.SystemMessage("Command paramater error.", (ulong)SystemMessageFlags.Normal | CommandSystemMessageType.Id);
+                ctx.Callee.Parent.SystemMessage($"Paramaters.Read exception: {ex}", (ulong)SystemMessageFlags.Debug | CommandSystemMessageType.Id);
             }
             return false;
         }

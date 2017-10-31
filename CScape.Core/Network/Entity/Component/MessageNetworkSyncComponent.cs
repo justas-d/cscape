@@ -4,6 +4,7 @@ using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Packet;
+using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
@@ -38,8 +39,15 @@ namespace CScape.Core.Network.Entity.Component
 
         public override void ReceiveMessage(IGameMessage msg)
         {
+            
+
             if (msg.EventId == (int)MessageId.NewSystemMessage)
             {
+                // don't sync messages if the user has got a chat interface open.
+                var interf = Parent.GetInterfaces();
+                if (interf?.Chat != null)
+                    return;
+
                 var msgStr = msg.AsSystemMessage();
                 var isDebugBitSet = (msgStr.Flags & (ulong)CoreSystemMessageFlags.Debug) != 0;
 
