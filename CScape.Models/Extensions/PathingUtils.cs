@@ -26,8 +26,8 @@ namespace CScape.Models.Extensions
             var y = us.Y;
             var z = us.Z;
             
-            while (x != target.X &&
-                   y != target.Y)
+            // "while we still need to move"
+            while (x != target.X || y != target.Y)
             {
                 if (z != target.Z)
                 {
@@ -61,6 +61,10 @@ namespace CScape.Models.Extensions
                     yield return delta;
                 }
             }
+
+            // we've arrived, no further work needs to be done.
+            while(true)
+                yield return DirectionDelta.Noop;
         }
     }
 }

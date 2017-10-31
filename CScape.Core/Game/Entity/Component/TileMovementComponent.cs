@@ -5,6 +5,7 @@ using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Directions;
 using CScape.Models.Game.Message;
+using CScape.Models.Game.World;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Component
@@ -21,7 +22,7 @@ namespace CScape.Core.Game.Entity.Component
             set
             {
                 if (_directions != null)
-                    CancelMovingAlongPath();
+                    Parent.SendMessage(NotificationMessage.StopMovingAlongMovePath);
 
                 if (value == null)
                 {
@@ -44,13 +45,6 @@ namespace CScape.Core.Game.Entity.Component
         {
         }
 
-        private void CancelMovingAlongPath()
-        {
-            Directions = null;
-
-            Parent.SendMessage(NotificationMessage.StopMovingAlongMovePath);
-        }
-
         private void ProcessMovement()
         {
             if (Directions == null)
@@ -62,11 +56,22 @@ namespace CScape.Core.Game.Entity.Component
             // both ops are noops, no work to be done there.
             if (data.IsNoop())
                 return;
+            
+            // split it into running or moving
+            MoveMessage msg;
+            if (IsRunning)
+            {
+                msg = new MoveMessage(data.Walk, data.Run);
+            }
+            else
+            {
+                msg = new MoveMessage(data.Walk, DirectionDelta.Noop);
+            }
 
             // TODO : check collision (with size) and then clamp movement
 
             // notify entity of movement.
-            Parent.SendMessage(new MoveMessage(data.Walk, data.Run));
+            Parent.SendMessage(msg);
         }
 
         private void Update()
@@ -117,7 +122,7 @@ namespace CScape.Core.Game.Entity.Component
                 }
                 case (int)MessageId.Teleport:
                 {
-                    CancelMovingAlongPath();
+                    Directions = null;
                     break;
                 }
                 case (int)MessageId.NewPlayerFollowTarget:

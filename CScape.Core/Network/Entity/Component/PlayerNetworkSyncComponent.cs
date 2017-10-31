@@ -42,6 +42,7 @@ namespace CScape.Core.Network.Entity.Component
             writer.SetFlag(new InteractingEntityUpdateFlag(ent.GetTransform().InteractingEntity));
         }
 
+        // TODO : still some issues with player syncing. Player A sees player B, player A teleports outside region, then teleports back in. Neither A nor B can see eachother.
         protected override void Sync()
         {
             var updates = new List<IUpdateWriter>();

@@ -26,7 +26,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public IFacingData FacingData { get; private set; }
 
-        public DirectionDelta LastMovedDirection { get; private set; }
+        public DirectionDelta LastMovedDirection { get; private set; } = DirectionDelta.Noop;
 
         public const int MaxZ = 4;
 
@@ -125,7 +125,7 @@ namespace CScape.Core.Game.Entity.Component
             // TODO : handle ForcedMovement movement over time in a separate component
             switch (msg.EventId)
             {
-                case (int) MessageId.BeginMovePath:
+                case (int) MessageId.Move:
                 {
                     var data = msg.AsMove();
                     var delta = data.SumMovements();

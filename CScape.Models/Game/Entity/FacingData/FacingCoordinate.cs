@@ -1,5 +1,6 @@
 using System;
 using CScape.Models.Game.Entity.FacingData;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Game.Entities.FacingData
 {
@@ -9,6 +10,12 @@ namespace CScape.Core.Game.Entities.FacingData
         public short SyncY { get; }
         public int RawX { get; }
         public int RawY { get; }
+
+        public bool TryConvertToDelta(out DirectionDelta delta) 
+        {
+            delta =DirectionDelta.Noop;
+            return false;
+        }
 
         public FacingCoordinate(int x, int y)
         {

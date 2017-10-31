@@ -13,10 +13,11 @@ namespace CScape.Models.Game.Entity.FacingData
         public int RawX => _default.RawX;
         public int RawY => _default.RawY;
 
+        public bool TryConvertToDelta(out DirectionDelta delta) => _default.TryConvertToDelta(out delta);
+
         public NullFacingData(ITransform transform)
         {
             _default = new FacingDirection(new DirectionDelta(Direction.South), transform);
         }
-
     }
 }

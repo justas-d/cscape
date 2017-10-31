@@ -1,3 +1,5 @@
+using CScape.Models.Game.World;
+
 namespace CScape.Models.Game.Entity.FacingData
 {
     /// <summary>
@@ -10,5 +12,10 @@ namespace CScape.Models.Game.Entity.FacingData
 
         int RawX { get; }
         int RawY { get; }
+
+        /// <summary>
+        /// Attempts to convert this facing data into a direction delta.
+        /// </summary>
+        bool TryConvertToDelta(out DirectionDelta delta);
     }
 }

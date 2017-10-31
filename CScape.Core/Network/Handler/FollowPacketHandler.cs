@@ -19,7 +19,7 @@ namespace CScape.Core.Network.Handler
 
         public void Handle(IEntity entity, PacketMessage packet)
         {
-            var id = packet.Data.ReadInt16();
+            var id = packet.Data.ReadInt16() - 1;
 
             // find player
             var target = _players.Get(id);

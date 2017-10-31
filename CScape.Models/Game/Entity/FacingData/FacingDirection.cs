@@ -15,6 +15,12 @@ namespace CScape.Core.Game.Entities.FacingData
         public int RawX => _transform.X + _dir.X;
         public int RawY => _transform.Y + _dir.Y;
 
+        public bool TryConvertToDelta(out DirectionDelta delta)
+        {
+            delta = _dir;
+            return true;
+        }
+
         public FacingDirection(DirectionDelta dir, ITransform transform)
         {
             _dir = dir;
