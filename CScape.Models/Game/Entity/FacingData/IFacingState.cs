@@ -1,17 +1,18 @@
 using CScape.Models.Game.World;
+using JetBrains.Annotations;
 
 namespace CScape.Models.Game.Entity.FacingData
 {
     /// <summary>
-    /// Defines an entities facing direction.
+    /// Defines an entity's facing state
     /// </summary>
-    public interface IFacingData
+    public interface IFacingState
     {
-        short SyncX { get; }
-        short SyncY { get; }
-
-        int RawX { get; }
-        int RawY { get; }
+        /// <summary>
+        /// The coordinate at which the entity is facing.
+        /// </summary>
+        [NotNull]
+        IPosition Coordinate { get; }
 
         /// <summary>
         /// Attempts to convert this facing data into a direction delta.

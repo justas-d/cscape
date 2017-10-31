@@ -169,7 +169,7 @@ namespace CScape.Core.Game.Entity.Component
                 }
                 case (int)MessageId.NewFacingDirection:
                 {
-                    SetFlag(new FacingCoordinateUpdateFlag(msg.AsNewFacingDirection().FacingData));
+                    SetFlag(new FacingCoordinateUpdateFlag(msg.AsNewFacingDirection().FacingState));
                     break;
                 }
                 case (int)MessageId.NewInteractingEntity:

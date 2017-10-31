@@ -38,7 +38,7 @@ namespace CScape.Core.Network.Entity.Component
         {
             var flags = ent.Components.AssertGet<FlagAccumulatorComponent>();
             writer.SetFlag(new PlayerAppearanceUpdateFlag(flags.AppearanceCache));
-            writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingData));
+            writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingState));
             writer.SetFlag(new InteractingEntityUpdateFlag(ent.GetTransform().InteractingEntity));
         }
 

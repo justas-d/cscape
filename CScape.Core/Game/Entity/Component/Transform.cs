@@ -24,7 +24,7 @@ namespace CScape.Core.Game.Entity.Component
         public IInteractingEntity InteractingEntity { get; private set; }
             = NullInteractingEntity.Instance;
 
-        public IFacingData FacingData { get; private set; }
+        public IFacingState FacingState { get; private set; }
 
         public DirectionDelta LastMovedDirection { get; private set; } = DirectionDelta.Noop;
 
@@ -44,7 +44,7 @@ namespace CScape.Core.Game.Entity.Component
         public Transform([NotNull] IEntity parent)
             :base(parent)
         {
-            FacingData = new NullFacingData(this);
+            FacingState = new NullFacingState(this);
             SwitchPoE(parent.Server.Overworld);
         }
 
@@ -83,11 +83,11 @@ namespace CScape.Core.Game.Entity.Component
             Parent.SendMessage(new TeleportMessage(oldPos, new ImmIntVec3(X, Y, Z)));
         }
 
-        public void SetFacingDirection([NotNull]IFacingData data)
+        public void SetFacingDirection([NotNull]IFacingState state)
         {
-            FacingData = data ?? throw new ArgumentNullException(nameof(data));
+            FacingState = state ?? throw new ArgumentNullException(nameof(state));
 
-            Parent.SendMessage(new FacingDirectionMessage(data));
+            Parent.SendMessage(new FacingDirectionMessage(state));
         }
 
         public void SetInteractingEntity([NotNull] IInteractingEntity ent)
@@ -145,13 +145,13 @@ namespace CScape.Core.Game.Entity.Component
                     // also we set the last moving direction here
                     if (data.IsWalking)
                     {
-                        FacingData = new FacingDirection(data.Dir1, this);
+                        FacingState = new DirecionFacingState(data.Dir1, this);
                         LastMovedDirection = data.Dir1;
                     }
                     else
                     {
                         LastMovedDirection = data.Dir2;
-                        FacingData = new FacingDirection(data.Dir2, this);
+                        FacingState = new DirecionFacingState(data.Dir2, this);
                     }
                         break;
                 }
@@ -164,7 +164,7 @@ namespace CScape.Core.Game.Entity.Component
                     if (player == null)
                         break;
 
-                    InteractingEntity = new PlayerInteractingEntity(player);
+                    SetInteractingEntity(new PlayerInteractingEntity(player));
                     break;
                 }
                 case (int) MessageId.SyncLocalsToGlobals:

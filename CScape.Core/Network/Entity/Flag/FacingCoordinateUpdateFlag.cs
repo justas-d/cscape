@@ -1,5 +1,4 @@
 using System;
-using CScape.Models.Data;
 using CScape.Models.Game.Entity.FacingData;
 using JetBrains.Annotations;
 
@@ -8,19 +7,19 @@ namespace CScape.Core.Network.Entity.Flag
     public sealed class FacingCoordinateUpdateFlag : IUpdateFlag
     {
         [NotNull]
-        public IFacingData Data { get; }
+        public IFacingState State { get; }
 
-        public FacingCoordinateUpdateFlag([NotNull] IFacingData data)
+        public FacingCoordinateUpdateFlag([NotNull] IFacingState state)
         {
-            Data = data ?? throw new ArgumentNullException(nameof(data));
+            State = state ?? throw new ArgumentNullException(nameof(state));
         }
 
         public FlagType Type => FlagType.FacingDir;
 
         public void Write(OutBlob stream)
         {
-            stream.Write16(Data.SyncX);
-            stream.Write16(Data.SyncY);
+            stream.Write16((State.Coordinate.X * 2 + 1).CastClamp(short.MinValue, short.MaxValue));
+            stream.Write16((State.Coordinate.Y * 2 + 1).CastClamp(short.MinValue, short.MaxValue));
         }
     }
 }

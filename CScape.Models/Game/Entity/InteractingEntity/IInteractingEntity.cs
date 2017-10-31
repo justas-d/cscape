@@ -3,7 +3,7 @@
 namespace CScape.Models.Game.Entity.InteractingEntity
 {
     /// <summary>
-    /// Defines a set which allows lookup of some entity's interacting entity.
+    /// Defines an object which allows lookup of some entity's interacting entity.
     /// </summary>
     public interface IInteractingEntity
     {

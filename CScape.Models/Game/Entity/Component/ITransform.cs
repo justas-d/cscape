@@ -12,9 +12,9 @@ namespace CScape.Models.Game.Entity.Component
     {
         /// <summary>
         /// The facing data of the entity.
-        /// </summary>
+        /// </summary>z
         [NotNull]
-        IFacingData FacingData { get; }
+        IFacingState FacingState { get; }
 
         /// <summary>
         /// The entity's interacting entity.
@@ -28,6 +28,17 @@ namespace CScape.Models.Game.Entity.Component
         DirectionDelta LastMovedDirection { get; }
 
         /// <summary>
+        /// Sets the facing direction for this entity.
+        /// </summary>
+        void SetFacingDirection([NotNull] IFacingState data);
+
+        /// <summary>
+        /// Sets the interacting entity for this entity.
+        /// </summary>
+        void SetInteractingEntity([NotNull] IInteractingEntity ent);
+
+
+        /// <summary>
         /// The PoE in which this entity resides in.
         /// </summary>
         [NotNull]
@@ -38,16 +49,6 @@ namespace CScape.Models.Game.Entity.Component
         /// </summary>
         [NotNull]
         IRegion Region { get; }
-
-        /// <summary>
-        /// Sets the facing direction for this entity.
-        /// </summary>
-        void SetFacingDirection([NotNull] IFacingData data);
-
-        /// <summary>
-        /// Sets the interacting entity for this entity.
-        /// </summary>
-        void SetInteractingEntity([NotNull] IInteractingEntity ent);
 
         /// <summary>
         /// Leaves the current PoE and switches to the given new one, assuming they are not the same.

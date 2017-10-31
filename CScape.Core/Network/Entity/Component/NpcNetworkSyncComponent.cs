@@ -29,7 +29,7 @@ namespace CScape.Core.Network.Entity.Component
         protected override void SetInitialFlags(IUpdateWriter writer, IEntity ent)
         {
             writer.SetFlag(new InteractingEntityUpdateFlag(ent.GetTransform().InteractingEntity));
-            writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingData));
+            writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingState));
         }
 
         protected override void Sync()

@@ -23,7 +23,7 @@ namespace CScape.Core.Game.Entity.Directions
              * That's what we want, so we do that
              */
 
-            if (transform.FacingData.TryConvertToDelta(out var delta))
+            if (transform.FacingState.TryConvertToDelta(out var delta))
                 return delta.Invert() + transform;
 
             var inverted = transform.LastMovedDirection.Invert();

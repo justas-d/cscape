@@ -59,7 +59,15 @@ namespace CScape.Core
         public static T ThrowOrGet<T>(this IServiceProvider provider) where T : class
             => provider.GetService<T>() ?? throw new ServiceNotProvidedException(typeof(T));
 
-        internal static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
+        public static short CastClamp(this int val, short min, short max)
+        {
+            if (val > max) return max;
+            if (min > val) return min;
+            return (short) val;
+        }
+
+        [DebuggerStepThrough]
+        public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {
             if (val.CompareTo(min) < 0) return min;
             return val.CompareTo(max) > 0 ? max : val;

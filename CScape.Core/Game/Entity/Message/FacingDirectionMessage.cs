@@ -8,12 +8,12 @@ namespace CScape.Core.Game.Entity.Message
     public sealed class FacingDirectionMessage : IGameMessage
     {
         [NotNull]
-        public IFacingData FacingData { get; }
+        public IFacingState FacingState { get; }
         public int EventId => (int)MessageId.NewFacingDirection;
 
-        public FacingDirectionMessage([NotNull] IFacingData facingData)
+        public FacingDirectionMessage([NotNull] IFacingState facingState)
         {
-            FacingData = facingData ?? throw new ArgumentNullException(nameof(facingData));
+            FacingState = facingState ?? throw new ArgumentNullException(nameof(facingState));
         }
     }
 }

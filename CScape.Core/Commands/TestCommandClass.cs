@@ -4,6 +4,7 @@ using CScape.Commands;
 using CScape.Core.Database;
 using CScape.Core.Extensions;
 using CScape.Core.Game;
+using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
@@ -13,6 +14,7 @@ using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity.Factory;
 using CScape.Models.Game.Item;
+using CScape.Models.Game.World;
 
 namespace CScape.Core.Commands
 {
@@ -20,6 +22,20 @@ namespace CScape.Core.Commands
     [CommandsClass]
     public sealed class TestCommandClass
     {
+        [CommandMethod("dir")]
+        public void SetDir(CommandContext ctx)
+        {
+            byte rawDir = 0;
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("direction", ref rawDir);
+            })) return;
+
+            var dir = (Direction) rawDir;
+            var t = ctx.Callee.Parent.GetTransform();
+            t.SetFacingDirection(new DirecionFacingState(new DirectionDelta(dir), t));
+        }
+
         [CommandMethod("debug")]
         public void ToggleDebug(CommandContext ctx)
         {
