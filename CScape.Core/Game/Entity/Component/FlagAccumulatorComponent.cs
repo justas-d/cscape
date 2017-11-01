@@ -192,7 +192,7 @@ namespace CScape.Core.Game.Entity.Component
                     Reinitialize = true;
                     break;
                 }
-                case SysMessage.FrameEnd:
+                case (int)MessageId.FrameEnd:
                 {
                     _flags.Clear();
                     Reinitialize = false;

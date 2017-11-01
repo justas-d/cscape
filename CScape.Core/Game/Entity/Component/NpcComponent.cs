@@ -37,7 +37,7 @@ namespace CScape.Core.Game.Entity.Component
         {
             switch (msg.EventId)
             {
-                case SysMessage.DestroyEntity:
+                case (int)MessageId.QueuedForDeath:
                 {
                     _destroyCallback(this);
                     break;

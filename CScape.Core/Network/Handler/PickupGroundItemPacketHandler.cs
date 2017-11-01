@@ -21,7 +21,7 @@ namespace CScape.Core.Network.Handler
             var id = packet.Data.ReadInt16() + 1;
             var x = packet.Data.ReadInt16();
 
-            // todo : make the player walk to the item they want to pick up before executing pick up code
+            
 
             var region = entity.GetTransform().PoE.GetRegion(x, y);
 
@@ -46,6 +46,9 @@ namespace CScape.Core.Network.Handler
             if (!entity.CanSee(item.Parent))
                 return;
 
+            // todo : make the player walk to the item they want to pick up before executing pick up code (.WalkTo extension)
+            // todo : pickup item actions are broken
+            // todo : execute movement action if we are standing on the goal
             actionComponent.CurrentAction = new PickupItemAction(entity.Handle, item.Parent.Handle);
         }
     }

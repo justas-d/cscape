@@ -4,10 +4,10 @@ namespace CScape.Core.Game.Entity.Message
 {
     public sealed class NotificationMessage : IGameMessage
     {
-        public static NotificationMessage FrameEnd { get; } = new NotificationMessage(SysMessage.FrameEnd);
-        public static NotificationMessage FrameUpdate { get; } = new NotificationMessage(SysMessage.FrameUpdate);
-        public static NotificationMessage GC { get; } = new NotificationMessage(SysMessage.GC);
-        public static NotificationMessage DestroyEntity { get; } = new NotificationMessage(SysMessage.DestroyEntity);
+        public static NotificationMessage FrameEnd { get; } = new NotificationMessage(MessageId.FrameEnd);
+        public static NotificationMessage FrameBegin { get; } = new NotificationMessage(MessageId.FrameBegin);
+        public static NotificationMessage GC { get; } = new NotificationMessage(MessageId.GC);
+        public static NotificationMessage QueuedForDeath { get; } = new NotificationMessage(MessageId.QueuedForDeath);
 
         public static NotificationMessage NetworkPrepare { get; } = new NotificationMessage(MessageId.NetworkPrepare);
         public static NotificationMessage NetworkSync { get; } = new NotificationMessage(MessageId.NetworkSync);
@@ -28,11 +28,6 @@ namespace CScape.Core.Game.Entity.Message
         public NotificationMessage(MessageId eventId)
         {
             EventId = (int)eventId;
-        }
-
-        public NotificationMessage(int eventId)
-        {
-            EventId = eventId;
         }
     }
 }

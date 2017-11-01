@@ -131,12 +131,12 @@ namespace CScape.Core.Game.Entity.Component
                     Reset();
                     break;
                 }
-                case SysMessage.FrameUpdate:
+                case (int)MessageId.FrameBegin:
                 {
                     Update();
                     break;
                 }
-                case SysMessage.GC:
+                case (int)MessageId.GC:
                 {
                     GC();
                     break;

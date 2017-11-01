@@ -116,12 +116,12 @@ namespace CScape.Core.Network.Entity.Component
         {
             switch (msg.EventId)
             {
-                case SysMessage.DestroyEntity:
+                case (int)MessageId.QueuedForDeath:
                 {
                     DropConnection();
                     break;
                 }
-                case SysMessage.FrameUpdate:
+                case (int)MessageId.FrameBegin:
                 {
                     FrameUpdate();
                     break;

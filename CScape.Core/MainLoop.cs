@@ -80,7 +80,7 @@ namespace CScape.Core
 
                     //================================================
 
-                    SendMessage(NotificationMessage.FrameUpdate);
+                    SendMessage(NotificationMessage.FrameBegin);
                     SendMessage(NotificationMessage.NetworkPrepare);
                     SendMessage(NotificationMessage.NetworkSync);
                     SendMessage(NotificationMessage.FrameEnd);

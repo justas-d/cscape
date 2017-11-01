@@ -220,7 +220,7 @@ namespace CScape.Core.Game.Entity.Component
                     OnActionOccurred();
                     break;
 
-                case SysMessage.FrameUpdate:
+                case (int)MessageId.FrameBegin:
                     Update();
                     break;
 

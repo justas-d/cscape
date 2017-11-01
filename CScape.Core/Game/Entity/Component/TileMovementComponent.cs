@@ -118,7 +118,7 @@ namespace CScape.Core.Game.Entity.Component
         {
             switch (msg.EventId)
             {
-                case SysMessage.FrameUpdate:
+                case (int)MessageId.FrameBegin:
                 {
                     Update();
                     break;

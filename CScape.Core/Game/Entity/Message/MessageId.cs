@@ -2,6 +2,19 @@ namespace CScape.Core.Game.Entity.Message
 {
     public enum MessageId : int
     {
+        FrameBegin,
+        FrameEnd,
+
+        /// <summary>
+        /// Clean up dead entities
+        /// </summary>
+        GC,
+
+        /// <summary>
+        /// The entity is going to be dead next frame
+        /// </summary>
+        QueuedForDeath, 
+
         NewSystemMessage,
         Initialize,
 

@@ -15,25 +15,18 @@ namespace CScape.Core.Game.Entity
     public sealed class EntitySystem : IEntitySystem
     { 
         public const int GenerationBits = 8;
+
         public int IdThreshold { get; }
+        public IGameServer Server { get; }
 
         private int _idTop = 0;
         private readonly List<int> _idQueue;
         private readonly Dictionary<int, int> _generationTracker = new Dictionary<int, int>(); // id  -> generation
-
-        private readonly Dictionary<IEntityHandle, IEntity> _entities 
-            = new Dictionary<IEntityHandle, IEntity>();
-
+        private readonly Dictionary<IEntityHandle, IEntity> _entities = new Dictionary<IEntityHandle, IEntity>();
         private readonly Dictionary<IEntityHandle, IEntity> _createQueue = new Dictionary<IEntityHandle, IEntity>();
-
-        public IReadOnlyDictionary<IEntityHandle, IEntity> All => _entities;
-
         private readonly HashSet<IEntityHandle> _deleteQueue = new HashSet<IEntityHandle>();
 
-        
-
-        [NotNull]
-        public IGameServer Server { get; }
+        public IReadOnlyDictionary<IEntityHandle, IEntity> All => _entities;
 
         public EntitySystem([NotNull] IGameServer server, int idThreshold = 1024)
         {
@@ -73,6 +66,7 @@ namespace CScape.Core.Game.Entity
             // we must delegate the adding of the entity to the entity list to
             // the end of the frame to allow for the creation of entities during
             // the iteration of all living entities.
+            // even if an entity is in the create queue, we will still regard it as alive.
             _createQueue.Add(entity.Handle, entity);
             
             return handle;
@@ -85,35 +79,62 @@ namespace CScape.Core.Game.Entity
 
             Debug.Assert(_generationTracker.ContainsKey(handle.Id));
 
+            // don't destroy entities that dont exist
             if (!_entities.TryGetValue(handle, out var ent))
                 return false;
+            
+            // dont destroy entities that are already in the destroy queue
+            // .Add will return false if we failed to add an element
+            if (!_deleteQueue.Add(handle))
+                return false;
 
-            ent.SendMessage(NotificationMessage.DestroyEntity);
+            // ent is queued for death, send the notif
+            ent.SendMessage(NotificationMessage.QueuedForDeath);
+            
+            return true;
+        }
 
-            // advance the generation for this id
+        private void DeleteEntity([NotNull] IEntityHandle handle)
+        {
+            if (handle == null) throw new ArgumentNullException(nameof(handle));
+            Debug.Assert(_entities.ContainsKey(handle));
+
+            // advance the generation
             _generationTracker[handle.Id] += 1;
 
-            _deleteQueue.Add(handle);
+            // remove ent
+            _entities.Remove(handle);
+        }
 
-            return true;
+        private void FlushDeleteQueue()
+        {
+            foreach (var handle in _deleteQueue)
+                DeleteEntity(handle);
+            
+            _deleteQueue.Clear();
+        }
+
+        private void AddEntity([NotNull] IEntity entity)
+        {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            Debug.Assert(!_entities.ContainsKey(entity.Handle));
+
+            _entities.Add(entity.Handle, entity);
+        }
+
+        private void FlushCreateQueue()
+        {
+            // flush entities in the create queue to the main entity map
+            foreach (var ent in _createQueue.Values)
+                AddEntity(ent);
+            
+            _createQueue.Clear();
         }
 
         public void PostFrame()
         {
-            // process delete queue
-            foreach (var ent in _deleteQueue)
-            {
-                _entities.Remove(ent);
-            }
-            _deleteQueue.Clear();
-
-            // flush entities in the create queue to the main entity map
-            foreach (var kvp in _createQueue)
-            {
-                Debug.Assert(!_entities.ContainsKey(kvp.Key));
-                _entities.Add(kvp.Key, kvp.Value);
-            }
-            _createQueue.Clear();
+            FlushDeleteQueue();
+            FlushCreateQueue();
         }
 
         public IEntity Get(IEntityHandle entityHandle)
