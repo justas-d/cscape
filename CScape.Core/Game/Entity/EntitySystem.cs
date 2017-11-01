@@ -149,6 +149,8 @@ namespace CScape.Core.Game.Entity
                 return _createQueue[entityHandle];
         }
 
+        public bool IsQueuedForDeath(IEntityHandle handle) => _deleteQueue.Contains(handle);
+
         public bool IsDead(IEntityHandle handle)
         {
             if (_generationTracker.ContainsKey(handle.Id))

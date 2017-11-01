@@ -21,6 +21,9 @@ namespace CScape.Core.Game.Entity.Message
         public static  EntityMessage LeftViewRange([NotNull] IEntityHandle entity)
             => new EntityMessage(entity, MessageId.EntityLeftViewRange);
 
+        public static EntityMessage NearbyEntityQueuedForDeath([NotNull] IEntityHandle entity)
+            => new EntityMessage(entity, MessageId.NearbyEntityQueuedForDeath);
+
         private EntityMessage([NotNull] IEntityHandle entity, MessageId eventId)
         {
             Entity = entity ?? throw new ArgumentNullException(nameof(entity));

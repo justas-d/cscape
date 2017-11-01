@@ -184,6 +184,7 @@ namespace CScape.Core.Network.Entity.Component
                     Sync();
                     break;
                 }
+                
                 case (int)MessageId.EntityEnteredViewRange:
                 {
                     var h = msg.AsEntityEnteredViewRange();

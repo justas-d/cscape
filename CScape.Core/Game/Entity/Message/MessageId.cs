@@ -13,7 +13,8 @@ namespace CScape.Core.Game.Entity.Message
         /// <summary>
         /// The entity is going to be dead next frame
         /// </summary>
-        QueuedForDeath, 
+        QueuedForDeath,
+        NearbyEntityQueuedForDeath,
 
         NewSystemMessage,
         Initialize,

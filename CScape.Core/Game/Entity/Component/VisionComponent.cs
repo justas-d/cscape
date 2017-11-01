@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
@@ -21,6 +22,7 @@ namespace CScape.Core.Game.Entity.Component
         public override int Priority => (int)ComponentPriority.VisionComponent;
 
         private readonly HashSet<IEntityHandle> _seeableEntities= new HashSet<IEntityHandle>();
+        private readonly HashSet<IEntityHandle> _deleteQueue = new HashSet<IEntityHandle>();
 
         /// <summary>
         /// "Can see up to n tiles".
@@ -71,8 +73,13 @@ namespace CScape.Core.Game.Entity.Component
 
         private void Update()
         {
+            // try add new entities
+            foreach (var handle in GetVisibleEntities())
+                TryAddEntityToSeeables(handle);
+
             // reset interacting entity if it's out of range
             var t = Parent.GetTransform();
+
             if (t.InteractingEntity.Entity != null && 
                 !t.InteractingEntity.Entity.IsDead() 
                 && !CanSee(t.InteractingEntity.Entity.Get()))
@@ -80,52 +87,72 @@ namespace CScape.Core.Game.Entity.Component
                 t.SetInteractingEntity(NullInteractingEntity.Instance);
             }
 
-            // handle visual messages
-
-            // remove entities which we cannot see anymore
-            // HACK : send message inside of predicate might not be a good design choice.
-            _seeableEntities.RemoveWhere(e =>
-            {
-                void SendDeleteMsg(IEntityHandle ent)
-                {
-                    Parent.SendMessage(EntityMessage.LeftViewRange(ent));
-                }
-
-                if (e.IsDead())
-                {
-                    SendDeleteMsg(e);
-                    return true;
-                }
-
-                if (!CanSee(e.Get()))
-                {
-                    SendDeleteMsg(e);
-                    return true;
-                }
-
-                return false;
-            });
-
-            // add new entities
-            foreach (var handle in GetVisibleEntities())
-            {
-                if (!_seeableEntities.Contains(handle))
-                {
-                    _seeableEntities.Add(handle);
-                    Parent.SendMessage(EntityMessage.EnteredViewRange(handle));
-                }
-            }
+            // perform gc
+            RemoveAnyEntitiesWeCannotSee();
         }
 
-        private void GC()
+        private void RemoveAnyEntitiesWeCannotSee()
         {
-            _seeableEntities.RemoveWhere(e => e.IsDead());
+            // append to delete queue
+            foreach (var handle in _seeableEntities)
+            {
+                if (handle.IsDead())
+                    _deleteQueue.Add(handle);
+                else if (!CanSee(handle.Get()))
+                    _deleteQueue.Add(handle);
+            }
+
+            foreach (var handle in _deleteQueue)
+                TryDeleteEntityFromSeeables(handle);
+
+            _deleteQueue.Clear();
+        }
+
+        private bool TryAddEntityToSeeables(IEntityHandle handle)
+        {
+            if (handle.IsDead() || handle.IsQueuedForDeath())
+                return false;
+
+            if (!_seeableEntities.Add(handle))
+                return false;
+
+            Parent.SendMessage(EntityMessage.EnteredViewRange(handle));
+            return true;
+        }
+
+        private bool TryDeleteEntityFromSeeables(IEntityHandle handle)
+        {
+            if (!_seeableEntities.Remove(handle))
+                return false;
+
+            Parent.SendMessage(EntityMessage.LeftViewRange(handle));
+            return true;
+        }
+
+        private void NotifyNearbyEntitiesOfDeath()
+        {
+            this.Broadcast(EntityMessage.NearbyEntityQueuedForDeath(Parent.Handle));
+        }
+
+        private void CatchNearbyEntityDying(EntityMessage msg)
+        {
+            TryDeleteEntityFromSeeables(msg.Entity);
         }
 
         public override void ReceiveMessage(IGameMessage msg)
         {
             switch (msg.EventId)
             {
+                case (int) MessageId.NearbyEntityQueuedForDeath:
+                {
+                    CatchNearbyEntityDying(msg.AsNearbyEntityQueuedForDeath());
+                    break;
+                }
+                case (int) MessageId.QueuedForDeath:
+                {
+                    NotifyNearbyEntitiesOfDeath();
+                    break;
+                }
                 case (int)MessageId.NetworkReinitialize:
                 {
                     Reset();
@@ -134,11 +161,6 @@ namespace CScape.Core.Game.Entity.Component
                 case (int)MessageId.FrameBegin:
                 {
                     Update();
-                    break;
-                }
-                case (int)MessageId.GC:
-                {
-                    GC();
                     break;
                 }
             }

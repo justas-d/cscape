@@ -59,6 +59,9 @@ namespace CScape.Core.Extensions
         public static ButtonClickMessage AsButtonClicked(this IGameMessage msg) =>
             AssertCast<ButtonClickMessage>(msg, MessageId.ButtonClicked);
 
+        public static EntityMessage AsNearbyEntityQueuedForDeath(this IGameMessage msg) =>
+            AssertCast<EntityMessage>(msg, MessageId.NearbyEntityQueuedForDeath);
+
         public static EntityMessage AsEntityEnteredViewRange(this IGameMessage msg) =>
             AssertCast<EntityMessage>(msg, MessageId.EntityEnteredViewRange);
 

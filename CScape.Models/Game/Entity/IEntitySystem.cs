@@ -44,6 +44,12 @@ namespace CScape.Models.Game.Entity
         bool IsDead(IEntityHandle handle);
 
         /// <summary>
+        /// Checks whether the entity pointed to by the handle is queued to be dead by the next frame.
+        /// </summary>
+        /// <returns>True if queued, false otherwise.</returns>
+        bool IsQueuedForDeath(IEntityHandle handle);
+
+        /// <summary>
         /// Called after FrameEnd messages.
         /// </summary>
         void PostFrame();

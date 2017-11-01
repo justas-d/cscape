@@ -77,6 +77,7 @@ namespace CScape.Models.Extensions
                 ent.SendMessage(msg);
         }
 
+        public static bool IsQueuedForDeath(this IEntityHandle handle) => handle.System.IsQueuedForDeath(handle);
         public static bool IsDead(this IEntityHandle handle) => handle.System.IsDead(handle);
         public static IEntity Get(this IEntityHandle handle) => handle.System.Get(handle);
         public static bool Destroy(this IEntityHandle handle) => handle.System.Destroy(handle);
