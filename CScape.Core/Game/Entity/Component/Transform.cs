@@ -22,6 +22,7 @@ namespace CScape.Core.Game.Entity.Component
     /// </summary>
     public sealed class Transform : EntityComponent, ITransform
     {
+        // TODO : BUG: A follows B. B logs out then logs in. Result: A's interacting entity is still player B. Expected result: A's interacting entity should be the null default.
         public IInteractingEntity InteractingEntity { get; private set; }
             = NullInteractingEntity.Instance;
 

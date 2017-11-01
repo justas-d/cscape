@@ -28,6 +28,8 @@ namespace CScape.Core.Game.Entity.Component
 
         public long DroppedForMs { get; private set; }
 
+        private readonly IMainLoop _loop;
+
         public GroundItemComponent(
             [NotNull] IEntity parent,
             [NotNull] ItemStack item,
@@ -38,11 +40,12 @@ namespace CScape.Core.Game.Entity.Component
 
             _onDestroy = onDestroy;
             Item = item;
+            _loop = parent.Server.Services.ThrowOrGet<IMainLoop>();
         }
 
         protected virtual void Update()
         {
-            DroppedForMs += Parent.Server.Services.ThrowOrGet<IMainLoop>().GetDeltaTime();
+            DroppedForMs += _loop.GetDeltaTime();
 
             // handle despawning
             if (DroppedForMs >= DespawnsAfterMs)
