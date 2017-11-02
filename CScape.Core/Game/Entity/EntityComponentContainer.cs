@@ -125,8 +125,9 @@ namespace CScape.Core.Game.Entity
             return true;
         }
 
-        public IEnumerator<IEntityComponent> GetEnumerator() => All.GetEnumerator();
+        public IEnumerator<KeyValuePair<Type, IEntityComponent>> GetEnumerator()
+            => _lookup.GetEnumerator();
+        
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
     }
 }

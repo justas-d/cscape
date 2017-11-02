@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Message;
 using JetBrains.Annotations;
+using CoreSystemMessageFlags = CScape.Core.Game.Entity.Message.CoreSystemMessageFlags;
 
 namespace CScape.Core.Game.Entity.Component
 {
@@ -29,7 +31,7 @@ namespace CScape.Core.Game.Entity.Component
             set => _optimalViewrange = value.Clamp(0, MaxViewRange);
         }
 
-        public int MaxVisibleEntities { get; set; } = 256;
+        public int MaxVisibleEntities { get; set; } = 3;
 
         // 2 tile step in order to half the number of calls to GetVisibleEntities 
         // when the optimal viewrange we are searching for approaches zero and our 
@@ -47,7 +49,7 @@ namespace CScape.Core.Game.Entity.Component
         {
             // recalc optimal viewrange
             GetVisibleEntities();
-
+                
             return EntityVision.CanSee(Parent, ent, OptimalViewrange);
         }
 
@@ -59,6 +61,8 @@ namespace CScape.Core.Game.Entity.Component
         // ever going over it
         public IEnumerable<IEntityHandle> GetVisibleEntities()
         {
+            var oldOptimal = OptimalViewrange;
+
             var visibleEntities = GetEnumeratedVisibleEntities();
 
             if (visibleEntities.Count == MaxVisibleEntities)
@@ -70,6 +74,7 @@ namespace CScape.Core.Game.Entity.Component
                 Debug.Assert(increase);
             }
 
+            Parent.SystemMessage($"Optimal vr: {oldOptimal} -> {OptimalViewrange}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
             return EntityVision.GetVisibleEntities(Parent, OptimalViewrange);            
         }
 

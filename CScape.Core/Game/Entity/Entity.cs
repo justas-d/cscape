@@ -35,16 +35,15 @@ namespace CScape.Core.Game.Entity
         {
             var handled = new HashSet<Type>();
             
-            foreach (var frag in Components)
+            foreach (var kvp in Components)
             {
-                var t = frag.GetType();
+                var t = kvp.Value.GetType();
 
                 if (handled.Contains(t))
                     continue;
                     
-
-                frag.ReceiveMessage(message);
-                handled.Add(frag.GetType());
+                kvp.Value.ReceiveMessage(message);
+                handled.Add(t);
             }
         }
 
@@ -63,12 +62,10 @@ namespace CScape.Core.Game.Entity
                     comp.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
                 {
                     // look for required attrib
-
-                    var match = Components.FirstOrDefault(c => c.GetType() == attrib.FragmentType);
+                    var match = Components.Get(attrib.ComponentType);
                     if (match == null)
                     {
-                        message =
-                            $"{comp.GetType().Name} requires component of type {attrib.FragmentType.Name} to be attached to the entity but it is not.";
+                        message = $"{comp.GetType().Name} requires component of type {attrib.ComponentType.Name} to be attached to the entity but it is not.";
                         return false;
                     }
                 }
