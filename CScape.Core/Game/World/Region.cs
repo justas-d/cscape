@@ -65,17 +65,17 @@ namespace CScape.Core.Game.World
         {
             return _nearbyRegions ?? (_nearbyRegions = new[]
             {
-                Poe.GetRegion(X + 1, Y),
-                Poe.GetRegion(X + 1, Y + 1),
-                Poe.GetRegion(X + 1, Y - 1),
+                Poe.GetRegionByRegionCoordinate(X + 1, Y),
+                Poe.GetRegionByRegionCoordinate(X + 1, Y + 1),
+                Poe.GetRegionByRegionCoordinate(X + 1, Y - 1),
 
-                Poe.GetRegion(X - 1, Y),
-                Poe.GetRegion(X - 1, Y + 1),
-                Poe.GetRegion(X - 1, Y - 1),
+                Poe.GetRegionByRegionCoordinate(X - 1, Y),
+                Poe.GetRegionByRegionCoordinate(X - 1, Y + 1),
+                Poe.GetRegionByRegionCoordinate(X - 1, Y - 1),
 
                 this,
-                Poe.GetRegion(X, Y + 1),
-                Poe.GetRegion(X, Y - 1)
+                Poe.GetRegionByRegionCoordinate(X, Y + 1),
+                Poe.GetRegionByRegionCoordinate(X, Y - 1)
             });
         }
     }

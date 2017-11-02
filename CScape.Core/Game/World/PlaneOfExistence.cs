@@ -36,11 +36,13 @@ namespace CScape.Core.Game.World
         /// Gets the region coords by global position.
         /// </summary>
         [NotNull]
-        public IRegion GetRegion(int x, int y)
+        public IRegion GetRegionByWorldCoordinate(int x, int y)
         {
             var key = (x >> Region.Shift, y >> Region.Shift);
             return GetRegion(key);
         }
+
+        public IRegion GetRegionByRegionCoordinate(int x, int y) => GetRegion((x, y));
 
         public void GC()
         {

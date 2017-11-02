@@ -40,10 +40,15 @@ namespace CScape.Models.Game.World
         void RegisterNewEntity([NotNull] ITransform transform);
 
         /// <summary>
-        /// Returns a region at the given coordinates. If it doesn't exist, a new one is created.
-        /// If x or y are negative, this method is undefined.
+        /// Returns the region to which the tile at the given position belongs to.
         /// </summary>
         [CanBeNull]
-        IRegion GetRegion(int x, int y);
+        IRegion GetRegionByWorldCoordinate(int x, int y);
+
+        /// <summary>
+        /// Returns the region at the given region coordinates.
+        /// </summary>
+        [CanBeNull]
+        IRegion GetRegionByRegionCoordinate(int x, int y);
     }
 }

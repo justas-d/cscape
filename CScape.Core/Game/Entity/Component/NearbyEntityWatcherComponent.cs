@@ -85,7 +85,6 @@ namespace CScape.Core.Game.Entity.Component
             TryDeleteEntityFromSeeables(msg.Entity);
         }
 
-        // TODO : lightweight version of the VisionComponent whose only purpose is to send out NearbyEntityQueuedForDeath upon receiving QueuedForDeath WITHOUT relying on VisionComponent
         public override void ReceiveMessage(IGameMessage msg)
         {
             switch (msg.EventId)

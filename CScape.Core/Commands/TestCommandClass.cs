@@ -292,6 +292,7 @@ namespace CScape.Core.Commands
             var ent = ctx.Callee.Parent;
 
             ent.SystemMessage($"X: {t.X} Y: {t.Y} Z: {t.Z}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
+            ent.SystemMessage($"REGX: {t.Region.X} REGY: {t.Region.Y}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
             ent.SystemMessage($"LX: {client.Local.X} LY: {client.Local.Y}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
             ent.SystemMessage($"CRX: {client.ClientRegion.Y} + 6 CRY: {client.ClientRegion.Y} + 6", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
             

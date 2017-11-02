@@ -102,7 +102,7 @@ namespace CScape.Core.Game.Entity.Component
 
         private void UpdateRegion()
         {
-            var region = PoE.GetRegion(X, Y) ?? throw new ArgumentNullException("PoE.GetRegion(X, Y)");
+            var region = PoE.GetRegionByWorldCoordinate(X, Y) ?? throw new ArgumentNullException(nameof(PoE.GetRegionByWorldCoordinate));
 
             if (Region == region) return;
 

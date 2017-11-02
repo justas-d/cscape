@@ -21,9 +21,7 @@ namespace CScape.Core.Network.Handler
             var id = packet.Data.ReadInt16() + 1;
             var x = packet.Data.ReadInt16();
 
-            
-
-            var region = entity.GetTransform().PoE.GetRegion(x, y);
+            var region = entity.GetTransform().PoE.GetRegionByWorldCoordinate(x, y);
 
             // select first item in the region's item list
             // where the pos of the item matches the packet data

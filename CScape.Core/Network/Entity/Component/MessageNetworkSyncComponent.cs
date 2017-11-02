@@ -37,24 +37,41 @@ namespace CScape.Core.Network.Entity.Component
 #endif
         }
 
-        public override void ReceiveMessage(IGameMessage msg)
+        private static bool IsBitSet(ulong flags, CoreSystemMessageFlags bit)
         {
-            
-
-            if (msg.EventId == (int)MessageId.NewSystemMessage)
-            {
-                // don't sync messages if the user has got a chat interface open.
-                var interf = Parent.GetInterfaces();
-                if (interf?.Chat != null)
-                    return;
-
-                var msgStr = msg.AsSystemMessage();
-                var isDebugBitSet = (msgStr.Flags & (ulong)CoreSystemMessageFlags.Debug) != 0;
-
-                if (!isDebugBitSet || SyncDebugMessages)
-                    Network.SendPacket(new SystemChatMessagePacket(msgStr.Msg));
-            }
+            return (flags & ((ulong)bit)) != 0;
         }
 
+        private bool CanSync()
+        {
+            // don't sync messages if the user has got a chat interface open.
+            var interf = Parent.GetInterfaces();
+            return interf?.Chat == null;
+        }
+
+        private bool IsMessageIgnored(ulong msgFlags)
+        {
+            if (IsBitSet(msgFlags, CoreSystemMessageFlags.Network))
+                return true;
+
+            if (IsBitSet(msgFlags, CoreSystemMessageFlags.Debug))
+                return !SyncDebugMessages;
+
+            return false;
+        }
+
+        public override void ReceiveMessage(IGameMessage msg)
+        {
+            if (msg.EventId == (int)MessageId.NewSystemMessage)
+            {
+                if (!CanSync())
+                    return;
+
+                var sysMsgData = msg.AsSystemMessage();
+                
+                if(!IsMessageIgnored(sysMsgData.Flags))
+                    Network.SendPacket(new SystemChatMessagePacket(sysMsgData.Msg));
+            }
+        }
     }
 }

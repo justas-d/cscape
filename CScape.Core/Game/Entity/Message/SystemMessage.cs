@@ -11,11 +11,11 @@ namespace CScape.Core.Game.Entity.Message
         None = SystemMessageFlags.None,
         Normal = SystemMessageFlags.Normal,
         Debug = SystemMessageFlags.Debug,
-        Skill,
-        Item,
-        Network,
-        Interface,
-        Entity
+        Skill = 2,
+        Item = 4,
+        Network = 8,
+        Interface = 16,
+        Entity = 32
     }
 
     public sealed class SystemMessage : IGameMessage
