@@ -85,6 +85,7 @@ namespace CScape.Core.Game.Entity
             ent.Components.Add(new NetworkingComponent(ent, socket, packetParser));
             ent.Components.Add(new PacketDispatcherComponent(ent, packets));
             ent.Components.Add(new FlagAccumulatorComponent(ent));
+            ent.Components.Add(new DeathBroadcasterComponent(ent));
 
             var client = new ClientPositionComponent(ent);
             ent.Components.Add(client);

@@ -45,6 +45,7 @@ namespace CScape.Core.Game.Entity
             ent.Components.Add(new MovementActionComponent(ent));
             ent.Components.Add(new TileMovementComponent(ent));
             ent.Components.Add(new FlagAccumulatorComponent(ent));
+            ent.Components.Add(new DeathBroadcasterComponent(ent));
 
             // TODO : set npc health according to it's definition when creating the npc.
             var health = new HealthComponent(ent);
