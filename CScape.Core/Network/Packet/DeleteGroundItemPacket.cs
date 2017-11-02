@@ -1,4 +1,5 @@
 using CScape.Models.Data;
+using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Packet
 {
@@ -11,11 +12,11 @@ namespace CScape.Core.Network.Packet
         private readonly int _id;
 
         public DeleteGroundItemPacket(
-            int itemId,
+            ItemStack item,
             (int x, int y) off)
             :base(off.x, off.y)
         {
-            _id = itemId - 1;
+            _id = item.Id.ItemId - 1;
         }
 
         protected override void InternalSend(OutBlob stream)

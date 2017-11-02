@@ -166,9 +166,32 @@ namespace CScape.Core.Game.Entity.Component
 
         private void OnBeginMovePath(BeginMovePathMessage msgData)
         {
-            // only reset interacting entity if the new directions provider
+            // TODO : HACK : only reset interacting entity if the new directions provider
             // is not a follow directions provider.
+            // this is due to us receiving NewPlayerFollowTarget and then BeginMovePath,
+            // the first one sets the interacting ent while the last resets it to null
             if (!(msgData.Directions is FollowDirectionProvider))
+                SetInteractingEntity(NullInteractingEntity.Instance);
+        }
+
+        private bool DoesInteractingEntityNeedToBeReset()
+        {
+            if (InteractingEntity.Entity == null)
+                return false;
+
+            if (!InteractingEntity.Entity.IsDead())
+                return false;
+
+            var vision = Parent.GetVision();
+            if(vision == null)
+                return false;
+
+            return vision.CanSee(InteractingEntity.Entity.Get());
+        }
+
+        private void OnUpdate()
+        {
+            if(DoesInteractingEntityNeedToBeReset())
                 SetInteractingEntity(NullInteractingEntity.Instance);
         }
 
@@ -178,6 +201,11 @@ namespace CScape.Core.Game.Entity.Component
             // TODO : handle ForcedMovement movement over time in a separate component
             switch (msg.EventId)
             {
+                case (int) MessageId.FrameBegin:
+                {
+                    OnUpdate();
+                    break;
+                }
                 case (int) MessageId.BeginMovePath:
                 {
                     OnBeginMovePath(msg.AsBeginMovePath());

@@ -72,8 +72,8 @@ namespace CScape.Dev.Runtime
             services.AddSingleton(s => new MainLoop(s));
             services.AddSingleton<IMainLoop>(s => s.ThrowOrGet<MainLoop>());
 
-            services.AddSingleton(s => new ItemFactory(s.ThrowOrGet<IEntitySystem>()));
-            services.AddSingleton<IItemFactory>(s => s.ThrowOrGet<ItemFactory>());
+            services.AddSingleton(s => new GroundItemFactory(s.ThrowOrGet<IEntitySystem>()));
+            services.AddSingleton<IGroundItemFactory>(s => s.ThrowOrGet<GroundItemFactory>());
 
             services.AddSingleton(s => new EntitySystem(s.ThrowOrGet<IGameServer>()));
             services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());

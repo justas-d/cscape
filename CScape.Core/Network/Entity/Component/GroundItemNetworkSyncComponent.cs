@@ -71,7 +71,7 @@ namespace CScape.Core.Network.Entity.Component
         private void RemoveItem(IGroundItemComponent item)
         {
             var coords = GetLocalCoords(item);
-            AddPacket(new DeleteGroundItemPacket(item.Item.Id.ItemId -1, coords.offset), coords.regionGrid);
+            AddPacket(new DeleteGroundItemPacket(item.Item, coords.offset), coords.regionGrid);
         }
 
         private void NewItem(IGroundItemComponent item)

@@ -9,11 +9,11 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
 {
-    public sealed class ItemFactory : IItemFactory
+    public sealed class GroundItemFactory : IGroundItemFactory
     {
         public IEntitySystem System { get; }
 
-        public ItemFactory([NotNull] IEntitySystem system)
+        public GroundItemFactory([NotNull] IEntitySystem system)
         {
             System = system ?? throw new ArgumentNullException(nameof(system));
         }
@@ -24,6 +24,7 @@ namespace CScape.Core.Game.Entity
             var ent = handle.Get();
 
             var item = new PlayerDroppedItemComponent(ent, stack, null, player.Username);
+            ent.Components.Add(new VisionComponent(ent));
             ent.Components.Add<IGroundItemComponent>(item);
             ent.Components.Add<IVisionResolver>(item);
 

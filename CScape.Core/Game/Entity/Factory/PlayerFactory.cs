@@ -114,6 +114,7 @@ namespace CScape.Core.Game.Entity
             var vision = new VisionComponent(ent);
             ent.Components.Add(vision);
             ent.Components.Add<IVisionComponent>(vision);
+            ent.Components.Add(new NearbyEntityWatcherComponent(ent));
 
             ent.Components.Add(new NpcNetworkSyncComponent(ent));
             ent.Components.Add(new PlayerNetworkSyncComponent(ent));

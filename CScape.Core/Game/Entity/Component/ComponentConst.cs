@@ -11,7 +11,7 @@
         TileMovement,
         MovementActionComponent,
         ClientPositionComponent,
-        VisionComponent,
+        EntityWatcher,
         ItemActionDispatchComponent,
         GroundItemComponent,
         InterfaceComponent,

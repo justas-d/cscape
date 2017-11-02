@@ -38,7 +38,7 @@ namespace CScape.Models.Extensions
             if (item == null)
                 return null;
 
-            var itemFactory = (IItemFactory)player.Parent.Server.Services.GetService(typeof(IItemFactory));
+            var itemFactory = (IGroundItemFactory)player.Parent.Server.Services.GetService(typeof(IGroundItemFactory));
             if (itemFactory == null)
                 return null;
 

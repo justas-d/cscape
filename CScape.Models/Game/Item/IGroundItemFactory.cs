@@ -7,7 +7,7 @@ namespace CScape.Models.Game.Item
     /// <summary>
     /// Defines a factory which create entities that have a valid IGroundItemComponent component attached to them.
     /// </summary>
-    public interface IItemFactory
+    public interface IGroundItemFactory
     {
         /// <summary>
         /// Creates an entity and ensures that it has:
