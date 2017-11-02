@@ -128,6 +128,13 @@ namespace CScape.Core.Game.Entity.Component
             SetFlag(new PlayerAppearanceUpdateFlag(cache));
         }
 
+        private void Reset()
+        {
+            _flags.Clear();
+            Reinitialize = false;
+            Movement = null;
+        }
+
         public override void ReceiveMessage(IGameMessage msg)
         {
             switch (msg.EventId)
@@ -194,9 +201,7 @@ namespace CScape.Core.Game.Entity.Component
                 }
                 case (int)MessageId.FrameEnd:
                 {
-                    _flags.Clear();
-                    Reinitialize = false;
-                    Movement = null;
+                    Reset();
                     break;
                 }
             }

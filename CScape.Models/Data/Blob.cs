@@ -15,7 +15,7 @@ namespace CScape.Models.Data
  
         public int WriteCaret { get; set; }
 
-        private bool _isInBitMode = false;
+        public bool IsInBitMode { get; private set; } = false;
 
         public int BitReadCaret { get; set; }
         public int BitWriteCaret { get; set; }
@@ -202,8 +202,10 @@ namespace CScape.Models.Data
         /// <exception cref="InvalidOperationException">Already in bit mode.</exception>
         public void BeginBitAccess()
         {
-            if (_isInBitMode) throw new InvalidOperationException("Already in bit access mode.");
-            _isInBitMode = true;
+            if (IsInBitMode)
+                return;
+            
+            IsInBitMode = true;
 
             BitReadCaret = ReadCaret * 8;
             BitWriteCaret = WriteCaret * 8;
@@ -228,8 +230,8 @@ namespace CScape.Models.Data
         /// <exception cref="InvalidOperationException">Not in bit mode.</exception>
         public void EndBitAccess()
         {
-            if (!_isInBitMode) throw new InvalidOperationException("Not in bit access mode.");
-            _isInBitMode = false;
+            if (!IsInBitMode) throw new InvalidOperationException("Not in bit access mode.");
+            IsInBitMode = false;
 
             ReadCaret = ((BitReadCaret + 7) / 8);
             WriteCaret= ((BitWriteCaret + 7) / 8);

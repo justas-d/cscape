@@ -1,7 +1,6 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using CScape.Core.Network.Entity.Segment;
-using CScape.Models.Data;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Packet
@@ -13,7 +12,9 @@ namespace CScape.Core.Network.Packet
         [NotNull] private readonly IEnumerable<IUpdateSegment> _initializeSegments;
         [NotNull] private readonly IEnumerable<IUpdateSegment> _flagSegments;
 
-        public const int Id = 81;
+        public const int NumIdBits = 11;
+        public const int MaxIdValue = 2047;
+        public const int PacketId = 81;
 
         public PlayerUpdatePacket(
             [NotNull] IUpdateSegment localSegment,
@@ -28,31 +29,18 @@ namespace CScape.Core.Network.Packet
         }
 
         public void Send(OutBlob stream)
-        { 
-            stream.BeginPacket(Id);
-
+        {
+            stream.BeginPacket(PacketId);
             stream.BeginBitAccess();
 
             _localSegment.Write(stream);
 
-            stream.WriteBits(8, _syncSegments.Count());
-
-            foreach (var segment in _syncSegments)
-                segment.Write(stream);
-
-            foreach(var init in _initializeSegments)
-                init.Write(stream);
-
-            if (_flagSegments.Any())
-            {
-                stream.WriteBits(11, 2047);
-                stream.EndBitAccess();
-
-                foreach (var flag in _flagSegments)
-                    flag.Write(stream);
-            }
-            else
-                stream.EndBitAccess();
+            GenericEntityUpdateWriter.WriteIntoPacket(stream,
+                _syncSegments,
+                _initializeSegments,
+                _flagSegments,
+                NumIdBits,
+                MaxIdValue);
 
             stream.EndPacket();
         }
