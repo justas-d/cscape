@@ -179,14 +179,14 @@ namespace CScape.Core.Game.Entity.Component
             if (InteractingEntity.Entity == null)
                 return false;
 
-            if (!InteractingEntity.Entity.IsDead())
-                return false;
+            if (InteractingEntity.Entity.IsDead())
+                return true;
 
             var vision = Parent.GetVision();
             if(vision == null)
                 return false;
 
-            return vision.CanSee(InteractingEntity.Entity.Get());
+            return !vision.CanSee(InteractingEntity.Entity.Get());
         }
 
         private void OnUpdate()
