@@ -29,7 +29,7 @@ namespace CScape.Core.Game.Entity.Component
         public const int MaxUsernameChars = 12;
         public const int MaxPasswordChars = 64;
 
-        public int PlayerId { get; }
+        public int InstanceId { get; }
 
         public PlayerAppearance Apperance { get; private set; }
         
@@ -49,7 +49,7 @@ namespace CScape.Core.Game.Entity.Component
             PlayerAppearance appearance,
             bool isMember,
             int titleId,
-            int playerId,
+            int instanceId,
             [CanBeNull] Action<PlayerComponent> destroyCallback)
             :base(parent)
         {
@@ -61,7 +61,7 @@ namespace CScape.Core.Game.Entity.Component
             }
 
             _destroyCallback = destroyCallback ?? throw new ArgumentNullException(nameof(destroyCallback));
-            PlayerId = playerId;
+            InstanceId = instanceId;
             TitleId = titleId;
             IsMember = isMember;
             Username = username;
@@ -80,7 +80,7 @@ namespace CScape.Core.Game.Entity.Component
             var net = Parent.GetNetwork();
             if (net != null)
             {
-                net.SendPacket(new InitializePlayerPacket(PlayerId, IsMember));
+                net.SendPacket(new InitializePlayerPacket(InstanceId, IsMember));
                 // TODO : delegate the retrieval of SetPlayerOptionPacket to the current Region
                 net.SendPacket(SetPlayerOptionPacket.Follow);
                 net.SendPacket(SetPlayerOptionPacket.TradeWith);
@@ -199,7 +199,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public override string ToString()
         {
-            return $"Player \"{Username}\" PID: {PlayerId})";
+            return $"Player \"{Username}\" PID: {InstanceId})";
         }
 
         public override int GetHashCode()

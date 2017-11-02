@@ -155,8 +155,10 @@ namespace CScape.Core.Commands
 
             var factory = ctx.Callee.Parent.Server.Services.ThrowOrGet<INpcFactory>();
             var npc = factory.Create("Spanwed NPC", defId);
+
+            npc.Get().GetTransform().Teleport(ctx.Callee.Parent.GetTransform());
             
-            ctx.Callee.Parent.SystemMessage($"Spawned NPC. Intance ID: {npc.Get().AssertGetNpc().NpcId}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
+            ctx.Callee.Parent.SystemMessage($"Spawned NPC. Intance ID: {npc.Get().AssertGetNpc().InstanceId}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
         }
 
         [CommandMethod("clearinv")]

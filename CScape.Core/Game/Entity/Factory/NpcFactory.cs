@@ -44,6 +44,7 @@ namespace CScape.Core.Game.Entity
 
             ent.Components.Add(new MovementActionComponent(ent));
             ent.Components.Add(new TileMovementComponent(ent));
+            ent.Components.Add(new FlagAccumulatorComponent(ent));
 
             // TODO : set npc health according to it's definition when creating the npc.
             var health = new HealthComponent(ent);
@@ -67,8 +68,8 @@ namespace CScape.Core.Game.Entity
 
         private void DestroyCallback(NpcComponent npc)
         {
-            _log.Normal(this, $"Freeing npc slot {npc.NpcId} named {npc.Parent.Name}");
-            InstanceLookup[npc.NpcId] = null;
+            _log.Normal(this, $"Freeing npc slot {npc.InstanceId} named {npc.Parent.Name}");
+            InstanceLookup[npc.InstanceId] = null;
         }
 
         public IEntityHandle Get(int id) => GetById(id);

@@ -7,7 +7,7 @@ namespace CScape.Models.Game.Entity.Component
         /// <summary>
         /// The instance id of the player.
         /// </summary>
-        int PlayerId { get; }
+        int InstanceId { get; }
 
         /// <summary>
         /// The implementation specific id of the player's title.

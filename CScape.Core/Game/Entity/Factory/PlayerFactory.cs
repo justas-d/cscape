@@ -173,9 +173,9 @@ namespace CScape.Core.Game.Entity
         {
             if (component == null) throw new ArgumentNullException(nameof(component));
 
-            Log.Normal(this, $"Freeing player slot {component.PlayerId} {component.Username}");
+            Log.Normal(this, $"Freeing player slot {component.InstanceId} {component.Username}");
 
-            InstanceLookup[component.PlayerId] = null;
+            InstanceLookup[component.InstanceId] = null;
             _usernameLookup.Remove(component.Username);
 
             NumAlivePlayers--;

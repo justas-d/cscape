@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using CScape.Core.Game.Entity.Component;
-using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Entity.Flag;
 using CScape.Core.Network.Entity.Segment;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 
 namespace CScape.Core.Network.Entity.Component
 {
@@ -46,27 +44,10 @@ namespace CScape.Core.Network.Entity.Component
         {
             var updates = new List<IUpdateWriter>();
 
-            /* Local */
-            IUpdateSegment local;
-            {
-                var flags = Parent.Components.AssertGet<FlagAccumulatorComponent>();
-                var updater = new LocalPlayerUpdateWriter(flags);
-                var needsUpdate = updater.NeedsUpdate();
-
-                if (flags.Reinitialize)
-                {
-                    local = new LocalPlayerInitSegment(Parent.AssertGetPlayer(), needsUpdate);
-                }
-                else
-                    local = CommonSegmentResolve(flags, needsUpdate);
-
-                if (needsUpdate)
-                    updates.Add(updater);
-            }
-
+            var local = CreateUpdateSegmentForParent(updates);
 
             var sync = GetSyncSegments(updates, f => new PlayerUpdateWriter(f));
-            var init = GetInitSegments(updates, f => new PlayerUpdateWriter(f));
+            var init = CreatePlayerInitSegments(updates);
 
             /* Send packet */
             Parent.Components.AssertGet<NetworkingComponent>().SendPacket(
@@ -77,5 +58,40 @@ namespace CScape.Core.Network.Entity.Component
                     updates));
         }
 
+        private IEnumerable<IUpdateSegment> CreatePlayerInitSegments(List<IUpdateWriter> updates)
+        {
+            IUpdateWriter UpdateWriterFactory(FlagAccumulatorComponent f) => new PlayerUpdateWriter(f);
+
+            IUpdateSegment InitSegmentFactory((bool needsUpdate, IEntity entityToBeInitialized) data)
+                => new InitPlayerSegment(data.entityToBeInitialized.AssertGetPlayer(), Parent.AssertGetPlayer(),
+                    data.needsUpdate);
+
+            var init = GetInitSegments(updates,
+                UpdateWriterFactory,
+                InitSegmentFactory);
+
+            return init;
+        }
+
+        private IUpdateSegment CreateUpdateSegmentForParent(List<IUpdateWriter> updates)
+        {
+            IUpdateSegment local;
+
+            var flags = Parent.Components.AssertGet<FlagAccumulatorComponent>();
+            var updater = new LocalPlayerUpdateWriter(flags);
+            var needsUpdate = updater.NeedsUpdate();
+
+            if (flags.Reinitialize)
+            {
+                local = new LocalPlayerInitSegment(Parent.AssertGetPlayer(), needsUpdate);
+            }
+            else
+                local = CommonSegmentResolve(flags, needsUpdate);
+
+            if (needsUpdate)
+                updates.Add(updater);
+
+            return local;
+        }
     }
 }

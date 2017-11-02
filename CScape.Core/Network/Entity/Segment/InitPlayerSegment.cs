@@ -16,7 +16,7 @@ namespace CScape.Core.Network.Entity.Segment
             [NotNull] IPlayerComponent newPlayer, [NotNull] IPlayerComponent localPlayer,
             bool needsUpdate)
         {
-            _pid = newPlayer.PlayerId;
+            _pid = newPlayer.InstanceId;
             _needsUpdate = needsUpdate;
             _xdelta = newPlayer.Parent.GetTransform().X - localPlayer.Parent.GetTransform().X;
             _ydelta = newPlayer.Parent.GetTransform().Y - localPlayer.Parent.GetTransform().Y;

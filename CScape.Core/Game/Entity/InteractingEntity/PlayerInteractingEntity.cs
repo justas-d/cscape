@@ -14,7 +14,7 @@ namespace CScape.Core.Game.Entity.InteractingEntity
         public PlayerInteractingEntity([NotNull] IPlayerComponent player)
         {
             Entity = player.Parent.Handle;
-            Id = (short) (player.PlayerId + 32769);
+            Id = (short) (player.InstanceId + 32769);
         }
     }
 }

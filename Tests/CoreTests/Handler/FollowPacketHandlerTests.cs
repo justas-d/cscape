@@ -45,7 +45,7 @@ namespace CScape.Dev.Tests.Internal.Handler
             var (s, p, h) = Data();
             var target = Mock.Player("follow target", s).Get();
 
-            Exec(p, h, (short)target.AssertGetPlayer().PlayerId);
+            Exec(p, h, (short)target.AssertGetPlayer().InstanceId);
             Validate(p, target);
         }
 
@@ -73,7 +73,7 @@ namespace CScape.Dev.Tests.Internal.Handler
         {
             var d = Data();
 
-            ExecInvalidTarget(d, (short)d.Item2.AssertGetPlayer().PlayerId);
+            ExecInvalidTarget(d, (short)d.Item2.AssertGetPlayer().InstanceId);
         }
     }
 }

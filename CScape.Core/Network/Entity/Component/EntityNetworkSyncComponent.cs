@@ -56,8 +56,10 @@ namespace CScape.Core.Network.Entity.Component
         protected abstract bool IsHandleableEntity(IEntityHandle h);
 
         protected IUpdateSegment CommonSegmentResolve(
-            FlagAccumulatorComponent flags, bool needsUpdate)
+            [NotNull] FlagAccumulatorComponent flags, 
+            bool needsUpdate)
         {
+            if (flags == null) throw new ArgumentNullException(nameof(flags));
 
             if (flags.Movement != null)
             {
@@ -82,9 +84,12 @@ namespace CScape.Core.Network.Entity.Component
 
 
         protected IEnumerable<IUpdateSegment> GetSyncSegments(
-            IList<IUpdateWriter> updateSegments,
-            Func<FlagAccumulatorComponent, IUpdateWriter> updateWriterFactory)
+            [NotNull] IList<IUpdateWriter> updateSegments,
+            [NotNull] Func<FlagAccumulatorComponent, IUpdateWriter> updateWriterFactory)
         {
+            if (updateSegments == null) throw new ArgumentNullException(nameof(updateSegments));
+            if (updateWriterFactory == null) throw new ArgumentNullException(nameof(updateWriterFactory));
+
             var removeList = new List<IEntityHandle>();
             var syncSegments = new List<IUpdateSegment>();
 
@@ -138,9 +143,14 @@ namespace CScape.Core.Network.Entity.Component
         protected abstract void SetInitialFlags(IUpdateWriter writer, IEntity ent);
 
         protected IEnumerable<IUpdateSegment> GetInitSegments(
-            IList<IUpdateWriter> updateSegments,
-            Func<FlagAccumulatorComponent, IUpdateWriter> updateWriterFactory)
+            [NotNull] IList<IUpdateWriter> updateSegments,
+            [NotNull] Func<FlagAccumulatorComponent, IUpdateWriter> updateWriterFactory,
+            [NotNull] Func<(bool needsUpdate, IEntity entityToBeInitialized), IUpdateSegment> initSegmentFactory)
         {
+            if (updateSegments == null) throw new ArgumentNullException(nameof(updateSegments));
+            if (updateWriterFactory == null) throw new ArgumentNullException(nameof(updateWriterFactory));
+            if (initSegmentFactory == null) throw new ArgumentNullException(nameof(initSegmentFactory));
+
             var init = new List<IUpdateSegment>();
 
             /* Initialize */
@@ -156,7 +166,7 @@ namespace CScape.Core.Network.Entity.Component
 
                 var needsUpd = updater.NeedsUpdate();
 
-                init.Add(new InitPlayerSegment(entity.AssertGetPlayer(), Parent.AssertGetPlayer(), needsUpd));
+                init.Add(initSegmentFactory((needsUpd, entity)));
 
                 if (needsUpd)
                 {

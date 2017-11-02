@@ -12,7 +12,7 @@ namespace CScape.Core.Game.Entities
         /// <summary>
         /// The instance id of the npc.
         /// </summary>
-        short NpcId { get; }
+        short InstanceId { get; }
 
         /// <summary>
         /// Changes the definition id of the npc.

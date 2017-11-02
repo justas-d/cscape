@@ -19,7 +19,7 @@ namespace CScape.Dev.Tests.Internal.Handler
 
             var h = new TalkToPacketHandler(server.Services);
             var b = new Blob(sizeof(short));
-            b.Write16(npc.AssertGetNpc().NpcId);
+            b.Write16(npc.AssertGetNpc().InstanceId);
 
             h.HandleAll(p, o => PacketMessage.Success((byte)o, b));
         }

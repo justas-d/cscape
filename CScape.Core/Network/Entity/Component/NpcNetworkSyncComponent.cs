@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using CScape.Core.Extensions;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Network.Entity.Flag;
+using CScape.Core.Network.Entity.Segment;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
@@ -37,13 +37,29 @@ namespace CScape.Core.Network.Entity.Component
             var updates = new List<IUpdateWriter>();
 
             var sync = GetSyncSegments(updates, f => new NpcUpdateWriter(f));
-            var init = GetInitSegments(updates, f => new NpcUpdateWriter(f));
+            var init = CreateNpcInitSegments(updates);
 
             Parent.AssertGetNetwork().SendPacket(
                 new NpcUpdatePacket(
                     sync,
                     init,
                     updates));
+        }
+
+        private IEnumerable<IUpdateSegment> CreateNpcInitSegments(List<IUpdateWriter> updates)
+        {
+            IUpdateWriter UpdateWriterFactory(FlagAccumulatorComponent f)
+            {
+                return new NpcUpdateWriter(f);
+            }
+
+            IUpdateSegment InitSegmentFactory((bool needsUpdate, IEntity entityToBeInitialized) data)
+            {
+                return new InitNpcSegment(data.entityToBeInitialized.AssertGetNpc(), Parent, data.needsUpdate);
+            }
+
+            var init = GetInitSegments(updates, UpdateWriterFactory, InitSegmentFactory);
+            return init;
         }
     }
 }

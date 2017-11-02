@@ -14,7 +14,7 @@ namespace CScape.Core.Game.Entity.InteractingEntity
         public NpcInteractingEntity([NotNull] INpcComponent npc)
         {
             Entity = npc.Parent.Handle ?? throw new ArgumentNullException(nameof(npc));
-            Id = npc.NpcId;
+            Id = npc.InstanceId;
         }
     }
 }

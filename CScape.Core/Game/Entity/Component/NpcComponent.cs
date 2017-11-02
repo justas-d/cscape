@@ -13,7 +13,7 @@ namespace CScape.Core.Game.Entity.Component
         public override int Priority => (int)ComponentPriority.Npc;
 
         public short DefinitionId { get; private set; }
-        public short NpcId { get; }
+        public short InstanceId { get; }
 
         public NpcComponent(
             IEntity parent,
@@ -24,7 +24,7 @@ namespace CScape.Core.Game.Entity.Component
         {
             _destroyCallback = destroyCallback;
             DefinitionId = defId;
-            NpcId = npcId;
+            InstanceId = npcId;
         }
 
         public void ChangeDefinitionId(short newId)
@@ -46,6 +46,6 @@ namespace CScape.Core.Game.Entity.Component
         }
 
         public override string ToString() 
-            => $"Npc {NpcId} def-id {DefinitionId}";
+            => $"Npc {InstanceId} def-id {DefinitionId}";
     }
 }
