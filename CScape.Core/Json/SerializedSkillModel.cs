@@ -2,7 +2,7 @@ using System;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Skill;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public sealed class SerializedSkillModel : ISkillModel
     {

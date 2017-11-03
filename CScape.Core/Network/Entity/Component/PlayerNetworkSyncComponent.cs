@@ -35,7 +35,7 @@ namespace CScape.Core.Network.Entity.Component
         protected override void SetInitialFlags(IUpdateWriter writer, IEntity ent)
         {
             var flags = ent.Components.AssertGet<FlagAccumulatorComponent>();
-            writer.SetFlag(new PlayerAppearanceUpdateFlag(flags.AppearanceCache));
+            writer.SetFlag(flags.CreateAppearanceUpdateFlag());
             writer.SetFlag(new FacingCoordinateUpdateFlag(ent.GetTransform().FacingState));
             writer.SetFlag(new InteractingEntityUpdateFlag(ent.GetTransform().InteractingEntity));
         }

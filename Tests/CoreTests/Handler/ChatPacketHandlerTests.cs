@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using CScape.Core;
 using CScape.Core.Extensions;
 using CScape.Core.Game;
-using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Handler;
@@ -13,11 +11,10 @@ using CScape.Models;
 using CScape.Models.Data;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal.Handler
+namespace CScape.Dev.Tests.CoreTests.Handler
 {
     [TestClass]
     public sealed class ChatPacketHandlerTests

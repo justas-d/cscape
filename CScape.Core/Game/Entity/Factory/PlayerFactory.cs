@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using CScape.Core.Database;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Game.Item;
 using CScape.Core.Game.Skill;
+using CScape.Core.Json;
 using CScape.Core.Network;
 using CScape.Core.Network.Entity.Component;
 using CScape.Models;
@@ -16,7 +17,7 @@ using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.Factory;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entity.Factory
 {
     public sealed class PlayerFactory : InstanceFactory, IPlayerFactory
     {
@@ -33,6 +34,7 @@ namespace CScape.Core.Game.Entity
 
         private ILogger Log { get; }
 
+        private SkillDb _skillDb;
         private PlayerJsonDatabase _db;
 
         public PlayerFactory(IServiceProvider services) : base(services.ThrowOrGet<IGameServerConfig>().MaxPlayers)
@@ -40,6 +42,7 @@ namespace CScape.Core.Game.Entity
             EntitySystem = services.ThrowOrGet<IEntitySystem>();
             Log = services.ThrowOrGet<ILogger>();
             _db = services.ThrowOrGet<PlayerJsonDatabase>();
+            _skillDb = services.ThrowOrGet<SkillDb>();
         }
 
         public IEntityHandle Get(int id) => GetById(id);
@@ -154,8 +157,8 @@ namespace CScape.Core.Game.Entity
                 skills.All.Add(skill.Key, new NormalSkillModel(skill.Key, skill.Value.Boost, skill.Value.Experience));
 
             // setup health
-            var skillDb = EntitySystem.Server.Services.ThrowOrGet<SkillDb>();
-            health.SetNewMaxHealth(skills.All[skillDb.Hitpoints].Level);
+            
+            health.SetNewMaxHealth(skills.All[_skillDb.Hitpoints].Level);
             health.SetNewHealth(model.Health);
           
             InstanceLookup[id] = entHandle;

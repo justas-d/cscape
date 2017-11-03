@@ -1,6 +1,7 @@
 ﻿namespace CScape.Core.Game.Entity
 {
-    public  struct PlayerAppearance
+    // TODO : make PlayerAppearance a class
+    public struct PlayerAppearance
     {
         public int Arms { get; }
         public int Beard { get; }

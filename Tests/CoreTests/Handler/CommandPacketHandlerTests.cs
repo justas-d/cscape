@@ -1,5 +1,4 @@
-﻿using CScape.Core.Game.Entity;
-using CScape.Core.Game.Entity.Message;
+﻿using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Handler;
 using CScape.Dev.Tests.Impl;
 using CScape.Models.Data;
@@ -9,7 +8,7 @@ using CScape.Models.Game.Entity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal.Handler
+namespace CScape.Dev.Tests.CoreTests.Handler
 {
     [TestClass]
     public class CommandPacketHandlerTests

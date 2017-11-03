@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CScape.Core.Extensions;
+using CScape.Core.Utility;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 using CoreSystemMessageFlags = CScape.Core.Game.Entity.Message.CoreSystemMessageFlags;
 
@@ -60,46 +60,10 @@ namespace CScape.Core.Game.Entity.Component
 
             return EntityVision.GetVisibleEntities(Parent, OptimalViewrange);            
         }
-
-        private static IEnumerable<(int index, int value)> ProgressiveBinarySearch(
-            Func<int, int> valueRetriever,
-            int targetValue,
-            int floorIdx, int roofIdx)
-        {
-            // recursion made iteration
-            while (true)
-            {
-                // don't go out of range
-                if (floorIdx > roofIdx)
-                    break;
-
-                var middleIdx = (floorIdx + roofIdx) / 2;
-                var middleValue = valueRetriever(middleIdx);
-                var result = (middleIdx, middleValue);
-
-                if (middleValue == targetValue)
-                {
-                    yield return result;
-                    break;
-                }
-                else if (middleValue < targetValue)
-                {
-                    floorIdx = middleIdx + 1;
-                    yield return result;
-                }
-                else if (middleValue > targetValue)
-                {
-                    roofIdx = middleIdx - 1;
-                    yield return result;
-                }
-            }
-        }
-
+        
         private int FindMostOptimalViewrange()
         {
-            var unenumeratedMaxVisibleEntities = EntityVision.GetVisibleEntities(Parent, MaxViewRange);
-            var maxVisibleEntities = unenumeratedMaxVisibleEntities as IList<IEntityHandle> ?? unenumeratedMaxVisibleEntities.ToList();
-            Debug.Assert(maxVisibleEntities != null);
+            var maxVisibleEntities = GetEnumeratedMaxVisibleEntities();
 
             if (maxVisibleEntities.Count == MaxVisibleEntities)
                 return MaxViewRange;
@@ -107,7 +71,7 @@ namespace CScape.Core.Game.Entity.Component
             int ValueRetriever(int viewrange)
                 => maxVisibleEntities.Count(ent => EntityVision.CanSee(Parent, ent.Get(), viewrange));
             
-            var optimalResults = ProgressiveBinarySearch(
+            var optimalResults = Algorithm.ProgressiveBinarySearch(
                 ValueRetriever,
                 MaxVisibleEntities,
                 0, 
@@ -115,6 +79,17 @@ namespace CScape.Core.Game.Entity.Component
 
             var best = FindBestSolution(optimalResults);
             return best.viewrange;
+        }
+
+        private IList<IEntityHandle> GetEnumeratedMaxVisibleEntities()
+        {
+            var unenumeratedMaxVisibleEntities = EntityVision.GetVisibleEntities(Parent, MaxViewRange);
+            var maxVisibleEntities = unenumeratedMaxVisibleEntities as IList<IEntityHandle> ??
+                                     unenumeratedMaxVisibleEntities.ToList();
+
+            Debug.Assert(maxVisibleEntities != null);
+
+            return maxVisibleEntities;
         }
 
         private (int viewrange, int entityCount) FindBestSolution(IEnumerable<(int index, int value)> optimalResults)

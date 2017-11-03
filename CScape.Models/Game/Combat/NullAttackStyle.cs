@@ -1,8 +1,7 @@
-﻿using CScape.Models.Game.Combat;
-using CScape.Models.Game.Entity;
+﻿using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 
-namespace CScape.Models.Game.Item
+namespace CScape.Models.Game.Combat
 {
     public sealed class NullAttackStyle : IAttackStyle
     {

@@ -1,11 +1,13 @@
 using System;
 using System.IO;
 using System.Reflection;
-using CScape.Core;
-using CScape.Core.Database;
+using CScape.Core.Extensions;
 using CScape.Core.Game;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Factory;
 using CScape.Core.Game.Entity.Message;
+using CScape.Core.Game.Skill;
+using CScape.Core.Json;
 using CScape.Core.Network;
 using CScape.Core.Network.Handler;
 using CScape.Models;
@@ -14,7 +16,6 @@ using CScape.Models.Extensions;
 using CScape.Models.Game;
 using CScape.Models.Game.Entity;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CScape.Dev.Tests.Impl
 {

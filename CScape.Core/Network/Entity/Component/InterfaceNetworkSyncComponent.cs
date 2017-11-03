@@ -1,12 +1,10 @@
-﻿using CScape.Core.Game.Entities;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 
 namespace CScape.Core.Network.Entity.Component
 {

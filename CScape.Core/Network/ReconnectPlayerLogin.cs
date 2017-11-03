@@ -14,13 +14,14 @@ namespace CScape.Core.Network
         public int SignlinkUid { get; }
         public IEntityHandle Existing { get; }
 
-        private ILogger Log => Existing.System.Server.Services.ThrowOrGet<ILogger>();
+        private ILogger Log { get; }
 
         public ReconnectPlayerLogin([NotNull] IEntityHandle existing, [NotNull] Socket newConnection, int signlinkUid)
         {
             NewConnection = newConnection ?? throw new ArgumentNullException(nameof(newConnection));
             Existing = existing ?? throw new ArgumentNullException(nameof(existing));
             SignlinkUid = signlinkUid;
+            Log = existing.System.Server.Services.ThrowOrGet<ILogger>();
         }
 
         public void Transfer(IMainLoop ignored)

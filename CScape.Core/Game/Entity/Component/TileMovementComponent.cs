@@ -5,7 +5,6 @@ using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Directions;
-using CScape.Models.Game.Message;
 using CScape.Models.Game.World;
 using JetBrains.Annotations;
 

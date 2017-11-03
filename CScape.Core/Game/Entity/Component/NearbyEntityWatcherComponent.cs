@@ -3,7 +3,6 @@ using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Component

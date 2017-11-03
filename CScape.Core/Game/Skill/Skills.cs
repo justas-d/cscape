@@ -1,8 +1,9 @@
 using System;
-using CScape.Core.Database;
+using CScape.Core.Extensions;
+using CScape.Core.Json.Model;
 using CScape.Models.Game.Skill;
 
-namespace CScape.Core.Game
+namespace CScape.Core.Game.Skill
 {
     public class SkillDb
     {

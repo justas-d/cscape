@@ -4,7 +4,7 @@ using CScape.Models.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.External
+namespace CScape.Dev.Tests.CoreTests
 {
     [TestClass]
     public class OutBlobTests

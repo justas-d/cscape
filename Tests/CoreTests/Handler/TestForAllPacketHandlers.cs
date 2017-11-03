@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using CScape.Core.Network;
-using CScape.Core.Network.Handler;
+﻿using CScape.Core.Network;
 using CScape.Dev.Tests.Impl;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal.Handler
+namespace CScape.Dev.Tests.CoreTests.Handler
 {
     [TestClass]
     public class TestForAllPacketHandlers

@@ -1,9 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
-using CScape.Core.Game;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Item;
@@ -12,7 +8,7 @@ using CScape.Models.Game.Item;
 using CScape.Models.Game.Skill;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
 
     public class SerializablePlayerModel

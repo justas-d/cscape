@@ -3,14 +3,17 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using CScape.Commands;
 using CScape.Core;
-using CScape.Core.Database;
+using CScape.Core.Extensions;
 using CScape.Core.Game;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Factory;
+using CScape.Core.Game.Skill;
+using CScape.Core.Json;
+using CScape.Core.Json.Model;
 using CScape.Core.Log;
 using CScape.Core.Network;
 using CScape.Models;
@@ -19,7 +22,6 @@ using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
 using CScape.Models.Game.Item;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
 
@@ -90,7 +92,7 @@ namespace CScape.Dev.Runtime
 
 
             services.AddSingleton(s =>
-                InterfaceIdDatabase.FromJson(Path.Combine(Core.Utils.GetExeDir(), "interface-ids.json")));
+                InterfaceIdDatabase.FromJson(Path.Combine(GetExeDir(), "interface-ids.json")));
             services.AddSingleton<IInterfaceIdDatabase>(s => s.ThrowOrGet<InterfaceIdDatabase>());
 
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
@@ -101,7 +103,7 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IPacketDatabase>(s =>
                 JsonConvert.DeserializeObject<JsonPacketDatabase>(
                     File.ReadAllText(
-                        Path.Combine(dirBuild, Path.Combine(Core.Utils.GetExeDir(), "packet-lengths.json")))));
+                        Path.Combine(dirBuild, Path.Combine(GetExeDir(), "packet-lengths.json")))));
 
 
 
@@ -148,6 +150,11 @@ namespace CScape.Dev.Runtime
                 _server.Dispose();
                 _cts.Dispose();
             }
+        }
+
+        public static string GetExeDir()
+        {
+            return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         }
     }
 }

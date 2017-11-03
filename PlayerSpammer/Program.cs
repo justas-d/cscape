@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using CScape.Core;
+using CScape.Core.Json;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
 

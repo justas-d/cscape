@@ -1,5 +1,5 @@
 using System;
-using CScape.Models.Game.Message;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Skill;
 using JetBrains.Annotations;
 

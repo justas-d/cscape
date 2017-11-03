@@ -2,11 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network;
 using CScape.Models;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core

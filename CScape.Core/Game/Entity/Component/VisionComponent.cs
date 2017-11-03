@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
-using CScape.Models.Game.Message;
 
 namespace CScape.Core.Game.Entity.Component
 {

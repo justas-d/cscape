@@ -7,7 +7,7 @@ using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Item;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entity.Factory
 {
     public sealed class GroundItemFactory : IGroundItemFactory
     {

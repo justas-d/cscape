@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CScape.Core.Extensions;
 using CScape.Models;
 using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     // TODO : proper player serialization
     public sealed class PlayerJsonDatabase : IDisposable

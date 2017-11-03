@@ -1,4 +1,3 @@
-using CScape.Core.Game.Entities.FacingData;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.World;
 

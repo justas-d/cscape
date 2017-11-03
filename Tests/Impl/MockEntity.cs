@@ -1,7 +1,6 @@
 using System;
 using CScape.Models;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 
 namespace CScape.Dev.Tests.Impl
 {

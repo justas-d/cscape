@@ -1,8 +1,6 @@
-using CScape.Models.Game;
-using CScape.Models.Game.Entity.FacingData;
 using CScape.Models.Game.World;
 
-namespace CScape.Core.Game.Entities.FacingData
+namespace CScape.Models.Game.Entity.FacingData
 {
     public sealed class FacingCoordinate : IFacingState
     {

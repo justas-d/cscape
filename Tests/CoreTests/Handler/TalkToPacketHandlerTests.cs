@@ -5,7 +5,7 @@ using CScape.Models.Data;
 using CScape.Models.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CScape.Dev.Tests.Internal.Handler
+namespace CScape.Dev.Tests.CoreTests.Handler
 {
     [TestClass]
     public class TalkToPacketHandlerTests

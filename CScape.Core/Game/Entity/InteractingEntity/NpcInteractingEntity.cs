@@ -1,6 +1,6 @@
 using System;
-using CScape.Core.Game.Entities;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.InteractingEntity;
 using JetBrains.Annotations;
 

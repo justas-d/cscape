@@ -1,4 +1,4 @@
-﻿namespace CScape.Core.Database
+﻿namespace CScape.Core.Json.Model
 {
     public interface IInterfaceIdDatabase
     {

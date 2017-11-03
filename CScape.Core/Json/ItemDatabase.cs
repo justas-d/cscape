@@ -4,7 +4,7 @@ using CScape.Models.Game.Entity;
 using CScape.Models.Game.Interface;
 using CScape.Models.Game.Item;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
 
     public sealed class ItemDatabase

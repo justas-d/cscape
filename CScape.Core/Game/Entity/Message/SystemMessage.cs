@@ -1,6 +1,5 @@
 ﻿using System;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Message

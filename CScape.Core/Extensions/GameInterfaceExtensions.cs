@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Extensions
 {
-    public static class InterfaceExtensions
+    public static class GameInterfaceExtensions
     {
         public static void ShowSidebar(
             [NotNull] this IInterfaceComponent interfaces,

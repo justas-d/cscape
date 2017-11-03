@@ -1,11 +1,9 @@
 using System;
 using System.Diagnostics;
 using CScape.Core.Extensions;
-using CScape.Core.Game.Entities;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component

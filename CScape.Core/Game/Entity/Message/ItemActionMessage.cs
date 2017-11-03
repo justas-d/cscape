@@ -1,8 +1,8 @@
 using System;
 using CScape.Core.Game.Item;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.Interface;
 using CScape.Models.Game.Item;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Message

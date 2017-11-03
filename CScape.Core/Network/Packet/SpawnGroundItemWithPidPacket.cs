@@ -1,4 +1,5 @@
-﻿using CScape.Models.Data;
+﻿using CScape.Core.Extensions;
+using CScape.Models.Data;
 using CScape.Models.Game.Item;
 
 namespace CScape.Core.Network.Packet

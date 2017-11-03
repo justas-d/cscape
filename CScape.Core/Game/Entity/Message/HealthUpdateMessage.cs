@@ -1,4 +1,4 @@
-﻿using CScape.Models.Game.Message;
+﻿using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Game.Entity.Message
 {

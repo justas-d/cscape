@@ -1,6 +1,6 @@
 using System;
 
-namespace CScape.Core.Network.Entity
+namespace CScape.Core.Network.Entity.Utility
 {
     public static class FlagHelpers
     {

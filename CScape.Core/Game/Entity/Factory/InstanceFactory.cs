@@ -1,7 +1,7 @@
 ﻿using CScape.Models.Game.Entity;
 using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entity.Factory
 {
     public abstract class InstanceFactory
     {

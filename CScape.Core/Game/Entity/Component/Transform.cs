@@ -1,6 +1,5 @@
 using System;
 using CScape.Core.Extensions;
-using CScape.Core.Game.Entities.FacingData;
 using CScape.Core.Game.Entity.Directions;
 using CScape.Core.Game.Entity.InteractingEntity;
 using CScape.Core.Game.Entity.Message;
@@ -11,7 +10,6 @@ using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.FacingData;
 using CScape.Models.Game.Entity.InteractingEntity;
-using CScape.Models.Game.Message;
 using CScape.Models.Game.World;
 using JetBrains.Annotations;
 
@@ -117,8 +115,7 @@ namespace CScape.Core.Game.Entity.Component
 
             UpdateRegion();
 
-            Parent.Server.Services.ThrowOrGet<ILogger>()
-                .Debug(this, "Synced client locals to globals.");
+            Log.Debug(this, "Synced client locals to globals.");
         }
 
         private void OnMove(MoveMessage data)

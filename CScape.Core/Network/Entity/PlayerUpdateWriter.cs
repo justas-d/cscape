@@ -1,4 +1,5 @@
 using CScape.Core.Game.Entity.Component;
+using CScape.Core.Network.Entity.Utility;
 using CScape.Models.Data;
 using JetBrains.Annotations;
 

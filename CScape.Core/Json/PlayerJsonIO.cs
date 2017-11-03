@@ -6,7 +6,7 @@ using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using Newtonsoft.Json;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public sealed class PlayerJsonIO
     {

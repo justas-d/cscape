@@ -1,4 +1,4 @@
-using CScape.Core.Database;
+using CScape.Core.Json.Model;
 
 namespace CScape.Dev.Tests.Impl
 {

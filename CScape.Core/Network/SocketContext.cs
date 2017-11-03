@@ -1,6 +1,7 @@
 using System;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using CScape.Core.Extensions;
 using CScape.Models;
 using CScape.Models.Data;
 using JetBrains.Annotations;

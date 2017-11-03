@@ -1,6 +1,4 @@
-﻿using CScape.Models.Game.Entity;
-
-namespace CScape.Core.Game.Entities
+﻿namespace CScape.Models.Game.Entity.Component
 {
     public interface INpcComponent : IEntityComponent
     {

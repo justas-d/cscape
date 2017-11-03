@@ -1,14 +1,14 @@
-using CScape.Core.Game.Entities;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Packet;
 using CScape.Models;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
 {
+    // TODO : DebugStatNetworkSyncComponent isn't doing anything visible to the client
     [RequiresComponent(typeof(NetworkingComponent))]
     public sealed class DebugStatNetworkSyncComponent : EntityComponent
     {

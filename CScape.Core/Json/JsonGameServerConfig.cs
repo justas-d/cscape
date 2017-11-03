@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CScape.Core
+namespace CScape.Core.Json
 {
     public class JsonGameServerConfig : IGameServerConfig
     {

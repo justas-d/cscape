@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CScape.Core.Extensions;
 using CScape.Models.Data;
 
 namespace CScape.Core.Network

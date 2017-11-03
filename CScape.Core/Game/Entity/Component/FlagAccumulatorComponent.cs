@@ -3,9 +3,9 @@ using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Network.Entity;
 using CScape.Core.Network.Entity.Flag;
+using CScape.Core.Network.Entity.Utility;
 using CScape.Models.Data;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Component
@@ -17,9 +17,8 @@ namespace CScape.Core.Game.Entity.Component
 
         public IReadOnlyDictionary<FlagType, IUpdateFlag> Flags => _flags;
 
-        public const int MaxAppearanceUpdateSize = 64;
-
-        public Blob AppearanceCache { get; }= new Blob(MaxAppearanceUpdateSize);
+        // TODO : different flag accumulators for NPCs and players
+        private readonly PlayerAppearanceSerialier _appearanceSerialier = new PlayerAppearanceSerialier();
 
         [CanBeNull]
         public MoveMessage Movement { get; private set; }
@@ -41,91 +40,18 @@ namespace CScape.Core.Game.Entity.Component
                 _flags.Add(flag.Type, flag);
         }
 
-        public void HandleAppearanceMessage(PlayerAppearanceMessage msg)
+        private void HandleAppearanceMessage(PlayerAppearanceMessage msg)
         {
-            var cache =AppearanceCache;
-            var app = msg.Appearance;
+            Parent.SystemMessage("Invalidating and rewriting appearance cache.",
+                CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
 
-            const int equipSlotSize = 12;
+            _appearanceSerialier.SerializeNewAppearance(msg.Username, msg.Appearance, msg.Equipment);
+            SetFlag(CreateAppearanceUpdateFlag());
+        }
 
-            Parent.SystemMessage("Invalidating and rewriting appearance cache.", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Network);
-
-            cache.ResetWrite();
-
-            var sizePh = cache.Placeholder(1);
-
-            cache.Write((byte)app.Gender);
-            // TODO : overheads
-            cache.Write(0);
-
-            /* 
-             * todo : some equipped items conflict with body parts 
-             * write body model if chest doesn't conceal the body
-             * write head model if head item doesn't fully conceal the head.
-             * write beard model if head item doesn't fully conceal the head.
-             */
-
-            for (var i = 0; i < equipSlotSize; i++)
-            {
-                const short plrObjMagic = 0x100;
-                const short itemMagic = 0x200;
-
-                if (!msg.Equipment.Provider[i].IsEmpty())
-                    cache.Write16((short)(msg.Equipment.Provider[i].Id.ItemId + itemMagic));
-                else
-                {
-                    switch (i)
-                    {
-                        case 4:
-                            cache.Write16((short)(app.Chest + plrObjMagic));
-                            break;
-                        case 6:
-                            cache.Write16((short)(app.Arms + plrObjMagic));
-                            break;
-                        case 7:
-                            cache.Write16((short)(app.Legs + plrObjMagic));
-                            break;
-                        case 8:
-                            cache.Write16((short)(app.Head + plrObjMagic));
-                            break;
-                        case 9:
-                            cache.Write16((short)(app.Hands + plrObjMagic));
-                            break;
-                        case 10:
-                            cache.Write16((short)(app.Feet + plrObjMagic));
-                            break;
-                        case 11:
-                            cache.Write16((short)(app.Beard + plrObjMagic));
-                            break;
-                        default:
-                            cache.Write(0);
-                            break;
-                    }
-                }
-            }
-
-            cache.Write(app.HairColor);
-            cache.Write(app.TorsoColor);
-            cache.Write(app.LegColor);
-            cache.Write(app.FeetColor);
-            cache.Write(app.SkinColor);
-
-            // upd.Player animation indices
-            cache.Write16(0x328); // standAnimIndex
-            cache.Write16(0x337); // standTurnAnimIndex
-            cache.Write16(0x333); // walkAnimIndex
-            cache.Write16(0x334); // turn180AnimIndex
-            cache.Write16(0x335); // turn90CWAnimIndex
-            cache.Write16(0x336); // turn90CCWAnimIndex
-            cache.Write16(0x338); // runAnimIndex
-
-            cache.Write64(Utils.StringToLong(msg.Username));
-            cache.Write(3); // todo : cmb
-            cache.Write16(0); // ...skill???
-
-            sizePh.WriteSize();
-
-            SetFlag(new PlayerAppearanceUpdateFlag(cache));
+        public PlayerAppearanceUpdateFlag CreateAppearanceUpdateFlag()
+        {
+            return new PlayerAppearanceUpdateFlag(_appearanceSerialier.SerializedAppearance);
         }
 
         private void Reset()

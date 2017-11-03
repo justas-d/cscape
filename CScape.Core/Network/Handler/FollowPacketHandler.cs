@@ -1,4 +1,5 @@
 using System;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;

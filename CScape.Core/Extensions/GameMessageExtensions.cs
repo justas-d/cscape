@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using CScape.Core.Game.Entity.Message;
-using CScape.Models.Game.Message;
+using CScape.Models.Game.Entity;
 
 namespace CScape.Core.Extensions
 {

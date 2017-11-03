@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using CScape.Models.Game.Message;
+using CScape.Models.Game.Entity;
 using CScape.Models.Game.World;
 
 namespace CScape.Core.Game.Entity.Message

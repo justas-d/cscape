@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using CScape.Core.Extensions;
 using CScape.Models;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;

@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using CScape.Core.Json.Model;
 using Newtonsoft.Json;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public sealed class InterfaceIdDatabase : IInterfaceIdDatabase
     {

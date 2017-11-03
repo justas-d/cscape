@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using CScape.Core.Game;
+using CScape.Core.Extensions;
+using CScape.Core.Game.Skill;
 using CScape.Models.Game.Skill;
 using Newtonsoft.Json;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public sealed class SkillIdConverter : JsonConverter
     {

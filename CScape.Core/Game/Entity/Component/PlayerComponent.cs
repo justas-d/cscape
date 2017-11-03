@@ -1,15 +1,14 @@
 ﻿using System;
-using CScape.Core.Database;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Core.Game.Interface;
 using CScape.Core.Game.Item;
+using CScape.Core.Json.Model;
 using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Interface;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 

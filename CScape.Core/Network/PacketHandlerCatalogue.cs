@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CScape.Core.Extensions;
 using CScape.Core.Network.Handler;
 using CScape.Models;
 using JetBrains.Annotations;
@@ -17,7 +18,7 @@ namespace CScape.Core.Network
         public PacketHandlerCatalogue(IServiceProvider services)
         {
             _services = services;
-            _log = _services.ThrowOrGet<ILogger>();
+            _log = services.ThrowOrGet<ILogger>();
 
             RegisterAssembly(GetType().GetTypeInfo().Assembly);
         }

@@ -3,7 +3,7 @@ using System.Reflection;
 using CScape.Models.Game.Skill;
 using Newtonsoft.Json;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public sealed class SkillModelConverter : JsonConverter
     {

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models;
 using CScape.Models.Game.Entity;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity
@@ -19,7 +19,7 @@ namespace CScape.Core.Game.Entity
 
         public IGameServer Server => Handle.System.Server;
 
-        public ILogger Log => Handle.System.Server.Services.ThrowOrGet<ILogger>();
+        public ILogger Log { get; }
 
         public IEntityComponentContainer Components { get; }
 
@@ -29,6 +29,7 @@ namespace CScape.Core.Game.Entity
             Handle = handle ?? throw new ArgumentNullException(nameof(handle));
 
             Components = new EntityComponentContainer();
+            Log = Server.Services.ThrowOrGet<ILogger>();
         }
 
         public void SendMessage([NotNull] IGameMessage message)

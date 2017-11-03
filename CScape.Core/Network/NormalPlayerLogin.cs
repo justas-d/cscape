@@ -1,7 +1,9 @@
 using System;
 using System.Net.Sockets;
-using CScape.Core.Database;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity;
+using CScape.Core.Game.Entity.Factory;
+using CScape.Core.Json;
 using CScape.Models;
 using CScape.Models.Extensions;
 using JetBrains.Annotations;
@@ -43,8 +45,8 @@ namespace CScape.Core.Network
             var player = _factory.Create(
                 Model,
                 socket,
-                Services.ThrowOrGet<IPacketParser>(),
-                Services.ThrowOrGet<IPacketHandlerCatalogue>());
+                loop.Server.Services.ThrowOrGet<IPacketParser>(),
+                loop.Server.Services.ThrowOrGet<IPacketHandlerCatalogue>());
             
             if (!string.IsNullOrEmpty(_greeting))
                 player.Get().SystemMessage(_greeting);

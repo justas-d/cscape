@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using CScape.Core.Game.Entities;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
-using CScape.Models.Game.Message;
 using JetBrains.Annotations;
 
 namespace CScape.Models.Extensions

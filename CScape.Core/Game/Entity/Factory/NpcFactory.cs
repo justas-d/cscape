@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using CScape.Core.Game.Entities;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models;
@@ -10,9 +10,8 @@ using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.Factory;
-using JetBrains.Annotations;
 
-namespace CScape.Core.Game.Entity
+namespace CScape.Core.Game.Entity.Factory
 {
     public sealed class NpcFactory : InstanceFactory, INpcFactory
     {

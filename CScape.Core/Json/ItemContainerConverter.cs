@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CScape.Core.Extensions;
 using CScape.Models.Game.Item;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public sealed class ItemContainerConverter : JsonConverter
     {

@@ -3,7 +3,7 @@ using System.IO;
 using CScape.Core.Network;
 using Newtonsoft.Json;
 
-namespace CScape.Core.Database
+namespace CScape.Core.Json
 {
     public class JsonPacketDatabase : IPacketDatabase
     {

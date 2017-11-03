@@ -1,6 +1,4 @@
-﻿using CScape.Models.Game.Combat;
-
-namespace CScape.Models.Game.Item
+﻿namespace CScape.Models.Game.Combat
 {
     public sealed class NullWeaponCombatType : IWeaponCombatType
     {

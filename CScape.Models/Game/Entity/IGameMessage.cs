@@ -1,4 +1,4 @@
-﻿namespace CScape.Models.Game.Message
+﻿namespace CScape.Models.Game.Entity
 {
     public interface IGameMessage
     {
