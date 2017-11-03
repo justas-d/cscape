@@ -10,6 +10,8 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
 {
+    // TODO : BUG : Spawning an NPC, logging out and then back in will result in that NPC not being shown on the player's client.
+    // TODO : BUG : Spawning 3 NPCS on one tile then moving out of that tile DC's the client. (Using CappedVision)
     public sealed class NpcNetworkSyncComponent : EntityNetworkSyncComponent
     {
         public override int Priority => (int)ComponentPriority.NpcSync;

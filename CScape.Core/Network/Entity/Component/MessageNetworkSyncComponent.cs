@@ -7,7 +7,6 @@ using CScape.Core.Network.Packet;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Message;
-using JetBrains.Annotations;
 
 namespace CScape.Core.Network.Entity.Component
 {
@@ -16,30 +15,14 @@ namespace CScape.Core.Network.Entity.Component
     {
         public override int Priority => (int)ComponentPriority.MessageSync;
 
-        public bool SyncDebugMessages { get; }
-
-        [NotNull]
-        private NetworkingComponent Network
-        {
-            get
-            {
-                var val = Parent.Components.Get<NetworkingComponent>();
-                Debug.Assert(val != null);
-                return val;
-            }
-        }
+        private readonly SystemMessageFilter _filter = new SystemMessageFilter();
 
         public MessageNetworkSyncComponent(IEntity parent)
             :base(parent)
         {
-#if DEBUG
-            SyncDebugMessages = true;
-#endif
-        }
 
-        private static bool IsBitSet(ulong flags, CoreSystemMessageFlags bit)
-        {
-            return (flags & ((ulong)bit)) != 0;
+            _filter.Filter((ulong)CoreSystemMessageFlags.Network);
+            _filter.Filter((ulong)CoreSystemMessageFlags.Debug);
         }
 
         private bool CanSync()
@@ -47,17 +30,6 @@ namespace CScape.Core.Network.Entity.Component
             // don't sync messages if the user has got a chat interface open.
             var interf = Parent.GetInterfaces();
             return interf?.Chat == null;
-        }
-
-        private bool IsMessageIgnored(ulong msgFlags)
-        {
-            if (IsBitSet(msgFlags, CoreSystemMessageFlags.Network))
-                return true;
-
-            if (IsBitSet(msgFlags, CoreSystemMessageFlags.Debug))
-                return !SyncDebugMessages;
-
-            return false;
         }
 
         public override void ReceiveMessage(IGameMessage msg)
@@ -68,9 +40,12 @@ namespace CScape.Core.Network.Entity.Component
                     return;
 
                 var sysMsgData = msg.AsSystemMessage();
-                
-                if(!IsMessageIgnored(sysMsgData.Flags))
-                    Network.SendPacket(new SystemChatMessagePacket(sysMsgData.Msg));
+
+                if (!_filter.IsFiltered(sysMsgData))
+                {
+                    var net = Parent.AssertGetNetwork();
+                    net.SendPacket(new SystemChatMessagePacket(sysMsgData.Msg));
+                }
             }
         }
     }

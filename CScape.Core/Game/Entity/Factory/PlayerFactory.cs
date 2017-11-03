@@ -112,7 +112,8 @@ namespace CScape.Core.Game.Entity
             ent.Components.Add<ISkillComponent>(skills);
             ent.Components.Add(new SkillNetworkSyncComponent(ent));
 
-            var vision = new VisionComponent(ent);
+            var vision = new CappedVisionComponent(ent);
+            //var vision = new VisionComponent(ent);
             ent.Components.Add(vision);
             ent.Components.Add<IVisionComponent>(vision);
             ent.Components.Add(new NearbyEntityWatcherComponent(ent));

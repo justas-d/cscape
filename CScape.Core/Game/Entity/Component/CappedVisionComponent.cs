@@ -31,14 +31,7 @@ namespace CScape.Core.Game.Entity.Component
             set => _optimalViewrange = value.Clamp(0, MaxViewRange);
         }
 
-        public int MaxVisibleEntities { get; set; } = 3;
-
-        // 2 tile step in order to half the number of calls to GetVisibleEntities 
-        // when the optimal viewrange we are searching for approaches zero and our 
-        // current optimal viewrange approaches the maximum viewrange
-        // e.g instead of 15 14 13 12 ... 1 we can do 15 13 11 9 .. 1
-        private const int Step = 2;
-        private const int HalfStep = 2;
+        public int MaxVisibleEntities { get; set; } = 1;
 
         public CappedVisionComponent([NotNull] IEntity parent) : base(parent)
         {
@@ -53,9 +46,6 @@ namespace CScape.Core.Game.Entity.Component
             return EntityVision.CanSee(Parent, ent, OptimalViewrange);
         }
 
-        private int GetNumberOfVisibleEntitiesWithViewrange(int viewrange, IList<IEntityHandle> entities)
-            => entities.Count(ent => EntityVision.IsEntityWithinViewrangeOfOther(Parent, ent.Get(), viewrange));
-
         // searches for a viewrange that we can plug into EntityVision.GetVisibleEntities and 
         // get a number of entities that is as close as possible to MaxVisibleEntities without 
         // ever going over it
@@ -63,90 +53,89 @@ namespace CScape.Core.Game.Entity.Component
         {
             var oldOptimal = OptimalViewrange;
 
-            var visibleEntities = GetEnumeratedVisibleEntities();
+            OptimalViewrange = FindMostOptimalViewrange();
 
-            if (visibleEntities.Count == MaxVisibleEntities)
-                return visibleEntities;
+            if (oldOptimal != OptimalViewrange)
+                Parent.SystemMessage($"Optimal vr: {oldOptimal} -> {OptimalViewrange}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
 
-            if (!TryDecreaseOptimalViewrange(visibleEntities))
-            {
-                var increase = TryIncreaseOptimalViewrange(visibleEntities);
-                Debug.Assert(increase);
-            }
-
-            Parent.SystemMessage($"Optimal vr: {oldOptimal} -> {OptimalViewrange}", CoreSystemMessageFlags.Debug | CoreSystemMessageFlags.Entity);
             return EntityVision.GetVisibleEntities(Parent, OptimalViewrange);            
         }
 
-
-        private bool IsUnder(int currentCount) => MaxVisibleEntities > currentCount;
-        private bool IsOver(int currentCount) => currentCount > MaxVisibleEntities;
-
-        private bool TryIncreaseOptimalViewrange([NotNull] IList<IEntityHandle> visibleEntities)
-            => StepSearch(visibleEntities, IsUnder, IsOver, ovr => ovr >= MaxViewRange, Step, HalfStep);
-
-        private bool TryDecreaseOptimalViewrange([NotNull] IList<IEntityHandle> visibleEntities)
-            => StepSearch(visibleEntities, IsOver, IsUnder, ovr => 0 >= ovr, -Step, -HalfStep);
-
-        private bool StepSearch(
-            [NotNull] IList<IEntityHandle> visibleEntities,
-            [NotNull] Func<int, bool> searchInvariant,
-            [NotNull] Func<int, bool> checkIfCurrentCountIsNearOptimalButNotOptimal,
-            [NotNull] Func<int, bool> isOptimalViewrangeAtTheEnd,
-            int step,
-            int halfStep)
+        private static IEnumerable<(int index, int value)> ProgressiveBinarySearch(
+            Func<int, int> valueRetriever,
+            int targetValue,
+            int floorIdx, int roofIdx)
         {
-            if (visibleEntities == null) throw new ArgumentNullException(nameof(visibleEntities));
-            if (searchInvariant == null) throw new ArgumentNullException(nameof(searchInvariant));
-            if (checkIfCurrentCountIsNearOptimalButNotOptimal == null) throw new ArgumentNullException(nameof(checkIfCurrentCountIsNearOptimalButNotOptimal));
-            if (isOptimalViewrangeAtTheEnd == null) throw new ArgumentNullException(nameof(isOptimalViewrangeAtTheEnd));
-            if (visibleEntities == null) throw new ArgumentNullException(nameof(visibleEntities));
-
-            var currentCount = visibleEntities.Count;
-            var wasWorkDone = false;
-
-            while (searchInvariant(currentCount))
+            // recursion made iteration
+            while (true)
             {
-                wasWorkDone = true;
+                // don't go out of range
+                if (floorIdx > roofIdx)
+                    break;
 
-                OptimalViewrange += step;
-                currentCount = GetNumberOfVisibleEntitiesWithViewrange(OptimalViewrange, visibleEntities);
+                var middleIdx = (floorIdx + roofIdx) / 2;
+                var middleValue = valueRetriever(middleIdx);
+                var result = (middleIdx, middleValue);
 
-                if (checkIfCurrentCountIsNearOptimalButNotOptimal(currentCount))
+                if (middleValue == targetValue)
                 {
-                    // the optimal viewrange is in [OptimalViewrange - Step; OptimalViewrange)
-
-                    // check if OptimalViewrange -= HalfStep is optimal
-                    OptimalViewrange -= halfStep;
-
-                    if (checkIfCurrentCountIsNearOptimalButNotOptimal(
-                        GetNumberOfVisibleEntitiesWithViewrange(OptimalViewrange, visibleEntities)))
-                        OptimalViewrange -= halfStep; // it's not, therefore OptimalViewrange - Step is optimal
-
-                    return true;
+                    yield return result;
+                    break;
                 }
-
-                // if we're going out of bounds, bail
-                if (isOptimalViewrangeAtTheEnd(OptimalViewrange))
-                    return true;
+                else if (middleValue < targetValue)
+                {
+                    floorIdx = middleIdx + 1;
+                    yield return result;
+                }
+                else if (middleValue > targetValue)
+                {
+                    roofIdx = middleIdx - 1;
+                    yield return result;
+                }
             }
-
-            Debug.Assert(wasWorkDone == false);
-            return false;
         }
 
-        [NotNull]
-        private IList<IEntityHandle> GetEnumeratedVisibleEntities()
+        private int FindMostOptimalViewrange()
         {
-            var unenumeratedVisibleEntities = EntityVision.GetVisibleEntities(Parent, OptimalViewrange);
-            var visibleEntities = unenumeratedVisibleEntities as IList<IEntityHandle> ?? unenumeratedVisibleEntities.ToList();
-            Debug.Assert(visibleEntities != null);
-            return visibleEntities;
+            var unenumeratedMaxVisibleEntities = EntityVision.GetVisibleEntities(Parent, MaxViewRange);
+            var maxVisibleEntities = unenumeratedMaxVisibleEntities as IList<IEntityHandle> ?? unenumeratedMaxVisibleEntities.ToList();
+            Debug.Assert(maxVisibleEntities != null);
+
+            if (maxVisibleEntities.Count == MaxVisibleEntities)
+                return MaxViewRange;
+            
+            int ValueRetriever(int viewrange)
+                => maxVisibleEntities.Count(ent => EntityVision.CanSee(Parent, ent.Get(), viewrange));
+            
+            var optimalResults = ProgressiveBinarySearch(
+                ValueRetriever,
+                MaxVisibleEntities,
+                0, 
+                MaxViewRange);
+
+            var best = FindBestSolution(optimalResults);
+            return best.viewrange;
+        }
+
+        private (int viewrange, int entityCount) FindBestSolution(IEnumerable<(int index, int value)> optimalResults)
+        {
+            (int viewrange, int entityCount) best = (0,0);
+
+            foreach ((int viewrange, int entityCount) d in optimalResults)
+            {
+                if (MaxVisibleEntities >= d.entityCount)
+                {
+                    if (d.entityCount > best.entityCount)
+                        best = d;
+                }
+            }
+
+            return best;
         }
 
         public override void ReceiveMessage(IGameMessage msg)
         {
-            
+            // ignored
         }
     }
 }

@@ -19,9 +19,32 @@ using CScape.Models.Game.World;
 namespace CScape.Core.Commands
 {
 
+
     [CommandsClass]
     public sealed class TestCommandClass
     {
+        [CommandMethod("maxent")]
+        public void SetMaxEntities(CommandContext ctx)
+        {
+            int maxEnts = 0;
+            if (!ctx.Read(b =>
+            {
+                b.ReadNumber("max ents", ref maxEnts);
+            })) return;
+
+            var vision = ctx.Callee.Parent.Components.Get<CappedVisionComponent>();
+            if (vision == null)
+            {
+                ctx.Callee.Parent.SystemMessage("No vision component found.");
+                return;
+            }
+
+
+            vision.MaxVisibleEntities = maxEnts;
+            ctx.Callee.Parent.SystemMessage($"Max ents: {vision.MaxVisibleEntities}");
+        }
+
+
         [CommandMethod("dir")]
         public void SetDir(CommandContext ctx)
         {
