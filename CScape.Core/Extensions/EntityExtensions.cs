@@ -44,6 +44,11 @@ namespace CScape.Core.Extensions
             ent.SendMessage(new AnimationMessage(anim));
         }
 
+        public static bool IsQueuedForDeath(this IEntityHandle ent)
+        {
+            return ent.IsDead() || ent.Get().Components.Contains<MarkedForDeathComponent>();
+        }
+
         public static void ShowParticleEffect(this IEntity ent, [NotNull] ParticleEffect eff)
         {
             if (eff == null) throw new ArgumentNullException(nameof(eff));

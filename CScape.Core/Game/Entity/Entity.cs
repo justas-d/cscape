@@ -32,19 +32,22 @@ namespace CScape.Core.Game.Entity
             Log = Server.Services.ThrowOrGet<ILogger>();
         }
 
-        public void SendMessage([NotNull] IGameMessage message)
+        public void SendMessage(IGameMessage message)
         {
-            var handled = new HashSet<Type>();
-            
-            foreach (var kvp in Components)
-            {
-                var t = kvp.Value.GetType();
+            if (message == null) throw new ArgumentNullException(nameof(message));
 
-                if (handled.Contains(t))
+            var handledComponentTypes = new HashSet<Type>();
+           
+            foreach (var component in Components.GetSorted())
+            {
+                var componentType = component.GetType();
+
+                if (handledComponentTypes.Contains(componentType))
                     continue;
                     
-                kvp.Value.ReceiveMessage(message);
-                handled.Add(t);
+                component.ReceiveMessage(message);
+
+                handledComponentTypes.Add(componentType);
             }
         }
 
@@ -57,16 +60,16 @@ namespace CScape.Core.Game.Entity
         public bool AreComponentRequirementsSatisfied(out string message)
         {
             message = null;
-            foreach (var comp in Components)
+            foreach (var component in Components.Lookup.Values)
             {
                 foreach (var attrib in
-                    comp.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
+                    component.GetType().GetTypeInfo().GetCustomAttributes<RequiresComponent>())
                 {
                     // look for required attrib
                     var match = Components.Get(attrib.ComponentType);
                     if (match == null)
                     {
-                        message = $"{comp.GetType().Name} requires component of type {attrib.ComponentType.Name} to be attached to the entity but it is not.";
+                        message = $"{component.GetType().Name} requires component of type {attrib.ComponentType.Name} to be attached to the entity but it is not.";
                         return false;
                     }
                 }

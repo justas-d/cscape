@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CScape.Core.Extensions;
-using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Factory;
 using CScape.Core.Game.World;
 using CScape.Core.Json;
@@ -23,15 +22,10 @@ namespace CScape.Core
         public IServiceProvider Services { get; }
         public IPlaneOfExistence Overworld { get; }
 
-
         public bool IsDisposed { get; private set; }
         public DateTime UTCStartTime { get; private set; }
 
-
         private ILogger Log { get; }
-        private IMainLoop Loop { get; }
-        private IEntitySystem Entities { get; }
-        private IPlayerFactory Players { get; }
 
         public GameServer([NotNull] IServiceCollection services)
         {
@@ -44,17 +38,15 @@ namespace CScape.Core
 
             Overworld = new PlaneOfExistence(this, "Overworld");
 
-            Loop = Services.ThrowOrGet<IMainLoop>();
-            Log = Services.ThrowOrGet<ILogger>();;
-            Entities = new EntitySystem(this);
-            Players = Services.ThrowOrGet<IPlayerFactory>();
+            Log = Services.ThrowOrGet<ILogger>();
         }
 
         public ServerStateFlags GetState()
         {
             ServerStateFlags ret = 0;
+            var players = Services.ThrowOrGet<IPlayerFactory>();
 
-            if (Players.NumAlivePlayers >= Services.GetService<IGameServerConfig>().MaxPlayers)
+            if (players.NumAlivePlayers >= Services.GetService<IGameServerConfig>().MaxPlayers)
                 ret |= ServerStateFlags.PlayersFull;
 
             if (!Services.GetService<SocketAndPlayerDatabaseDispatch>().IsEnabled)
@@ -69,7 +61,7 @@ namespace CScape.Core
 
             Log.Normal(this, "Starting server...");
 
-            await Loop.Run(ct);
+            await Services.ThrowOrGet<IMainLoop>().Run(ct);
         }
 
         public void SaveAllPlayers()
@@ -91,9 +83,8 @@ namespace CScape.Core
 
                 SaveAllPlayers();
 
-                // destroy entities
-                foreach (var ent in Entities.All.Keys)
-                    Entities.Destroy(ent);
+                var entities = Services.GetService<IEntitySystem>();
+                entities?.DestroyAll();
             
                 (Services as IDisposable)?.Dispose();
             }

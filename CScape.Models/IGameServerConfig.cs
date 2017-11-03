@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Models
 {
+    // TODO : remove core server config values from models server config.
     public interface IGameServerConfig
     {
         int MaxPlayers { get; }

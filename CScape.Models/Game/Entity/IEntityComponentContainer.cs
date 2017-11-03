@@ -7,8 +7,14 @@ namespace CScape.Models.Game.Entity
     /// <summary>
     /// Defines a container which stores entity components.
     /// </summary>
-    public interface IEntityComponentContainer : IEnumerable<KeyValuePair<Type, IEntityComponent>>
+    public interface IEntityComponentContainer
     {
+        [NotNull]
+        IReadOnlyDictionary<Type, IEntityComponent> Lookup { get; }
+
+        [NotNull]
+        IEnumerable<IEntityComponent> GetSorted();
+
         /// <summary>
         /// Adds a <see cref="component"/> to the entity and maps it to the <see cref="IEntityComponent"/> type of <see cref="T"/>.
         /// </summary>

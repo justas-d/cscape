@@ -7,16 +7,24 @@ using JetBrains.Annotations;
 namespace CScape.Core.Game.Entity.Component
 {
     [RequiresComponent(typeof(IVisionComponent))]
-    public sealed class DeathBroadcasterComponent : EntityComponent
+    public sealed class MarkedForDeathBroadcasterComponent : EntityComponent
     {
         public override int Priority => (int)ComponentPriority.Invariant;
 
-        public DeathBroadcasterComponent([NotNull] IEntity parent) : base(parent)
+        public MarkedForDeathBroadcasterComponent([NotNull] IEntity parent) : base(parent)
         {
         }
 
+        private void AddMarkedForDeathComponent()
+        {
+            Parent.Components.Add(new MarkedForDeathComponent(Parent));
+        }
+
         private void NotifyNearbyEntitiesOfDeath()
-            => Parent.AssertGetVision().Broadcast(EntityMessage.NearbyEntityQueuedForDeath(Parent.Handle));
+        {
+            AddMarkedForDeathComponent();
+            Parent.AssertGetVision().Broadcast(EntityMessage.NearbyEntityQueuedForDeath(Parent.Handle));
+        }
 
         public override void ReceiveMessage(IGameMessage msg)
         {

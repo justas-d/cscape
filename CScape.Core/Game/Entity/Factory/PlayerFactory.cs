@@ -88,7 +88,7 @@ namespace CScape.Core.Game.Entity.Factory
             ent.Components.Add(new NetworkingComponent(ent, socket, packetParser));
             ent.Components.Add(new PacketDispatcherComponent(ent, packets));
             ent.Components.Add(new FlagAccumulatorComponent(ent));
-            ent.Components.Add(new DeathBroadcasterComponent(ent));
+            ent.Components.Add(new MarkedForDeathBroadcasterComponent(ent));
 
             var client = new ClientPositionComponent(ent);
             ent.Components.Add(client);
@@ -116,7 +116,6 @@ namespace CScape.Core.Game.Entity.Factory
             ent.Components.Add(new SkillNetworkSyncComponent(ent));
 
             var vision = new CappedVisionComponent(ent);
-            //var vision = new VisionComponent(ent);
             ent.Components.Add(vision);
             ent.Components.Add<IVisionComponent>(vision);
             ent.Components.Add(new NearbyEntityWatcherComponent(ent));

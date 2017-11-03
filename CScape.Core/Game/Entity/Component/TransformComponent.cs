@@ -18,7 +18,7 @@ namespace CScape.Core.Game.Entity.Component
     /// <summary>
     /// Defines a way of tracking and transforming the location of server-side world entities.
     /// </summary>
-    public sealed class Transform : EntityComponent, ITransform
+    public sealed class TransformComponent : EntityComponent, ITransform
     {
         public IInteractingEntity InteractingEntity { get; private set; }
             = NullInteractingEntity.Instance;
@@ -40,7 +40,7 @@ namespace CScape.Core.Game.Entity.Component
 
         public override int Priority => (int)ComponentPriority.Transform;
 
-        public Transform([NotNull] IEntity parent)
+        public TransformComponent([NotNull] IEntity parent)
             :base(parent)
         {
             FacingState = new NullFacingState(this);

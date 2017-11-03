@@ -31,6 +31,11 @@ namespace CScape.Models.Game.Entity
         bool Destroy([NotNull] IEntityHandle handle);
 
         /// <summary>
+        /// Destroys all entities in this system.
+        /// </summary>
+        void DestroyAll();
+
+        /// <summary>
         /// Dereferences the entity that the given <see cref="entityHandle"/> points to.
         /// </summary>
         /// <exception cref="DestroyedEntityDereference">Thrown if the handle points to an entity that is destroyed.</exception>
@@ -42,12 +47,6 @@ namespace CScape.Models.Game.Entity
         /// </summary>
         /// <returns>True if dead, false otherwise.</returns>
         bool IsDead(IEntityHandle handle);
-
-        /// <summary>
-        /// Checks whether the entity pointed to by the handle is queued to be dead by the next frame.
-        /// </summary>
-        /// <returns>True if queued, false otherwise.</returns>
-        bool IsQueuedForDeath(IEntityHandle handle);
 
         /// <summary>
         /// Called after FrameEnd messages.

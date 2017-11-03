@@ -3,6 +3,7 @@ using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
+using CScape.Models.Game.Entity.Component;
 using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Component
@@ -10,7 +11,7 @@ namespace CScape.Core.Game.Entity.Component
     /// <summary>
     /// Responsible for tracking nearby entities and dispatching leave/enter viewrange messages
     /// </summary>
-    [RequiresComponent(typeof(VisionComponent))]
+    [RequiresComponent(typeof(IVisionComponent))]
     public sealed class NearbyEntityWatcherComponent : EntityComponent
     {
         public override int Priority => (int)ComponentPriority.EntityWatcher;

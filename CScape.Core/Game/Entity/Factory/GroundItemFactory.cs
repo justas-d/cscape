@@ -25,7 +25,7 @@ namespace CScape.Core.Game.Entity.Factory
 
             var item = new PlayerDroppedItemComponent(ent, stack, null, player.Username);
             ent.Components.Add(new VisionComponent(ent));
-            ent.Components.Add(new DeathBroadcasterComponent(ent));
+            ent.Components.Add(new MarkedForDeathBroadcasterComponent(ent));
             ent.Components.Add<IGroundItemComponent>(item);
             ent.Components.Add<IVisionResolver>(item);
 
@@ -38,7 +38,7 @@ namespace CScape.Core.Game.Entity.Factory
             var ent = handle.Get();
 
             ent.Components.Add(new VisionComponent(ent));
-            ent.Components.Add(new DeathBroadcasterComponent(ent));
+            ent.Components.Add(new MarkedForDeathBroadcasterComponent(ent));
             ent.Components.Add<IGroundItemComponent>(new GroundItemComponent(ent, stack, null));
             
             var status = ent.AreComponentRequirementsSatisfied(out var msg);

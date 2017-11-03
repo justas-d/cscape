@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,20 +11,30 @@ namespace CScape.Core.Game.Entity
 {
     public sealed class EntityComponentContainer : IEntityComponentContainer
     {
-        private readonly Dictionary<Type, IEntityComponent> _lookup
-            = new Dictionary<Type, IEntityComponent>();
+        private ImmutableDictionary<Type, IEntityComponent> _lookup 
+            = ImmutableDictionary<Type, IEntityComponent>.Empty;
 
-        // TODO : write tests for entity fragment sorting
+        // TODO : write tests for entity component sorting
 
-        // we set this to Enimerable.Empty because as soon as this container is modified,
-        // we immediatelly call Sort(), which assigns a sorted, by IEntityComponent.Priority, IEnumerable
-        [NotNull]
-        public IEnumerable<IEntityComponent> All { get; private set; } 
-            = Enumerable.Empty<IEntityComponent>();
+        [CanBeNull]
+        private List<IEntityComponent> _sorted;
+
+        public IReadOnlyDictionary<Type, IEntityComponent> Lookup => _lookup;
+
+        public IEnumerable<IEntityComponent> GetSorted()
+        {
+            if (_sorted == null)
+            {
+                // flatten to a list in order to avoid reordering every GetSorted call
+                _sorted = _lookup.Values.OrderBy(f => f.Priority).ToList();
+            }
+
+            return _sorted;
+        }
 
         private void Sort()
         {
-            All = _lookup.Values.OrderBy(f => f.Priority);
+            _sorted = null;
         }
 
         public bool Add<T>(T fragment)
@@ -37,7 +47,7 @@ namespace CScape.Core.Game.Entity
             if (Contains<T>())
                 return false;
 
-            _lookup.Add(type, fragment);
+            _lookup = _lookup.Add(type, fragment);
             Sort();
             return true;
         }
@@ -50,7 +60,7 @@ namespace CScape.Core.Game.Entity
             if (Contains(type))
                 return false;
 
-            _lookup.Add(type, component);
+            _lookup = _lookup.Add(type, component);
             Sort();
             return true;
         }
@@ -110,8 +120,7 @@ namespace CScape.Core.Game.Entity
             if (!Contains<T>())
                 return false;
 
-            var statusLookup = _lookup.Remove(type);
-            Debug.Assert(statusLookup);
+            _lookup = _lookup.Remove(type);
             return true;
         }
 
@@ -120,14 +129,8 @@ namespace CScape.Core.Game.Entity
             if (!Contains(type))
                 return false;
 
-            var statusLookup = _lookup.Remove(type);
-            Debug.Assert(statusLookup);
+            _lookup = _lookup.Remove(type);
             return true;
         }
-
-        public IEnumerator<KeyValuePair<Type, IEntityComponent>> GetEnumerator()
-            => _lookup.GetEnumerator();
-        
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
