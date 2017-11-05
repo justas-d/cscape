@@ -17,39 +17,37 @@ namespace CScape.Core.Network
         [NotNull]
         public Socket Connection { get; }
 
-        [NotNull]
+        public PlayerFactory Factory { get; }
         public IServiceProvider Services { get; }
+        public string Greeting { get; }
         public int SignlinkUid { get; }
-
-        private readonly string _greeting;
-        private readonly PlayerFactory _factory;
 
         public NormalPlayerLogin(
             IServiceProvider services,
+            string greeting,
             [NotNull] SerializablePlayerModel model,
             [NotNull] Socket connection, 
             int signlinkUid)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            Factory = services.ThrowOrGet<PlayerFactory>();
             Services = services;
+            Greeting = greeting;
             SignlinkUid = signlinkUid;
-
-            _greeting = services.ThrowOrGet<IGameServerConfig>().Greeting;
-            _factory = services.ThrowOrGet<PlayerFactory>();
         }
 
         public void Transfer(IMainLoop loop)
         {
             var socket = new SocketContext(Services, Connection, SignlinkUid);
-            var player = _factory.Create(
+            var player = Factory.Create(
                 Model,
                 socket,
                 loop.Server.Services.ThrowOrGet<IPacketParser>(),
                 loop.Server.Services.ThrowOrGet<IPacketHandlerCatalogue>());
             
-            if (!string.IsNullOrEmpty(_greeting))
-                player.Get().SystemMessage(_greeting);
+            if (!string.IsNullOrEmpty(Greeting))
+                player.Get().SystemMessage(Greeting);
         }
     }
 }

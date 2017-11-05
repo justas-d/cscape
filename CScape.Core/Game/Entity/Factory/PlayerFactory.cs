@@ -10,7 +10,9 @@ using CScape.Core.Game.Skill;
 using CScape.Core.Json;
 using CScape.Core.Network;
 using CScape.Core.Network.Entity.Component;
+using CScape.Core.Utility;
 using CScape.Models;
+using CScape.Models.Data;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
@@ -23,26 +25,30 @@ namespace CScape.Core.Game.Entity.Factory
     {
         public const int InvalidPlayerId = -1;
 
-        [NotNull]
-        public IEntitySystem EntitySystem { get; }
+        private Lazy<IEntitySystem> _system;
+        private Lazy<ILogger> _log;
+        private Lazy<SkillDb> _skillDb;
+        private Lazy<PlayerJsonDatabase> _db;
 
-        // username lookup
         private readonly Dictionary<string, IEntityHandle> _usernameLookup = new Dictionary<string, IEntityHandle>();
+
+        [NotNull]
+        public IEntitySystem EntitySystem => _system.Value;
 
         public IEnumerable<IEntityHandle> All => InstanceLookup.Where(p => p != null);
         public int NumAlivePlayers { get; private set; }
 
-        private ILogger Log { get; }
+        private ILogger Log => _log.Value;
+        private SkillDb SkillDb => _skillDb.Value;
+        private PlayerJsonDatabase Db => _db.Value;
 
-        private SkillDb _skillDb;
-        private PlayerJsonDatabase _db;
-
-        public PlayerFactory(IServiceProvider services) : base(services.ThrowOrGet<IGameServerConfig>().MaxPlayers)
+        public PlayerFactory(IServiceProvider services) 
+            : base(services.ThrowOrGet<IConfigurationService>().GetInt(ConfigKey.MaxPlayers))
         {
-            EntitySystem = services.ThrowOrGet<IEntitySystem>();
-            Log = services.ThrowOrGet<ILogger>();
-            _db = services.ThrowOrGet<PlayerJsonDatabase>();
-            _skillDb = services.ThrowOrGet<SkillDb>();
+            _system = services.GetLazy<IEntitySystem>();
+            _log = services.GetLazy<ILogger>();
+            _skillDb = services.GetLazy<SkillDb>();
+            _db = services.GetLazy<PlayerJsonDatabase>();
         }
 
         public IEntityHandle Get(int id) => GetById(id);
@@ -53,8 +59,6 @@ namespace CScape.Core.Game.Entity.Factory
                 return _usernameLookup[username];
             return null;
         }
-
-
 
         // TODO : return value PlayerFactory.Create null checks
         [CanBeNull]
@@ -157,7 +161,7 @@ namespace CScape.Core.Game.Entity.Factory
 
             // setup health
             
-            health.SetNewMaxHealth(skills.All[_skillDb.Hitpoints].Level);
+            health.SetNewMaxHealth(skills.All[SkillDb.Hitpoints].Level);
             health.SetNewHealth(model.Health);
           
             InstanceLookup[id] = entHandle;
@@ -185,7 +189,7 @@ namespace CScape.Core.Game.Entity.Factory
             NumAlivePlayers--;
 
             // serialize
-            _db.Save(component);
+            Db.Save(component);
         }
     }
 }

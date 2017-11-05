@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
+using CScape.Core.Utility;
 using CScape.Models;
 using CScape.Models.Game.Entity;
 using JetBrains.Annotations;
@@ -13,23 +13,28 @@ namespace CScape.Core.Game.Entity
 {
     public sealed class Entity : IEntity
     {
+        private Lazy<ILogger> _log;
+        private Lazy<IGameServer> _server;
+
+        public IGameServer Server => _server.Value;
+        public ILogger Log => _log.Value;
+
         public string Name { get; }
-
         public IEntityHandle Handle { get; }
-
-        public IGameServer Server => Handle.System.Server;
-
-        public ILogger Log { get; }
-
         public IEntityComponentContainer Components { get; }
 
-        public Entity([NotNull] string name, [NotNull] EntityHandle handle)
+        public Entity(
+            [NotNull] string name, 
+            [NotNull] IEntityHandle handle,
+            [NotNull] IServiceProvider services)
         {
+            if (services == null) throw new ArgumentNullException(nameof(services));
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Handle = handle ?? throw new ArgumentNullException(nameof(handle));
 
             Components = new EntityComponentContainer();
-            Log = Server.Services.ThrowOrGet<ILogger>();
+            _log = services.GetLazy<ILogger>();
+            _server = services.GetLazy<IGameServer>();
         }
 
         public void SendMessage(IGameMessage message)

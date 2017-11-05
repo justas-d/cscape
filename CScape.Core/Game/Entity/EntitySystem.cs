@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
+using CScape.Core.Utility;
 using CScape.Models;
+using CScape.Models.Data;
+using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
 using CScape.Models.Game.Entity.Exceptions;
@@ -14,11 +18,16 @@ using JetBrains.Annotations;
 namespace CScape.Core.Game.Entity
 {
     public sealed class EntitySystem : IEntitySystem
-    { 
-        public const int GenerationBits = 8;
+    {
+        
+        private Lazy<IGameServer> _server;
+
+        public IGameServer Server => _server.Value;
+
+        [NotNull]
+        public IServiceProvider Services { get; }
 
         public int IdThreshold { get; }
-        public IGameServer Server { get; }
 
         private int _idTop = 0;
         private readonly List<int> _idQueue;
@@ -28,14 +37,16 @@ namespace CScape.Core.Game.Entity
 
         public IReadOnlyDictionary<IEntityHandle, IEntity> All => _entities;
 
-        // todo : make Core.EntitySystem take an IServiceProvider
-        public EntitySystem([NotNull] IGameServer server, int idThreshold = 1024)
+        public EntitySystem([NotNull] IServiceProvider services)
         {
-            Debug.Assert(idThreshold > 0);
+            Services = services ?? throw new ArgumentNullException(nameof(services));
+            _server = services.GetLazy<IGameServer>();
 
-            Server = server ?? throw new ArgumentNullException(nameof(server));
+            var config = Server.Services.ThrowOrGet<IConfigurationService>();
+            IdThreshold = config.GetInt(ConfigKey.EntitySystemIdThreshold);
 
-            IdThreshold = idThreshold;
+            Debug.Assert(IdThreshold> 0, "Id queue threshold must be over 0.");
+
             _idQueue = new List<int>(IdThreshold);
         }
 
@@ -78,7 +89,7 @@ namespace CScape.Core.Game.Entity
                 _generationTracker.Add(id, 0);
 
             var handle = new EntityHandle(this, _generationTracker[id], id);
-            var entity = new Entity(name, handle);
+            var entity = new Entity(name, handle, Services);
 
             var t = new TransformComponent(entity);
             entity.Components.Add(t);
@@ -89,7 +100,7 @@ namespace CScape.Core.Game.Entity
             return handle;
         }
    
-        public bool Destroy([NotNull] IEntityHandle handle)
+        public bool Destroy(IEntityHandle handle)
         {
             if (handle == null) throw new ArgumentNullException(nameof(handle));
             if (IsDead(handle)) return false;

@@ -6,6 +6,7 @@ using CScape.Core.Extensions;
 using CScape.Core.Game.Entity.Component;
 using CScape.Core.Game.Entity.Message;
 using CScape.Models;
+using CScape.Models.Data;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Component;
@@ -15,16 +16,19 @@ namespace CScape.Core.Game.Entity.Factory
 {
     public sealed class NpcFactory : InstanceFactory, INpcFactory
     {
-        public IEntitySystem Entities { get; }
+        private Lazy<IEntitySystem> _system;
+        private Lazy<ILogger> _log;
+
+        public IEntitySystem Entities => _system.Value;
+        public ILogger Log => _log.Value;
 
         public IEnumerable<IEntityHandle> All => InstanceLookup.Where(p => p != null);
-
-        private ILogger _log;
-
-        public NpcFactory(IServiceProvider services) : base(services.ThrowOrGet<IGameServerConfig>().MaxNpcs)
+        
+        public NpcFactory(IServiceProvider services) 
+            : base(services.ThrowOrGet<IConfigurationService>().GetInt(ConfigKey.MaxNpcs))
         {
-            Entities = services.ThrowOrGet<IEntitySystem>();
-            _log = services.ThrowOrGet<ILogger>();
+            _log = services.GetLazy<ILogger>();
+            _system = services.GetLazy<IEntitySystem>();
         }
 
         // TODO : replace definition id with an INpcDefinition interface?
@@ -68,7 +72,7 @@ namespace CScape.Core.Game.Entity.Factory
 
         private void DestroyCallback(NpcComponent npc)
         {
-            _log.Normal(this, $"Freeing npc slot {npc.InstanceId} named {npc.Parent.Name}");
+            Log.Normal(this, $"Freeing npc slot {npc.InstanceId} named {npc.Parent.Name}");
             InstanceLookup[npc.InstanceId] = null;
         }
 

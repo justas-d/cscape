@@ -17,6 +17,7 @@ using CScape.Core.Json.Model;
 using CScape.Core.Log;
 using CScape.Core.Network;
 using CScape.Models;
+using CScape.Models.Data;
 using CScape.Models.Game.Command;
 using CScape.Models.Game.Entity;
 using CScape.Models.Game.Entity.Factory;
@@ -59,10 +60,6 @@ namespace CScape.Dev.Runtime
             // set up servicess
             var services = new ServiceCollection();
 
-            var cfg = JsonConvert.DeserializeObject<JsonGameServerConfig>(
-                File.ReadAllText(
-                    Path.Combine(dirBuild, "config.json")));
-
             services.AddSingleton<SkillDb>(s => new SkillDb(s));
 
             services.AddSingleton(s => new PlayerFactory(s));
@@ -77,19 +74,18 @@ namespace CScape.Dev.Runtime
             services.AddSingleton(s => new GroundItemFactory(s.ThrowOrGet<IEntitySystem>()));
             services.AddSingleton<IGroundItemFactory>(s => s.ThrowOrGet<GroundItemFactory>());
 
-            services.AddSingleton(s => new EntitySystem(s.ThrowOrGet<IGameServer>()));
+            services.AddSingleton(s => new EntitySystem(s));
             services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());
 
             services.AddSingleton<ItemDatabase>(s => new ItemDatabase());
             services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
-            services.AddSingleton<IGameServerConfig>(s => cfg);
+            services.AddSingleton<IConfigurationService>(s => new JsonConfigurationService(s, Path.Combine(GetExeDir(), "config.json")));
             services.AddSingleton<ICommandHandler>(s =>
             {
                 var a = new CommandDispatch();
                 a.RegisterAssembly(typeof(Entity).GetTypeInfo().Assembly);
                 return a;
             });
-
 
             services.AddSingleton(s =>
                 InterfaceIdDatabase.FromJson(Path.Combine(GetExeDir(), "interface-ids.json")));

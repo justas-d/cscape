@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using CScape.Core.Utility;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CScape.Core.Extensions
@@ -21,6 +22,15 @@ namespace CScape.Core.Extensions
         public static T ThrowOrGet<T>(this IServiceProvider provider) where T : class
         {
             return provider.GetService<T>() ?? throw new ServiceNotProvidedException(typeof(T));
+        }
+
+        [DebuggerStepThrough]
+        [DebuggerHidden]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Lazy<T> GetLazy<T>(this IServiceProvider services)
+            where T : class
+        {
+            return new Lazy<T>(services.ThrowOrGet<T>);
         }
     }
 }

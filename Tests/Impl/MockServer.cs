@@ -29,7 +29,7 @@ namespace CScape.Dev.Tests.Impl
         {
             UTCStartTime = DateTime.UtcNow;
 
-            services.AddSingleton(s => new EntitySystem(this));
+            services.AddSingleton(s => new EntitySystem(s));
             services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());
 
             services.AddSingleton(s => new PlayerFactory(s));
@@ -38,7 +38,6 @@ namespace CScape.Dev.Tests.Impl
             services.AddSingleton(s => new NpcFactory(s));
             services.AddSingleton<INpcFactory>(s => s.ThrowOrGet<NpcFactory>());
 
-            services.AddSingleton<IGameServerConfig>(_ => new MockConfig());
             services.AddSingleton<ILogger>(_ => new TestLogger());
             services.AddSingleton<IGameServer>(_ => this);
             services.AddSingleton<IInterfaceIdDatabase>(new MockInterfaceDb());

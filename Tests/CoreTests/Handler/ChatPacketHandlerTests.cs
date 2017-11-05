@@ -213,7 +213,6 @@ namespace CScape.Dev.Tests.CoreTests.Handler
             var (h, p) = Data(msg, ChatMessage.TextEffect.None, ChatMessage.TextColor.Yellow, false, 0);
             Exec(h, p, e, c, msg);
 
-            var cfg = p.Server.Services.ThrowOrGet<IGameServerConfig>();
             Validate(p);
         }
     }

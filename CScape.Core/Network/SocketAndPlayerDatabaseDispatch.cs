@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using CScape.Core.Extensions;
 using CScape.Core.Game;
 using CScape.Core.Game.Entity.Component;
+using CScape.Core.Game.Entity.Factory;
 using CScape.Core.Game.Skill;
 using CScape.Core.Json;
 using CScape.Models;
@@ -51,10 +54,10 @@ namespace CScape.Core.Network
 
     public static class Utils
     {
-        public static OaepEncoding GetCrypto(IGameServerConfig cfg, bool forEncryption)
+        public static OaepEncoding GetCrypto(string keyDir, bool forEncryption)
         {
             AsymmetricCipherKeyPair keys;
-            using (var file = File.Open(cfg.PrivateLoginKeyDir, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var file = File.Open(keyDir, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var stream = new StreamReader(file))
                 keys = (AsymmetricCipherKeyPair)new PemReader(stream).ReadObject();
 
@@ -78,39 +81,52 @@ namespace CScape.Core.Network
     {
         [NotNull] private readonly IServiceProvider _services;
         [NotNull] private readonly IGameServer _server;
-        [NotNull] private readonly IGameServerConfig _config;
         [NotNull] private readonly PlayerJsonDatabase _db;
-        [NotNull] private readonly IPlayerFactory _players;
+        [NotNull] private readonly PlayerFactory _players;
         [NotNull] private readonly SkillDb _skills;
         [NotNull] private readonly Random _rng;
         [NotNull] private readonly Socket _socket;
         [NotNull] private readonly IAsymmetricBlockCipher _crypto;
         [NotNull] private readonly ILogger _log;
-        [NotNull] private readonly Queue<IPlayerLogin> _loginQueue = new Queue<IPlayerLogin>();
+        [NotNull] private readonly ConcurrentQueue<IPlayerLogin> _loginQueue 
+            = new ConcurrentQueue<IPlayerLogin>();
 
         public bool IsDisposed { get; private set; }
         private bool _continueListening = true;
         public bool IsEnabled { get; set; } = true;
 
+        private string _greeting;
+        private int _backlog;
+        private EndPoint _listenEndpoint;
+        private int _revision;
+
         public SocketAndPlayerDatabaseDispatch([NotNull] IServiceProvider services)
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
-            _players = services.ThrowOrGet<IPlayerFactory>();
+            _players = services.ThrowOrGet<PlayerFactory>();
             _db = services.ThrowOrGet<PlayerJsonDatabase>();
             _server = services.ThrowOrGet<IGameServer>();
-            _config = services.ThrowOrGet<IGameServerConfig>();
             _log = services.ThrowOrGet<ILogger>();
             _skills = services.ThrowOrGet<SkillDb>();
 
+            var cfg = services.ThrowOrGet<IConfigurationService>();
+
+
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp)
             {
-                SendTimeout = _config.SocketSendTimeout,
-                ReceiveTimeout = _config.SocketReceiveTimeout
+                SendTimeout = cfg.GetInt(ConfigKey.SocketSendTimeout),
+                ReceiveTimeout = cfg.GetInt(ConfigKey.SocketReceiveTimeout)
             };
+
+            _greeting = cfg.Get(ConfigKey.Greeting);
+            _backlog = cfg.GetInt(ConfigKey.SocketBacklog);
+            _listenEndpoint = cfg.GetIpAddress(ConfigKey.ListenEndPoint);
+            _revision = cfg.GetInt(ConfigKey.Revision);
+
             _rng = new Random();
 
-            _crypto = Utils.GetCrypto(_config, false);
+            _crypto = Utils.GetCrypto(cfg.Get(ConfigKey.PrivateLoginKeyDir), false);
 
             // start the service as soon as we're initialized
             Task.Run(StartListening).ContinueWith(t =>
@@ -122,12 +138,16 @@ namespace CScape.Core.Network
         }
 
         public IPlayerLogin TryGetNext()
-            => _loginQueue.Count > 0 ? _loginQueue.Dequeue() : null;
+        {
+            if (_loginQueue.TryDequeue(out var result))
+                return result;
+            return null;
+        }
 
         public async Task StartListening()
         {
-            _socket.Bind(_config.ListenEndPoint);
-            _socket.Listen(_config.Backlog);
+            _socket.Bind(_listenEndpoint);
+            _socket.Listen(_backlog);
 
             _log.Debug(this, "Entry point listening.");
             while (_continueListening)
@@ -240,7 +260,7 @@ namespace CScape.Core.Network
 
                 // verify revision
                 var revision = blob.ReadInt16();
-                if (revision != _config.Revision)
+                if (revision != _revision)
                 {
                     await KillBadConnection(socket, blob, InitResponseCode.MustUpdate);
                     return;
@@ -368,7 +388,14 @@ namespace CScape.Core.Network
                     blob.Write(0); // is flagged
                     blob.Write((byte)model.TitleId);
 
-                    _loginQueue.Enqueue(new NormalPlayerLogin(_services, model, socket, signlinkUid));
+                    var login = new NormalPlayerLogin(
+                        _services,
+                        _greeting,
+                        model,
+                        socket,
+                        signlinkUid);
+
+                    _loginQueue.Enqueue(login);
                 }
 
                 await SocketSend(socket, blob);

@@ -21,7 +21,7 @@ namespace CScape.Dev.Tests.ModelTests
         public IEntityHandle CreateEntity(string name)
         {
             var services = new ServiceCollection();
-            services.AddSingleton<IEntitySystem>(s => new EntitySystem(s.ThrowOrGet<IGameServer>()));
+            services.AddSingleton<IEntitySystem>(s => new EntitySystem(s));
             services.AddSingleton<ILogger>(new TestLogger());
             var server = new GameServer(services);
             return server.Services.ThrowOrGet<IEntitySystem>().Create(name);
