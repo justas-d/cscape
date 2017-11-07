@@ -3,21 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using CScape.Core.Extensions;
-using CScape.Core.Utility;
-using CScape.Models;
-using CScape.Models.Data;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace CScape.Core.Json
 {
-    public sealed class JsonConfigurationService : IConfigurationService
+    public sealed class JsonConfigurationService : InMemoryConfigurationService
     {
-        private ImmutableDictionary<string, string> _lookup = ImmutableDictionary<string, string>.Empty;
-
-        private Lazy<ILogger> _log;
-        private ILogger Log => _log.Value;
 
         private bool _isDisposed = false;
 
@@ -25,18 +17,16 @@ namespace CScape.Core.Json
         public string FilePath { get; }
 
         public JsonConfigurationService(
-            [NotNull] IServiceProvider services, 
+            [NotNull] IServiceProvider services,
             [NotNull] string filePath)
+            : base(services)
         {
-            if (services == null) throw new ArgumentNullException(nameof(services));
             FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
-
-            _log = services.GetLazy<ILogger>();
 
             Reload();
         }
 
-        public void Reload()
+        public override void Reload()
         {
             if (!DoesConfigFileExist())
                 return;
@@ -58,7 +48,7 @@ namespace CScape.Core.Json
 
             var immDict = rawDict.ToImmutableDictionary();
 
-            _lookup = immDict;
+            Lookup = immDict;
 
             Log.Normal(this, "Overwrote config with the one from disk.");
         }
@@ -67,24 +57,14 @@ namespace CScape.Core.Json
         {
             if (!File.Exists(FilePath))
             {
-                Log.Warning(this, $"Could not find a config file located at {FilePath}");
+                Log.Warning(this, $"Could not find a config file located at {Path.GetFullPath(FilePath)}");
                 return false;
             }
             return true;
         }
 
-        public bool Add(string key, string value)
-        {
-            return ImmutableInterlocked.TryAdd(ref _lookup, key, value);
-        }
 
-        public string Get(string key)
-        {
-            _lookup.TryGetValue(key, out var retval);
-            return retval;
-        }
-
-        public void Dispose()
+        public override void Dispose()
         {
             if (!_isDisposed)
             {
@@ -107,7 +87,7 @@ namespace CScape.Core.Json
 
         private void WriteToDisk()
         {
-            var dict = _lookup.ToDictionary(kvp => kvp.Key);
+            var dict = Lookup.ToDictionary(kvp => kvp.Key);
             var json = JsonConvert.SerializeObject(dict);
 
             File.WriteAllText(FilePath, json);

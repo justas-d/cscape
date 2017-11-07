@@ -1,73 +1,15 @@
 ﻿using System;
-using CScape.Core;
-using CScape.Core.Extensions;
-using CScape.Core.Game.Entity;
-using CScape.Dev.Tests.Impl;
-using CScape.Models;
+using System.Collections.Generic;
+using CScape.Dev.Tests.ModelTests.Mock;
 using CScape.Models.Extensions;
 using CScape.Models.Game.Entity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CScape.Dev.Tests.ModelTests
 {
-    public interface IModelImplementation
-    {
-        IEntityHandle CreateEntity(string name = "test entity");
-    }
-
-    public class CoreModelImpl : IModelImplementation
-    {
-        public IEntityHandle CreateEntity(string name)
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IEntitySystem>(s => new EntitySystem(s));
-            services.AddSingleton<ILogger>(new TestLogger());
-            var server = new GameServer(services);
-            return server.Services.ThrowOrGet<IEntitySystem>().Create(name);
-        }
-    }
-
-    public static class ModelImpl
-    {
-        public static IModelImplementation Active { get; } = new CoreModelImpl();
-    }
-
     [TestClass]
     public class EntityComponentContainerTests
     {
-        private interface IComponentOne : IEntityComponent
-        { }
-
-        private interface IComponentTwo : IEntityComponent
-        { }
-
-        private interface IComponentThree : IEntityComponent
-        { }
-
-        private sealed class MultiInterfaceComponent : IComponentOne, IComponentTwo, IComponentThree
-        {
-            public IEntity Parent { get; }
-            public int Priority => 0;
-
-            public int NumReceivedMessages { get; private set; }
-
-            public MultiInterfaceComponent(IEntity ent)
-            {
-                Parent = ent;
-            }
-
-            public void ReceiveMessage(IGameMessage msg)
-            {
-                NumReceivedMessages++;
-            }
-        }
-
-        private sealed class TestMessage : IGameMessage
-        {
-            public int EventId => 0;
-        }
-
         private static (IEntity Entity, MultiInterfaceComponent Component) GetTestData()
         {
             var entity = ModelImpl.Active.CreateEntity().Get();
@@ -75,154 +17,215 @@ namespace CScape.Dev.Tests.ModelTests
             return (entity, component);
         }
 
-        private static void AssertContainsComponent(IEntity entity, Type type)
+        private static void AssertContainsComponent(IEntityComponentContainer components, Type type)
         {
-            Assert.IsTrue(entity.Components.Contains(type));
+            Assert.IsTrue(components.Contains(type));
         }
 
-        private static void AssertContainsComponent<T>(IEntity entity)
-            where T : class, IEntityComponent
+        private static void AssertDoesNotContainComponent(IEntityComponentContainer components, Type type)
         {
-            Assert.IsTrue(entity.Components.Contains<T>());
+            Assert.IsFalse(components.Contains(type));
         }
 
-        private static void AssertDoesNotContainComponent(IEntity entity, Type type)
+        private static void RunContainerTest(
+            Action<(IEntity Entity, MultiInterfaceComponent Component)> test,
+            Action<(IEntity Entity, MultiInterfaceComponent Component)> assert)
         {
-            Assert.IsFalse(entity.Components.Contains(type));
+            var data = GetTestData();
+            test(data);
+            assert(data);
         }
 
-        private static void AssertDoesNotContainComponent<T>(IEntity entity)
-            where T : class, IEntityComponent
+        private static void RunContainerTestCarryReturn<TResult>(
+            Func<(IEntity Entity, MultiInterfaceComponent Component), TResult> test,
+            Action<(IEntity Entity, MultiInterfaceComponent Component, TResult ReturnValue)> assert)
         {
-            Assert.IsFalse(entity.Components.Contains<T>());
+            var data = GetTestData();
+            var result = test(data);
+            assert((data.Entity, data.Component, result));
         }
-
 
         [TestMethod]
         public void DoesContainsWorksOnPurelyMappedComponents()
         {
-            var data = GetTestData();
-
-            data.Entity.Components.Add(data.Component.GetType(), data.Component);
-
-            AssertContainsComponent(data.Entity, data.Component.GetType());
-        }
-
-
-        [TestMethod]
-        public void DoesContainsWorksOnPurelyMappedComponentsGeneric()
-        {
-            var data = GetTestData();
-
-            data.Entity.Components.Add(data.Component);
-
-            AssertContainsComponent<MultiInterfaceComponent>(data.Entity);
+            RunContainerTest(
+                data => data.Entity.Components.Add(data.Component.GetType(), data.Component),
+                data => AssertContainsComponent(data.Entity.Components, data.Component.GetType()));
         }
 
         [TestMethod]
         public void DoesContainsWorksOnMappedComponents()
         {
-            var data = GetTestData();
-
-            data.Entity.Components.Add(typeof(IComponentOne), data.Component);
-
-            AssertContainsComponent(data.Entity, typeof(IComponentOne));
-        }
-
-        [TestMethod]
-        public void DoesContainsWorksOMappedComponentsGeneric()
-        {
-            var data = GetTestData();
-
-            data.Entity.Components.Add<IComponentOne>(data.Component);
-
-            AssertContainsComponent<IComponentOne>(data.Entity);
+            RunContainerTest(
+                data => data.Entity.Components.Add(typeof(IComponentOne), data.Component),
+                data => AssertContainsComponent(data.Entity.Components, typeof(IComponentOne)));            
         }
 
         [TestMethod]
         public void MappedTypeMustNotMapToPureType()
         {
-            var data = GetTestData();
-
-            data.Entity.Components.Add(typeof(IComponentOne), data.Component);
-
-            AssertDoesNotContainComponent(data.Entity, typeof(MultiInterfaceComponent));
+            RunContainerTest(
+                data => data.Entity.Components.Add(typeof(IComponentOne), data.Component),
+                data => AssertDoesNotContainComponent(data.Entity.Components, typeof(MultiInterfaceComponent)));
         }
 
         [TestMethod]
-        public void MappedTypeMustNotMapToPureTypeGeneric()
+        public void RemoveNonexistantComponentReturnsFalse()
         {
-            var data = GetTestData();
+            RunContainerTestCarryReturn(
+                data => data.Entity.Components.Remove(data.Component.GetType()),
+                data => Assert.IsFalse(data.ReturnValue));
+        }
 
-            data.Entity.Components.Add<IComponentOne>(data.Component);
+        private static bool AddAndRemove(
+            IEntityComponentContainer container,
+            IEntityComponent component,
+            Type addType,
+            Type removeType = null)
+        {
+            if (removeType == null)
+                removeType = addType;
 
-            AssertDoesNotContainComponent<MultiInterfaceComponent>(data.Entity);
+            var addResult = container.Add(addType, component);
+            Assert.IsTrue(addResult);
+
+            return container.Remove(removeType);
+        }
+
+        [TestMethod]
+        public void RemoveExistantPurelyMappedComponentReturnsTrue()
+        {
+            RunContainerTestCarryReturn(
+                data => AddAndRemove(data.Entity.Components, data.Component, data.Component.GetType()),
+                data => Assert.IsTrue(data.ReturnValue));
+        }
+
+        [TestMethod]
+        public void RemoveExistantMappedComponentReturnsTrue()
+        {
+            RunContainerTestCarryReturn(
+                data => AddAndRemove(data.Entity.Components, data.Component, typeof(IComponentOne)),
+                data => Assert.IsTrue(data.ReturnValue));
+        }
+
+        [TestMethod]
+        public void RemoveMappedComponentByPureReferenceReturnsFalse()
+        {
+            RunContainerTestCarryReturn(
+                data => AddAndRemove(data.Entity.Components, data.Component, typeof(IComponentOne), data.Component.GetType()),
+                data => Assert.IsFalse(data.ReturnValue));
+        }
+
+        [TestMethod]
+        public void RemovePureMappedComponentByMappedReferenceReturnsFalse()
+        {
+            RunContainerTestCarryReturn(
+                data => AddAndRemove(data.Entity.Components, data.Component, data.Component.GetType(), typeof(IComponentOne)),
+                data => Assert.IsFalse(data.ReturnValue));
         }
 
         // todo : write add/remove tests
         // todo : finish component container tests
 
+        private static void TestIterationConcurrency(
+            Func<IEntityComponentContainer, IEnumerable<IEntityComponent>> enumerableFactory,
+            Action<IEntity> setup,
+            Func<IEntityComponentContainer, bool> manipulator,
+            Action<IEntityComponentContainer> test)
+        {
+
+            var entity = ModelImpl.Active.CreateEntity().Get();
+            var component = new PureComponent(entity);
+            Assert.IsTrue(entity.Components.Add(component));
+            
+            var enumerable = enumerableFactory(entity.Components);
+            setup(entity);
+  
+            var didAdd = false;
+            foreach (var _ in enumerable)
+            {
+                if (!didAdd)
+                {
+                    Assert.IsTrue(manipulator(entity.Components));
+                    didAdd = true;
+                }
+            }
+                
+
+            test(entity.Components);
+        }
+
+        private static void TestIterationConcurrencyAdd(
+            Func<IEntityComponentContainer, IEnumerable<IEntityComponent>> enumerableFactory)
+        {
+            MultiInterfaceComponent component = null;
+            TestIterationConcurrency(
+                enumerableFactory,
+                setup: (ent) =>
+                {
+                    component = new MultiInterfaceComponent(ent);
+                },
+                manipulator: (all) => all.Add(component),
+                test: (all) => AssertContainsComponent(all, component.GetType()));
+        }
+
+        private static void TestIterationConcurrencyRemove(
+            Func<IEntityComponentContainer, IEnumerable<IEntityComponent>> enumerableFactory)
+        {
+            MultiInterfaceComponent component = null;
+            TestIterationConcurrency(
+                enumerableFactory,
+                setup: (ent) =>
+                {
+                    component = new MultiInterfaceComponent(ent);
+                    ent.Components.Add(component);
+                },
+                manipulator: (all) => all.Remove(component.GetType()),
+                test: (all) => AssertDoesNotContainComponent(all, component.GetType()));
+        }
+
+        [TestMethod]
+        public void FailOnAddingIEntityComponentMappedComponent()
+        {
+            var ent = ModelImpl.Active.CreateEntity().Get();
+            var component = new PureComponent(ent);
+
+            var didFail = false;
+            try
+            {
+                didFail = !ent.Components.Add(typeof(IEntityComponent), component);
+                
+            }
+            catch (Exception e)
+            {
+                didFail = true;
+            }
+
+            Assert.IsTrue(didFail);
+        }
+
         [TestMethod]
         public void CanAddComponentsDuringComponentIterationUsingGetSorted()
         {
-            var testEntity = ModelImpl.Active.CreateEntity().Get();
-            var component = new MultiInterfaceComponent(testEntity);
-
-            testEntity.Components.Add(component);
-
-            foreach (var element in testEntity.Components.GetSorted())
-                testEntity.Components.Add<IComponentOne>(component);
-
-            AssertContainsComponent<IComponentOne>(testEntity);
+            TestIterationConcurrencyAdd(c => c.GetSorted());
         }
 
         [TestMethod]
         public void CanRemoveComponentsDuringComponentIterationUsingGetSorted()
         {
-
+            TestIterationConcurrencyRemove(c => c.GetSorted());
         }
 
         [TestMethod]
         public void CanAddComponentsDuringComponentIterationUsingLookup()
         {
-            
+            TestIterationConcurrencyAdd(c => c.Lookup.Values);
         }
 
         [TestMethod]
         public void CanRemoveComponentsDuringComponentIterationUsingLookup()
         {
-
-        }
-
-        [TestMethod]
-        public void SendMessageThrowsNullOnNullMessage()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() =>
-            {
-                var testEntityHandle = ModelImpl.Active.CreateEntity();
-                var testEntity = testEntityHandle.Get();
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                testEntity.SendMessage(null);
-            });
-        }
-
-        [TestMethod]
-        public void SendMessageShouldSendAMessageOnceToEachComponent()
-        {
-            var testEntityHandle = ModelImpl.Active.CreateEntity();
-            var testEntity = testEntityHandle.Get();
-            var component = new MultiInterfaceComponent(testEntity);
-            var message = new TestMessage();
-
-            testEntity.Components.Add(component);
-            testEntity.Components.Add<IComponentOne>(component);
-            testEntity.Components.Add<IComponentTwo>(component);
-            testEntity.Components.Add<IComponentThree>(component);
-
-            testEntity.SendMessage(message);
-
-            Assert.AreEqual(component.NumReceivedMessages, 1);
+            TestIterationConcurrencyRemove(c => c.Lookup.Values);
         }
     }
 }

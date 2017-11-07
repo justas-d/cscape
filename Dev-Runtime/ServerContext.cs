@@ -16,6 +16,7 @@ using CScape.Core.Json;
 using CScape.Core.Json.Model;
 using CScape.Core.Log;
 using CScape.Core.Network;
+using CScape.Core.Utility;
 using CScape.Models;
 using CScape.Models.Data;
 using CScape.Models.Game.Command;
@@ -79,7 +80,7 @@ namespace CScape.Dev.Runtime
 
             services.AddSingleton<ItemDatabase>(s => new ItemDatabase());
             services.AddSingleton<ILogger>(s => new Logger(s.ThrowOrGet<IGameServer>()));
-            services.AddSingleton<IConfigurationService>(s => new JsonConfigurationService(s, Path.Combine(GetExeDir(), "config.json")));
+            services.AddSingleton<IConfigurationService>(s => new JsonConfigurationService(s, Path.Combine(MiscUtils.GetExeDir(), "config.json")));
             services.AddSingleton<ICommandHandler>(s =>
             {
                 var a = new CommandDispatch();
@@ -88,7 +89,7 @@ namespace CScape.Dev.Runtime
             });
 
             services.AddSingleton(s =>
-                InterfaceIdDatabase.FromJson(Path.Combine(GetExeDir(), "interface-ids.json")));
+                InterfaceIdDatabase.FromJson(Path.Combine(MiscUtils.GetExeDir(), "interface-ids.json")));
             services.AddSingleton<IInterfaceIdDatabase>(s => s.ThrowOrGet<InterfaceIdDatabase>());
 
             services.AddSingleton<ICommandHandler>(s => new CommandDispatch());
@@ -99,7 +100,7 @@ namespace CScape.Dev.Runtime
             services.AddSingleton<IPacketDatabase>(s =>
                 JsonConvert.DeserializeObject<JsonPacketDatabase>(
                     File.ReadAllText(
-                        Path.Combine(dirBuild, Path.Combine(GetExeDir(), "packet-lengths.json")))));
+                        Path.Combine(dirBuild, Path.Combine(MiscUtils.GetExeDir(), "packet-lengths.json")))));
 
 
 
@@ -148,9 +149,6 @@ namespace CScape.Dev.Runtime
             }
         }
 
-        public static string GetExeDir()
-        {
-            return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-        }
+
     }
 }

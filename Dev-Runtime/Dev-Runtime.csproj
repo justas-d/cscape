@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="cryptokey-private.pem">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

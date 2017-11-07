@@ -57,6 +57,9 @@ namespace CScape.Core.Game.Entity
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (component == null) throw new ArgumentNullException(nameof(component));
 
+            if (type == typeof(IEntityComponent))
+                return false;
+
             if (Contains(type))
                 return false;
 
