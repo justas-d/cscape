@@ -21,13 +21,13 @@ namespace CScape.Core
 {
     public sealed class GameServer : IGameServer
     {
-        private Lazy<IPlayerFactory> _players;
+        private Lazy<IPlayerCatalogue> _players;
         private Lazy<IConfigurationService> _config;
         private Lazy<SocketAndPlayerDatabaseDispatch> _dispatch;
         private Lazy<PlayerJsonDatabase> _jsonDb;
         private Lazy<ILogger> _log;
 
-        private IPlayerFactory PlayerFactory => _players.Value;
+        private IPlayerCatalogue PlayerCatalogue => _players.Value;
         private IConfigurationService Config => _config.Value;
         private SocketAndPlayerDatabaseDispatch Dispatch => _dispatch.Value;
         private PlayerJsonDatabase JsonDb => _jsonDb.Value;
@@ -50,7 +50,7 @@ namespace CScape.Core
 
             Overworld = new PlaneOfExistence(this, "Overworld");
 
-            _players = Services.GetLazy<IPlayerFactory>();
+            _players = Services.GetLazy<IPlayerCatalogue>();
             _config = Services.GetLazy<IConfigurationService>();
             _dispatch = Services.GetLazy<SocketAndPlayerDatabaseDispatch>();
             _jsonDb = Services.GetLazy<PlayerJsonDatabase>();
@@ -61,7 +61,7 @@ namespace CScape.Core
         {
             ServerStateFlags ret = 0;
 
-            if (PlayerFactory.NumAlivePlayers >= Config.GetInt(ConfigKey.MaxPlayers))
+            if (PlayerCatalogue.NumAlivePlayers >= Config.GetInt(ConfigKey.MaxPlayers))
                 ret |= ServerStateFlags.PlayersFull;
 
             if (!Dispatch.IsEnabled)
@@ -83,7 +83,7 @@ namespace CScape.Core
         {
             Log.Normal(this, $"Saving players.");
 
-            foreach (var p in PlayerFactory.All.Where(p => !p.IsDead()).Select(p => p.Get()))
+            foreach (var p in PlayerCatalogue.All.Where(p => !p.IsDead()).Select(p => p.Get()))
                 JsonDb.Save(p.AssertGetPlayer());
         }
     

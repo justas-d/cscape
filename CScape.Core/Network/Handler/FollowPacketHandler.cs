@@ -11,11 +11,11 @@ namespace CScape.Core.Network.Handler
     {
         public byte[] Handles { get; } = { 128, 139 };
 
-        private IPlayerFactory _players;
+        private IPlayerCatalogue _players;
 
         public FollowPacketHandler(IServiceProvider services)
         {
-            _players = services.ThrowOrGet<IPlayerFactory>();
+            _players = services.ThrowOrGet<IPlayerCatalogue>();
         }
 
         public void Handle(IEntity entity, PacketMessage packet)

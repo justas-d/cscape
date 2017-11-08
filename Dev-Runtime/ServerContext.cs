@@ -63,8 +63,8 @@ namespace CScape.Dev.Runtime
 
             services.AddSingleton<SkillDb>(s => new SkillDb(s));
 
-            services.AddSingleton(s => new PlayerFactory(s));
-            services.AddSingleton<IPlayerFactory>(s => s.ThrowOrGet<PlayerFactory>());
+            services.AddSingleton(s => new PlayerCatalogue(s));
+            services.AddSingleton<IPlayerCatalogue>(s => s.ThrowOrGet<PlayerCatalogue>());
 
             services.AddSingleton(s => new NpcFactory(s));
             services.AddSingleton<INpcFactory>(s => s.ThrowOrGet<NpcFactory>());

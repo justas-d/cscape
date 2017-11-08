@@ -100,7 +100,7 @@ namespace CScape.Core.Tests.Impl
 
         public static IEntityHandle Player(string name, IGameServer server, IPosition pos)
         {
-            var players = server.Services.ThrowOrGet<PlayerFactory>();
+            var players = server.Services.ThrowOrGet<PlayerCatalogue>();
             var p = players.Create(SerializablePlayerModel.Default(name, server.Services.ThrowOrGet<SkillDb>()), MockSocketContext.Instance, MockPacketParser.Instance, new PacketHandlerCatalogue(server.Services));
             p.Get().GetTransform().Teleport(pos);
             return p;

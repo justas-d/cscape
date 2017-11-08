@@ -17,7 +17,7 @@ namespace CScape.Core.Network
         [NotNull]
         public Socket Connection { get; }
 
-        public PlayerFactory Factory { get; }
+        public PlayerCatalogue Catalogue { get; }
         public IServiceProvider Services { get; }
         public string Greeting { get; }
         public int SignlinkUid { get; }
@@ -31,7 +31,7 @@ namespace CScape.Core.Network
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            Factory = services.ThrowOrGet<PlayerFactory>();
+            Catalogue = services.ThrowOrGet<PlayerCatalogue>();
             Services = services;
             Greeting = greeting;
             SignlinkUid = signlinkUid;
@@ -40,7 +40,7 @@ namespace CScape.Core.Network
         public void Transfer(IMainLoop loop)
         {
             var socket = new SocketContext(Services, Connection, SignlinkUid);
-            var player = Factory.Create(
+            var player = Catalogue.Create(
                 Model,
                 socket,
                 loop.Server.Services.ThrowOrGet<IPacketParser>(),

@@ -4,9 +4,9 @@ using JetBrains.Annotations;
 namespace CScape.Models.Game.Entity.Factory
 {
     /// <summary>
-    /// Defines a factory for player entities.
+    /// Defines a lookup of active players in the world.
     /// </summary>
-    public interface IPlayerFactory
+    public interface IPlayerCatalogue
     {
         IEntitySystem EntitySystem { get; }
         IEnumerable<IEntityHandle> All { get; }

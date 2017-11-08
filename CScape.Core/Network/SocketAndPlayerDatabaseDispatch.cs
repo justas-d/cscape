@@ -82,7 +82,7 @@ namespace CScape.Core.Network
         [NotNull] private readonly IServiceProvider _services;
         [NotNull] private readonly IGameServer _server;
         [NotNull] private readonly PlayerJsonDatabase _db;
-        [NotNull] private readonly PlayerFactory _players;
+        [NotNull] private readonly PlayerCatalogue _players;
         [NotNull] private readonly SkillDb _skills;
         [NotNull] private readonly Random _rng;
         [NotNull] private readonly Socket _socket;
@@ -104,7 +104,7 @@ namespace CScape.Core.Network
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
-            _players = services.ThrowOrGet<PlayerFactory>();
+            _players = services.ThrowOrGet<PlayerCatalogue>();
             _db = services.ThrowOrGet<PlayerJsonDatabase>();
             _server = services.ThrowOrGet<IGameServer>();
             _log = services.ThrowOrGet<ILogger>();

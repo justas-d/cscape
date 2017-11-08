@@ -106,7 +106,7 @@ namespace CScape.Core.Commands
                 b.ReadNumber("type", ref type);
             })) return;
 
-            var players = ctx.Callee.Parent.Server.Services.ThrowOrGet<IPlayerFactory>();
+            var players = ctx.Callee.Parent.Server.Services.ThrowOrGet<IPlayerCatalogue>();
             var ent = players.Get(pid);
             if (ent == null)
             {
@@ -160,7 +160,7 @@ namespace CScape.Core.Commands
                 b.ReadNumber("delay", ref delay);
             })) return;
 
-            var players = ctx.Callee.Parent.Server.Services.ThrowOrGet<IPlayerFactory>();
+            var players = ctx.Callee.Parent.Server.Services.ThrowOrGet<IPlayerCatalogue>();
             var ent = players.Get(id);
             if (ent == null)
             {

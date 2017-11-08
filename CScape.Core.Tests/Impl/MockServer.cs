@@ -28,8 +28,8 @@ namespace CScape.Core.Tests.Impl
             services.AddSingleton(s => new EntitySystem(s));
             services.AddSingleton<IEntitySystem>(s => s.ThrowOrGet<EntitySystem>());
 
-            services.AddSingleton(s => new PlayerFactory(s));
-            services.AddSingleton<IPlayerFactory>(s => s.ThrowOrGet<PlayerFactory>());
+            services.AddSingleton(s => new PlayerCatalogue(s));
+            services.AddSingleton<IPlayerCatalogue>(s => s.ThrowOrGet<PlayerCatalogue>());
 
             services.AddSingleton(s => new NpcFactory(s));
             services.AddSingleton<INpcFactory>(s => s.ThrowOrGet<NpcFactory>());

@@ -21,7 +21,7 @@ using JetBrains.Annotations;
 
 namespace CScape.Core.Game.Entity.Factory
 {
-    public sealed class PlayerFactory : InstanceFactory, IPlayerFactory
+    public sealed class PlayerCatalogue : InstanceFactory, IPlayerCatalogue
     {
         public const int InvalidPlayerId = -1;
 
@@ -42,7 +42,7 @@ namespace CScape.Core.Game.Entity.Factory
         private SkillDb SkillDb => _skillDb.Value;
         private PlayerJsonDatabase Db => _db.Value;
 
-        public PlayerFactory(IServiceProvider services) 
+        public PlayerCatalogue(IServiceProvider services) 
             : base(services.ThrowOrGet<IConfigurationService>().GetInt(ConfigKey.MaxPlayers))
         {
             _system = services.GetLazy<IEntitySystem>();
