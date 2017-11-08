@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
-using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using CScape.Core;
 using CScape.Core.Extensions;
 using CScape.Core.Json;
-using CScape.Core.Log;
 using CScape.Models;
 using CScape.Models.Data;
 using CScape.Models.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Nito.AsyncEx;
 
-namespace PlayerSpammer
+namespace CSCape.Core.PlayerSpammer
 {
     class BasicLogger : ILogger
     {

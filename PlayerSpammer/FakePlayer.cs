@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CScape.Models.Data;
 using Org.BouncyCastle.Crypto;
 
-namespace PlayerSpammer
+namespace CSCape.Core.PlayerSpammer
 {
     public class FakePlayer
     {
