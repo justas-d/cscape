@@ -107,7 +107,7 @@ namespace CScape.Core.Game.Entity
                 
                 if (val == null)
                     throw new InvalidOperationException(
-                        $"Attempted to get component that does not exist. Comp: {typeof(T).Name} Ent: {Parent}");
+                        $"Attempted to get component that does not exist. Comp: {typeof(T).Name}");
 #endif
 
             return val;

@@ -14,6 +14,7 @@ namespace CScape.Core.Game.Entity.Directions
     /// </summary>
     public sealed class InterpolatedWaypointDirectionsProvider : IDirectionsProvider
     {
+        // todo  : waypoints direction provider is really slow on debug, not on release. investigate.
         [NotNull]
         public IList<IPosition> Waypoints { get; }
 

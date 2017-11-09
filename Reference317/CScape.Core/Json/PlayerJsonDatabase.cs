@@ -55,21 +55,11 @@ namespace CScape.Core.Json
         public bool IsValidPassword(string username, string password)
         {
             return true;
-
-            if (!_pwdLookup.ContainsKey(username))
-            {
-                _log.Warning(this, $"Tried to check if pwd is valid for username {username} but the username was not found in pwd lookup.");
-                return false;
-            }
-
-            return _pwdLookup[username].Equals(password, StringComparison.Ordinal);
         }
 
         public bool PlayerExists(string username)
         {
             return false;
-
-            File.Exists(MakeFileDir(username));
         }
 
         public void Save([NotNull] IPlayerComponent player)
@@ -90,19 +80,11 @@ namespace CScape.Core.Json
         public SerializablePlayerModel Load([NotNull] string username)
         {
             throw new InvalidOperationException();
-
-            if (username == null) throw new ArgumentNullException(nameof(username));
-
-            if (!PlayerExists(username)) return null;
-
-            return _serializer.Deserialize(File.ReadAllText(MakeFileDir(username)));
         }
 
         public void Dispose()
         {
             return;
-
-            SavePwdLookup();
         }
     }
 }
