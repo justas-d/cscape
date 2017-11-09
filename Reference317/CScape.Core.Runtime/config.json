@@ -1,0 +1,20 @@
+{
+  "Core_Version": "0.1.0",
+  "Core_Revision": 317,
+
+  "Core_EntitySystem_IdThreshold": 1024,
+  "Core_Players_Max": 2000,
+  "Core_Npcs_Max": 16000,
+
+  "Core_Loop_Tickrate": 600,
+  "Core_Loop_GcIntervalMs": 120000,
+
+  "Core_Greeting": "Welcome to CScape.",
+
+  "Core_PrivateKeyDir": "cryptokey-private.pem",
+
+  "Core_Socket_ListenEndpoint": "127.0.0.1:43594",
+  "Core_Socket_Backlog": 64,
+  "Core_Socket_ReceiveTimeout": 5000,
+  "Core_Socket_SendTimout": 5000
+}
