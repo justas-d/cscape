@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using CScape.Commands.Extensions;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Factory;
@@ -57,6 +58,7 @@ namespace CScape.Core.Runtime
             services.WithPacketParser();
             services.WithPacketHandlerCatalogue();
             services.WithPlayerDatabase();
+            services.WithCommandHandler(new[] {GetType().GetTypeInfo().Assembly});
 
             services.WithPlayerCatalogue(s => new PlayerCatalogue(s));
             services.WithNpcFactory(s => new NpcFactory(s));
