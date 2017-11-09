@@ -30,8 +30,11 @@ namespace CScape.Core.Network.Entity.Component
         /// In milliseconds, the delay between a socket dying and its entity being removed
         /// from the world.
         /// </summary>
+        public long ReapTimeMs { get; set; }
 #if DEBUG
-        public long ReapTimeMs { get; set; } = 1000/* * 60*/;   
+         = 1000* 60;   
+#else
+            = 1000 * 60;
 #endif
 
         public NetworkingComponent(

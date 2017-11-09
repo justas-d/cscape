@@ -87,6 +87,7 @@ namespace CScape.Core
 
         private int EndFrameClock()
         {
+            // todo : tick process time kind of bleeds into DT such that DT > TicKRate. investigate
             // handle tick delays
             TickProcessTime = _tickWatch.ElapsedMilliseconds;
             var waitTime = TickRate - Convert.ToInt32(TickProcessTime);
