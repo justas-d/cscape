@@ -10,7 +10,7 @@ using CScape.Core.Extensions;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Factory;
 using CScape.Core.Json;
-using CScape.Core.Log;
+using CScape.Core.Logging;
 using CScape.Core.Utility;
 using CScape.Models.Extensions;
 using Microsoft.Extensions.DependencyInjection;
