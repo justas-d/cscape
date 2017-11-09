@@ -104,22 +104,37 @@ namespace CScape.Commands
                     }
                     // cmd found
 
-                    // check if predicates say its ok to proceed.
-                    if (cmd.Predicates.Any(pred => !pred.CanExecute(callee, cmd)))
-                        break;
+                    // check if predicates say its ok to proceed
+                    CommandContext ctx = null;
+                    CommandContext GetCtx()
+                    {
+                        if (ctx == null)
+                        {
 
-                    // parse data if needed
-                    string data = null;
-                    if (cmd.NoArgExecTarg == null)
-                        data = input.Substring(input.IndexOf(word, StringComparison.Ordinal) + word.Length).TrimStart();
+
+                            string data = null;
+                            if (cmd.CommandCallbackNoContext == null)
+                                data = input.Substring(input.IndexOf(word, StringComparison.Ordinal) + word.Length)
+                                    .TrimStart();
+
+                            ctx = new CommandContext(player, cmd, data, input);
+                        }
+                        return ctx;
+                    }
+
+                    if (cmd.Predicates != null)
+                    {
+                        if (cmd.Predicates.Any(pred => !pred.CanExecute(GetCtx(), cmd)))
+                            break;
+                    }
 
                     try
                     {
                         // dispatch cmd
-                        if (cmd.NoArgExecTarg != null)
-                            cmd.NoArgExecTarg();
-                        else if (cmd.ExecTarg != null)
-                            cmd.ExecTarg(new CommandContext(player, cmd, data, input));
+                        if (cmd.CommandCallbackNoContext != null)
+                            cmd.CommandCallbackNoContext();
+                        else if (cmd.CommandCallaback != null)
+                            cmd.CommandCallaback(GetCtx());
                         else
                             throw new NotSupportedException("Cmd has no exec target.");
                     }

@@ -58,7 +58,7 @@ namespace CScape.Core.Runtime
             services.WithPacketParser();
             services.WithPacketHandlerCatalogue();
             services.WithPlayerDatabase();
-            services.WithCommandHandler(new[] {GetType().GetTypeInfo().Assembly});
+            services.WithCommandHandler(new[] {typeof(CScape.Core.Commands.TestCommandClass).GetTypeInfo().Assembly});
 
             services.WithPlayerCatalogue(s => new PlayerCatalogue(s));
             services.WithNpcFactory(s => new NpcFactory(s));

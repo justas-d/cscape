@@ -8,20 +8,23 @@ namespace CScape.Commands
     {
         public Command(
             [NotNull] string identifier, 
-            [CanBeNull] Action noArgExecTarg, 
-            [CanBeNull] Action<CommandContext> execTarg,
+            [CanBeNull] Action commandCallbackNoContext, 
+            [CanBeNull] Action<CommandContext> commandCallaback,
             [NotNull] IEnumerable<PredicateAttribute> predicates)
         {
-            if(noArgExecTarg == null && execTarg == null) throw new ArgumentException("No valid exec target");
+            if(commandCallbackNoContext == null && commandCallaback == null) throw new ArgumentException("No valid exec target");
             Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
-            NoArgExecTarg = noArgExecTarg;
-            ExecTarg = execTarg;
+            CommandCallbackNoContext = commandCallbackNoContext;
+            CommandCallaback = commandCallaback;
             Predicates = predicates ?? throw new ArgumentNullException(nameof(predicates));
         }
 
         [NotNull] public string Identifier { get; }
-        [CanBeNull] public Action NoArgExecTarg { get; }
-        [CanBeNull] public Action<CommandContext> ExecTarg { get; }
+        /// <summary>
+        /// Command callback that does not take a <see cref="CommandContext"/>
+        /// </summary>
+        [CanBeNull] public Action CommandCallbackNoContext { get; }
+        [CanBeNull] public Action<CommandContext> CommandCallaback { get; }
         [CanBeNull] public IEnumerable<PredicateAttribute> Predicates { get; }
 
         public bool Equals(Command other)
