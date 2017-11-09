@@ -5,24 +5,14 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using CScape.Commands;
 using CScape.Core.Extensions;
 using CScape.Core.Game.Entity;
 using CScape.Core.Game.Entity.Factory;
-using CScape.Core.Game.Skill;
 using CScape.Core.Json;
-using CScape.Core.Json.Model;
 using CScape.Core.Log;
-using CScape.Core.Network;
 using CScape.Core.Utility;
-using CScape.Models;
-using CScape.Models.Data;
 using CScape.Models.Extensions;
-using CScape.Models.Game.Command;
-using CScape.Models.Game.Entity;
-using CScape.Models.Game.Item;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Nito.AsyncEx;
 
 namespace CScape.Core.Runtime
@@ -30,7 +20,8 @@ namespace CScape.Core.Runtime
     public class ServerContext : IDisposable
     {
         private GameServer _server;
-        private CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private bool _isDisposed = false;
 
         private void HandleAggregateException(AggregateException aggEx)
         {
@@ -106,8 +97,6 @@ namespace CScape.Core.Runtime
             Dispose();
         }
 
-        private bool _isDisposed = false;
-
         public void Dispose()
         {
             if (!_isDisposed)
@@ -118,7 +107,5 @@ namespace CScape.Core.Runtime
                 _cts.Dispose();
             }
         }
-
-
     }
 }
